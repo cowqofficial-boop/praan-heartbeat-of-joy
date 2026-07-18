@@ -20,7 +20,9 @@ export type MyCredits = {
   };
 };
 
-async function ensureCreditsRow(supabase: Awaited<ReturnType<typeof import("@/integrations/supabase/client.server")>>["supabaseAdmin"], userId: string) {
+type AdminClient = (typeof import("@/integrations/supabase/client.server"))["supabaseAdmin"];
+
+async function ensureCreditsRow(supabase: AdminClient, userId: string) {
   const { data } = await supabase
     .from("user_credits")
     .select("*")
