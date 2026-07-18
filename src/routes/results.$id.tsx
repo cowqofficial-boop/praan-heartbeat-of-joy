@@ -160,17 +160,25 @@ function Results() {
 
       {/* 5. Download */}
       <Section title="Download">
-        <div className="flex flex-col gap-3">
-          <DownloadAllButton images={images} name={(data.product_name as string) || "praan"} />
-          <a
-            href={data.csv_url as string}
-            download
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-[12px] border border-[color:var(--color-border)] bg-white text-[15px] font-semibold text-ink"
-          >
-            <Download className="h-4 w-4" />
-            Download catalog file (CSV)
-          </a>
-        </div>
+        {user ? (
+          <div className="flex flex-col gap-3">
+            <DownloadAllButton images={images} name={(data.product_name as string) || "praan"} />
+            <a
+              href={data.csv_url as string}
+              download
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-[12px] border border-[color:var(--color-border)] bg-white text-[15px] font-semibold text-ink"
+            >
+              <Download className="h-4 w-4" />
+              Download catalog file (CSV)
+            </a>
+          </div>
+        ) : (
+          <SignUpGate
+            title="Sign up to save & download"
+            body="Free forever. Keep this product in your library and download all photos + the Shopify CSV."
+            next={`/results/${id}`}
+          />
+        )}
       </Section>
 
       {/* Feedback */}
@@ -178,13 +186,39 @@ function Results() {
 
       <div className="pt-6 text-center">
         <button
-          onClick={() => navigate({ to: "/" })}
+          onClick={() => navigate({ to: user ? "/library" : "/" })}
           className="text-[14px] font-medium text-muted underline"
         >
-          Start another product
+          {user ? "Back to your library" : "Start another product"}
         </button>
       </div>
     </main>
+  );
+}
+
+function SignUpGate({ title, body, next }: { title: string; body: string; next: string }) {
+  return (
+    <div className="rounded-[12px] border border-[color:var(--color-border)] bg-surface p-5 text-center">
+      <div className="mx-auto grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary">
+        <Lock className="h-4 w-4" />
+      </div>
+      <p className="mt-3 text-[16px] font-semibold text-ink">{title}</p>
+      <p className="mt-1 text-[14px] text-muted">{body}</p>
+      <Link
+        to="/auth"
+        search={{ mode: "signup", next }}
+        className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-[12px] bg-primary px-5 text-[15px] font-semibold text-primary-foreground"
+      >
+        Create free account
+      </Link>
+      <Link
+        to="/auth"
+        search={{ mode: "signin", next }}
+        className="mt-2 inline-block text-[13px] font-medium text-muted underline"
+      >
+        Already have one? Sign in
+      </Link>
+    </div>
   );
 }
 
