@@ -1,0 +1,100 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { usePraanStore } from "@/lib/praan-store";
+import { PrimaryButton } from "@/components/PrimaryButton";
+
+export const Route = createFileRoute("/confirm")({
+  head: () => ({
+    meta: [
+      { title: "Confirm your product — PRAAN" },
+      { name: "description", content: "Confirm the product details before creating your listing." },
+    ],
+  }),
+  component: Confirm,
+});
+
+function Confirm() {
+  const navigate = useNavigate();
+  const { originalDataUrl, identified, setForm } = usePraanStore();
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [detail, setDetail] = useState("");
+
+  useEffect(() => {
+    if (!identified || !originalDataUrl) {
+      navigate({ to: "/", replace: true });
+      return;
+    }
+    setName(identified.name);
+    setDetail(identified.features?.[0] ?? identified.material ?? "");
+  }, [identified, originalDataUrl, navigate]);
+
+  if (!identified || !originalDataUrl) return null;
+
+  const canSubmit = name.trim().length > 0 && price.trim().length > 0;
+
+  return (
+    <div className="flex min-h-screen flex-col px-5 pb-28 pt-8">
+      <h1 className="font-display text-[28px] leading-tight text-ink">
+        Is this right?
+      </h1>
+      <p className="mt-1 text-[15px] text-muted">Change anything that's off.</p>
+
+      <div className="mt-6 overflow-hidden rounded-[12px] bg-surface">
+        <img
+          src={originalDataUrl}
+          alt="Your product"
+          className="aspect-square w-full object-cover"
+        />
+      </div>
+
+      <div className="mt-6 flex flex-col gap-5">
+        <Field label="Product name">
+          <input
+            className="h-12 w-full rounded-[12px] border border-[color:var(--color-border)] bg-white px-4 text-[16px] text-ink"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Brass diya set"
+          />
+        </Field>
+        <Field label="Price (₹)">
+          <input
+            inputMode="numeric"
+            className="h-12 w-full rounded-[12px] border border-[color:var(--color-border)] bg-white px-4 text-[16px] text-ink"
+            value={price}
+            onChange={(e) => setPrice(e.target.value.replace(/[^\d]/g, ""))}
+            placeholder="499"
+          />
+        </Field>
+        <Field label="One detail worth knowing">
+          <input
+            className="h-12 w-full rounded-[12px] border border-[color:var(--color-border)] bg-white px-4 text-[16px] text-ink"
+            value={detail}
+            onChange={(e) => setDetail(e.target.value)}
+            placeholder="Handmade, cotton, 6-inch, etc."
+          />
+        </Field>
+      </div>
+
+      <PrimaryButton
+        fixed
+        disabled={!canSubmit}
+        onClick={() => {
+          setForm({ name: name.trim(), price: price.trim(), detail: detail.trim() });
+          navigate({ to: "/generating" });
+        }}
+      >
+        Create my listing
+      </PrimaryButton>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="flex flex-col gap-2">
+      <span className="text-[15px] font-medium text-ink">{label}</span>
+      {children}
+    </label>
+  );
+}
