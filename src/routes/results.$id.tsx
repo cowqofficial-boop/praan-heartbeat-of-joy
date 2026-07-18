@@ -8,6 +8,8 @@ import { getBrowserId } from "@/lib/browser-id";
 import { CopyButton } from "@/components/CopyButton";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import { useAuth } from "@/lib/use-auth";
+import { getMyCredits } from "@/lib/billing.functions";
+import { watermarkImageUrl } from "@/lib/watermark";
 
 export const Route = createFileRoute("/results/$id")({
   head: ({ params }) => ({
