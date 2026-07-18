@@ -296,12 +296,18 @@ function PhotosSection({
 
   async function handleDownload(img: GenImage) {
     try {
-      const src = watermark ? await watermarkImageUrl(img.url) : img.url;
+      let href = img.url;
+      let revoke = false;
+      if (watermark) {
+        const blob = await watermarkImageUrl(img.url);
+        href = URL.createObjectURL(blob);
+        revoke = true;
+      }
       const a = document.createElement("a");
-      a.href = src;
+      a.href = href;
       a.download = `praan-${img.kind}-${img.ratio.replace(":", "x")}.png`;
       a.click();
-      if (watermark) URL.revokeObjectURL(src);
+      if (revoke) URL.revokeObjectURL(href);
     } catch {
       window.open(img.url, "_blank");
     }
