@@ -28,9 +28,9 @@ function fallbackOpenUrl(dest: Destination, caption: string): string {
 }
 
 async function fetchAsFile(url: string, filename: string, watermark: boolean): Promise<File> {
-  const src = watermark ? await watermarkImageUrl(url) : url;
-  const r = await fetch(src);
-  const blob = await r.blob();
+  const blob: Blob = watermark
+    ? await watermarkImageUrl(url)
+    : await (await fetch(url)).blob();
   return new File([blob], filename, { type: blob.type || "image/png" });
 }
 
