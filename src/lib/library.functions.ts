@@ -6,7 +6,7 @@ export type LibraryItem = {
   product_name: string | null;
   created_at: string;
   original_image_url: string | null;
-  generated_images: unknown;
+  generated_images: Array<{ kind: string; ratio: string; url: string }>;
 };
 
 export const listMyProducts = createServerFn({ method: "GET" })
