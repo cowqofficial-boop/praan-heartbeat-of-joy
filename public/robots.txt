@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /confirm
+Disallow: /generating
+Disallow: /results/
+
+Sitemap: https://praan-heartbeat-of-joy.lovable.app/sitemap.xml
