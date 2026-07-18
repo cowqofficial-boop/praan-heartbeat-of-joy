@@ -21,7 +21,7 @@ export async function upsertConnection(input: {
   accountName: string | null;
   accessToken: string;
   tokenExpiresAt: string | null;
-  meta?: Record<string, unknown>;
+  meta?: Record<string, string | number | boolean | null>;
 }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const row = {
