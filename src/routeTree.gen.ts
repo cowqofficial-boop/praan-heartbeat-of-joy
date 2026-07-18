@@ -10,20 +10,28 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as GeneratingRouteImport } from './routes/generating'
 import { Route as ConfirmRouteImport } from './routes/confirm'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as BrandKitRouteImport } from './routes/brand-kit'
+import { Route as BillingRouteImport } from './routes/billing'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResultsIdRouteImport } from './routes/results.$id'
 import { Route as BlogFlatLayGuideRouteImport } from './routes/blog.flat-lay-guide'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LibraryRoute = LibraryRouteImport.update({
@@ -51,6 +59,11 @@ const BrandKitRoute = BrandKitRouteImport.update({
   path: '/brand-kit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BillingRoute = BillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -76,100 +89,127 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/callback',
   getParentRoute: () => AuthRoute,
 } as any)
+const ApiPublicRazorpayWebhookRoute =
+  ApiPublicRazorpayWebhookRouteImport.update({
+    id: '/api/public/razorpay-webhook',
+    path: '/api/public/razorpay-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/billing': typeof BillingRoute
   '/brand-kit': typeof BrandKitRoute
   '/calendar': typeof CalendarRoute
   '/confirm': typeof ConfirmRoute
   '/generating': typeof GeneratingRoute
   '/library': typeof LibraryRoute
+  '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/results/$id': typeof ResultsIdRoute
+  '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/billing': typeof BillingRoute
   '/brand-kit': typeof BrandKitRoute
   '/calendar': typeof CalendarRoute
   '/confirm': typeof ConfirmRoute
   '/generating': typeof GeneratingRoute
   '/library': typeof LibraryRoute
+  '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/results/$id': typeof ResultsIdRoute
+  '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/billing': typeof BillingRoute
   '/brand-kit': typeof BrandKitRoute
   '/calendar': typeof CalendarRoute
   '/confirm': typeof ConfirmRoute
   '/generating': typeof GeneratingRoute
   '/library': typeof LibraryRoute
+  '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/results/$id': typeof ResultsIdRoute
+  '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
+    | '/billing'
     | '/brand-kit'
     | '/calendar'
     | '/confirm'
     | '/generating'
     | '/library'
+    | '/pricing'
     | '/sitemap.xml'
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/results/$id'
+    | '/api/public/razorpay-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/billing'
     | '/brand-kit'
     | '/calendar'
     | '/confirm'
     | '/generating'
     | '/library'
+    | '/pricing'
     | '/sitemap.xml'
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/results/$id'
+    | '/api/public/razorpay-webhook'
   id:
     | '__root__'
     | '/'
     | '/auth'
+    | '/billing'
     | '/brand-kit'
     | '/calendar'
     | '/confirm'
     | '/generating'
     | '/library'
+    | '/pricing'
     | '/sitemap.xml'
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/results/$id'
+    | '/api/public/razorpay-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
+  BillingRoute: typeof BillingRoute
   BrandKitRoute: typeof BrandKitRoute
   CalendarRoute: typeof CalendarRoute
   ConfirmRoute: typeof ConfirmRoute
   GeneratingRoute: typeof GeneratingRoute
   LibraryRoute: typeof LibraryRoute
+  PricingRoute: typeof PricingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   BlogFlatLayGuideRoute: typeof BlogFlatLayGuideRoute
   ResultsIdRoute: typeof ResultsIdRoute
+  ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -179,6 +219,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/library': {
@@ -216,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BrandKitRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/billing': {
+      id: '/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof BillingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -251,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/api/public/razorpay-webhook': {
+      id: '/api/public/razorpay-webhook'
+      path: '/api/public/razorpay-webhook'
+      fullPath: '/api/public/razorpay-webhook'
+      preLoaderRoute: typeof ApiPublicRazorpayWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -267,14 +328,17 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
+  BillingRoute: BillingRoute,
   BrandKitRoute: BrandKitRoute,
   CalendarRoute: CalendarRoute,
   ConfirmRoute: ConfirmRoute,
   GeneratingRoute: GeneratingRoute,
   LibraryRoute: LibraryRoute,
+  PricingRoute: PricingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   BlogFlatLayGuideRoute: BlogFlatLayGuideRoute,
   ResultsIdRoute: ResultsIdRoute,
+  ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
