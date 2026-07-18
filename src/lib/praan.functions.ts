@@ -163,6 +163,9 @@ async function checkAndIncrementLimit(browserId: string): Promise<void> {
 
 // ---------- Image generation ----------
 
+const NO_PEOPLE =
+  "Absolutely no people, no humans, no hands, no fingers, no arms, no models, no figures, no silhouettes — not even blurred in the background.";
+
 const IMAGE_STYLES = [
   {
     kind: "white",
@@ -177,27 +180,27 @@ const IMAGE_STYLES = [
   {
     kind: "lifestyle",
     prompt:
-      "Same product from the input photo, kept faithful. Place it in a natural Indian home/shop lifestyle scene appropriate to its category — warm, everyday, aspirational. Soft daylight, shallow depth of field, no text.",
+      "Same product from the input photo, kept faithful. First determine where this specific product is actually used or kept in real life, then set the scene in exactly that place — e.g. a speaker on a desk or bedside table, a kurta on a wardrobe rail or chair, a spice jar on a kitchen shelf, a cushion on a sofa, a mug on a breakfast table. Never use a generic shop, market stall, bazaar, workshop, or warehouse backdrop unless the product itself is shop equipment. Keep the scene simple: one clear surface, at most two or three small props that genuinely belong with this product. The product remains the clear hero, centred and uncrowded. Soft natural daylight, shallow depth of field, photorealistic, no text.",
   },
   {
     kind: "flatlay",
     prompt:
-      "Same product from the input photo, kept faithful. Styled overhead flat-lay on a textured neutral surface with a few tasteful complementary props. Balanced composition, soft daylight, no text.",
+      "Same product from the input photo, kept faithful. Styled overhead flat-lay on a textured neutral surface with two or three tasteful props that clearly belong with this product's real use. Balanced composition, soft daylight, product centred and clearly the hero, no text.",
   },
 ];
 
 async function generateOneImage(refB64: string, refMime: string, prompt: string, ratio: "1:1" | "9:16") {
   const ratioHint =
     ratio === "1:1"
-      ? "Square 1:1 aspect ratio, 1024x1024."
-      : "Vertical 9:16 aspect ratio, 1024x1820, tall portrait orientation.";
+      ? "Square 1:1 aspect ratio, 1024x1024. The full product must be centred and completely visible with comfortable margin — nothing important cropped."
+      : "Vertical 9:16 aspect ratio, 1024x1820, tall portrait orientation. Product centred, fully visible.";
   const body = {
     model: "google/gemini-2.5-flash-image",
     messages: [
       {
         role: "user",
         content: [
-          { type: "text", text: `${prompt} ${ratioHint}` },
+          { type: "text", text: `${prompt} ${ratioHint} ${NO_PEOPLE}` },
           { type: "image_url", image_url: { url: `data:${refMime};base64,${refB64}` } },
         ],
       },
@@ -284,7 +287,15 @@ export const generateCopyAndSave = createServerFn({ method: "POST" })
     }) => d,
   )
   .handler(async ({ data }) => {
-    const sys = `You are an experienced Indian e-commerce copywriter. You write plain, confident English that Indian sellers use. Never use words like "elevate", "unleash", "curated", "lifestyle" as filler. Never use ALL CAPS. Sentence case. Be specific and concrete.`;
+    const sys = `You are a plain-speaking Indian shopkeeper who writes product listings. You explain why THIS specific product is worth buying — with concrete facts, not filler.
+
+Hard rules:
+- Open with the single most useful thing about the product. Never restate what the product obviously is.
+- Every bullet must contain a concrete fact: a material, a size, a use, a benefit someone can picture. Never a bullet that only describes the colour.
+- Never state the obvious ("this yellow speaker is yellow", "has a handle making it easy to carry").
+- Banned phrases (never use, in any form): "on the go", "elevate", "adds a pop", "perfect for every", "take your X anywhere", "grab yours today", "unleash", "curated", "lifestyle".
+- Sentence case. No ALL CAPS. No emoji spam. Confident, specific, no filler.
+- Write like a good shopkeeper who knows the product — every sentence earns its place.`;
 
     const userPrompt = `Write a full listing for this product.
 
@@ -298,13 +309,13 @@ Features: ${data.features.filter(Boolean).join("; ") || "n/a"}
 
 Return a JSON object only (no prose, no markdown fences) with these exact keys:
 {
-  "seoTitle": "under 200 characters, keyword-rich, no ALL CAPS",
-  "description": "short scannable paragraphs separated by \\n\\n",
-  "bullets": [exactly 5 benefit-led bullet points, each under 120 chars],
+  "seoTitle": "under 200 characters, keyword-rich, sentence case, no ALL CAPS",
+  "description": "exactly three short paragraphs separated by \\n\\n. Every sentence must earn its place. First paragraph opens with the most useful thing about the product, not a restatement of what it is.",
+  "bullets": [exactly 5 bullets under 120 chars each, each with a concrete fact — material, size, use, or specific benefit. No colour-only bullets. No banned phrases.],
   "tags": [exactly 15 search tags, single or two-word, lowercase],
-  "instagram": "Instagram caption with a strong first line, 2-4 short lines",
+  "instagram": "Instagram caption with a strong specific first line, 2-4 short lines, no banned phrases",
   "instagramHashtags": [exactly 10 hashtags including the # symbol],
-  "whatsapp": "WhatsApp broadcast message under 300 characters with 1-2 emojis",
+  "whatsapp": "WhatsApp broadcast message under 300 characters with 1-2 emojis, specific not generic",
   "festival": "one festival or offer line, single sentence"
 }`;
 

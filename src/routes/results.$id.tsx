@@ -71,46 +71,15 @@ function Results() {
       </header>
 
       {/* 1. Photos */}
-      <Section title="Photos">
-        <div className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 no-scrollbar">
-          {images.map((img, i) => (
-            <div
-              key={i}
-              className="relative shrink-0 snap-center overflow-hidden rounded-[12px] bg-surface"
-              style={{
-                width: img.ratio === "1:1" ? "78%" : "64%",
-                aspectRatio: img.ratio === "1:1" ? "1 / 1" : "9 / 16",
-              }}
-            >
-              <img
-                src={img.url}
-                alt={`${img.kind} ${img.ratio}`}
-                className="h-full w-full object-cover"
-              />
-              <a
-                href={img.url}
-                download={`praan-${img.kind}-${img.ratio.replace(":", "x")}.png`}
-                target="_blank"
-                rel="noreferrer"
-                className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-ink shadow-md"
-                aria-label="Download photo"
-              >
-                <Download className="h-4 w-4" />
-              </a>
-            </div>
-          ))}
-        </div>
-        <MakeMoreButton
-          id={id}
-          productName={data.product_name as string}
-          category={data.category as string}
-          originalUrl={original}
-          onDone={() => refetch()}
-          onLimit={() =>
-            alert("You've used today's 5 free products. Come back tomorrow.")
-          }
-        />
-      </Section>
+      <PhotosSection
+        images={images}
+        id={id}
+        productName={data.product_name as string}
+        category={data.category as string}
+        originalUrl={original}
+        onDone={() => refetch()}
+      />
+
 
       {/* 2. Before / after */}
       <Section title="See the change">
@@ -228,6 +197,81 @@ function Block({
         {text}
       </p>
     </div>
+  );
+}
+
+function PhotosSection({
+  images,
+  id,
+  productName,
+  category,
+  originalUrl,
+  onDone,
+}: {
+  images: GenImage[];
+  id: string;
+  productName: string;
+  category: string;
+  originalUrl: string;
+  onDone: () => void;
+}) {
+  const [ratio, setRatio] = useState<"1:1" | "9:16">("1:1");
+  const filtered = images.filter((i) => i.ratio === ratio);
+  return (
+    <Section title="Photos">
+      <div className="inline-flex self-start rounded-full border border-[color:var(--color-border)] bg-white p-1">
+        {(["1:1", "9:16"] as const).map((r) => (
+          <button
+            key={r}
+            type="button"
+            onClick={() => setRatio(r)}
+            className={`rounded-full px-4 py-1.5 text-[13px] font-semibold transition-colors ${
+              ratio === r ? "bg-ink text-white" : "text-muted"
+            }`}
+          >
+            {r === "1:1" ? "Square" : "Vertical"}
+          </button>
+        ))}
+      </div>
+      <div className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 no-scrollbar">
+        {filtered.map((img, i) => (
+          <div
+            key={`${img.kind}-${img.ratio}-${i}`}
+            className="relative shrink-0 snap-center overflow-hidden rounded-[12px] bg-surface"
+            style={{
+              width: ratio === "1:1" ? "78%" : "64%",
+              aspectRatio: ratio === "1:1" ? "1 / 1" : "9 / 16",
+            }}
+          >
+            <img
+              src={img.url}
+              alt={`${img.kind} ${img.ratio}`}
+              className="h-full w-full object-cover"
+            />
+            <a
+              href={img.url}
+              download={`praan-${img.kind}-${img.ratio.replace(":", "x")}.png`}
+              target="_blank"
+              rel="noreferrer"
+              className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-ink shadow-md"
+              aria-label="Download photo"
+            >
+              <Download className="h-4 w-4" />
+            </a>
+          </div>
+        ))}
+      </div>
+      <MakeMoreButton
+        id={id}
+        productName={productName}
+        category={category}
+        originalUrl={originalUrl}
+        onDone={onDone}
+        onLimit={() =>
+          alert("You've used today's 5 free products. Come back tomorrow.")
+        }
+      />
+    </Section>
   );
 }
 
