@@ -173,7 +173,11 @@ function Results() {
       <Section title="Download">
         {user ? (
           <div className="flex flex-col gap-3">
-            <DownloadAllButton images={images} name={(data.product_name as string) || "praan"} />
+            <DownloadAllButton
+              images={images}
+              name={(data.product_name as string) || "praan"}
+              watermark={watermark}
+            />
             <a
               href={data.csv_url as string}
               download
