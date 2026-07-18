@@ -14,7 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      daily_usage: {
+        Row: {
+          browser_id: string
+          count: number
+          date: string
+        }
+        Insert: {
+          browser_id: string
+          count?: number
+          date?: string
+        }
+        Update: {
+          browser_id?: string
+          count?: number
+          date?: string
+        }
+        Relationships: []
+      }
+      generations: {
+        Row: {
+          browser_id: string
+          category: string | null
+          copy: Json | null
+          created_at: string
+          csv_url: string | null
+          detail: string | null
+          feedback_rating: number | null
+          feedback_text: string | null
+          generated_images: Json
+          id: string
+          original_image_url: string | null
+          price: number | null
+          product_name: string | null
+        }
+        Insert: {
+          browser_id: string
+          category?: string | null
+          copy?: Json | null
+          created_at?: string
+          csv_url?: string | null
+          detail?: string | null
+          feedback_rating?: number | null
+          feedback_text?: string | null
+          generated_images?: Json
+          id?: string
+          original_image_url?: string | null
+          price?: number | null
+          product_name?: string | null
+        }
+        Update: {
+          browser_id?: string
+          category?: string | null
+          copy?: Json | null
+          created_at?: string
+          csv_url?: string | null
+          detail?: string | null
+          feedback_rating?: number | null
+          feedback_text?: string | null
+          generated_images?: Json
+          id?: string
+          original_image_url?: string | null
+          price?: number | null
+          product_name?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
