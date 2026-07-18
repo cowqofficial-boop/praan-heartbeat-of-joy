@@ -121,14 +121,17 @@ function Generating() {
       {error && (
         <>
           <p className="mt-8 text-[15px] text-primary">{error}</p>
-          {!error.includes("today's 5") && (
-            <PrimaryButton fixed onClick={run}>
-              Try again
+          {error.includes("Upgrade") ? (
+            <PrimaryButton fixed onClick={() => navigate({ to: "/pricing" })}>
+              See plans
             </PrimaryButton>
-          )}
-          {error.includes("today's 5") && (
+          ) : error.includes("today's 5") ? (
             <PrimaryButton fixed onClick={() => navigate({ to: "/" })}>
               Back to start
+            </PrimaryButton>
+          ) : (
+            <PrimaryButton fixed onClick={run}>
+              Try again
             </PrimaryButton>
           )}
         </>
