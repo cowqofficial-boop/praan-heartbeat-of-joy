@@ -275,6 +275,7 @@ export const generateCopyAndSave = createServerFn({ method: "POST" })
   .inputValidator(
     (d: {
       browserId: string;
+      userId?: string | null;
       originalImageUrl: string;
       productName: string;
       price: string;
@@ -287,7 +288,40 @@ export const generateCopyAndSave = createServerFn({ method: "POST" })
     }) => d,
   )
   .handler(async ({ data }) => {
+    // Look up brand kit if signed in.
+    let brand: {
+      business_name: string;
+      sells_what: string;
+      sells_to: string;
+      tone: string;
+    } | null = null;
+    if (data.userId) {
+      const sbLookup = await admin();
+      const { data: bk } = await sbLookup
+        .from("brand_kits")
+        .select("business_name, sells_what, sells_to, tone")
+        .eq("user_id", data.userId)
+        .maybeSingle();
+      if (bk) brand = bk;
+    }
+
+    const toneLine =
+      brand?.tone === "premium"
+        ? "Voice: premium, understated, confident. No exclamation marks."
+        : brand?.tone === "value"
+          ? "Voice: value-for-money, practical, direct. Emphasise durability and price."
+          : brand?.tone === "traditional"
+            ? "Voice: traditional, warm, respectful. Comfortable with Hindi/regional words where natural."
+            : "Voice: friendly, plain-speaking, warm.";
+
+    const brandLines = brand
+      ? `Brand: ${brand.business_name || "unnamed"}. Sells: ${brand.sells_what || "n/a"}. Target buyer: ${brand.sells_to || "general Indian shoppers"}.`
+      : `Brand: independent Indian seller. Target buyer: general Indian shoppers.`;
+
     const sys = `You are a plain-speaking Indian shopkeeper who writes product listings. You explain why THIS specific product is worth buying — with concrete facts, not filler.
+
+${brandLines}
+${toneLine}
 
 Hard rules:
 - Open with the single most useful thing about the product. Never restate what the product obviously is.
@@ -295,7 +329,7 @@ Hard rules:
 - Never state the obvious ("this yellow speaker is yellow", "has a handle making it easy to carry").
 - Banned phrases (never use, in any form): "on the go", "elevate", "adds a pop", "perfect for every", "take your X anywhere", "grab yours today", "unleash", "curated", "lifestyle".
 - Sentence case. No ALL CAPS. No emoji spam. Confident, specific, no filler.
-- Write like a good shopkeeper who knows the product — every sentence earns its place.`;
+- Match the target buyer's language and priorities. Write like a good shopkeeper who knows the product — every sentence earns its place.`;
 
     const userPrompt = `Write a full listing for this product.
 
@@ -374,6 +408,7 @@ Return a JSON object only (no prose, no markdown fences) with these exact keys:
       .from("generations")
       .insert({
         browser_id: data.browserId,
+        user_id: data.userId ?? null,
         original_image_url: data.originalImageUrl,
         product_name: data.productName,
         price: Number(data.price) || null,
