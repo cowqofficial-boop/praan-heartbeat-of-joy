@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Download, Share2, ThumbsDown, ThumbsUp } from "lucide-react";
+import { Download, Lock, Share2, ThumbsDown, ThumbsUp } from "lucide-react";
 import JSZip from "jszip";
 import { generateImages, getGeneration, submitFeedback } from "@/lib/praan.functions";
 import { getBrowserId } from "@/lib/browser-id";
 import { CopyButton } from "@/components/CopyButton";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
+import { useAuth } from "@/lib/use-auth";
 
 export const Route = createFileRoute("/results/$id")({
   head: ({ params }) => ({
