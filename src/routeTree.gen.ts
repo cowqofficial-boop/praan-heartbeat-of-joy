@@ -23,6 +23,7 @@ import { Route as ResultsIdRouteImport } from './routes/results.$id'
 import { Route as BlogFlatLayGuideRouteImport } from './routes/blog.flat-lay-guide'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
+import { Route as ApiPublicMetaOauthCallbackRouteImport } from './routes/api/public/meta-oauth-callback'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -95,6 +96,12 @@ const ApiPublicRazorpayWebhookRoute =
     path: '/api/public/razorpay-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicMetaOauthCallbackRoute =
+  ApiPublicMetaOauthCallbackRouteImport.update({
+    id: '/api/public/meta-oauth-callback',
+    path: '/api/public/meta-oauth-callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/results/$id': typeof ResultsIdRoute
+  '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -126,6 +134,7 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/results/$id': typeof ResultsIdRoute
+  '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRoutesById {
@@ -143,6 +152,7 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/results/$id': typeof ResultsIdRoute
+  '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRouteTypes {
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/results/$id'
+    | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/results/$id'
+    | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
   id:
     | '__root__'
@@ -193,6 +205,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/results/$id'
+    | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
   fileRoutesById: FileRoutesById
 }
@@ -209,6 +222,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   BlogFlatLayGuideRoute: typeof BlogFlatLayGuideRoute
   ResultsIdRoute: typeof ResultsIdRoute
+  ApiPublicMetaOauthCallbackRoute: typeof ApiPublicMetaOauthCallbackRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
 }
 
@@ -312,6 +326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRazorpayWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/meta-oauth-callback': {
+      id: '/api/public/meta-oauth-callback'
+      path: '/api/public/meta-oauth-callback'
+      fullPath: '/api/public/meta-oauth-callback'
+      preLoaderRoute: typeof ApiPublicMetaOauthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -338,6 +359,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   BlogFlatLayGuideRoute: BlogFlatLayGuideRoute,
   ResultsIdRoute: ResultsIdRoute,
+  ApiPublicMetaOauthCallbackRoute: ApiPublicMetaOauthCallbackRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
 }
 export const routeTree = rootRouteImport
