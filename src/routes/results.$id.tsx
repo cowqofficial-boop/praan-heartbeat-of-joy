@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Download, Lock, Share2, ThumbsDown, ThumbsUp } from "lucide-react";
+import { PostThisButton } from "@/components/PostThisButton";
 import JSZip from "jszip";
 import { generateImages, getGeneration, submitFeedback } from "@/lib/praan.functions";
 import { getBrowserId } from "@/lib/browser-id";
