@@ -10,8 +10,21 @@ export const Route = createFileRoute("/generating")({
   head: () => ({
     meta: [
       { title: "Making your listing — PRAAN" },
-      { name: "description", content: "Studio photos and copy are being prepared." },
+      {
+        name: "description",
+        content:
+          "PRAAN is studying your product, shooting studio photos, and writing your marketplace listing. This usually takes under a minute.",
+      },
+      { property: "og:title", content: "Making your listing — PRAAN" },
+      {
+        property: "og:description",
+        content: "Studio photos, marketplace copy, and a catalog file are being prepared.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://praan-heartbeat-of-joy.lovable.app/generating" },
+      { name: "robots", content: "noindex, follow" },
     ],
+    links: [{ rel: "canonical", href: "https://praan-heartbeat-of-joy.lovable.app/generating" }],
   }),
   component: Generating,
 });
@@ -82,7 +95,7 @@ function Generating() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col px-5 pb-28 pt-16">
+    <main className="flex min-h-screen flex-col px-5 pb-28 pt-16">
       <h1 className="font-display text-[28px] leading-tight text-ink">
         Making your listing.
       </h1>
@@ -113,6 +126,6 @@ function Generating() {
           )}
         </>
       )}
-    </div>
+    </main>
   );
 }

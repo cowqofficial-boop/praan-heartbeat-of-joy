@@ -12,7 +12,28 @@ export const Route = createFileRoute("/results/$id")({
   head: ({ params }) => ({
     meta: [
       { title: "Your listing is ready — PRAAN" },
-      { name: "description", content: `Studio photos and copy for listing ${params.id}.` },
+      {
+        name: "description",
+        content:
+          "Studio product photos, marketplace copy, and a Shopify catalog CSV — ready to download and post.",
+      },
+      { property: "og:title", content: "Your listing is ready — PRAAN" },
+      {
+        property: "og:description",
+        content: "Download studio photos, copy marketplace text, and export a Shopify CSV.",
+      },
+      { property: "og:type", content: "website" },
+      {
+        property: "og:url",
+        content: `https://praan-heartbeat-of-joy.lovable.app/results/${params.id}`,
+      },
+      { name: "robots", content: "noindex, follow" },
+    ],
+    links: [
+      {
+        rel: "canonical",
+        href: `https://praan-heartbeat-of-joy.lovable.app/results/${params.id}`,
+      },
     ],
   }),
   component: Results,
@@ -60,7 +81,7 @@ function Results() {
   const whiteAfter = images.find((i) => i.kind === "white" && i.ratio === "1:1")?.url ?? images[0]?.url;
 
   return (
-    <div className="flex min-h-screen flex-col gap-10 px-5 pb-16 pt-8">
+    <main className="flex min-h-screen flex-col gap-10 px-5 pb-16 pt-8">
       <header>
         <h1 className="font-display text-[28px] leading-tight text-ink">
           Ready to sell.
@@ -161,7 +182,7 @@ function Results() {
           Start another product
         </button>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -390,6 +411,7 @@ function Feedback({ id }: { id: string }) {
         </button>
       </div>
       <textarea
+        aria-label="Feedback about your listing"
         value={text}
         onChange={(e) => setText(e.target.value)}
         onBlur={() => {

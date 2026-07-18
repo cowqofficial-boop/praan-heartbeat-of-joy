@@ -87,6 +87,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Inter:wght@400;500;600;700&display=swap",
       },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "PRAAN",
+          url: "https://praan-heartbeat-of-joy.lovable.app/",
+          logo: "https://praan-heartbeat-of-joy.lovable.app/icon-512.png",
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,

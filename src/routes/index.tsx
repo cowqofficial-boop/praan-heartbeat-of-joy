@@ -8,11 +8,41 @@ import { identifyProduct, uploadOriginal } from "@/lib/praan.functions";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PRAAN — one photo, everything you need to sell it" },
+      { title: "PRAAN — AI Product Photos & Listings for Indian Sellers" },
       {
         name: "description",
         content:
-          "Upload one product photo. Get studio photos, sales copy, and a catalog file — ready to sell on Amazon, Flipkart, Meesho, Instagram, and WhatsApp.",
+          "Upload one product photo. Get studio photos, sales copy, and a Shopify catalog file — ready to sell on Amazon, Flipkart, Meesho, Instagram, and WhatsApp.",
+      },
+      { property: "og:title", content: "PRAAN — AI Product Photos & Listings for Indian Sellers" },
+      {
+        property: "og:description",
+        content:
+          "Turn one phone photo into studio images, marketplace copy, and a catalog CSV in under a minute.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://praan-heartbeat-of-joy.lovable.app/" },
+    ],
+    links: [{ rel: "canonical", href: "https://praan-heartbeat-of-joy.lovable.app/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "PRAAN",
+          url: "https://praan-heartbeat-of-joy.lovable.app/",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "PRAAN",
+          url: "https://praan-heartbeat-of-joy.lovable.app/",
+          logo: "https://praan-heartbeat-of-joy.lovable.app/icon-512.png",
+        }),
       },
     ],
   }),
@@ -73,9 +103,11 @@ function Upload() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-5">
+    <main className="flex min-h-screen flex-col items-center justify-center px-5">
       <div className="w-full max-w-sm">
-        <h1 className="font-display text-[44px] leading-[1.05] text-ink">PRAAN</h1>
+        <h1 className="font-display text-[44px] leading-[1.05] text-ink">
+          PRAAN — AI Product Photos &amp; Listings
+        </h1>
         <p className="mt-3 text-[15px] text-muted">
           One photo. Everything you need to sell it.
         </p>
@@ -110,6 +142,6 @@ function Upload() {
           if (f) handleFile(f);
         }}
       />
-    </div>
+    </main>
   );
 }

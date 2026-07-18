@@ -6,9 +6,22 @@ import { PrimaryButton } from "@/components/PrimaryButton";
 export const Route = createFileRoute("/confirm")({
   head: () => ({
     meta: [
-      { title: "Confirm your product — PRAAN" },
-      { name: "description", content: "Confirm the product details before creating your listing." },
+      { title: "Confirm your product details — PRAAN" },
+      {
+        name: "description",
+        content:
+          "Review the product name, price, and detail PRAAN picked up from your photo before generating your marketplace listing.",
+      },
+      { property: "og:title", content: "Confirm your product details — PRAAN" },
+      {
+        property: "og:description",
+        content: "Review the product details PRAAN detected before generating your listing.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://praan-heartbeat-of-joy.lovable.app/confirm" },
+      { name: "robots", content: "noindex, follow" },
     ],
+    links: [{ rel: "canonical", href: "https://praan-heartbeat-of-joy.lovable.app/confirm" }],
   }),
   component: Confirm,
 });
@@ -34,9 +47,9 @@ function Confirm() {
   const canSubmit = name.trim().length > 0 && price.trim().length > 0;
 
   return (
-    <div className="flex min-h-screen flex-col px-5 pb-28 pt-8">
+    <main className="flex min-h-screen flex-col px-5 pb-28 pt-8">
       <h1 className="font-display text-[28px] leading-tight text-ink">
-        Is this right?
+        Confirm your product details
       </h1>
       <p className="mt-1 text-[15px] text-muted">Change anything that's off.</p>
 
@@ -49,16 +62,18 @@ function Confirm() {
       </div>
 
       <div className="mt-6 flex flex-col gap-5">
-        <Field label="Product name">
+        <Field htmlFor="product-name" label="Product name">
           <input
+            id="product-name"
             className="h-12 w-full rounded-[12px] border border-[color:var(--color-border)] bg-white px-4 text-[16px] text-ink"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Brass diya set"
           />
         </Field>
-        <Field label="Price (₹)">
+        <Field htmlFor="product-price" label="Price (₹)">
           <input
+            id="product-price"
             inputMode="numeric"
             className="h-12 w-full rounded-[12px] border border-[color:var(--color-border)] bg-white px-4 text-[16px] text-ink"
             value={price}
@@ -66,8 +81,9 @@ function Confirm() {
             placeholder="499"
           />
         </Field>
-        <Field label="One detail worth knowing">
+        <Field htmlFor="product-detail" label="One detail worth knowing">
           <input
+            id="product-detail"
             className="h-12 w-full rounded-[12px] border border-[color:var(--color-border)] bg-white px-4 text-[16px] text-ink"
             value={detail}
             onChange={(e) => setDetail(e.target.value)}
@@ -86,15 +102,25 @@ function Confirm() {
       >
         Create my listing
       </PrimaryButton>
-    </div>
+    </main>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  htmlFor,
+  label,
+  children,
+}: {
+  htmlFor: string;
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
-    <label className="flex flex-col gap-2">
-      <span className="text-[15px] font-medium text-ink">{label}</span>
+    <div className="flex flex-col gap-2">
+      <label htmlFor={htmlFor} className="text-[15px] font-medium text-ink">
+        {label}
+      </label>
       {children}
-    </label>
+    </div>
   );
 }
