@@ -86,7 +86,9 @@ function Generating() {
     } catch (e) {
       console.error(e);
       const msg = String((e as Error).message || e);
-      if (msg.includes("DAILY_LIMIT")) {
+      if (msg.includes("NO_CREDITS")) {
+        setError("You've used your products for this month. Upgrade or top up to keep going.");
+      } else if (msg.includes("DAILY_LIMIT")) {
         setError("You've used today's 5 free products. Come back tomorrow.");
       } else if (msg.includes("image gen") || msg.includes("photos")) {
         setError("The photos didn't come through. Try again.");
