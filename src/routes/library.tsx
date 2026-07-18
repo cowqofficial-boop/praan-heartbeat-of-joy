@@ -120,6 +120,9 @@ function LibraryPage() {
         </div>
       </header>
 
+      <ReconnectBanner />
+
+
       <Link
         to="/"
         className="mt-6 flex h-14 items-center justify-center gap-2 rounded-[12px] bg-primary text-[16px] font-semibold text-primary-foreground"
