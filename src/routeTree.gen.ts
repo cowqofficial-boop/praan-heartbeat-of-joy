@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as GeneratingRouteImport } from './routes/generating'
 import { Route as ConfirmRouteImport } from './routes/confirm'
+import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as BrandKitRouteImport } from './routes/brand-kit'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
@@ -38,6 +39,11 @@ const GeneratingRoute = GeneratingRouteImport.update({
 const ConfirmRoute = ConfirmRouteImport.update({
   id: '/confirm',
   path: '/confirm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BrandKitRoute = BrandKitRouteImport.update({
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/brand-kit': typeof BrandKitRoute
+  '/calendar': typeof CalendarRoute
   '/confirm': typeof ConfirmRoute
   '/generating': typeof GeneratingRoute
   '/library': typeof LibraryRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/brand-kit': typeof BrandKitRoute
+  '/calendar': typeof CalendarRoute
   '/confirm': typeof ConfirmRoute
   '/generating': typeof GeneratingRoute
   '/library': typeof LibraryRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/brand-kit': typeof BrandKitRoute
+  '/calendar': typeof CalendarRoute
   '/confirm': typeof ConfirmRoute
   '/generating': typeof GeneratingRoute
   '/library': typeof LibraryRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/brand-kit'
+    | '/calendar'
     | '/confirm'
     | '/generating'
     | '/library'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/brand-kit'
+    | '/calendar'
     | '/confirm'
     | '/generating'
     | '/library'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/brand-kit'
+    | '/calendar'
     | '/confirm'
     | '/generating'
     | '/library'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
   BrandKitRoute: typeof BrandKitRoute
+  CalendarRoute: typeof CalendarRoute
   ConfirmRoute: typeof ConfirmRoute
   GeneratingRoute: typeof GeneratingRoute
   LibraryRoute: typeof LibraryRoute
@@ -187,6 +200,13 @@ declare module '@tanstack/react-router' {
       path: '/confirm'
       fullPath: '/confirm'
       preLoaderRoute: typeof ConfirmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/brand-kit': {
@@ -248,6 +268,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   BrandKitRoute: BrandKitRoute,
+  CalendarRoute: CalendarRoute,
   ConfirmRoute: ConfirmRoute,
   GeneratingRoute: GeneratingRoute,
   LibraryRoute: LibraryRoute,

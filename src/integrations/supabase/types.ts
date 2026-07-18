@@ -53,6 +53,108 @@ export type Database = {
         }
         Relationships: []
       }
+      content_plans: {
+        Row: {
+          created_at: string
+          id: string
+          month: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          month: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          month?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      content_posts: {
+        Row: {
+          caption: string | null
+          created_at: string
+          day_index: number
+          error: string | null
+          hashtags: string | null
+          id: string
+          image_url: string | null
+          plan_id: string
+          post_date: string
+          post_type: string
+          posted: boolean
+          product_id: string | null
+          product_name: string | null
+          product_ref_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          day_index: number
+          error?: string | null
+          hashtags?: string | null
+          id?: string
+          image_url?: string | null
+          plan_id: string
+          post_date: string
+          post_type: string
+          posted?: boolean
+          product_id?: string | null
+          product_name?: string | null
+          product_ref_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          day_index?: number
+          error?: string | null
+          hashtags?: string | null
+          id?: string
+          image_url?: string | null
+          plan_id?: string
+          post_date?: string
+          post_type?: string
+          posted?: boolean
+          product_id?: string | null
+          product_name?: string | null
+          product_ref_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_posts_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "content_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_posts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "generations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_usage: {
         Row: {
           browser_id: string
