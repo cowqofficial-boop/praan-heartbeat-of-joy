@@ -6,9 +6,22 @@ import { PrimaryButton } from "@/components/PrimaryButton";
 export const Route = createFileRoute("/confirm")({
   head: () => ({
     meta: [
-      { title: "Confirm your product — PRAAN" },
-      { name: "description", content: "Confirm the product details before creating your listing." },
+      { title: "Confirm your product details — PRAAN" },
+      {
+        name: "description",
+        content:
+          "Review the product name, price, and detail PRAAN picked up from your photo before generating your marketplace listing.",
+      },
+      { property: "og:title", content: "Confirm your product details — PRAAN" },
+      {
+        property: "og:description",
+        content: "Review the product details PRAAN detected before generating your listing.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://praan-heartbeat-of-joy.lovable.app/confirm" },
+      { name: "robots", content: "noindex, follow" },
     ],
+    links: [{ rel: "canonical", href: "https://praan-heartbeat-of-joy.lovable.app/confirm" }],
   }),
   component: Confirm,
 });
