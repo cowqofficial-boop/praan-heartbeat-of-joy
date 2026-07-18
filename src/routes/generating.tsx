@@ -5,6 +5,7 @@ import { getBrowserId } from "@/lib/browser-id";
 import { generateCopyAndSave, generateImages } from "@/lib/praan.functions";
 import { ProgressSteps, type StepState } from "@/components/ProgressSteps";
 import { PrimaryButton } from "@/components/PrimaryButton";
+import { markFreeGenerationUsed, useAuth } from "@/lib/use-auth";
 
 export const Route = createFileRoute("/generating")({
   head: () => ({
@@ -31,6 +32,7 @@ export const Route = createFileRoute("/generating")({
 
 function Generating() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { originalImageUrl, identified, form } = usePraanStore();
   const [states, setStates] = useState<StepState[]>(["done", "active", "pending"]);
   const [error, setError] = useState<string | null>(null);
@@ -65,6 +67,7 @@ function Generating() {
       const { id } = await generateCopyAndSave({
         data: {
           browserId,
+          userId: user?.id ?? null,
           originalImageUrl,
           productName: form.name,
           price: form.price,
@@ -77,6 +80,7 @@ function Generating() {
         },
       });
       setStates(["done", "done", "done"]);
+      if (!user) markFreeGenerationUsed();
       navigate({ to: "/results/$id", params: { id } });
     } catch (e) {
       console.error(e);
