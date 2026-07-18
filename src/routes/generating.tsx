@@ -58,6 +58,7 @@ function Generating() {
       const { images } = await generateImages({
         data: {
           browserId,
+          userId: user?.id ?? null,
           imageUrl: originalImageUrl,
           productName: form.name,
           category: identified.category,
@@ -85,7 +86,9 @@ function Generating() {
     } catch (e) {
       console.error(e);
       const msg = String((e as Error).message || e);
-      if (msg.includes("DAILY_LIMIT")) {
+      if (msg.includes("NO_CREDITS")) {
+        setError("You've used your products for this month. Upgrade or top up to keep going.");
+      } else if (msg.includes("DAILY_LIMIT")) {
         setError("You've used today's 5 free products. Come back tomorrow.");
       } else if (msg.includes("image gen") || msg.includes("photos")) {
         setError("The photos didn't come through. Try again.");
@@ -118,14 +121,17 @@ function Generating() {
       {error && (
         <>
           <p className="mt-8 text-[15px] text-primary">{error}</p>
-          {!error.includes("today's 5") && (
-            <PrimaryButton fixed onClick={run}>
-              Try again
+          {error.includes("Upgrade") ? (
+            <PrimaryButton fixed onClick={() => navigate({ to: "/pricing" })}>
+              See plans
             </PrimaryButton>
-          )}
-          {error.includes("today's 5") && (
+          ) : error.includes("today's 5") ? (
             <PrimaryButton fixed onClick={() => navigate({ to: "/" })}>
               Back to start
+            </PrimaryButton>
+          ) : (
+            <PrimaryButton fixed onClick={run}>
+              Try again
             </PrimaryButton>
           )}
         </>

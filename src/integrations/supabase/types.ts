@@ -224,12 +224,171 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount_inr: number
+          created_at: string
+          credits_granted: number
+          id: string
+          invoice_url: string | null
+          plan_id: string
+          razorpay_invoice_id: string | null
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          razorpay_subscription_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_inr: number
+          created_at?: string
+          credits_granted?: number
+          id?: string
+          invoice_url?: string | null
+          plan_id: string
+          razorpay_invoice_id?: string | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          razorpay_subscription_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_inr?: number
+          created_at?: string
+          credits_granted?: number
+          id?: string
+          invoice_url?: string | null
+          plan_id?: string
+          razorpay_invoice_id?: string | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          razorpay_subscription_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          credits: number
+          features: Json
+          id: string
+          interval: string | null
+          kind: string
+          name: string
+          price_inr: number
+          sort_order: number
+        }
+        Insert: {
+          credits: number
+          features?: Json
+          id: string
+          interval?: string | null
+          kind: string
+          name: string
+          price_inr: number
+          sort_order?: number
+        }
+        Update: {
+          credits?: number
+          features?: Json
+          id?: string
+          interval?: string | null
+          kind?: string
+          name?: string
+          price_inr?: number
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      razorpay_plans: {
+        Row: {
+          created_at: string
+          plan_id: string
+          razorpay_plan_id: string
+        }
+        Insert: {
+          created_at?: string
+          plan_id: string
+          razorpay_plan_id: string
+        }
+        Update: {
+          created_at?: string
+          plan_id?: string
+          razorpay_plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "razorpay_plans_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: true
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_credits: {
+        Row: {
+          pack_credits: number
+          period_end: string | null
+          period_start: string | null
+          plan_id: string
+          razorpay_customer_id: string | null
+          razorpay_subscription_id: string | null
+          subscription_credits: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          pack_credits?: number
+          period_end?: string | null
+          period_start?: string | null
+          plan_id?: string
+          razorpay_customer_id?: string | null
+          razorpay_subscription_id?: string | null
+          subscription_credits?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          pack_credits?: number
+          period_end?: string | null
+          period_start?: string | null
+          plan_id?: string
+          razorpay_customer_id?: string | null
+          razorpay_subscription_id?: string | null
+          subscription_credits?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_credits_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      consume_credit: {
+        Args: { _amount?: number; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

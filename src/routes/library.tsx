@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, LogOut, Plus, Search, Settings2, Trash2, Pencil } from "lucide-react";
+import { CalendarDays, LogOut, Plus, Receipt, Search, Settings2, Trash2, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteMyProduct, listMyProducts, renameMyProduct, type LibraryItem } from "@/lib/library.functions";
+import { CreditBadge } from "@/components/CreditBadge";
 
 export const Route = createFileRoute("/library")({
   head: () => ({
@@ -78,12 +79,20 @@ function LibraryPage() {
       <header className="flex items-center justify-between">
         <h1 className="font-display text-[28px] leading-tight text-ink">Your products</h1>
         <div className="flex items-center gap-1">
+          <CreditBadge />
           <Link
             to="/calendar"
             className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
             aria-label="Content calendar"
           >
             <CalendarDays className="h-5 w-5" />
+          </Link>
+          <Link
+            to="/billing"
+            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
+            aria-label="Billing"
+          >
+            <Receipt className="h-5 w-5" />
           </Link>
           <Link
             to="/brand-kit"

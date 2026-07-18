@@ -8,6 +8,8 @@ import { getBrowserId } from "@/lib/browser-id";
 import { CopyButton } from "@/components/CopyButton";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import { useAuth } from "@/lib/use-auth";
+import { getMyCredits } from "@/lib/billing.functions";
+import { watermarkImageUrl } from "@/lib/watermark";
 
 export const Route = createFileRoute("/results/$id")({
   head: ({ params }) => ({
@@ -60,6 +62,13 @@ function Results() {
     queryKey: ["gen", id],
     queryFn: () => getGeneration({ data: { id } }),
   });
+  const { data: credits } = useQuery({
+    queryKey: ["my-credits"],
+    queryFn: () => getMyCredits(),
+    enabled: !!user,
+    staleTime: 30_000,
+  });
+  const watermark = !user || (credits?.features?.watermark ?? true);
 
   if (isLoading) {
     return (
@@ -102,6 +111,7 @@ function Results() {
         originalUrl={original}
         onDone={() => refetch()}
         hasAccount={!!user}
+        watermark={watermark}
       />
 
 
@@ -163,7 +173,11 @@ function Results() {
       <Section title="Download">
         {user ? (
           <div className="flex flex-col gap-3">
-            <DownloadAllButton images={images} name={(data.product_name as string) || "praan"} />
+            <DownloadAllButton
+              images={images}
+              name={(data.product_name as string) || "praan"}
+              watermark={watermark}
+            />
             <a
               href={data.csv_url as string}
               download
@@ -266,6 +280,7 @@ function PhotosSection({
   originalUrl,
   onDone,
   hasAccount,
+  watermark,
 }: {
   images: GenImage[];
   id: string;
@@ -274,9 +289,30 @@ function PhotosSection({
   originalUrl: string;
   onDone: () => void;
   hasAccount: boolean;
+  watermark: boolean;
 }) {
   const [ratio, setRatio] = useState<"1:1" | "9:16">("1:1");
   const filtered = images.filter((i) => i.ratio === ratio);
+
+  async function handleDownload(img: GenImage) {
+    try {
+      let href = img.url;
+      let revoke = false;
+      if (watermark) {
+        const blob = await watermarkImageUrl(img.url);
+        href = URL.createObjectURL(blob);
+        revoke = true;
+      }
+      const a = document.createElement("a");
+      a.href = href;
+      a.download = `praan-${img.kind}-${img.ratio.replace(":", "x")}.png`;
+      a.click();
+      if (revoke) URL.revokeObjectURL(href);
+    } catch {
+      window.open(img.url, "_blank");
+    }
+  }
+
   return (
     <Section title="Photos">
       <div className="inline-flex self-start rounded-full border border-[color:var(--color-border)] bg-white p-1">
@@ -308,17 +344,20 @@ function PhotosSection({
               alt={`${img.kind} ${img.ratio}`}
               className="h-full w-full object-cover"
             />
+            {watermark && (
+              <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
+                Made with PRAAN
+              </span>
+            )}
             {hasAccount && (
-              <a
-                href={img.url}
-                download={`praan-${img.kind}-${img.ratio.replace(":", "x")}.png`}
-                target="_blank"
-                rel="noreferrer"
+              <button
+                type="button"
+                onClick={() => handleDownload(img)}
                 className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-ink shadow-md"
                 aria-label="Download photo"
               >
                 <Download className="h-4 w-4" />
-              </a>
+              </button>
             )}
           </div>
         ))}
@@ -386,7 +425,7 @@ function MakeMoreButton({
   );
 }
 
-function DownloadAllButton({ images, name }: { images: GenImage[]; name: string }) {
+function DownloadAllButton({ images, name, watermark }: { images: GenImage[]; name: string; watermark: boolean }) {
   const [busy, setBusy] = useState(false);
   return (
     <button
@@ -398,9 +437,15 @@ function DownloadAllButton({ images, name }: { images: GenImage[]; name: string 
           const zip = new JSZip();
           await Promise.all(
             images.map(async (img, i) => {
-              const res = await fetch(img.url);
-              const buf = await res.arrayBuffer();
-              zip.file(`${name}-${img.kind}-${img.ratio.replace(":", "x")}-${i + 1}.png`, buf);
+              const filename = `${name}-${img.kind}-${img.ratio.replace(":", "x")}-${i + 1}.png`;
+              if (watermark) {
+                const blob = await watermarkImageUrl(img.url);
+                zip.file(filename, blob);
+              } else {
+                const res = await fetch(img.url);
+                const buf = await res.arrayBuffer();
+                zip.file(filename, buf);
+              }
             }),
           );
           const blob = await zip.generateAsync({ type: "blob" });
