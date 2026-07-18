@@ -46,9 +46,9 @@ export const listMyChannels = createServerFn({ method: "GET" })
       .from("my_social_connections")
       .select("channel, account_id, account_name, token_expires_at, needs_reconnect");
     if (error) throw new Error(error.message);
-    const by: Record<string, (typeof data)[number]> = {};
+    const by: Record<string, NonNullable<typeof data>[number]> = {};
     (data ?? []).forEach((r) => {
-      by[r.channel] = r;
+      if (r.channel) by[r.channel] = r;
     });
     return CHANNELS.map((ch) => {
       const row = by[ch];
