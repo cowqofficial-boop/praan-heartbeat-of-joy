@@ -81,7 +81,7 @@ function Results() {
   const whiteAfter = images.find((i) => i.kind === "white" && i.ratio === "1:1")?.url ?? images[0]?.url;
 
   return (
-    <div className="flex min-h-screen flex-col gap-10 px-5 pb-16 pt-8">
+    <main className="flex min-h-screen flex-col gap-10 px-5 pb-16 pt-8">
       <header>
         <h1 className="font-display text-[28px] leading-tight text-ink">
           Ready to sell.
