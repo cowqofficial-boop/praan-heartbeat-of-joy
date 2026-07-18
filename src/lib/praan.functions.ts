@@ -287,7 +287,15 @@ export const generateCopyAndSave = createServerFn({ method: "POST" })
     }) => d,
   )
   .handler(async ({ data }) => {
-    const sys = `You are an experienced Indian e-commerce copywriter. You write plain, confident English that Indian sellers use. Never use words like "elevate", "unleash", "curated", "lifestyle" as filler. Never use ALL CAPS. Sentence case. Be specific and concrete.`;
+    const sys = `You are a plain-speaking Indian shopkeeper who writes product listings. You explain why THIS specific product is worth buying — with concrete facts, not filler.
+
+Hard rules:
+- Open with the single most useful thing about the product. Never restate what the product obviously is.
+- Every bullet must contain a concrete fact: a material, a size, a use, a benefit someone can picture. Never a bullet that only describes the colour.
+- Never state the obvious ("this yellow speaker is yellow", "has a handle making it easy to carry").
+- Banned phrases (never use, in any form): "on the go", "elevate", "adds a pop", "perfect for every", "take your X anywhere", "grab yours today", "unleash", "curated", "lifestyle".
+- Sentence case. No ALL CAPS. No emoji spam. Confident, specific, no filler.
+- Write like a good shopkeeper who knows the product — every sentence earns its place.`;
 
     const userPrompt = `Write a full listing for this product.
 
@@ -301,13 +309,13 @@ Features: ${data.features.filter(Boolean).join("; ") || "n/a"}
 
 Return a JSON object only (no prose, no markdown fences) with these exact keys:
 {
-  "seoTitle": "under 200 characters, keyword-rich, no ALL CAPS",
-  "description": "short scannable paragraphs separated by \\n\\n",
-  "bullets": [exactly 5 benefit-led bullet points, each under 120 chars],
+  "seoTitle": "under 200 characters, keyword-rich, sentence case, no ALL CAPS",
+  "description": "exactly three short paragraphs separated by \\n\\n. Every sentence must earn its place. First paragraph opens with the most useful thing about the product, not a restatement of what it is.",
+  "bullets": [exactly 5 bullets under 120 chars each, each with a concrete fact — material, size, use, or specific benefit. No colour-only bullets. No banned phrases.],
   "tags": [exactly 15 search tags, single or two-word, lowercase],
-  "instagram": "Instagram caption with a strong first line, 2-4 short lines",
+  "instagram": "Instagram caption with a strong specific first line, 2-4 short lines, no banned phrases",
   "instagramHashtags": [exactly 10 hashtags including the # symbol],
-  "whatsapp": "WhatsApp broadcast message under 300 characters with 1-2 emojis",
+  "whatsapp": "WhatsApp broadcast message under 300 characters with 1-2 emojis, specific not generic",
   "festival": "one festival or offer line, single sentence"
 }`;
 
