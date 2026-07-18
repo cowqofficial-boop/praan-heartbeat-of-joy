@@ -35,7 +35,7 @@ export function ReconnectBanner() {
       ? "Facebook Page"
       : "WhatsApp";
   return (
-    <div className="mx-4 mt-3 flex items-center justify-between gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-[#FFF6EC] px-3 py-2 text-[13px] text-ink">
+    <div className="mt-3 flex items-center justify-between gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-[#FFF6EC] px-3 py-2 text-[13px] text-ink">
       <span>{label} needs reconnecting.</span>
       <Link
         to="/connect"
