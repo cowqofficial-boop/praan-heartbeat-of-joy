@@ -91,7 +91,11 @@ function BrandKitPage() {
     setBusy(true);
     try {
       await saveMyBrandKit({ data: kit });
-      navigate({ to: "/library" });
+      if (onboarding) {
+        navigate({ to: "/connect", search: { onboarding: true } });
+      } else {
+        navigate({ to: "/library" });
+      }
     } finally {
       setBusy(false);
     }

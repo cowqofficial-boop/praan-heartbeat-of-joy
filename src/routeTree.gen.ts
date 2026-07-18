@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as GeneratingRouteImport } from './routes/generating'
+import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as ConfirmRouteImport } from './routes/confirm'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as BrandKitRouteImport } from './routes/brand-kit'
@@ -20,9 +21,11 @@ import { Route as BillingRouteImport } from './routes/billing'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResultsIdRouteImport } from './routes/results.$id'
+import { Route as ConnectInstagramRouteImport } from './routes/connect.instagram'
 import { Route as BlogFlatLayGuideRouteImport } from './routes/blog.flat-lay-guide'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
+import { Route as ApiPublicMetaOauthCallbackRouteImport } from './routes/api/public/meta-oauth-callback'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -42,6 +45,11 @@ const LibraryRoute = LibraryRouteImport.update({
 const GeneratingRoute = GeneratingRouteImport.update({
   id: '/generating',
   path: '/generating',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnectRoute = ConnectRouteImport.update({
+  id: '/connect',
+  path: '/connect',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConfirmRoute = ConfirmRouteImport.update({
@@ -79,6 +87,11 @@ const ResultsIdRoute = ResultsIdRouteImport.update({
   path: '/results/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConnectInstagramRoute = ConnectInstagramRouteImport.update({
+  id: '/instagram',
+  path: '/instagram',
+  getParentRoute: () => ConnectRoute,
+} as any)
 const BlogFlatLayGuideRoute = BlogFlatLayGuideRouteImport.update({
   id: '/blog/flat-lay-guide',
   path: '/blog/flat-lay-guide',
@@ -95,6 +108,12 @@ const ApiPublicRazorpayWebhookRoute =
     path: '/api/public/razorpay-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicMetaOauthCallbackRoute =
+  ApiPublicMetaOauthCallbackRouteImport.update({
+    id: '/api/public/meta-oauth-callback',
+    path: '/api/public/meta-oauth-callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -103,13 +122,16 @@ export interface FileRoutesByFullPath {
   '/brand-kit': typeof BrandKitRoute
   '/calendar': typeof CalendarRoute
   '/confirm': typeof ConfirmRoute
+  '/connect': typeof ConnectRouteWithChildren
   '/generating': typeof GeneratingRoute
   '/library': typeof LibraryRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
+  '/connect/instagram': typeof ConnectInstagramRoute
   '/results/$id': typeof ResultsIdRoute
+  '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -119,13 +141,16 @@ export interface FileRoutesByTo {
   '/brand-kit': typeof BrandKitRoute
   '/calendar': typeof CalendarRoute
   '/confirm': typeof ConfirmRoute
+  '/connect': typeof ConnectRouteWithChildren
   '/generating': typeof GeneratingRoute
   '/library': typeof LibraryRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
+  '/connect/instagram': typeof ConnectInstagramRoute
   '/results/$id': typeof ResultsIdRoute
+  '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRoutesById {
@@ -136,13 +161,16 @@ export interface FileRoutesById {
   '/brand-kit': typeof BrandKitRoute
   '/calendar': typeof CalendarRoute
   '/confirm': typeof ConfirmRoute
+  '/connect': typeof ConnectRouteWithChildren
   '/generating': typeof GeneratingRoute
   '/library': typeof LibraryRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
+  '/connect/instagram': typeof ConnectInstagramRoute
   '/results/$id': typeof ResultsIdRoute
+  '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRouteTypes {
@@ -154,13 +182,16 @@ export interface FileRouteTypes {
     | '/brand-kit'
     | '/calendar'
     | '/confirm'
+    | '/connect'
     | '/generating'
     | '/library'
     | '/pricing'
     | '/sitemap.xml'
     | '/auth/callback'
     | '/blog/flat-lay-guide'
+    | '/connect/instagram'
     | '/results/$id'
+    | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -170,13 +201,16 @@ export interface FileRouteTypes {
     | '/brand-kit'
     | '/calendar'
     | '/confirm'
+    | '/connect'
     | '/generating'
     | '/library'
     | '/pricing'
     | '/sitemap.xml'
     | '/auth/callback'
     | '/blog/flat-lay-guide'
+    | '/connect/instagram'
     | '/results/$id'
+    | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
   id:
     | '__root__'
@@ -186,13 +220,16 @@ export interface FileRouteTypes {
     | '/brand-kit'
     | '/calendar'
     | '/confirm'
+    | '/connect'
     | '/generating'
     | '/library'
     | '/pricing'
     | '/sitemap.xml'
     | '/auth/callback'
     | '/blog/flat-lay-guide'
+    | '/connect/instagram'
     | '/results/$id'
+    | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
   fileRoutesById: FileRoutesById
 }
@@ -203,12 +240,14 @@ export interface RootRouteChildren {
   BrandKitRoute: typeof BrandKitRoute
   CalendarRoute: typeof CalendarRoute
   ConfirmRoute: typeof ConfirmRoute
+  ConnectRoute: typeof ConnectRouteWithChildren
   GeneratingRoute: typeof GeneratingRoute
   LibraryRoute: typeof LibraryRoute
   PricingRoute: typeof PricingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   BlogFlatLayGuideRoute: typeof BlogFlatLayGuideRoute
   ResultsIdRoute: typeof ResultsIdRoute
+  ApiPublicMetaOauthCallbackRoute: typeof ApiPublicMetaOauthCallbackRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
 }
 
@@ -240,6 +279,13 @@ declare module '@tanstack/react-router' {
       path: '/generating'
       fullPath: '/generating'
       preLoaderRoute: typeof GeneratingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connect': {
+      id: '/connect'
+      path: '/connect'
+      fullPath: '/connect'
+      preLoaderRoute: typeof ConnectRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/confirm': {
@@ -291,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResultsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/connect/instagram': {
+      id: '/connect/instagram'
+      path: '/instagram'
+      fullPath: '/connect/instagram'
+      preLoaderRoute: typeof ConnectInstagramRouteImport
+      parentRoute: typeof ConnectRoute
+    }
     '/blog/flat-lay-guide': {
       id: '/blog/flat-lay-guide'
       path: '/blog/flat-lay-guide'
@@ -312,6 +365,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRazorpayWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/meta-oauth-callback': {
+      id: '/api/public/meta-oauth-callback'
+      path: '/api/public/meta-oauth-callback'
+      fullPath: '/api/public/meta-oauth-callback'
+      preLoaderRoute: typeof ApiPublicMetaOauthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -325,6 +385,17 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface ConnectRouteChildren {
+  ConnectInstagramRoute: typeof ConnectInstagramRoute
+}
+
+const ConnectRouteChildren: ConnectRouteChildren = {
+  ConnectInstagramRoute: ConnectInstagramRoute,
+}
+
+const ConnectRouteWithChildren =
+  ConnectRoute._addFileChildren(ConnectRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
@@ -332,12 +403,14 @@ const rootRouteChildren: RootRouteChildren = {
   BrandKitRoute: BrandKitRoute,
   CalendarRoute: CalendarRoute,
   ConfirmRoute: ConfirmRoute,
+  ConnectRoute: ConnectRouteWithChildren,
   GeneratingRoute: GeneratingRoute,
   LibraryRoute: LibraryRoute,
   PricingRoute: PricingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   BlogFlatLayGuideRoute: BlogFlatLayGuideRoute,
   ResultsIdRoute: ResultsIdRoute,
+  ApiPublicMetaOauthCallbackRoute: ApiPublicMetaOauthCallbackRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
 }
 export const routeTree = rootRouteImport
