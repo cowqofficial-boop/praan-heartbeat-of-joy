@@ -425,7 +425,7 @@ function MakeMoreButton({
   );
 }
 
-function DownloadAllButton({ images, name }: { images: GenImage[]; name: string }) {
+function DownloadAllButton({ images, name, watermark }: { images: GenImage[]; name: string; watermark: boolean }) {
   const [busy, setBusy] = useState(false);
   return (
     <button
@@ -437,9 +437,15 @@ function DownloadAllButton({ images, name }: { images: GenImage[]; name: string 
           const zip = new JSZip();
           await Promise.all(
             images.map(async (img, i) => {
-              const res = await fetch(img.url);
-              const buf = await res.arrayBuffer();
-              zip.file(`${name}-${img.kind}-${img.ratio.replace(":", "x")}-${i + 1}.png`, buf);
+              const filename = `${name}-${img.kind}-${img.ratio.replace(":", "x")}-${i + 1}.png`;
+              if (watermark) {
+                const blob = await watermarkImageUrl(img.url);
+                zip.file(filename, blob);
+              } else {
+                const res = await fetch(img.url);
+                const buf = await res.arrayBuffer();
+                zip.file(filename, buf);
+              }
             }),
           );
           const blob = await zip.generateAsync({ type: "blob" });
