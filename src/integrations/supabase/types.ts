@@ -224,6 +224,30 @@ export type Database = {
         }
         Relationships: []
       }
+      oauth_states: {
+        Row: {
+          channel: string
+          created_at: string
+          expires_at: string
+          state: string
+          user_id: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          expires_at?: string
+          state: string
+          user_id: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          expires_at?: string
+          state?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount_inr: number
@@ -336,6 +360,51 @@ export type Database = {
           },
         ]
       }
+      social_connections: {
+        Row: {
+          access_token_ciphertext: string
+          account_id: string
+          account_name: string | null
+          channel: string
+          created_at: string
+          id: string
+          last_refreshed_at: string | null
+          meta: Json
+          needs_reconnect: boolean
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token_ciphertext: string
+          account_id: string
+          account_name?: string | null
+          channel: string
+          created_at?: string
+          id?: string
+          last_refreshed_at?: string | null
+          meta?: Json
+          needs_reconnect?: boolean
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token_ciphertext?: string
+          account_id?: string
+          account_name?: string | null
+          channel?: string
+          created_at?: string
+          id?: string
+          last_refreshed_at?: string | null
+          meta?: Json
+          needs_reconnect?: boolean
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_credits: {
         Row: {
           pack_credits: number
@@ -382,7 +451,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      my_social_connections: {
+        Row: {
+          account_id: string | null
+          account_name: string | null
+          channel: string | null
+          created_at: string | null
+          id: string | null
+          last_refreshed_at: string | null
+          needs_reconnect: boolean | null
+          token_expires_at: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          account_name?: string | null
+          channel?: string | null
+          created_at?: string | null
+          id?: string | null
+          last_refreshed_at?: string | null
+          needs_reconnect?: boolean | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          account_name?: string | null
+          channel?: string | null
+          created_at?: string | null
+          id?: string | null
+          last_refreshed_at?: string | null
+          needs_reconnect?: boolean | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       consume_credit: {
