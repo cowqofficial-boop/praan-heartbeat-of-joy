@@ -224,10 +224,20 @@ async function generateOneImage(refB64: string, refMime: string, prompt: string,
 
 export const generateImages = createServerFn({ method: "POST" })
   .inputValidator(
-    (d: { browserId: string; imageUrl: string; productName: string; category: string }) => d,
+    (d: { browserId: string; userId?: string | null; imageUrl: string; productName: string; category: string }) => d,
   )
   .handler(async ({ data }) => {
-    await checkAndIncrementLimit(data.browserId);
+    if (data.userId) {
+      const sb = await admin();
+      const { data: ok, error } = await sb.rpc("consume_credit", {
+        _user_id: data.userId,
+        _amount: 1,
+      });
+      if (error) throw new Error(`credit check failed: ${error.message}`);
+      if (!ok) throw new Error("NO_CREDITS");
+    } else {
+      await checkAndIncrementLimit(data.browserId);
+    }
     const { b64: refB64, mime: refMime } = await fetchAsBase64(data.imageUrl);
     const contextLine = `Product: ${data.productName}. Category: ${data.category}.`;
 
