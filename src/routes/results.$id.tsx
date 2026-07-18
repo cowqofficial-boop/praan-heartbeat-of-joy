@@ -111,6 +111,7 @@ function Results() {
         originalUrl={original}
         onDone={() => refetch()}
         hasAccount={!!user}
+        watermark={watermark}
       />
 
 
