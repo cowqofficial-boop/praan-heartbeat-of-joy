@@ -24,7 +24,7 @@ export function BeforeAfterSlider({
   return (
     <div
       ref={ref}
-      className="relative w-full overflow-hidden rounded-[12px] bg-surface select-none touch-none"
+      className="relative w-full overflow-hidden rounded-[12px] bg-surface select-none touch-none cursor-ew-resize"
       style={{ aspectRatio: aspect }}
       onPointerDown={(e) => {
         dragging.current = true;
@@ -51,37 +51,31 @@ export function BeforeAfterSlider({
         <img
           src={before}
           alt="Your photo"
-          className="absolute inset-0 h-full w-full object-cover"
-          style={{ width: `${(100 / pos) * 100}%`, maxWidth: "none" }}
+          className="absolute inset-y-0 left-0 h-full object-cover"
+          style={{ width: `${(ref.current?.clientWidth ?? 0)}px`, maxWidth: "none" }}
           draggable={false}
         />
       </div>
 
-      {/* labels */}
-      <span className="absolute left-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-white">
+      <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-white">
         Before
       </span>
-      <span className="absolute right-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-white">
+      <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-white">
         After
       </span>
 
-      {/* handle */}
       <div
-        className="absolute inset-y-0 flex items-center justify-center"
+        className="pointer-events-none absolute inset-y-0"
         style={{ left: `calc(${pos}% - 1.5px)`, width: "3px", background: "#F5A623" }}
+      />
+      <div
+        className="pointer-events-none absolute top-1/2 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-highlight text-white shadow-[0_4px_14px_rgba(0,0,0,0.25)]"
+        style={{ left: `${pos}%` }}
       >
-        <div
-          className="grid h-10 w-10 place-items-center rounded-full bg-highlight text-white shadow-lg"
-          style={{ transform: "translateX(-50%)", marginLeft: "1.5px" }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-            <polyline points="9 18 3 12 9 6" style={{ display: "none" }} />
-          </svg>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: "translateX(-50%)", position: "absolute", marginLeft: "1.5px" }}>
-            <polyline points="9 6 15 12 9 18" />
-          </svg>
-        </div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="15 18 9 12 15 6" />
+          <polyline points="9 6 15 12 9 18" transform="translate(6 0)" />
+        </svg>
       </div>
     </div>
   );
