@@ -37,7 +37,8 @@ export async function upsertConnection(input: {
   };
   const { error } = await supabaseAdmin
     .from("social_connections")
-    .upsert(row, { onConflict: "user_id,channel" });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .upsert(row as any, { onConflict: "user_id,channel" });
   if (error) throw new Error(error.message);
 }
 
