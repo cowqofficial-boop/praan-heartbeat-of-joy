@@ -11,6 +11,9 @@ import {
   markPosted,
   type PostType,
 } from "@/lib/calendar.functions";
+import { getMyCredits } from "@/lib/billing.functions";
+import { CreditBadge } from "@/components/CreditBadge";
+import { Lock } from "lucide-react";
 
 type Post = Awaited<ReturnType<typeof listPlanPosts>>[number];
 
