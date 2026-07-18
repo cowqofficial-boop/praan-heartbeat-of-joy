@@ -89,6 +89,13 @@ function LibraryPage() {
             <CalendarDays className="h-5 w-5" />
           </Link>
           <Link
+            to="/connect"
+            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
+            aria-label="Connect channels"
+          >
+            <Link2 className="h-5 w-5" />
+          </Link>
+          <Link
             to="/billing"
             className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
             aria-label="Billing"
