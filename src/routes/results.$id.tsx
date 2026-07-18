@@ -182,7 +182,7 @@ function Results() {
           Start another product
         </button>
       </div>
-    </div>
+    </main>
   );
 }
 
