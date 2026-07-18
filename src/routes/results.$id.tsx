@@ -62,6 +62,13 @@ function Results() {
     queryKey: ["gen", id],
     queryFn: () => getGeneration({ data: { id } }),
   });
+  const { data: credits } = useQuery({
+    queryKey: ["my-credits"],
+    queryFn: () => getMyCredits(),
+    enabled: !!user,
+    staleTime: 30_000,
+  });
+  const watermark = !user || !credits?.features?.no_watermark;
 
   if (isLoading) {
     return (
