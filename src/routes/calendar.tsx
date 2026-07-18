@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Calendar as CalendarIcon, Check, Copy, Download, Loader2, RefreshCw, Sparkles, X } from "lucide-react";
+import { PostThisButton } from "@/components/PostThisButton";
 import { supabase } from "@/integrations/supabase/client";
 import {
   POST_TYPE_LABELS,
@@ -468,50 +469,62 @@ function PostSheet({
               <p className="mt-3 text-[12px] leading-relaxed text-muted">{post.hashtags}</p>
             )}
 
-            <div className="mt-5 grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={handleCopy}
-                disabled={!post.caption}
-                className="flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-white text-[14px] font-medium text-ink disabled:opacity-50"
-              >
-                {copied ? <Check className="h-4 w-4 text-[#2f8f3d]" /> : <Copy className="h-4 w-4" />}
-                {copied ? "Copied" : "Copy caption"}
-              </button>
-              <button
-                type="button"
-                onClick={handleDownload}
-                disabled={!post.image_url}
-                className="flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-white text-[14px] font-medium text-ink disabled:opacity-50"
-              >
-                <Download className="h-4 w-4" />
-                Download image
-              </button>
-              <button
-                type="button"
-                onClick={() => regen.mutate()}
-                disabled={regen.isPending}
-                className="flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-white text-[14px] font-medium text-ink disabled:opacity-50"
-              >
-                {regen.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4" />
-                )}
-                Regenerate
-              </button>
-              <button
-                type="button"
-                onClick={() => toggle.mutate()}
-                className={`flex h-11 items-center justify-center gap-2 rounded-[10px] text-[14px] font-medium ${
-                  post.posted
-                    ? "bg-[#e8f6ea] text-[#2f8f3d]"
-                    : "bg-primary text-primary-foreground"
-                }`}
-              >
-                <Check className="h-4 w-4" />
-                {post.posted ? "Posted" : "Mark as posted"}
-              </button>
+            <div className="mt-5 flex flex-col gap-3">
+              <PostThisButton
+                imageUrl={post.image_url ?? null}
+                caption={[post.caption ?? "", post.hashtags ?? ""].filter(Boolean).join("\n\n")}
+                productName={post.product_name ?? undefined}
+                filenameHint={`${post.post_date}-${post.post_type}`}
+                onPosted={() => {
+                  if (!post.posted) toggle.mutate();
+                }}
+              />
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  disabled={!post.caption}
+                  className="flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-white text-[14px] font-medium text-ink disabled:opacity-50"
+                >
+                  {copied ? <Check className="h-4 w-4 text-[#2f8f3d]" /> : <Copy className="h-4 w-4" />}
+                  {copied ? "Copied" : "Copy caption"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownload}
+                  disabled={!post.image_url}
+                  className="flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-white text-[14px] font-medium text-ink disabled:opacity-50"
+                >
+                  <Download className="h-4 w-4" />
+                  Download image
+                </button>
+                <button
+                  type="button"
+                  onClick={() => regen.mutate()}
+                  disabled={regen.isPending}
+                  className="flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-white text-[14px] font-medium text-ink disabled:opacity-50"
+                >
+                  {regen.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4" />
+                  )}
+                  Regenerate
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggle.mutate()}
+                  className={`flex h-11 items-center justify-center gap-2 rounded-[10px] text-[14px] font-medium ${
+                    post.posted
+                      ? "bg-[#e8f6ea] text-[#2f8f3d]"
+                      : "border border-[color:var(--color-border)] bg-white text-ink"
+                  }`}
+                >
+                  <Check className="h-4 w-4" />
+                  {post.posted ? "Posted" : "Mark as posted"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
