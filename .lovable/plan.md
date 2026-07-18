@@ -1,84 +1,107 @@
+# Razorpay Payments & Credit System
 
-# PRAAN — plan
+## Overview
 
-A mobile-first web app for Indian small sellers. Upload one product photo, get studio photos, sales copy, and a Shopify CSV. Four screens, no login, no payment.
+Add a full credit + subscription system to PRAAN using Razorpay. Free tier gains a watermark, paid tiers remove it and unlock features (calendar for Growth+).
 
-## Backend (Lovable Cloud + Lovable AI Gateway)
+## Database (new migration)
 
-Enable Lovable Cloud. All AI calls go through the built-in gateway — no external keys.
+**`plans` (seed table)** — static catalog of plans/packs
+- `id` (text pk: `free`, `starter_m`, `starter_y`, `growth_m`, `growth_y`, `pro_m`, `pro_y`, `pack_10`, `pack_25`, `pack_60`)
+- `kind` (`subscription` | `pack` | `free`), `name`, `credits`, `price_inr`, `interval` (`month` | `year` | null), `features` jsonb
 
-Tables:
-- `generations` — id, created_at, browser_id (client UUID in localStorage), original_image_url, product_name, price, detail, category, generated_images (jsonb: [{url, kind, ratio}]), copy (jsonb: title, description, bullets, tags, instagram, whatsapp, festival), csv_url, feedback_rating (int), feedback_text (text).
-- `daily_usage` — browser_id, date, count. Unique on (browser_id, date). Used for the 5/day rate limit.
+**`user_credits`**
+- `user_id` pk, `plan_id` (current active plan), `subscription_credits` (resets on renewal), `pack_credits` (never expire), `period_start`, `period_end`, `razorpay_subscription_id`, `updated_at`
+- View helper: `total_credits = subscription_credits + pack_credits`
 
-Storage bucket `praan` (public read) for uploaded originals, generated images, and CSVs.
+**`payments`** (invoice history)
+- `id`, `user_id`, `razorpay_payment_id`, `razorpay_order_id`, `razorpay_subscription_id` (nullable), `plan_id`, `amount_inr`, `credits_granted`, `status` (`created`/`paid`/`failed`), `invoice_url`, `created_at`
 
-RLS: public insert/select via anon (no auth in v1). Grants per public-schema rules.
+All tables: RLS scoped to `auth.uid()`, GRANTs for authenticated + service_role.
 
-Server functions (TanStack `createServerFn`):
-1. `identifyProduct({ imageUrl })` — vision call to `google/gemini-3-pro` returning structured JSON `{ name, category, material, color, features[3] }`. Uses `Output.object` with a small strict-free schema.
-2. `generateListing({ generationId, name, price, detail })` — enforces daily limit (increments `daily_usage`, throws friendly limit error if >5), then:
-   - Runs 4 parallel image edits with `google/gemini-3-pro-image` using uploaded photo as input reference: (1) white bg e-com, (2) soft studio neutral, (3) lifestyle scene by category, (4) styled flat-lay. For each, produce 1:1 and 9:16 = 8 total. Uploads results to storage.
-   - Calls `openai/gpt-5.5` for copy (Indian e-com copywriter system prompt), returning structured JSON per the brief's constraints (title <200, 5 bullets, 15 tags, IG + hashtags, WA <300, festival line).
-   - Builds Shopify CSV with the exact column set, uploads as file.
-   - Writes row to `generations`, returns full payload.
-3. `submitFeedback({ generationId, rating, text })` — updates row.
+## Backend
 
-Progress streaming: `generateListing` isn't streamed. Instead the client shows the 3 sequential steps by calling three thin server fns in order — `identifyProduct` already ran on screen 2, so screen 3 calls: `startGeneration` (marks studying done immediately), `generateImages`, `generateCopy` — each resolves as its step completes, driving the checkmark UI. CSV assembly piggybacks on `generateCopy`.
+**Secrets**: `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` (via `add_secret`).
 
-Rate limit is checked at the top of `generateImages` so users hit the cap before spending image credits when possible.
+**Server functions** (`src/lib/billing.functions.ts`):
+- `getMyCredits()` — balance + plan for header/UI
+- `getMyPayments()` — invoice history
+- `createOrder({ planId })` — creates Razorpay order (one-time packs) or subscription; returns checkout params
+- `verifyPayment({ ... })` — verifies signature client-side callback (belt-and-suspenders)
+
+**Webhook route** `src/routes/api/public/razorpay-webhook.ts`:
+- Verifies HMAC signature
+- Handles `payment.captured`, `subscription.charged`, `subscription.cancelled`
+- Grants credits atomically (packs → `pack_credits`, subs → resets `subscription_credits` and updates `period_end`)
+- Records payment row + invoice URL
+
+**Credit consumption**:
+- Wrap existing `generateOnePost`, `generateCopyAndSave`, and the initial product-generation entrypoint with a `consumeCredit(userId)` helper that deducts 1 credit atomically. Prefers `subscription_credits` first, then `pack_credits`.
+- Anonymous path unchanged (browser_id, 1 free).
+- Signed-in without paid plan: 3 free lifetime credits (tracked via `subscription_credits` on `free` plan seeded at signup).
+
+**Watermark**:
+- New `applyWatermark(imageBase64)` helper server-side using canvas/sharp-free approach — actually simpler: pass a `watermark: true` flag into image generation prompt so Gemini adds "Made with PRAAN" text corner. Fallback: overlay via server-side canvas using `@napi-rs/canvas` if worker supports; else client-side draw at display/download time.
+- Decision: **client-side overlay at download time** using canvas — reliable on Cloudflare Worker runtime. Display shows watermark badge overlay in `<img>` container for free users too.
 
 ## Frontend
 
-Routes (TanStack):
-- `/` — Screen 1 Upload
-- `/confirm` — Screen 2 (holds uploaded file + AI-identified fields in a Zustand store; if state missing, redirect to `/`)
-- `/generating` — Screen 3
-- `/results/$id` — Screen 4 (loads from `generations` by id)
+**Pricing page** `/pricing`:
+- Toggle: Monthly / **Annual (2 months free)** — annual pre-selected
+- Three subscription cards (Starter/Growth/Pro) with feature list
+- "One-time packs" section below (10/25/60)
+- CTA per card → Razorpay Checkout modal (loads `checkout.razorpay.com/v1/checkout.js`)
 
-Global:
-- `src/styles.css` sets the design tokens (colors, radius 12, Bricolage Grotesque + Inter loaded via `<link>` in `__root.tsx` head).
-- Max-width 480px centered wrapper.
-- Reusable `PrimaryButton` fixed to viewport bottom, 56px tall, full-width minus 20px margins.
-- `CopyButton` — one-tap copy with "Copied" confirmation.
-- Focus rings visible; body 16px, labels 15px.
+**Header credit badge** (added to library, calendar, results):
+- `<CreditBadge />` component reads `getMyCredits` via useQuery
+- Shows `⚡ 12 left` — click → `/pricing`
 
-Screen 1: single large tap target (label + hidden file input, `capture="environment"` for camera). One subtitle. Nothing else.
+**Out-of-credits modal**:
+- Friendly banner "You've used your products for this month" + Upgrade button
+- Replaces generation attempt when balance is 0
 
-Screen 2: photo preview on top, three inputs (Name, Price ₹, One detail). Primary button "Create my listing" → navigates to `/generating` and kicks off the three-step pipeline.
+**Billing page** `/billing`:
+- Current plan card (name, renewal date, credits used/remaining this period)
+- Cancel subscription button (calls Razorpay API)
+- Invoice history table with download links
 
-Screen 3: three rows with a circle that fills as each step resolves. Copy exactly: "Studying your product", "Shooting studio photos", "Writing your listing". On success, navigate to `/results/{id}`. On failure, show a specific message ("Photos didn't come through" / "Copy didn't come through") + "Try again" button that retries only the failed step.
+**Calendar gating**:
+- `/calendar` checks plan; if `free`/`starter_*`/`pack_*` → shows locked state: "The Calendar plans 30 days of posts for you. Available on Growth and Pro." + Upgrade button
+- Growth/Pro → normal calendar
 
-Screen 4 sections in order:
-1. Photos — horizontal snap-scroll carousel of the 8 images, each with a download button. "Make more photos" button re-runs image step (counts against daily limit).
-2. Before/after slider — signature element. Custom pointer/touch draggable divider. Original photo on the left half, first white-bg studio image on the right, marigold (#F5A623) 3px vertical handle with a circular grip. Below it: "Share this" button (uses `navigator.share` with the studio image + copy title).
-3. Marketplace listing — title, description, bullets, tags. Each block has its own copy button.
-4. Social — IG caption + hashtags, WhatsApp message, festival line. Each with copy button.
-5. Download — "Download all photos" (zips client-side via `jszip`) + "Download catalog file (CSV)".
-Bottom: thumbs up/down + optional text field → `submitFeedback`.
+**Brand kit gating**:
+- Already accessible; keep as-is but note in pricing that Growth+ formally includes it (Starter can still access but this matches spec — actually spec says Starter doesn't list brand kit; keep it available since it's already built and useful. Only calendar is explicitly locked).
 
-Rate-limit UI: when server throws the limit error, show the exact friendly line on the current screen and disable the primary action.
+**Watermark**:
+- Free plan images show a small "Made with PRAAN" tag in bottom-right corner via CSS overlay in display
+- On download (ZIP or single image), draw watermark onto canvas before saving
 
-## PWA
+## Files
 
-`public/manifest.webmanifest` with name PRAAN, short_name PRAAN, theme #E0402F, background #FFFFFF, display standalone, icons (192, 512, maskable). Head tags in `__root.tsx`. No service worker (manifest-only per PWA skill).
+**New**:
+- `supabase/migrations/*_billing.sql`
+- `src/lib/billing.functions.ts`
+- `src/lib/razorpay.server.ts` (SDK wrapper)
+- `src/routes/api/public/razorpay-webhook.ts`
+- `src/routes/pricing.tsx`
+- `src/routes/billing.tsx`
+- `src/components/CreditBadge.tsx`
+- `src/components/UpgradeModal.tsx`
+- `src/lib/watermark.ts` (client canvas helper)
 
-## Files to add/change
+**Modified**:
+- `src/lib/praan.functions.ts` — consume credit, tag images with watermark flag
+- `src/lib/calendar.functions.ts` — consume credit per post
+- `src/routes/index.tsx`, `library.tsx`, `calendar.tsx`, `results.$id.tsx` — add CreditBadge, watermark overlay
+- `src/routes/calendar.tsx` — plan gate
+- `src/routes/auth/callback.tsx` — seed `user_credits` row with 3 free credits on first signup
 
-- `src/styles.css` — tokens + font imports via link in root head.
-- `src/routes/__root.tsx` — head metadata (title "PRAAN — one photo, everything you need to sell it", description, manifest, theme-color, font `<link>`s).
-- `src/routes/index.tsx` — Screen 1.
-- `src/routes/confirm.tsx` — Screen 2.
-- `src/routes/generating.tsx` — Screen 3.
-- `src/routes/results.$id.tsx` — Screen 4.
-- `src/components/` — `PrimaryButton`, `CopyButton`, `BeforeAfterSlider`, `ProgressSteps`, `PhotoCarousel`.
-- `src/lib/praan.functions.ts` — server functions listed above.
-- `src/lib/praan-store.ts` — Zustand store for the upload → confirm → generating handoff.
-- `src/lib/browser-id.ts` — localStorage UUID.
-- `src/lib/csv.ts` — Shopify CSV builder.
-- Migration for `generations`, `daily_usage`, storage bucket, grants, RLS.
-- `public/manifest.webmanifest` + icons (generated).
+## Pricing math (verification)
 
-## Out of scope for v1
+- Annual = monthly × 10 (2 months free): Starter ₹9,990/yr, Growth ₹29,990/yr, Pro ₹69,990/yr
 
-Auth, payments, admin dashboard, service worker/offline, multi-language.
+## Open questions
+
+1. **Watermark placement**: I'll do bottom-right corner, semi-transparent white text on dark pill background — matches brand.
+2. **Credit cost per action**: 1 credit = 1 product generation (initial 4-photo + copy + CSV bundle). Calendar posts also cost 1 credit each. Confirm?
+3. **Razorpay account**: You'll need to create Razorpay Plans (for subscriptions) in the Razorpay dashboard and paste the plan IDs, OR I create them via API on first use. I'll do API-on-first-use to avoid manual setup.
