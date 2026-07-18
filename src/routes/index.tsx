@@ -103,9 +103,11 @@ function Upload() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-5">
+    <main className="flex min-h-screen flex-col items-center justify-center px-5">
       <div className="w-full max-w-sm">
-        <h1 className="font-display text-[44px] leading-[1.05] text-ink">PRAAN</h1>
+        <h1 className="font-display text-[44px] leading-[1.05] text-ink">
+          PRAAN — AI Product Photos &amp; Listings
+        </h1>
         <p className="mt-3 text-[15px] text-muted">
           One photo. Everything you need to sell it.
         </p>
@@ -140,6 +142,6 @@ function Upload() {
           if (f) handleFile(f);
         }}
       />
-    </div>
+    </main>
   );
 }
