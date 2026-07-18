@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Download, Share2, ThumbsDown, ThumbsUp } from "lucide-react";
+import { Download, Lock, Share2, ThumbsDown, ThumbsUp } from "lucide-react";
 import JSZip from "jszip";
 import { generateImages, getGeneration, submitFeedback } from "@/lib/praan.functions";
 import { getBrowserId } from "@/lib/browser-id";
 import { CopyButton } from "@/components/CopyButton";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
+import { useAuth } from "@/lib/use-auth";
 
 export const Route = createFileRoute("/results/$id")({
   head: ({ params }) => ({
@@ -54,6 +55,7 @@ type Copy = {
 function Results() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["gen", id],
     queryFn: () => getGeneration({ data: { id } }),
@@ -99,6 +101,7 @@ function Results() {
         category={data.category as string}
         originalUrl={original}
         onDone={() => refetch()}
+        hasAccount={!!user}
       />
 
 
@@ -158,17 +161,25 @@ function Results() {
 
       {/* 5. Download */}
       <Section title="Download">
-        <div className="flex flex-col gap-3">
-          <DownloadAllButton images={images} name={(data.product_name as string) || "praan"} />
-          <a
-            href={data.csv_url as string}
-            download
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-[12px] border border-[color:var(--color-border)] bg-white text-[15px] font-semibold text-ink"
-          >
-            <Download className="h-4 w-4" />
-            Download catalog file (CSV)
-          </a>
-        </div>
+        {user ? (
+          <div className="flex flex-col gap-3">
+            <DownloadAllButton images={images} name={(data.product_name as string) || "praan"} />
+            <a
+              href={data.csv_url as string}
+              download
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-[12px] border border-[color:var(--color-border)] bg-white text-[15px] font-semibold text-ink"
+            >
+              <Download className="h-4 w-4" />
+              Download catalog file (CSV)
+            </a>
+          </div>
+        ) : (
+          <SignUpGate
+            title="Sign up to save & download"
+            body="Free forever. Keep this product in your library and download all photos + the Shopify CSV."
+            next={`/results/${id}`}
+          />
+        )}
       </Section>
 
       {/* Feedback */}
@@ -176,13 +187,39 @@ function Results() {
 
       <div className="pt-6 text-center">
         <button
-          onClick={() => navigate({ to: "/" })}
+          onClick={() => navigate({ to: user ? "/library" : "/" })}
           className="text-[14px] font-medium text-muted underline"
         >
-          Start another product
+          {user ? "Back to your library" : "Start another product"}
         </button>
       </div>
     </main>
+  );
+}
+
+function SignUpGate({ title, body, next }: { title: string; body: string; next: string }) {
+  return (
+    <div className="rounded-[12px] border border-[color:var(--color-border)] bg-surface p-5 text-center">
+      <div className="mx-auto grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary">
+        <Lock className="h-4 w-4" />
+      </div>
+      <p className="mt-3 text-[16px] font-semibold text-ink">{title}</p>
+      <p className="mt-1 text-[14px] text-muted">{body}</p>
+      <Link
+        to="/auth"
+        search={{ mode: "signup", next }}
+        className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-[12px] bg-primary px-5 text-[15px] font-semibold text-primary-foreground"
+      >
+        Create free account
+      </Link>
+      <Link
+        to="/auth"
+        search={{ mode: "signin", next }}
+        className="mt-2 inline-block text-[13px] font-medium text-muted underline"
+      >
+        Already have one? Sign in
+      </Link>
+    </div>
   );
 }
 
@@ -228,6 +265,7 @@ function PhotosSection({
   category,
   originalUrl,
   onDone,
+  hasAccount,
 }: {
   images: GenImage[];
   id: string;
@@ -235,6 +273,7 @@ function PhotosSection({
   category: string;
   originalUrl: string;
   onDone: () => void;
+  hasAccount: boolean;
 }) {
   const [ratio, setRatio] = useState<"1:1" | "9:16">("1:1");
   const filtered = images.filter((i) => i.ratio === ratio);
@@ -269,29 +308,33 @@ function PhotosSection({
               alt={`${img.kind} ${img.ratio}`}
               className="h-full w-full object-cover"
             />
-            <a
-              href={img.url}
-              download={`praan-${img.kind}-${img.ratio.replace(":", "x")}.png`}
-              target="_blank"
-              rel="noreferrer"
-              className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-ink shadow-md"
-              aria-label="Download photo"
-            >
-              <Download className="h-4 w-4" />
-            </a>
+            {hasAccount && (
+              <a
+                href={img.url}
+                download={`praan-${img.kind}-${img.ratio.replace(":", "x")}.png`}
+                target="_blank"
+                rel="noreferrer"
+                className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-ink shadow-md"
+                aria-label="Download photo"
+              >
+                <Download className="h-4 w-4" />
+              </a>
+            )}
           </div>
         ))}
       </div>
-      <MakeMoreButton
-        id={id}
-        productName={productName}
-        category={category}
-        originalUrl={originalUrl}
-        onDone={onDone}
-        onLimit={() =>
-          alert("You've used today's 5 free products. Come back tomorrow.")
-        }
-      />
+      {hasAccount && (
+        <MakeMoreButton
+          id={id}
+          productName={productName}
+          category={category}
+          originalUrl={originalUrl}
+          onDone={onDone}
+          onLimit={() =>
+            alert("You've used today's 5 free products. Come back tomorrow.")
+          }
+        />
+      )}
     </Section>
   );
 }

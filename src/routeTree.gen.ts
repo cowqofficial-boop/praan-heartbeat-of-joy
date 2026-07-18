@@ -10,15 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as LibraryRouteImport } from './routes/library'
 import { Route as GeneratingRouteImport } from './routes/generating'
 import { Route as ConfirmRouteImport } from './routes/confirm'
+import { Route as BrandKitRouteImport } from './routes/brand-kit'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResultsIdRouteImport } from './routes/results.$id'
 import { Route as BlogFlatLayGuideRouteImport } from './routes/blog.flat-lay-guide'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GeneratingRoute = GeneratingRouteImport.update({
@@ -29,6 +38,16 @@ const GeneratingRoute = GeneratingRouteImport.update({
 const ConfirmRoute = ConfirmRouteImport.update({
   id: '/confirm',
   path: '/confirm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrandKitRoute = BrandKitRouteImport.update({
+  id: '/brand-kit',
+  path: '/brand-kit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -46,29 +65,46 @@ const BlogFlatLayGuideRoute = BlogFlatLayGuideRouteImport.update({
   path: '/blog/flat-lay-guide',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AuthRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/brand-kit': typeof BrandKitRoute
   '/confirm': typeof ConfirmRoute
   '/generating': typeof GeneratingRoute
+  '/library': typeof LibraryRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/results/$id': typeof ResultsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/brand-kit': typeof BrandKitRoute
   '/confirm': typeof ConfirmRoute
   '/generating': typeof GeneratingRoute
+  '/library': typeof LibraryRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/results/$id': typeof ResultsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/brand-kit': typeof BrandKitRoute
   '/confirm': typeof ConfirmRoute
   '/generating': typeof GeneratingRoute
+  '/library': typeof LibraryRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/results/$id': typeof ResultsIdRoute
 }
@@ -76,33 +112,48 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
+    | '/brand-kit'
     | '/confirm'
     | '/generating'
+    | '/library'
     | '/sitemap.xml'
+    | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/results/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
+    | '/brand-kit'
     | '/confirm'
     | '/generating'
+    | '/library'
     | '/sitemap.xml'
+    | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/results/$id'
   id:
     | '__root__'
     | '/'
+    | '/auth'
+    | '/brand-kit'
     | '/confirm'
     | '/generating'
+    | '/library'
     | '/sitemap.xml'
+    | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/results/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRouteWithChildren
+  BrandKitRoute: typeof BrandKitRoute
   ConfirmRoute: typeof ConfirmRoute
   GeneratingRoute: typeof GeneratingRoute
+  LibraryRoute: typeof LibraryRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   BlogFlatLayGuideRoute: typeof BlogFlatLayGuideRoute
   ResultsIdRoute: typeof ResultsIdRoute
@@ -117,6 +168,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/generating': {
       id: '/generating'
       path: '/generating'
@@ -129,6 +187,20 @@ declare module '@tanstack/react-router' {
       path: '/confirm'
       fullPath: '/confirm'
       preLoaderRoute: typeof ConfirmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/brand-kit': {
+      id: '/brand-kit'
+      path: '/brand-kit'
+      fullPath: '/brand-kit'
+      preLoaderRoute: typeof BrandKitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -152,13 +224,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogFlatLayGuideRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof AuthRoute
+    }
   }
 }
 
+interface AuthRouteChildren {
+  AuthCallbackRoute: typeof AuthCallbackRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthCallbackRoute: AuthCallbackRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRouteWithChildren,
+  BrandKitRoute: BrandKitRoute,
   ConfirmRoute: ConfirmRoute,
   GeneratingRoute: GeneratingRoute,
+  LibraryRoute: LibraryRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   BlogFlatLayGuideRoute: BlogFlatLayGuideRoute,
   ResultsIdRoute: ResultsIdRoute,

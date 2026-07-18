@@ -1,9 +1,10 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
-import { Camera } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
+import { Camera, LibraryBig } from "lucide-react";
 import { getBrowserId } from "@/lib/browser-id";
 import { usePraanStore } from "@/lib/praan-store";
 import { identifyProduct, uploadOriginal } from "@/lib/praan.functions";
+import { hasUsedFreeGeneration, useAuth } from "@/lib/use-auth";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -83,6 +84,15 @@ function Upload() {
   const [error, setError] = useState<string | null>(null);
   const setUpload = usePraanStore((s) => s.setUpload);
   const navigate = useNavigate();
+  const { user, ready } = useAuth();
+
+  // Anonymous users get exactly one free product. Second attempt → sign up.
+  useEffect(() => {
+    if (!ready) return;
+    if (!user && hasUsedFreeGeneration()) {
+      navigate({ to: "/auth", search: { mode: "signup", next: "/" }, replace: true });
+    }
+  }, [ready, user, navigate]);
 
   async function handleFile(file: File) {
     setError(null);
@@ -104,6 +114,16 @@ function Upload() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-5">
+      {user && (
+        <Link
+          to="/library"
+          className="absolute left-5 top-5 flex items-center gap-1.5 text-[14px] font-medium text-muted"
+        >
+          <LibraryBig className="h-4 w-4" />
+          Your library
+        </Link>
+      )}
+
       <div className="w-full max-w-sm">
         <h1 className="font-display text-[44px] leading-[1.05] text-ink">
           PRAAN — AI Product Photos &amp; Listings
@@ -128,6 +148,15 @@ function Upload() {
 
         {error && (
           <p className="mt-4 text-center text-[14px] text-primary">{error}</p>
+        )}
+
+        {!user && (
+          <p className="mt-6 text-center text-[13px] text-muted">
+            First product is free — no account needed.{" "}
+            <Link to="/auth" search={{ mode: "signin" }} className="font-medium text-ink underline">
+              Sign in
+            </Link>
+          </p>
         )}
       </div>
 

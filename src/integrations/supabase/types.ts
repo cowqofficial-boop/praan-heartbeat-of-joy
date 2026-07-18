@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      brand_kits: {
+        Row: {
+          accent_color: string
+          business_name: string
+          created_at: string
+          logo_url: string | null
+          primary_color: string
+          sells_to: string
+          sells_what: string
+          tone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accent_color?: string
+          business_name?: string
+          created_at?: string
+          logo_url?: string | null
+          primary_color?: string
+          sells_to?: string
+          sells_what?: string
+          tone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accent_color?: string
+          business_name?: string
+          created_at?: string
+          logo_url?: string | null
+          primary_color?: string
+          sells_to?: string
+          sells_what?: string
+          tone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_usage: {
         Row: {
           browser_id: string
@@ -47,6 +86,7 @@ export type Database = {
           original_image_url: string | null
           price: number | null
           product_name: string | null
+          user_id: string | null
         }
         Insert: {
           browser_id: string
@@ -62,6 +102,7 @@ export type Database = {
           original_image_url?: string | null
           price?: number | null
           product_name?: string | null
+          user_id?: string | null
         }
         Update: {
           browser_id?: string
@@ -77,6 +118,7 @@ export type Database = {
           original_image_url?: string | null
           price?: number | null
           product_name?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
