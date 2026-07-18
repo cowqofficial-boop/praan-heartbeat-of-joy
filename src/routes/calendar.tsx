@@ -157,40 +157,112 @@ function CalendarPage() {
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <h1 className="font-display text-[22px] leading-tight text-ink">Content calendar</h1>
-        <div className="h-10 w-10" />
+        <CreditBadge />
       </header>
 
-      {!planId ? (
-        <EmptyState onCreate={handleCreate} creating={creating} error={createError} />
-      ) : (
-        <>
-          {totalCount > 0 && readyCount < totalCount && (
-            <div className="mt-4 flex items-center gap-3 rounded-[12px] bg-surface px-4 py-3">
-              <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              <p className="flex-1 text-[13px] text-ink">
-                Building your month… <span className="text-muted">{readyCount}/{totalCount} ready</span>
-              </p>
-            </div>
-          )}
-
-          {todayPost && (
-            <section className="mt-5">
-              <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">Today</p>
-              <TodayCard post={todayPost} onOpen={() => setOpenPostId(todayPost.id)} />
-            </section>
-          )}
-
-          <section className="mt-6">
-            <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">This month</p>
-            <MonthGrid posts={posts} onOpen={setOpenPostId} />
-          </section>
-        </>
-      )}
+      <CalendarBody
+        planId={planId}
+        posts={posts}
+        todayPost={todayPost}
+        readyCount={readyCount}
+        totalCount={totalCount}
+        onCreate={handleCreate}
+        creating={creating}
+        createError={createError}
+        onOpen={setOpenPostId}
+      />
 
       {openPost && (
         <PostSheet post={openPost} planId={planId!} onClose={() => setOpenPostId(null)} />
       )}
     </main>
+  );
+}
+
+function CalendarBody({
+  planId,
+  posts,
+  todayPost,
+  readyCount,
+  totalCount,
+  onCreate,
+  creating,
+  createError,
+  onOpen,
+}: {
+  planId: string | null;
+  posts: Post[];
+  todayPost: Post | null;
+  readyCount: number;
+  totalCount: number;
+  onCreate: () => void;
+  creating: boolean;
+  createError: string | null;
+  onOpen: (id: string) => void;
+}) {
+  const { data: credits, isLoading } = useQuery({
+    queryKey: ["my-credits"],
+    queryFn: () => getMyCredits(),
+    staleTime: 30_000,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="mt-10 text-center text-[14px] text-muted">Loading…</div>
+    );
+  }
+
+  if (credits && !credits.features.calendar) {
+    return <CalendarLocked planName={credits.plan_name} />;
+  }
+
+  if (!planId) {
+    return <EmptyState onCreate={onCreate} creating={creating} error={createError} />;
+  }
+
+  return (
+    <>
+      {totalCount > 0 && readyCount < totalCount && (
+        <div className="mt-4 flex items-center gap-3 rounded-[12px] bg-surface px-4 py-3">
+          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+          <p className="flex-1 text-[13px] text-ink">
+            Building your month… <span className="text-muted">{readyCount}/{totalCount} ready</span>
+          </p>
+        </div>
+      )}
+
+      {todayPost && (
+        <section className="mt-5">
+          <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">Today</p>
+          <TodayCard post={todayPost} onOpen={() => onOpen(todayPost.id)} />
+        </section>
+      )}
+
+      <section className="mt-6">
+        <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">This month</p>
+        <MonthGrid posts={posts} onOpen={onOpen} />
+      </section>
+    </>
+  );
+}
+
+function CalendarLocked({ planName }: { planName: string }) {
+  return (
+    <div className="mt-10 flex flex-1 flex-col items-center justify-center text-center">
+      <div className="grid h-20 w-20 place-items-center rounded-full bg-surface">
+        <Lock className="h-8 w-8 text-muted" />
+      </div>
+      <h2 className="mt-5 font-display text-[26px] leading-tight text-ink">Calendar is on Growth &amp; Pro.</h2>
+      <p className="mt-2 max-w-xs text-[15px] text-muted">
+        A month of ready-to-post product content — image, caption, hashtags — built from your library. You're on {planName}.
+      </p>
+      <Link
+        to="/pricing"
+        className="mt-8 inline-flex h-14 w-full max-w-xs items-center justify-center gap-2 rounded-[12px] bg-primary text-[16px] font-semibold text-primary-foreground"
+      >
+        See plans
+      </Link>
+    </div>
   );
 }
 
