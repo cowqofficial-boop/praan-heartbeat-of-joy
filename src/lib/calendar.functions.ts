@@ -431,13 +431,14 @@ export const generateOnePost = createServerFn({ method: "POST" })
     const sb = context.supabase;
 
     // atomically pick and lock one pending post (or the requested one)
-    let target: {
+    type Target = {
       id: string;
       post_type: PostType;
       product_name: string | null;
       product_ref_url: string | null;
       post_date: string;
-    } | null = null;
+    };
+    let target: Target | null = null;
 
     if (data.post_id) {
       const { data: row } = await sb
@@ -447,7 +448,7 @@ export const generateOnePost = createServerFn({ method: "POST" })
         .eq("user_id", context.userId)
         .select("id, post_type, product_name, product_ref_url, post_date")
         .single();
-      target = row as typeof target;
+      target = (row ?? null) as Target | null;
     } else {
       // find one pending, then claim it
       const { data: candidates } = await sb
