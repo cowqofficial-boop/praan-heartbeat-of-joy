@@ -79,6 +79,13 @@ function LibraryPage() {
         <h1 className="font-display text-[28px] leading-tight text-ink">Your products</h1>
         <div className="flex items-center gap-1">
           <Link
+            to="/calendar"
+            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
+            aria-label="Content calendar"
+          >
+            <CalendarDays className="h-5 w-5" />
+          </Link>
+          <Link
             to="/brand-kit"
             className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
             aria-label="Brand kit"
