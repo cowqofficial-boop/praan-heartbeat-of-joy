@@ -163,6 +163,9 @@ async function checkAndIncrementLimit(browserId: string): Promise<void> {
 
 // ---------- Image generation ----------
 
+const NO_PEOPLE =
+  "Absolutely no people, no humans, no hands, no fingers, no arms, no models, no figures, no silhouettes — not even blurred in the background.";
+
 const IMAGE_STYLES = [
   {
     kind: "white",
@@ -177,27 +180,27 @@ const IMAGE_STYLES = [
   {
     kind: "lifestyle",
     prompt:
-      "Same product from the input photo, kept faithful. Place it in a natural Indian home/shop lifestyle scene appropriate to its category — warm, everyday, aspirational. Soft daylight, shallow depth of field, no text.",
+      "Same product from the input photo, kept faithful. First determine where this specific product is actually used or kept in real life, then set the scene in exactly that place — e.g. a speaker on a desk or bedside table, a kurta on a wardrobe rail or chair, a spice jar on a kitchen shelf, a cushion on a sofa, a mug on a breakfast table. Never use a generic shop, market stall, bazaar, workshop, or warehouse backdrop unless the product itself is shop equipment. Keep the scene simple: one clear surface, at most two or three small props that genuinely belong with this product. The product remains the clear hero, centred and uncrowded. Soft natural daylight, shallow depth of field, photorealistic, no text.",
   },
   {
     kind: "flatlay",
     prompt:
-      "Same product from the input photo, kept faithful. Styled overhead flat-lay on a textured neutral surface with a few tasteful complementary props. Balanced composition, soft daylight, no text.",
+      "Same product from the input photo, kept faithful. Styled overhead flat-lay on a textured neutral surface with two or three tasteful props that clearly belong with this product's real use. Balanced composition, soft daylight, product centred and clearly the hero, no text.",
   },
 ];
 
 async function generateOneImage(refB64: string, refMime: string, prompt: string, ratio: "1:1" | "9:16") {
   const ratioHint =
     ratio === "1:1"
-      ? "Square 1:1 aspect ratio, 1024x1024."
-      : "Vertical 9:16 aspect ratio, 1024x1820, tall portrait orientation.";
+      ? "Square 1:1 aspect ratio, 1024x1024. The full product must be centred and completely visible with comfortable margin — nothing important cropped."
+      : "Vertical 9:16 aspect ratio, 1024x1820, tall portrait orientation. Product centred, fully visible.";
   const body = {
     model: "google/gemini-2.5-flash-image",
     messages: [
       {
         role: "user",
         content: [
-          { type: "text", text: `${prompt} ${ratioHint}` },
+          { type: "text", text: `${prompt} ${ratioHint} ${NO_PEOPLE}` },
           { type: "image_url", image_url: { url: `data:${refMime};base64,${refB64}` } },
         ],
       },
