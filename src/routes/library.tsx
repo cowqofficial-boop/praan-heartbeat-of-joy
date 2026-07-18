@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, LogOut, Plus, Receipt, Search, Settings2, Trash2, Pencil } from "lucide-react";
+import { CalendarDays, LogOut, Plus, Receipt, Search, Settings2, Trash2, Pencil, Link2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteMyProduct, listMyProducts, renameMyProduct, type LibraryItem } from "@/lib/library.functions";
 import { CreditBadge } from "@/components/CreditBadge";
+import { ReconnectBanner } from "@/components/ReconnectBanner";
 
 export const Route = createFileRoute("/library")({
   head: () => ({
