@@ -280,6 +280,7 @@ function PhotosSection({
   originalUrl,
   onDone,
   hasAccount,
+  watermark,
 }: {
   images: GenImage[];
   id: string;
@@ -288,9 +289,24 @@ function PhotosSection({
   originalUrl: string;
   onDone: () => void;
   hasAccount: boolean;
+  watermark: boolean;
 }) {
   const [ratio, setRatio] = useState<"1:1" | "9:16">("1:1");
   const filtered = images.filter((i) => i.ratio === ratio);
+
+  async function handleDownload(img: GenImage) {
+    try {
+      const src = watermark ? await watermarkImageUrl(img.url) : img.url;
+      const a = document.createElement("a");
+      a.href = src;
+      a.download = `praan-${img.kind}-${img.ratio.replace(":", "x")}.png`;
+      a.click();
+      if (watermark) URL.revokeObjectURL(src);
+    } catch {
+      window.open(img.url, "_blank");
+    }
+  }
+
   return (
     <Section title="Photos">
       <div className="inline-flex self-start rounded-full border border-[color:var(--color-border)] bg-white p-1">
@@ -322,17 +338,20 @@ function PhotosSection({
               alt={`${img.kind} ${img.ratio}`}
               className="h-full w-full object-cover"
             />
+            {watermark && (
+              <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
+                Made with PRAAN
+              </span>
+            )}
             {hasAccount && (
-              <a
-                href={img.url}
-                download={`praan-${img.kind}-${img.ratio.replace(":", "x")}.png`}
-                target="_blank"
-                rel="noreferrer"
+              <button
+                type="button"
+                onClick={() => handleDownload(img)}
                 className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-ink shadow-md"
                 aria-label="Download photo"
               >
                 <Download className="h-4 w-4" />
-              </a>
+              </button>
             )}
           </div>
         ))}
