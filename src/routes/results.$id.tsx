@@ -55,6 +55,7 @@ type Copy = {
 function Results() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["gen", id],
     queryFn: () => getGeneration({ data: { id } }),
