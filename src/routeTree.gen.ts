@@ -9,11 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as GeneratingRouteImport } from './routes/generating'
 import { Route as ConfirmRouteImport } from './routes/confirm'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResultsIdRouteImport } from './routes/results.$id'
+import { Route as BlogFlatLayGuideRouteImport } from './routes/blog.flat-lay-guide'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GeneratingRoute = GeneratingRouteImport.update({
   id: '/generating',
   path: '/generating',
@@ -34,17 +41,26 @@ const ResultsIdRoute = ResultsIdRouteImport.update({
   path: '/results/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogFlatLayGuideRoute = BlogFlatLayGuideRouteImport.update({
+  id: '/blog/flat-lay-guide',
+  path: '/blog/flat-lay-guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/confirm': typeof ConfirmRoute
   '/generating': typeof GeneratingRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/results/$id': typeof ResultsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/confirm': typeof ConfirmRoute
   '/generating': typeof GeneratingRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/results/$id': typeof ResultsIdRoute
 }
 export interface FileRoutesById {
@@ -52,25 +68,55 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/confirm': typeof ConfirmRoute
   '/generating': typeof GeneratingRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/results/$id': typeof ResultsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/confirm' | '/generating' | '/results/$id'
+  fullPaths:
+    | '/'
+    | '/confirm'
+    | '/generating'
+    | '/sitemap.xml'
+    | '/blog/flat-lay-guide'
+    | '/results/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/confirm' | '/generating' | '/results/$id'
-  id: '__root__' | '/' | '/confirm' | '/generating' | '/results/$id'
+  to:
+    | '/'
+    | '/confirm'
+    | '/generating'
+    | '/sitemap.xml'
+    | '/blog/flat-lay-guide'
+    | '/results/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/confirm'
+    | '/generating'
+    | '/sitemap.xml'
+    | '/blog/flat-lay-guide'
+    | '/results/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ConfirmRoute: typeof ConfirmRoute
   GeneratingRoute: typeof GeneratingRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  BlogFlatLayGuideRoute: typeof BlogFlatLayGuideRoute
   ResultsIdRoute: typeof ResultsIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/generating': {
       id: '/generating'
       path: '/generating'
@@ -99,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResultsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/flat-lay-guide': {
+      id: '/blog/flat-lay-guide'
+      path: '/blog/flat-lay-guide'
+      fullPath: '/blog/flat-lay-guide'
+      preLoaderRoute: typeof BlogFlatLayGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -106,6 +159,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ConfirmRoute: ConfirmRoute,
   GeneratingRoute: GeneratingRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  BlogFlatLayGuideRoute: BlogFlatLayGuideRoute,
   ResultsIdRoute: ResultsIdRoute,
 }
 export const routeTree = rootRouteImport
