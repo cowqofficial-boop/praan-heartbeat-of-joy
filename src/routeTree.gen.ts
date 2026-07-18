@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as GeneratingRouteImport } from './routes/generating'
+import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as ConfirmRouteImport } from './routes/confirm'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as BrandKitRouteImport } from './routes/brand-kit'
@@ -43,6 +44,11 @@ const LibraryRoute = LibraryRouteImport.update({
 const GeneratingRoute = GeneratingRouteImport.update({
   id: '/generating',
   path: '/generating',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnectRoute = ConnectRouteImport.update({
+  id: '/connect',
+  path: '/connect',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConfirmRoute = ConfirmRouteImport.update({
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/brand-kit': typeof BrandKitRoute
   '/calendar': typeof CalendarRoute
   '/confirm': typeof ConfirmRoute
+  '/connect': typeof ConnectRoute
   '/generating': typeof GeneratingRoute
   '/library': typeof LibraryRoute
   '/pricing': typeof PricingRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/brand-kit': typeof BrandKitRoute
   '/calendar': typeof CalendarRoute
   '/confirm': typeof ConfirmRoute
+  '/connect': typeof ConnectRoute
   '/generating': typeof GeneratingRoute
   '/library': typeof LibraryRoute
   '/pricing': typeof PricingRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/brand-kit': typeof BrandKitRoute
   '/calendar': typeof CalendarRoute
   '/confirm': typeof ConfirmRoute
+  '/connect': typeof ConnectRoute
   '/generating': typeof GeneratingRoute
   '/library': typeof LibraryRoute
   '/pricing': typeof PricingRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/brand-kit'
     | '/calendar'
     | '/confirm'
+    | '/connect'
     | '/generating'
     | '/library'
     | '/pricing'
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/brand-kit'
     | '/calendar'
     | '/confirm'
+    | '/connect'
     | '/generating'
     | '/library'
     | '/pricing'
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/brand-kit'
     | '/calendar'
     | '/confirm'
+    | '/connect'
     | '/generating'
     | '/library'
     | '/pricing'
@@ -216,6 +228,7 @@ export interface RootRouteChildren {
   BrandKitRoute: typeof BrandKitRoute
   CalendarRoute: typeof CalendarRoute
   ConfirmRoute: typeof ConfirmRoute
+  ConnectRoute: typeof ConnectRoute
   GeneratingRoute: typeof GeneratingRoute
   LibraryRoute: typeof LibraryRoute
   PricingRoute: typeof PricingRoute
@@ -254,6 +267,13 @@ declare module '@tanstack/react-router' {
       path: '/generating'
       fullPath: '/generating'
       preLoaderRoute: typeof GeneratingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connect': {
+      id: '/connect'
+      path: '/connect'
+      fullPath: '/connect'
+      preLoaderRoute: typeof ConnectRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/confirm': {
@@ -353,6 +373,7 @@ const rootRouteChildren: RootRouteChildren = {
   BrandKitRoute: BrandKitRoute,
   CalendarRoute: CalendarRoute,
   ConfirmRoute: ConfirmRoute,
+  ConnectRoute: ConnectRoute,
   GeneratingRoute: GeneratingRoute,
   LibraryRoute: LibraryRoute,
   PricingRoute: PricingRoute,
