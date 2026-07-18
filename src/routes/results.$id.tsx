@@ -68,7 +68,7 @@ function Results() {
     enabled: !!user,
     staleTime: 30_000,
   });
-  const watermark = !user || !credits?.features?.no_watermark;
+  const watermark = !user || (credits?.features?.watermark ?? true);
 
   if (isLoading) {
     return (
