@@ -469,7 +469,7 @@ export const generateOnePost = createServerFn({ method: "POST" })
         .select("id, post_type, product_name, product_ref_url, post_date")
         .maybeSingle();
       if (!claimed) return { done: false as const, skipped: true as const };
-      target = claimed as typeof target;
+      target = claimed as unknown as Target;
     }
     if (!target) return { done: true as const };
 
