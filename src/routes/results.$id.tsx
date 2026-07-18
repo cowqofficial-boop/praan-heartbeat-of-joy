@@ -116,34 +116,21 @@ function Results() {
       />
 
 
-      {/* 2. Before / after */}
+      {/* 2. Post this — primary action */}
+      <Section title="Post this">
+        <PostThisButton
+          imageUrl={whiteAfter}
+          caption={copy ? `${copy.instagram}\n\n${copy.instagramHashtags.join(" ")}` : ""}
+          productName={(data.product_name as string) || undefined}
+          filenameHint={(data.product_name as string) || "praan"}
+          watermark={watermark}
+        />
+      </Section>
+
+      {/* 3. Before / after */}
       <Section title="See the change">
         {whiteAfter && (
-          <>
-            <BeforeAfterSlider before={original} after={whiteAfter} />
-            <button
-              type="button"
-              onClick={async () => {
-                try {
-                  const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
-                  if (nav.share) {
-                    await nav.share({
-                      title: (data.product_name as string) || "PRAAN",
-                      text: copy?.instagram ?? "",
-                      url: whiteAfter,
-                    });
-                  } else {
-                    await navigator.clipboard.writeText(whiteAfter);
-                    alert("Link copied.");
-                  }
-                } catch { /* user cancelled */ }
-              }}
-              className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-highlight text-[15px] font-semibold text-white"
-            >
-              <Share2 className="h-4 w-4" />
-              Share this
-            </button>
-          </>
+          <BeforeAfterSlider before={original} after={whiteAfter} />
         )}
       </Section>
 
