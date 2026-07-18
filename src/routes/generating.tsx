@@ -58,6 +58,7 @@ function Generating() {
       const { images } = await generateImages({
         data: {
           browserId,
+          userId: user?.id ?? null,
           imageUrl: originalImageUrl,
           productName: form.name,
           category: identified.category,
