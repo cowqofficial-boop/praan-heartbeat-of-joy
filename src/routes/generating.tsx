@@ -95,7 +95,7 @@ function Generating() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col px-5 pb-28 pt-16">
+    <main className="flex min-h-screen flex-col px-5 pb-28 pt-16">
       <h1 className="font-display text-[28px] leading-tight text-ink">
         Making your listing.
       </h1>
@@ -126,6 +126,6 @@ function Generating() {
           )}
         </>
       )}
-    </div>
+    </main>
   );
 }
