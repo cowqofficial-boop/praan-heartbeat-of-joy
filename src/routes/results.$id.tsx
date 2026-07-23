@@ -114,6 +114,7 @@ function Results() {
         onDone={() => refetch()}
         hasAccount={!!user}
         watermark={watermark}
+        personSource={personSource}
       />
 
 
