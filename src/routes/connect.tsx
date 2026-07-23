@@ -85,11 +85,11 @@ function ConnectPage() {
       <PageHeader
         icon={Link2}
         title="Connect your channels"
-        subtitle="Link the places you sell so CowQ can post for you. Optional — everything else keeps working if you skip."
+        subtitle="Link the places you sell. CowQ works fine without this — connecting just saves you the copy-paste."
         help={
           <>
             <p className="font-semibold text-ink">What connecting does</p>
-            <p className="mt-1 text-muted">Once linked, "Post this" sends photos and captions straight to Instagram, Facebook or WhatsApp. Tokens are encrypted; you can disconnect any time.</p>
+            <p className="mt-1 text-muted">Once connected, CowQ can post for you instead of you downloading and uploading each time. You can disconnect any time.</p>
           </>
         }
       />
@@ -152,20 +152,25 @@ function ChannelCard(props: {
   return (
     <section className="rounded-[12px] bg-raised p-4">
       <div className="flex items-center gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-full bg-highlight/10 text-ink">
+        <div className="grid h-10 w-10 place-items-center rounded-full" style={{ background: "color-mix(in oklab, #3B82F6 18%, transparent)", color: "#3B82F6" }}>
           {props.icon}
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <h2 className="text-[16px] font-semibold text-ink">{props.title}</h2>
             {connected && !needsReconnect && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#E7F5EC] px-2 py-0.5 text-[11px] font-medium text-[#137a3d]">
+              <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ background: "color-mix(in oklab, #3B82F6 20%, transparent)", color: "#3B82F6" }}>
                 <Check className="h-3 w-3" /> Connected
               </span>
             )}
             {needsReconnect && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#FDECEC] px-2 py-0.5 text-[11px] font-medium text-[#B33]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary">
                 Needs reconnect
+              </span>
+            )}
+            {!connected && !needsReconnect && (
+              <span className="rounded-full px-2 py-0.5 text-[11px] font-semibold text-muted" style={{ background: "var(--surface)" }}>
+                {props.disabled ? "Coming soon" : "Not connected"}
               </span>
             )}
           </div>
