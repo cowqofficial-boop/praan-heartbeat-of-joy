@@ -94,15 +94,17 @@ function Results() {
   const personSource = ((data.gen_metadata as { person_source?: "ai" | "user" } | null)?.person_source) ?? "ai";
 
   return (
-    <main className="flex min-h-screen flex-col gap-10 px-5 pb-16 pt-8">
-      <header>
-        <h1 className="font-display text-[28px] leading-tight text-ink">
+    <main className="flex min-h-screen flex-col gap-10 pb-16 pt-8">
+      <header className="px-5">
+        <p className="eyebrow">Ready</p>
+        <h1 className="mt-2 font-display text-[40px] leading-[1.02] text-ink sm:text-[48px]">
           Ready to sell.
         </h1>
-        <p className="mt-1 text-[15px] text-muted">
+        <p className="mt-2 text-[15px] text-muted">
           Copy anything with one tap.
         </p>
       </header>
+
 
       {/* 1. Photos */}
       <PhotosSection
@@ -119,73 +121,85 @@ function Results() {
 
 
       {/* 2. Post this — primary action */}
-      <Section title="Post this">
-        <PostThisButton
-          imageUrl={whiteAfter}
-          caption={copy ? `${copy.instagram}\n\n${copy.instagramHashtags.join(" ")}` : ""}
-          productName={(data.product_name as string) || undefined}
-          filenameHint={(data.product_name as string) || "cowq"}
-          watermark={watermark}
-        />
-      </Section>
+      <div className="px-5">
+        <Section title="Post this">
+          <PostThisButton
+            imageUrl={whiteAfter}
+            caption={copy ? `${copy.instagram}\n\n${copy.instagramHashtags.join(" ")}` : ""}
+            productName={(data.product_name as string) || undefined}
+            filenameHint={(data.product_name as string) || "cowq"}
+            watermark={watermark}
+          />
+        </Section>
+      </div>
 
       {/* 3. Before / after */}
-      <Section title="See the change">
-        {whiteAfter && (
-          <BeforeAfterSlider before={original} after={whiteAfter} />
-        )}
-      </Section>
+      <div className="px-5">
+        <Section title="See the change">
+          {whiteAfter && (
+            <BeforeAfterSlider before={original} after={whiteAfter} />
+          )}
+        </Section>
+      </div>
 
       {/* 3. Marketplace listing */}
-      <Section title="Marketplace listing">
-        <Block label="Title" text={copy.seoTitle} />
-        <Block label="Description" text={copy.description} multiline />
-        <Block
-          label="Bullet points"
-          text={copy.bullets.map((b) => `• ${b}`).join("\n")}
-          multiline
-        />
-        <Block label="Search tags" text={copy.tags.join(", ")} />
-      </Section>
+      <div className="px-5">
+        <Section title="Marketplace listing">
+          <Block label="Title" text={copy.seoTitle} />
+          <Block label="Description" text={copy.description} multiline />
+          <Block
+            label="Bullet points"
+            text={copy.bullets.map((b) => `• ${b}`).join("\n")}
+            multiline
+          />
+          <Block label="Search tags" text={copy.tags.join(", ")} />
+        </Section>
+      </div>
 
       {/* 4. Social */}
-      <Section title="Social">
-        <Block
-          label="Instagram caption"
-          text={`${copy.instagram}\n\n${copy.instagramHashtags.join(" ")}`}
-          multiline
-        />
-        <Block label="WhatsApp broadcast" text={copy.whatsapp} multiline />
-        <Block label="Festival line" text={copy.festival} />
-      </Section>
+      <div className="px-5">
+        <Section title="Social">
+          <Block
+            label="Instagram caption"
+            text={`${copy.instagram}\n\n${copy.instagramHashtags.join(" ")}`}
+            multiline
+          />
+          <Block label="WhatsApp broadcast" text={copy.whatsapp} multiline />
+          <Block label="Festival line" text={copy.festival} />
+        </Section>
+      </div>
 
       {/* 5. Download */}
-      <Section title="Download">
-        {user ? (
-          <div className="flex flex-col gap-3">
-            <DownloadAllButton
-              images={images}
-              name={(data.product_name as string) || "cowq"}
-              watermark={watermark}
+      <div className="px-5">
+        <Section title="Download">
+          {user ? (
+            <div className="flex flex-col gap-3">
+              <DownloadAllButton
+                images={images}
+                name={(data.product_name as string) || "cowq"}
+                watermark={watermark}
+              />
+              <DownloadCsvButton
+                url={data.csv_url as string}
+                name={(data.product_name as string) || "cowq"}
+              />
+            </div>
+          ) : (
+            <SignUpGate
+              title="Sign up to save and download"
+              body="Free forever. Keep this product in your library and download all photos plus the Shopify catalog file."
+              next={`/results/${id}`}
             />
-            <DownloadCsvButton
-              url={data.csv_url as string}
-              name={(data.product_name as string) || "cowq"}
-            />
-          </div>
-        ) : (
-          <SignUpGate
-            title="Sign up to save & download"
-            body="Free forever. Keep this product in your library and download all photos + the Shopify CSV."
-            next={`/results/${id}`}
-          />
-        )}
-      </Section>
+          )}
+        </Section>
+      </div>
 
       {/* Feedback */}
-      <Feedback id={id} />
+      <div className="px-5">
+        <Feedback id={id} />
+      </div>
 
-      <div className="pt-6 text-center">
+      <div className="px-5 pt-6 text-center">
         <button
           onClick={() => navigate({ to: user ? "/library" : "/" })}
           className="text-[14px] font-medium text-muted underline"
@@ -193,6 +207,7 @@ function Results() {
           {user ? "Back to your library" : "Start another product"}
         </button>
       </div>
+
     </main>
   );
 }
@@ -226,9 +241,7 @@ function SignUpGate({ title, body, next }: { title: string; body: string; next: 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-muted">
-        {title}
-      </h2>
+      <h2 className="eyebrow">{title}</h2>
       {children}
     </section>
   );
@@ -244,9 +257,12 @@ function Block({
   multiline?: boolean;
 }) {
   return (
-    <div className="rounded-[12px] border border-[color:var(--color-border)] bg-surface p-4">
+    <div
+      className="rounded-[16px] bg-surface p-4"
+      style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)" }}
+    >
       <div className="flex items-start justify-between gap-3">
-        <span className="text-[13px] font-medium text-muted">{label}</span>
+        <span className="eyebrow">{label}</span>
         <CopyButton text={text} />
       </div>
       <p
@@ -257,6 +273,7 @@ function Block({
     </div>
   );
 }
+
 
 function PhotosSection({
   images,
@@ -302,82 +319,94 @@ function PhotosSection({
   }
 
   return (
-    <Section title="Photos">
-      <div className="inline-flex self-start rounded-full border border-[color:var(--color-border)] bg-raised p-1">
-        {(["1:1", "9:16"] as const).map((r) => (
-          <button
-            key={r}
-            type="button"
-            onClick={() => setRatio(r)}
-            className={`rounded-full px-4 py-1.5 text-[13px] font-semibold transition-colors ${
-              ratio === r ? "bg-ink text-background" : "text-muted"
-            }`}
-          >
-            {r === "1:1" ? "Square" : "Vertical"}
-          </button>
-        ))}
-      </div>
-      <div className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 no-scrollbar">
-        {filtered.map((img, i) => {
-          const isOnModel = img.kind.startsWith("onmodel");
-          return (
-            <div
-              key={`${img.kind}-${img.ratio}-${i}`}
-              className="flex shrink-0 snap-center flex-col gap-1.5"
-              style={{ width: ratio === "1:1" ? "78%" : "64%" }}
+    <section className="flex flex-col gap-3">
+      <div className="flex items-center justify-between px-5">
+        <h2 className="eyebrow">Photos</h2>
+        <div className="inline-flex rounded-full bg-raised p-1">
+          {(["1:1", "9:16"] as const).map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => setRatio(r)}
+              className={`rounded-full px-4 py-1.5 text-[13px] font-semibold ${
+                ratio === r ? "bg-ink text-background" : "text-muted"
+              }`}
             >
+              {r === "1:1" ? "Square" : "Vertical"}
+            </button>
+          ))}
+        </div>
+      </div>
+      {/* Full-bleed carousel — the only element allowed to break the 520px column */}
+      <div className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 stagger">
+        <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 pt-2 no-scrollbar">
+          {filtered.map((img, i) => {
+            const isOnModel = img.kind.startsWith("onmodel");
+            return (
               <div
-                className="relative overflow-hidden rounded-[12px] bg-surface"
-                style={{ aspectRatio: ratio === "1:1" ? "1 / 1" : "9 / 16" }}
+                key={`${img.kind}-${img.ratio}-${i}`}
+                className="stagger-item flex shrink-0 snap-center flex-col gap-2"
+                style={{ width: ratio === "1:1" ? "min(78vw, 460px)" : "min(64vw, 340px)" }}
               >
-                <img
-                  src={img.url}
-                  alt={`${img.kind} ${img.ratio}`}
-                  className="h-full w-full object-cover"
-                />
-                {watermark && (
-                  <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
-                    Made with CowQ
-                  </span>
-                )}
-                {hasAccount && (
-                  <button
-                    type="button"
-                    onClick={() => handleDownload(img)}
-                    className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-full bg-raised/90 text-ink shadow-md"
-                    aria-label="Download photo"
-                  >
-                    <Download className="h-4 w-4" />
-                  </button>
+                <div
+                  className="relative overflow-hidden rounded-[16px] bg-surface"
+                  style={{
+                    aspectRatio: ratio === "1:1" ? "1 / 1" : "9 / 16",
+                    boxShadow: "0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
+                  }}
+                >
+                  <img
+                    src={img.url}
+                    alt={`${img.kind} ${img.ratio}`}
+                    className="h-full w-full object-cover img-warm"
+                  />
+                  {watermark && (
+                    <span className="pointer-events-none absolute bottom-3 left-3 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white">
+                      Made with CowQ
+                    </span>
+                  )}
+                  {hasAccount && (
+                    <button
+                      type="button"
+                      onClick={() => handleDownload(img)}
+                      className="absolute bottom-3 right-3 grid h-11 w-11 place-items-center rounded-full bg-raised/90 text-ink backdrop-blur-sm"
+                      aria-label="Download photo"
+                    >
+                      <Download className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                {isOnModel && (
+                  <p className="px-1 text-[11px] leading-snug text-muted">
+                    {personSource === "user"
+                      ? "Your model. Check the fit before you list."
+                      : "AI-made model. Check the fit and drape before you list this."}
+                  </p>
                 )}
               </div>
-              {isOnModel && (
-                <p className="px-0.5 text-[11px] leading-snug text-muted">
-                  {personSource === "user"
-                    ? "Your model. Check the fit before you list."
-                    : "AI-generated model. Check the fit and drape before you list this."}
-                </p>
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {hasAccount && (
-        <MakeMoreButton
-          id={id}
-          productName={productName}
-          category={category}
-          originalUrl={originalUrl}
-          onDone={onDone}
-          onLimit={() =>
-            alert("You've used today's 5 free products. Come back tomorrow.")
-          }
-        />
+        <div className="px-5">
+          <MakeMoreButton
+            id={id}
+            productName={productName}
+            category={category}
+            originalUrl={originalUrl}
+            onDone={onDone}
+            onLimit={() =>
+              alert("You've used today's 5 free products. Come back tomorrow.")
+            }
+          />
+        </div>
       )}
-    </Section>
+    </section>
   );
 }
+
 
 function MakeMoreButton({
   id: _id,

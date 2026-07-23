@@ -137,20 +137,31 @@ function PricingPage() {
         </p>
       )}
 
-      {/* Cycle toggle */}
+      {/* Cycle toggle — sliding pill */}
       <div className="mt-6 flex items-center justify-center">
-        <div className="inline-flex rounded-full border border-[color:var(--color-border)] bg-raised p-1">
+        <div className="relative inline-flex rounded-full bg-raised p-1"
+             style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)" }}>
+          <span
+            aria-hidden
+            className="absolute top-1 bottom-1 rounded-full bg-primary transition-transform duration-300"
+            style={{
+              width: "calc(50% - 4px)",
+              left: 4,
+              transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+              transform: cycle === "yearly" ? "translateX(100%)" : "translateX(0%)",
+            }}
+          />
           <button
             type="button"
             onClick={() => setCycle("monthly")}
-            className={`h-9 rounded-full px-4 text-[13px] font-semibold ${cycle === "monthly" ? "bg-surface text-ink" : "text-muted"}`}
+            className={`relative z-10 h-9 rounded-full px-4 text-[13px] font-semibold ${cycle === "monthly" ? "text-primary-foreground" : "text-muted"}`}
           >
             Monthly
           </button>
           <button
             type="button"
             onClick={() => setCycle("yearly")}
-            className={`h-9 rounded-full px-4 text-[13px] font-semibold ${cycle === "yearly" ? "bg-primary text-primary-foreground" : "text-muted"}`}
+            className={`relative z-10 h-9 rounded-full px-4 text-[13px] font-semibold ${cycle === "yearly" ? "text-primary-foreground" : "text-muted"}`}
           >
             Annual · 2 months free
           </button>
@@ -158,24 +169,26 @@ function PricingPage() {
       </div>
 
       {/* Subscriptions */}
-      <section className="mt-6 space-y-3">
+      <section className="mt-6 space-y-4 stagger">
         {subs.map(({ name, monthly, yearly }) => {
           const plan = cycle === "yearly" ? yearly : monthly;
           const busy = buying === plan.id;
           const isCurrent = credits?.plan_id === plan.id;
           return (
-            <PlanCard
-              key={name}
-              plan={plan}
-              monthlyEquivalent={cycle === "yearly" ? Math.round(yearly.priceInr / 12) : null}
-              busy={busy}
-              current={isCurrent}
-              onBuy={() => buy(plan)}
-              highlight={name === "Growth"}
-            />
+            <div key={name} className="stagger-item">
+              <PlanCard
+                plan={plan}
+                monthlyEquivalent={cycle === "yearly" ? Math.round(yearly.priceInr / 12) : null}
+                busy={busy}
+                current={isCurrent}
+                onBuy={() => buy(plan)}
+                highlight={name === "Growth"}
+              />
+            </div>
           );
         })}
       </section>
+
 
       {/* Packs */}
       <section id="topups" className="mt-10 scroll-mt-6">
@@ -228,20 +241,31 @@ function PlanCard({
   ];
   return (
     <div
-      className={`rounded-[16px] border p-5 ${
-        highlight ? "border-primary bg-primary/[.03]" : "border-[color:var(--color-border)] bg-raised"
+      className={`relative rounded-[16px] p-5 ${
+        highlight ? "bg-raised sm:scale-[1.02]" : "bg-surface"
       }`}
+      style={
+        highlight
+          ? {
+              boxShadow:
+                "inset 0 0 0 1px var(--sindoor), inset 0 1px 0 rgba(255,255,255,0.06), 0 20px 60px rgba(0,0,0,0.55)",
+            }
+          : {
+              boxShadow:
+                "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)",
+            }
+      }
     >
+      {highlight && (
+        <span className="absolute -top-2.5 left-5 rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-primary-foreground">
+          Most popular
+        </span>
+      )}
       <div className="flex items-baseline justify-between">
-        <h3 className="font-display text-[22px] text-ink">{plan.name}</h3>
-        {highlight && (
-          <span className="rounded-full bg-highlight/20 px-2 py-0.5 text-[11px] font-semibold text-ink">
-            Most popular
-          </span>
-        )}
+        <h3 className="font-display text-[24px] text-ink">{plan.name}</h3>
       </div>
       <div className="mt-2 flex items-baseline gap-2">
-        <span className="font-display text-[28px] leading-none text-ink">{formatInr(plan.priceInr)}</span>
+        <span className="font-mono text-[28px] font-semibold leading-none text-ink tabular-nums">{formatInr(plan.priceInr)}</span>
         <span className="text-[13px] text-muted">/{plan.interval === "year" ? "year" : "month"}</span>
       </div>
       {monthlyEquivalent != null && (
@@ -250,7 +274,7 @@ function PlanCard({
       <ul className="mt-4 space-y-1.5">
         {features.map((f) => (
           <li key={f} className="flex items-start gap-2 text-[14px] text-ink">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-highlight" />
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-marigold" />
             <span>{f}</span>
           </li>
         ))}
@@ -261,8 +285,10 @@ function PlanCard({
         disabled={busy || current}
         className={`mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-[12px] text-[15px] font-semibold ${
           current
-            ? "bg-surface text-muted"
-            : "bg-primary text-primary-foreground disabled:opacity-60"
+            ? "bg-raised text-muted"
+            : highlight
+              ? "bg-primary text-primary-foreground disabled:opacity-60"
+              : "bg-raised text-ink hover:brightness-110 disabled:opacity-60"
         }`}
       >
         {current ? "Current plan" : busy ? <><Loader2 className="h-4 w-4 animate-spin" /> Opening…</> : "Choose " + plan.name}
@@ -271,20 +297,22 @@ function PlanCard({
   );
 }
 
+
 function PackCard({ plan, busy, onBuy }: { plan: Plan; busy: boolean; onBuy: () => void }) {
   return (
-    <div className="flex items-center justify-between rounded-[16px] border border-[color:var(--color-border)] bg-raised p-4">
+    <div className="flex items-center justify-between rounded-[16px] bg-surface p-4"
+         style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)" }}>
       <div>
         <p className="text-[15px] font-semibold text-ink">{plan.name}</p>
         <p className="mt-0.5 text-[12px] text-muted">One-time · credits never expire</p>
       </div>
       <div className="text-right">
-        <p className="font-display text-[20px] leading-none text-ink">{formatInr(plan.priceInr)}</p>
+        <p className="font-mono text-[20px] font-semibold leading-none text-ink tabular-nums">{formatInr(plan.priceInr)}</p>
         <button
           type="button"
           onClick={onBuy}
           disabled={busy}
-          className="mt-2 inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-ink px-4 text-[13px] font-semibold text-white disabled:opacity-60"
+          className="mt-2 inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-[13px] font-semibold text-primary-foreground hover:brightness-110 disabled:opacity-60"
         >
           {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
           Buy
@@ -293,3 +321,4 @@ function PackCard({ plan, busy, onBuy }: { plan: Plan; busy: boolean; onBuy: () 
     </div>
   );
 }
+

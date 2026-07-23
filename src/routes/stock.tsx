@@ -50,13 +50,14 @@ const REASON_LABEL = {
 function statusChip(s: StockStatus) {
   switch (s) {
     case "out":
-      return { label: "Out of stock", cls: "bg-primary/10 text-primary" };
+      return { label: "Out of stock", cls: "bg-primary/15 text-primary/90" };
     case "low":
-      return { label: "Low", cls: "bg-highlight/20 text-ink" };
+      return { label: "Low", cls: "bg-marigold/20 text-marigold" };
     default:
-      return { label: "In stock", cls: "bg-surface text-muted" };
+      return { label: "In stock", cls: "bg-green/15 text-green" };
   }
 }
+
 
 function StockPage() {
   const navigate = useNavigate();
@@ -67,6 +68,9 @@ function StockPage() {
   const [editing, setEditing] = useState<StockItem | null>(null);
   const [creating, setCreating] = useState(false);
   const [showLog, setShowLog] = useState(false);
+  const [pulseId, setPulseId] = useState<string | null>(null);
+  const [undo, setUndo] = useState<{ id: string; name: string; expiresAt: number } | null>(null);
+
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -232,20 +236,23 @@ function StockPage() {
         {isLoading ? (
           <p className="text-[15px] text-muted">Loading…</p>
         ) : items.length === 0 ? (
-          <div className="mt-10 rounded-[14px] bg-surface p-8 text-center">
+          <div className="mt-10 rounded-[16px] bg-surface p-8 text-center" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)" }}>
             <Package className="mx-auto h-8 w-8 text-muted" />
-            <p className="mt-3 text-[16px] font-medium text-ink">No stock yet.</p>
-            <p className="mt-1 text-[14px] text-muted">Add your first item — it's free.</p>
+            <p className="mt-3 text-[16px] font-medium text-ink">Add your first item — it's free.</p>
+            <p className="mt-1 text-[14px] text-muted">Track what's in stock, low, or sold out.</p>
           </div>
+
         ) : sorted.length === 0 ? (
           <p className="text-[15px] text-muted">Nothing matches.</p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-2 stagger">
             {sorted.map((it) => {
               const chip = statusChip(it.status);
+
               const profit = it.selling_price_paise - it.cost_price_paise;
               return (
-                <li key={it.id} className="rounded-[14px] bg-raised p-3 ring-1 ring-inset ring-[color:var(--color-border)]">
+                <li key={it.id} className="stagger-item rounded-[16px] bg-surface p-3" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)" }}>
+
                   <div className="flex items-start gap-3">
                     {it.thumb_url ? (
                       <img src={it.thumb_url} alt="" className="h-14 w-14 shrink-0 rounded-[10px] object-cover" loading="lazy" />
@@ -309,10 +316,13 @@ function StockPage() {
                       <button
                         type="button"
                         disabled={it.quantity === 0 || changeQty.isPending}
-                        onClick={() =>
-                          changeQty.mutate({ data: { stock_item_id: it.id, delta: -1, reason: "sold" } })
-                        }
-                        className="h-9 rounded-full bg-ink px-3 text-[13px] font-semibold text-white disabled:opacity-40"
+                        onClick={() => {
+                          setPulseId(it.id);
+                          setTimeout(() => setPulseId((cur) => (cur === it.id ? null : cur)), 300);
+                          changeQty.mutate({ data: { stock_item_id: it.id, delta: -1, reason: "sold" } });
+                          setUndo({ id: it.id, name: it.name, expiresAt: Date.now() + 5000 });
+                        }}
+                        className={`h-9 rounded-full bg-primary px-3 text-[13px] font-semibold text-primary-foreground disabled:opacity-40 ${pulseId === it.id ? "pulse-once" : ""}`}
                       >
                         Sold 1
                       </button>
@@ -327,6 +337,7 @@ function StockPage() {
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
+
                   </div>
                 </li>
               );
@@ -334,6 +345,19 @@ function StockPage() {
           </ul>
         )}
       </div>
+
+      {undo && (
+        <UndoToast
+          key={undo.expiresAt}
+          name={undo.name}
+          onUndo={() => {
+            changeQty.mutate({ data: { stock_item_id: undo.id, delta: 1, reason: "returned" } });
+            setUndo(null);
+          }}
+          onClose={() => setUndo(null)}
+        />
+      )}
+
 
       {(creating || editing) && (
         <StockSheet
@@ -509,10 +533,27 @@ function StockSheet({
         </button>
       </div>
 
-      <style>{`.input{height:44px;width:100%;border-radius:12px;background:var(--color-surface,#F4F4F2);padding:0 12px;color:#111;font-size:15px;outline:none}`}</style>
+      <style>{`.input{height:44px;width:100%;border-radius:12px;background:var(--raised);padding:0 12px;color:var(--text);font-size:15px;outline:none;box-shadow:inset 0 0 0 1px var(--line)}`}</style>
     </div>
   );
 }
+
+function UndoToast({ name, onUndo, onClose }: { name: string; onUndo: () => void; onClose: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 5000);
+    return () => clearTimeout(t);
+  }, [onClose]);
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-5">
+      <div className="pointer-events-auto flex items-center gap-3 rounded-full bg-raised px-4 py-2.5 text-[13px] text-ink scale-in"
+           style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
+        <span>Sold 1 · {name}</span>
+        <button type="button" onClick={onUndo} className="text-marigold font-semibold hover:brightness-110">Undo</button>
+      </div>
+    </div>
+  );
+}
+
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

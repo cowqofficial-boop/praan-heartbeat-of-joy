@@ -113,26 +113,47 @@ function Generating() {
     }
   }
 
-  return (
-    <main className="flex min-h-screen flex-col px-5 pb-28 pt-16">
-      <h1 className="font-display text-[28px] leading-tight text-ink">
-        Making your listing.
-      </h1>
-      <p className="mt-1 text-[15px] text-muted">This takes under a minute.</p>
+  const heroPhoto = photos[0]?.dataUrl ?? originalImageUrl ?? null;
 
-      <div className="mt-10">
-        <ProgressSteps
-          steps={[
-            { label: "Studying your product", state: states[0] },
-            { label: "Shooting studio photos", state: states[1] },
-            { label: "Writing your listing", state: states[2] },
-          ]}
-        />
+  return (
+    <main className="flex min-h-screen flex-col items-center px-5 pb-28 pt-12">
+      <div className="w-full max-w-sm text-center">
+        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[48px]">
+          Making your listing.
+        </h1>
+        <p className="mt-2 text-[15px] text-muted">This takes under a minute.</p>
+
+        {heroPhoto && (
+          <div className="mx-auto mt-10 w-[78%]">
+            <div
+              className="sweep-mask relative aspect-square overflow-hidden rounded-[16px] bg-surface"
+              style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05)" }}
+            >
+              <img
+                src={heroPhoto}
+                alt="Your product"
+                className="absolute inset-0 h-full w-full object-cover"
+                style={{ opacity: 0.55, filter: "saturate(0.85)" }}
+                draggable={false}
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="mx-auto mt-10 max-w-[280px] text-left">
+          <ProgressSteps
+            steps={[
+              { label: "Studying your product", state: states[0] },
+              { label: "Shooting the photos", state: states[1] },
+              { label: "Writing your listing", state: states[2] },
+            ]}
+          />
+        </div>
       </div>
 
       {error && (
-        <>
-          <p className="mt-8 text-[15px] text-primary">{error}</p>
+        <div className="mt-8 w-full max-w-sm text-center">
+          <p className="text-[15px] text-primary">{error}</p>
           {detail && (
             <>
               <button
@@ -143,7 +164,7 @@ function Generating() {
                 {showDetail ? "Hide details" : "Details"}
               </button>
               {showDetail && (
-                <p className="mt-1 break-all text-[11px] leading-snug text-muted">{detail}</p>
+                <p className="mt-1 break-all text-left text-[11px] leading-snug text-muted">{detail}</p>
               )}
             </>
           )}
@@ -160,8 +181,9 @@ function Generating() {
               Try again
             </PrimaryButton>
           )}
-        </>
+        </div>
       )}
     </main>
   );
 }
+
