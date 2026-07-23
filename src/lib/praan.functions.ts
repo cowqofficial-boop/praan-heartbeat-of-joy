@@ -524,6 +524,7 @@ Return a JSON object only (no prose, no markdown fences) with these exact keys:
           image_model: data.meta?.image_model ?? GEMINI_IMAGE_MODEL,
           image_count: data.meta?.image_count ?? 0,
           image_resolution: data.meta?.image_resolution ?? 2048,
+          person_source: data.meta?.person_source ?? "ai",
         },
       })
       .select("id")
