@@ -1,10 +1,10 @@
-# CowQ Ai
+# CowQ
 
 > AI product photos and marketplace listings for Indian small sellers. Upload one product photo and get studio images, sales copy, and a Shopify-ready CSV in under a minute.
 
-CowQ Ai is a mobile-first web app built for small businesses selling on Amazon, Flipkart, Meesho, Instagram, and WhatsApp. Sellers upload a single phone photo of their product and receive four styles of studio images (white background, soft studio, lifestyle scene, flat-lay) in both square and vertical formats, plus a full marketplace listing: SEO title, description, five bullets, fifteen search tags, an Instagram caption with hashtags, a WhatsApp broadcast, and a festival line. Everything downloads together as photos and a Shopify catalog CSV. No login, no payment.
+CowQ is a mobile-first web app built for small businesses selling on Amazon, Flipkart, Meesho, Instagram, and WhatsApp. Sellers upload a single phone photo of their product and receive four styles of studio images (white background, soft studio, lifestyle scene, flat-lay) in both square and vertical formats, plus a full marketplace listing: SEO title, description, five bullets, fifteen search tags, an Instagram caption with hashtags, a WhatsApp broadcast, and a festival line. Everything downloads together as photos and a Shopify catalog CSV. No login, no payment.
 
 ## Pages
 
 - [Home](/): Upload a product photo to start.
-- [Flat lay photography guide](/blog/flat-lay-guide): How to take great product photos with your phone before enhancing them with CowQ Ai.
+- [Flat lay photography guide](/blog/flat-lay-guide): How to take great product photos with your phone before enhancing them with CowQ.

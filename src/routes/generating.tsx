@@ -16,13 +16,13 @@ import { markFreeGenerationUsed, useAuth } from "@/lib/use-auth";
 export const Route = createFileRoute("/generating")({
   head: () => ({
     meta: [
-      { title: "Making your listing — CowQ Ai" },
+      { title: "Making your listing — CowQ" },
       {
         name: "description",
         content:
-          "CowQ Ai is studying your product, shooting studio photos, and writing your marketplace listing. This usually takes under a minute.",
+          "CowQ is studying your product, shooting studio photos, and writing your marketplace listing. This usually takes under a minute.",
       },
-      { property: "og:title", content: "Making your listing — CowQ Ai" },
+      { property: "og:title", content: "Making your listing — CowQ" },
       {
         property: "og:description",
         content: "Studio photos, marketplace copy, and a catalog file are being prepared.",

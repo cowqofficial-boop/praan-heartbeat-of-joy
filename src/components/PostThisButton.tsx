@@ -89,7 +89,7 @@ export function PostThisButton({
         canShare?: (d: ShareData) => boolean;
       };
 
-      const shareData: ShareData = { files: [file], text: caption, title: productName ?? "CowQ Ai" };
+      const shareData: ShareData = { files: [file], text: caption, title: productName ?? "CowQ" };
 
       if (nav.share && nav.canShare && nav.canShare(shareData)) {
         try {

@@ -6,16 +6,16 @@ import { PrimaryButton } from "@/components/PrimaryButton";
 export const Route = createFileRoute("/confirm")({
   head: () => ({
     meta: [
-      { title: "Confirm your product details — CowQ Ai" },
+      { title: "Confirm your product details — CowQ" },
       {
         name: "description",
         content:
-          "Review the product name, price, and detail CowQ Ai picked up from your photo before generating your marketplace listing.",
+          "Review the product name, price, and detail CowQ picked up from your photo before generating your marketplace listing.",
       },
-      { property: "og:title", content: "Confirm your product details — CowQ Ai" },
+      { property: "og:title", content: "Confirm your product details — CowQ" },
       {
         property: "og:description",
-        content: "Review the product details CowQ Ai detected before generating your listing.",
+        content: "Review the product details CowQ detected before generating your listing.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://praan-heartbeat-of-joy.lovable.app/confirm" },

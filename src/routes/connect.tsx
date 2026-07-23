@@ -17,10 +17,10 @@ export const Route = createFileRoute("/connect")({
   validateSearch: (s) => searchSchema.parse(s),
   head: () => ({
     meta: [
-      { title: "Connect your channels — CowQ Ai" },
-      { name: "description", content: "Connect Instagram, Facebook Page, and WhatsApp so CowQ Ai can post for you." },
-      { property: "og:title", content: "Connect your channels — CowQ Ai" },
-      { property: "og:description", content: "Link Instagram, Facebook Page, and WhatsApp to CowQ Ai." },
+      { title: "Connect your channels — CowQ" },
+      { name: "description", content: "Connect Instagram, Facebook Page, and WhatsApp so CowQ can post for you." },
+      { property: "og:title", content: "Connect your channels — CowQ" },
+      { property: "og:description", content: "Link Instagram, Facebook Page, and WhatsApp to CowQ." },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex, follow" },
     ],
@@ -84,7 +84,7 @@ function ConnectPage() {
         <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">Connect your channels</h1>
       </header>
       <p className="mt-2 text-[15px] text-muted">
-        Link the places you sell. CowQ Ai keeps working even if you skip this.
+        Link the places you sell. CowQ keeps working even if you skip this.
       </p>
 
       <div className="mt-6 flex flex-col gap-3">

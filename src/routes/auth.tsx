@@ -17,9 +17,9 @@ export const Route = createFileRoute("/auth")({
   validateSearch: (s) => searchSchema.parse(s),
   head: () => ({
     meta: [
-      { title: "Sign in — CowQ Ai" },
-      { name: "description", content: "Sign in or create a free CowQ Ai account to save your products, download files, and generate more listings." },
-      { property: "og:title", content: "Sign in — CowQ Ai" },
+      { title: "Sign in — CowQ" },
+      { name: "description", content: "Sign in or create a free CowQ account to save your products, download files, and generate more listings." },
+      { property: "og:title", content: "Sign in — CowQ" },
       { property: "og:description", content: "Save your products, download files, and generate more listings." },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex, follow" },
@@ -101,14 +101,24 @@ function Auth() {
   return (
     <main className="flex min-h-screen flex-col px-5 pb-16 pt-10">
       <Link to="/" className="text-[14px] font-medium text-muted">← Back</Link>
-      <h1 className="mt-6 font-display text-[32px] leading-tight text-ink">
+      <div className="mt-10 flex flex-col items-center">
+        <span className="font-display text-[40px] leading-none text-ink">CowQ</span>
+        <span
+          className="mt-[12px] text-[13px] font-medium text-muted"
+          style={{ letterSpacing: "0.04em" }}
+        >
+          Complete Operations With Quality
+        </span>
+      </div>
+      <h1 className="mt-10 font-display text-[32px] leading-tight text-ink">
         {mode === "signup" ? "Save your work." : "Welcome back."}
       </h1>
       <p className="mt-2 text-[15px] text-muted">
         {mode === "signup"
           ? "Create a free account to keep your products and download files."
-          : "Sign in to your CowQ Ai account."}
+          : "Sign in to your CowQ account."}
       </p>
+
 
       <button
         type="button"

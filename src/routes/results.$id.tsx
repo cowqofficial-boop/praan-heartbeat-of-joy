@@ -15,13 +15,13 @@ import { watermarkImageUrl } from "@/lib/watermark";
 export const Route = createFileRoute("/results/$id")({
   head: ({ params }) => ({
     meta: [
-      { title: "Your listing is ready — CowQ Ai" },
+      { title: "Your listing is ready — CowQ" },
       {
         name: "description",
         content:
           "Studio product photos, marketplace copy, and a Shopify catalog CSV — ready to download and post.",
       },
-      { property: "og:title", content: "Your listing is ready — CowQ Ai" },
+      { property: "og:title", content: "Your listing is ready — CowQ" },
       {
         property: "og:description",
         content: "Download studio photos, copy marketplace text, and export a Shopify CSV.",

@@ -1,7 +1,7 @@
 {
-  "name": "CowQ Ai",
-  "short_name": "CowQ Ai",
-  "description": "One photo. Everything you need to sell it.",
+  "name": "CowQ",
+  "short_name": "CowQ",
+  "description": "CowQ — Complete Operations With Quality.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

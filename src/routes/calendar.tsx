@@ -21,13 +21,13 @@ type Post = Awaited<ReturnType<typeof listPlanPosts>>[number];
 export const Route = createFileRoute("/calendar")({
   head: () => ({
     meta: [
-      { title: "Content calendar — CowQ Ai" },
+      { title: "Content calendar — CowQ" },
       {
         name: "description",
         content:
-          "A month of ready-to-post product content, generated from your CowQ Ai library.",
+          "A month of ready-to-post product content, generated from your CowQ library.",
       },
-      { property: "og:title", content: "Content calendar — CowQ Ai" },
+      { property: "og:title", content: "Content calendar — CowQ" },
       { property: "og:description", content: "30 days of posts, images and captions, done." },
       { name: "robots", content: "noindex, follow" },
     ],
