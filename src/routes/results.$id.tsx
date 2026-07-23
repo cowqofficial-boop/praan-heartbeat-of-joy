@@ -91,6 +91,7 @@ function Results() {
   const copy = data.copy as Copy;
   const original = data.original_image_url as string;
   const whiteAfter = images.find((i) => i.kind === "white" && i.ratio === "1:1")?.url ?? images[0]?.url;
+  const personSource = ((data.gen_metadata as { person_source?: "ai" | "user" } | null)?.person_source) ?? "ai";
 
   return (
     <main className="flex min-h-screen flex-col gap-10 px-5 pb-16 pt-8">
