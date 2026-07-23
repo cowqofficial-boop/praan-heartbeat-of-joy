@@ -345,7 +345,7 @@ function TodayCard({ post, onOpen }: { post: Post; onOpen: () => void }) {
 function MonthGrid({ posts, onOpen }: { posts: Post[]; onOpen: (id: string) => void }) {
   // 6 rows x 5-day rows keeps thumbs bigger and one-handed friendly
   return (
-    <ul className="mt-2 grid grid-cols-5 gap-2">
+    <ul className="mt-2 grid grid-cols-5 gap-2 lg:grid-cols-7 xl:grid-cols-10">
       {posts.map((p) => (
         <li key={p.id}>
           <button
