@@ -203,14 +203,20 @@ function BrandKitPage() {
 
  return (
  <main className="flex min-h-screen flex-col px-5 pb-32 pt-10 lg:px-0 lg:pt-12">
- <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">
- {onboarding ? "Set up your brand" : "Your brand kit"}
- </h1>
- <p className="mt-2 text-[15px] text-muted">
- {onboarding
- ? "Takes 30 seconds. You can skip and edit later."
- : "Used in every listing CowQ writes for you."}
- </p>
+ <PageHeader
+   icon={Palette}
+   title={onboarding ? "Set up your brand" : "Your brand kit"}
+   subtitle={onboarding
+     ? "Takes 30 seconds — CowQ uses this in every future listing. You can skip and edit later."
+     : "Your business name, logo, colours and voice — used every time CowQ writes or shoots for you."}
+   help={
+     <>
+       <p className="font-semibold text-ink">Why fill this in</p>
+       <p className="mt-1 text-muted">Every listing, caption and photo CowQ makes will match your business — your name, colours and tone of voice. Change any time; future work updates automatically.</p>
+     </>
+   }
+ />
+
 
  <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-x-10">
 
