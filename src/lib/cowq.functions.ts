@@ -223,55 +223,77 @@ async function markGenerationSucceeded(jobId: string, browserId: string): Promis
 const NO_PEOPLE =
   "Absolutely no people, no humans, no hands, no fingers, no arms, no models, no figures, no silhouettes — not even blurred in the background.";
 
+// Applied to EVERY image prompt. Locks the output toward real photography instead of AI-art gloss.
+const PHOTO_REALISM = [
+  "This is a real photograph, not a render or illustration.",
+  "Shot on a full-frame camera with an 85mm lens at f/4, natural window light coming from the left, soft directional shadow falling to the right, gentle falloff — never flat, even, shadowless studio lighting.",
+  "True-to-life colour, neutral white balance, no saturation boost, no contrast punch, no colour grading.",
+  "Real surface texture visible — unpolished wood grain, woven cloth weave, matte paper, brushed concrete, plain plaster wall — with tiny natural imperfections (a faint mark, a slight crease, a bit of dust).",
+  "Subtle honest shadow, natural highlights only where light actually falls. No artificial rim light, no glow, no halo, no bloom, no lens flare, no vignette.",
+  "Photograph the product exactly as it is — do not idealise, smooth, polish, prettify, or reinterpret it.",
+].join(" ");
+
+// Words that push image models toward the plastic AI look. Never include any of these.
+const BANNED_LOOK =
+  "Do NOT use or evoke any of: glossy, glowing, vibrant, hyper-realistic, ultra-detailed, cinematic lighting, dramatic lighting, 8K, HDR, professional studio lighting, floating, levitating, gradient background, product hovering in mid-air, seamless void, perfect seamless backdrop, glass reflection floor, polished mirror surface, magazine gloss.";
+
+// The four shots are the same physical object photographed in different settings.
+const SAME_OBJECT =
+  "This is the SAME physical object shown in the reference photos, just photographed in a different setting — identical wear, identical marks, identical colour, identical detail as every other shot in this set.";
+
+// Absolute product fidelity — the single most important rule.
+const PRODUCT_FIDELITY =
+  "Preserve the EXACT colour, EXACT texture, EXACT pattern, EXACT proportions and EVERY visible detail of the product as shown in the reference photos — including any small marks, stitching, weave, label placement, print alignment, and material finish. Change ONLY the background and the lighting. Never redraw, restyle, smooth, upscale, idealise or reinterpret the product itself. If any detail is unclear from the references, keep it plain rather than invent.";
+
 type StyleDef = { kind: string; prompt: string; hasPerson?: boolean };
 
 const PRODUCT_STYLES: StyleDef[] = [
   {
     kind: "white",
     prompt:
-      "Reproduce the exact same product from the input photo — same shape, colour, material, branding, and label. Place it on a pure clean white studio background suitable for Amazon/Flipkart, soft even lighting, subtle contact shadow, centred, no props, no text, high detail, photorealistic.",
+      "White-background e-commerce shot for Amazon/Flipkart. Product placed on a clean matte white paper sweep (not a perfect void — a real paper surface, faint texture visible). Soft natural window light from the left, gentle real contact shadow beneath the product falling slightly to the right. Product centred with generous margin on all four sides. No props, no text.",
   },
   {
     kind: "studio",
     prompt:
-      "Same product from the input photo, kept faithful in every detail. Place it on a neutral warm surface with soft studio lighting, gentle side shadow, minimal styling, premium e-commerce look, photorealistic.",
+      "Product resting on an ordinary matte surface — unpolished light wood with visible grain, or plain neutral linen with soft creases. Soft daylight from a nearby window, honest side shadow, quiet neutral background wall slightly out of focus. Minimal styling. Real photograph, not staged perfection.",
   },
   {
     kind: "lifestyle",
     prompt:
-      "Same product from the input photo, kept faithful. First determine where this specific product is actually used or kept in real life, then set the scene in exactly that place — e.g. a speaker on a desk or bedside table, a spice jar on a kitchen shelf, a cushion on a sofa, a mug on a breakfast table. Never use a generic shop, market stall, bazaar, workshop, or warehouse backdrop unless the product itself is shop equipment. Keep the scene simple: one clear surface, at most two or three small props that genuinely belong with this product. The product remains the clear hero, centred and uncrowded. Soft natural daylight, shallow depth of field, photorealistic, no text.",
+      "First decide where this specific product actually lives in a real Indian home or small workplace — a speaker on a wooden desk beside a notebook, a spice jar on a kitchen shelf beside a steel dabba, a cushion on a cotton-covered sofa, a mug on a breakfast table with a folded newspaper. Never a shop, market stall, bazaar, workshop or warehouse unless the product is shop equipment. Keep the scene simple: one clear ordinary surface, at most two or three small everyday props that genuinely belong. Real morning daylight from a window, natural shadows, product the clear hero, uncrowded. No text.",
   },
   {
     kind: "flatlay",
     prompt:
-      "Same product from the input photo, kept faithful. Styled overhead flat-lay on a textured neutral surface with two or three tasteful props that clearly belong with this product's real use. Balanced composition, soft daylight, product centred and clearly the hero, no text.",
+      "Overhead shot from directly above on a real textured neutral surface — plain linen, unpolished wood, or matte craft paper with visible fibre. Two or three tasteful everyday props that clearly belong with this product's real use, arranged naturally (not perfectly symmetrical). Soft daylight, real soft shadows on the surface, product centred and clearly the hero. No text.",
   },
 ];
 
 function personStyles(modelLine: string, brandModelBinding: string, isDraped: boolean): StyleDef[] {
   const drapeRules = `If it is a draped Indian garment (saree, dupatta, lehenga, stole), the COMPLETE drape must be visible and correctly formed in the frame: pleats neat at the waist, pallu over the LEFT shoulder falling to the back, border continuous and unbroken along the whole length, full length of the garment from shoulder to hem visible. If the correct drape cannot be produced with confidence, prefer a well-lit product-only shot to a badly draped or badly cropped model shot.`;
-  const bodyRules = `Natural pose, natural light, hands and fingers correct (five fingers, no distortion), arms held slightly away from the body so the garment is not hidden, face calm and pleasant, nothing exaggerated, no fashion-editorial posing, no text, no logo, no watermark. The person is a clearly adult model — 25 to 40 years old, unmistakably an adult. Never depict a child, teenager, or minor.`;
-  const fidelity = `The garment/item must match the uploaded photos exactly — same colour, same pattern, same border, same length, same fittings. Do not restyle, do not recolour, do not shorten, do not embellish.`;
+  const bodyRules = `Natural relaxed pose, hands and fingers correct (five fingers, no distortion), arms held slightly away from the body so the garment is not hidden, face calm and pleasant with a genuine relaxed expression — no fashion-editorial posing. The person is a clearly adult model — 25 to 40 years old, unmistakably an adult. Never a child, teenager or minor.`;
+  const skinRules = `Natural skin texture with visible pores, fine hair and normal skin tone variation. NO skin smoothing, NO beauty retouching, NO airbrush, NO plastic complexion, NO glowing skin. Small honest details — a stray hair, faint under-eye tone, an ordinary mark — are welcome. Hair is real hair with individual strands, not a smooth cap.`;
   const FRAMING_HARD_RULE = `HARD FRAMING RULE — the entire product must be ENTIRELY WITHIN THE FRAME, fully visible from every side, with clear margin on all four sides, NEVER cut off by any edge of the image. Do not crop into the product. If framing forces a choice between showing the model's face and showing the whole garment, ALWAYS show the whole garment — crop the face, never the product.`;
   const whitePrompt = isDraped
-    ? "Reproduce the exact same draped garment from the input photo — same colour, weave, border, and pattern. Present it for e-commerce WITHOUT a person: neatly folded on a clean white surface OR partially draped over a plain wooden hanger/stand so the fabric, border and pallu/pattern read clearly. Pure clean white studio background suitable for Amazon/Flipkart marketplace main image, soft even lighting, subtle contact shadow, centred, generous margin on all four sides so nothing touches the frame edge, no props, no text, high detail, photorealistic. Never a flat rectangle of cloth. No person, no hands, no mannequin face."
-    : "Reproduce the exact same product from the input photo — same shape, colour, material, branding, and label. Place it on a pure clean white studio background suitable for Amazon/Flipkart marketplace main image, soft even lighting, subtle contact shadow, centred, generous even margin on all four sides so nothing touches the frame edge, no props, no text, high detail, photorealistic. No person.";
+    ? "White-background e-commerce shot of the exact same draped garment from the references — same colour, weave, border and pattern. Present it WITHOUT a person: neatly folded on a clean matte white paper sweep OR partially draped over a plain wooden hanger/stand so the fabric, border and pallu read clearly. Soft natural window light from the left, real soft contact shadow, centred with generous margin. Never a flat rectangle of cloth. No person, no hands, no mannequin face, no text."
+    : "White-background e-commerce shot for Amazon/Flipkart. Product on a clean matte white paper sweep (not a perfect void — a real paper surface, faint texture visible). Soft natural window light from the left, gentle real contact shadow. Centred with generous even margin on all four sides. No props, no text. No person.";
   return [
     { kind: "white", prompt: whitePrompt },
     {
       kind: "studio",
       prompt:
-        "Same product from the input photo, kept faithful in every detail. Place it on or against a neutral warm studio backdrop with soft lighting, gentle side shadow, minimal styling, premium e-commerce look. Product centred with clear even margin on all four sides — nothing touching the frame edge. Photorealistic. No people.",
+        "The same garment on or against a quiet ordinary indoor backdrop — a plain plaster wall with soft light falloff, or a wooden panel with visible grain. Soft daylight from a nearby window, gentle real side shadow, minimal styling. Product centred with clear even margin on all four sides — nothing touching the frame edge. No people.",
     },
     {
       kind: "onmodel_full",
       hasPerson: true,
-      prompt: `On-model FULL-BODY shot: one adult person wearing the product, framed from ABOVE THE HEAD down to BELOW THE FEET (or at minimum to mid-calf for full-length garments). The ENTIRE garment must be visible top to bottom with clear margin — for a saree, that means the complete drape: pleats at the waist, pallu over the left shoulder falling to the back, and the border continuous along the whole length; for a kurta, dress or lehenga, shoulder to hem fully in frame. Straight-on view, model standing naturally with arms held slightly away from the body so no part of the garment is hidden. ${FRAMING_HARD_RULE} ${modelLine} ${brandModelBinding} ${fidelity} ${drapeRules} ${bodyRules} Soft natural daylight, plain neutral background, photorealistic, catalogue-quality.`,
+      prompt: `On-model FULL-BODY shot: one adult person wearing the product, framed from ABOVE THE HEAD down to BELOW THE FEET (or at minimum to mid-calf for full-length garments). The ENTIRE garment must be visible top to bottom with clear margin — for a saree, that means the complete drape: pleats at the waist, pallu over the left shoulder falling to the back, and the border continuous along the whole length; for a kurta, dress or lehenga, shoulder to hem fully in frame. Straight-on view, model standing naturally with arms held slightly away from the body so no part of the garment is hidden. ${FRAMING_HARD_RULE} ${modelLine} ${brandModelBinding} ${PRODUCT_FIDELITY} ${drapeRules} ${bodyRules} ${skinRules} Soft natural indoor daylight from a nearby window, plain ordinary neutral wall behind the model, real soft shadow. Photograph, not fashion editorial.`,
     },
     {
       kind: "onmodel_detail",
       hasPerson: true,
-      prompt: `On-model THREE-QUARTER / WAIST-UP detail shot of the same adult person: closer framing to show fabric, weave, border, neckline and how the garment falls — but NEVER a tight crop into the product. Frame from head to waist at minimum so the viewer still understands what they are looking at; the section of the product shown must be entirely within the frame with clear margin, never becoming an abstract patch of colour. ${FRAMING_HARD_RULE} ${modelLine} ${brandModelBinding} ${fidelity} ${drapeRules} ${bodyRules} Soft natural daylight, plain neutral background, photorealistic.`,
+      prompt: `On-model THREE-QUARTER / WAIST-UP detail shot of the same adult person: closer framing to show fabric, weave, border, neckline and how the garment falls — but NEVER a tight crop into the product. Frame from head to waist at minimum so the viewer still understands what they are looking at; the section of the product shown must be entirely within the frame with clear margin, never becoming an abstract patch of colour. ${FRAMING_HARD_RULE} ${modelLine} ${brandModelBinding} ${PRODUCT_FIDELITY} ${drapeRules} ${bodyRules} ${skinRules} Soft natural indoor daylight, plain ordinary neutral wall behind the model, real soft shadow.`,
     },
   ];
 }
@@ -282,22 +304,22 @@ const KIDSWEAR_STYLES: StyleDef[] = [
   {
     kind: "white",
     prompt:
-      "Reproduce the exact same children's garment from the input photo — same colour, pattern, print, and stitching. Present it on a pure clean white studio background, laid flat and neatly arranged so the front is clearly visible and the shape reads well. Marketplace main image quality, soft even lighting, subtle contact shadow, centred, no props, no text, photorealistic. Absolutely no person, no child, no adult, no hands, no mannequin face.",
+      "White-background e-commerce shot of the exact same children's garment from the references — same colour, pattern, print and stitching. Laid flat and neatly arranged on a clean matte white paper sweep so the front is clearly visible and the shape reads well. Soft natural window light from the left, real soft contact shadow, centred, no props, no text. Absolutely no person, no child, no adult, no hands, no mannequin face.",
   },
   {
     kind: "hanger",
     prompt:
-      "Same children's garment from the input photo, kept faithful. Presented on a plain wooden or white clothing hanger against a soft neutral studio backdrop, gently lit, showing the full shape and length of the garment. No person, no child, no hands, no mannequin face.",
+      "The same children's garment on a plain wooden or white clothing hanger against an ordinary neutral wall, soft daylight from a nearby window, real soft shadow on the wall, showing the full shape and length of the garment. No person, no child, no hands, no mannequin face.",
   },
   {
     kind: "ghost",
     prompt:
-      "Same children's garment from the input photo, kept faithful. Ghost-mannequin style: the garment appears filled out and holds its natural shape as if worn, but there is NO person and NO visible mannequin — the inside is hollow. Plain soft neutral studio background, even lighting, photorealistic e-commerce catalogue look. Absolutely no child, no adult, no hands, no face.",
+      "The same children's garment in ghost-mannequin style: the garment appears filled out and holds its natural shape as if worn, but there is NO person and NO visible mannequin — the inside is hollow. Plain ordinary neutral backdrop, soft natural daylight, real soft shadow. Absolutely no child, no adult, no hands, no face.",
   },
   {
     kind: "flatlay",
     prompt:
-      "Same children's garment from the input photo, kept faithful. Overhead flat-lay on a soft neutral textured surface, neatly arranged, one or two tasteful child-appropriate props that clearly belong (a small folded blanket, a wooden toy at a distance) — never a child, never hands, never a person. Balanced composition, soft daylight, garment centred, photorealistic.",
+      "The same children's garment shot from directly above on a real textured neutral surface — plain linen or unpolished wood with visible grain — neatly arranged. One or two tasteful child-appropriate props that clearly belong (a small folded blanket, a wooden toy at a distance) — never a child, never hands, never a person. Soft daylight, real soft shadows, garment centred.",
   },
 ];
 
