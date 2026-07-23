@@ -343,7 +343,7 @@ function PackCard({ plan, busy, onBuy }: { plan: Plan; busy: boolean; onBuy: () 
           type="button"
           onClick={onBuy}
           disabled={busy}
-          className="mt-2 inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-[13px] font-semibold text-primary-foreground hover:brightness-110 disabled:opacity-60"
+          className="mt-2 inline-flex h-9 items-center justify-center gap-1.5 rounded-full btn-accent px-4 text-[13px] font-semibold disabled:opacity-60"
         >
           {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
           Buy
