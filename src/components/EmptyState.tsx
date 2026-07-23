@@ -88,6 +88,10 @@ export function IllustrationCalendar() {
   );
 }
 
+export function IllustrationBoxes() {
+  return IllustrationStock();
+}
+
 export function IllustrationStock() {
   return (
     <svg viewBox="0 0 120 120" width="120" height="120" {...sv} className="draw-in">
