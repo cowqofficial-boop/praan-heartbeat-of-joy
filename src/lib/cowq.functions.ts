@@ -241,21 +241,52 @@ async function generateOneImage(
   targetSize = 2048,
   allowPerson = false,
 ): Promise<string> {
-  const sizeHint = `Render at ${targetSize} by ${targetSize} pixels, square 1:1, photorealistic, catalogue-quality, high detail. Subject centred with generous margin so nothing important is cropped when reframed to vertical.`;
+  const sizeHint = `Render at ${targetSize} by ${targetSize} pixels, square 1:1, photorealistic, catalogue-quality, high detail. The subject must be entirely within the frame with generous even margin on all four sides — nothing important may touch or exceed any edge of the image, so it stays uncropped when reframed to vertical.`;
   const multiHint =
     refs.length > 1
       ? `You are given ${refs.length} reference images. The FIRST images are photos of the same single product from different angles — use them together to keep the product's true shape, colour, material, branding and any labels faithful from every side. Any final reference (if present) is a PERSON portrait to keep the model's face and appearance consistent — reuse that same person.`
       : "Keep the product identical to the reference photo — same shape, colour, material, branding and label.";
   const peopleRule = allowPerson ? "" : NO_PEOPLE;
-  const full = `${prompt} ${sizeHint} ${peopleRule} ${multiHint}`;
-  const [primary, ...extras] = refs;
-  const out = await geminiGenerateImage({
-    prompt: full,
-    reference: { mimeType: primary.mime, b64: primary.b64 },
-    extraReferences: extras.map((e) => ({ mimeType: e.mime, b64: e.b64 })),
-  });
-  return out.b64;
+
+  async function runOnce(extraGuidance = ""): Promise<string> {
+    const full = `${prompt} ${sizeHint} ${peopleRule} ${multiHint} ${extraGuidance}`.trim();
+    const [primary, ...extras] = refs;
+    const out = await geminiGenerateImage({
+      prompt: full,
+      reference: { mimeType: primary.mime, b64: primary.b64 },
+      extraReferences: extras.map((e) => ({ mimeType: e.mime, b64: e.b64 })),
+    });
+    return out.b64;
+  }
+
+  const first = await runOnce();
+  if (!allowPerson) return first;
+
+  // On-model shots: verify the product isn't cropped at any frame edge; retry once free if it is.
+  try {
+    const verdict = await geminiGenerateText({
+      parts: [
+        { inlineData: { mimeType: "image/png", data: first } },
+        {
+          text:
+            'Look at this on-model photo. Is any part of the garment/product cut off by the top, bottom, left, or right edge of the image, or does the product touch a frame edge with no visible margin? Answer with ONLY the single word "yes" or "no".',
+        },
+      ],
+      temperature: 0,
+      maxOutputTokens: 4,
+    });
+    if (/^\s*yes\b/i.test(verdict)) {
+      const retry = await runOnce(
+        "PREVIOUS ATTEMPT CROPPED THE PRODUCT. Pull the camera BACK and zoom OUT significantly so the entire garment and person fit comfortably inside the frame with clear empty margin on all four sides. Prioritise showing the whole product over showing the model's face — crop the face at the top if you must, but never crop the product.",
+      );
+      return retry;
+    }
+  } catch {
+    // Verification is best-effort; if it fails, keep the first image.
+  }
+  return first;
 }
+
 
 export const generateImages = createServerFn({ method: "POST" })
   .inputValidator(
