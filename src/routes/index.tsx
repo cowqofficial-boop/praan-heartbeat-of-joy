@@ -232,10 +232,10 @@ function Upload() {
       )}
 
       <div className="w-full max-w-sm">
-        <h1 className="font-display text-[32px] leading-[1.05] text-ink">
+        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">
           One photo. Everything you need to sell it.
         </h1>
-        <p className="mt-3 text-[15px] text-muted">
+        <p className="mt-4 text-[15px] text-muted">
           Studio photos, listing, and a catalog file — from your phone.
         </p>
 
@@ -243,7 +243,7 @@ function Upload() {
           <button
             type="button"
             onClick={() => mainInputRef.current?.click()}
-            className="mt-8 flex aspect-square w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[14px] bg-surface text-ink transition-colors active:bg-[#eeeeeb]"
+            className="card-lift mt-10 flex aspect-square w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[16px] text-ink"
           >
             <span className="grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground">
               <Camera className="h-7 w-7" />
