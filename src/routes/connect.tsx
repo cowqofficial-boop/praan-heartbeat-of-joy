@@ -59,7 +59,7 @@ function ConnectPage() {
   });
 
   async function handleDisconnect(channel: ChannelStatus["channel"]) {
-    if (!confirm("Disconnect this channel?")) return;
+    if (!(await showConfirm({ title: "Disconnect this channel?", body: "You can reconnect any time from this page.", confirmLabel: "Disconnect", destructive: true }))) return;
     await disconnectChannel({ data: { channel } });
     qc.invalidateQueries({ queryKey: ["channels"] });
   }
