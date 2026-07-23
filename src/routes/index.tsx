@@ -535,14 +535,19 @@ function Landing() {
           <Reveal delay={80}>
             <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {[
-                { t: "Marketplace sellers", b: "Amazon, Flipkart, Meesho." },
-                { t: "Instagram & WhatsApp shops", b: "Post daily without a designer." },
-                { t: "Physical shops going online", b: "Your first proper catalog." },
-                { t: "Anyone with a product", b: "And no team behind them." },
+                { t: "Marketplace sellers", b: "Amazon, Flipkart, Meesho.", src: who1.url, alt: "Marketplace packing table with boxes" },
+                { t: "Instagram & WhatsApp shops", b: "Post daily without a designer.", src: who2.url, alt: "Phone showing an Instagram shop grid" },
+                { t: "Physical shops going online", b: "Your first proper catalog.", src: who3.url, alt: "Small retail shop counter" },
+                { t: "Anyone with a product", b: "And no team behind them.", src: who4.url, alt: "Artisan workbench with tools" },
               ].map((c) => (
-                <div key={c.t} className="rounded-[16px] bg-background p-5">
-                  <p className="text-[15px] font-semibold text-ink">{c.t}</p>
-                  <p className="mt-1 text-[13px] text-muted">{c.b}</p>
+                <div key={c.t} className="overflow-hidden rounded-[16px] bg-background">
+                  <div className="relative aspect-[4/3]">
+                    <img src={c.src} alt={c.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                  </div>
+                  <div className="p-5">
+                    <p className="text-[15px] font-semibold text-ink">{c.t}</p>
+                    <p className="mt-1 text-[13px] text-muted">{c.b}</p>
+                  </div>
                 </div>
               ))}
             </div>
