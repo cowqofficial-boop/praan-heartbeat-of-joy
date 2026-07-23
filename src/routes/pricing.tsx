@@ -321,8 +321,8 @@ function PlanCard({
 
 function PackCard({ plan, busy, onBuy }: { plan: Plan; busy: boolean; onBuy: () => void }) {
   return (
-    <div className="flex items-center justify-between rounded-[16px] bg-surface p-4"
-         style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)" }}>
+    <div className="flex items-center justify-between card-lift p-4">
+
       <div>
         <p className="text-[15px] font-semibold text-ink">{plan.name}</p>
         <p className="mt-0.5 text-[12px] text-muted">One-time · credits never expire</p>
