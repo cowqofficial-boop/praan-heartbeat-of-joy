@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Boxes, CalendarDays, LibraryBig, LogOut, Package, Plus, Receipt, Search, Settings2, Trash2, Pencil, Link2 } from "lucide-react";
+import { CalendarDays, MoreHorizontal, Package, Plus, Search, Trash2, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteMyProduct, listMyProducts, renameMyProduct, type LibraryItem } from "@/lib/library.functions";
 import { CreditBadge } from "@/components/CreditBadge";
@@ -10,6 +10,8 @@ import { ReconnectBanner } from "@/components/ReconnectBanner";
 import { PageHeader } from "@/components/PageHeader";
 import { EmptyState, IllustrationShelf } from "@/components/EmptyState";
 import { NudgeCard } from "@/components/NudgeCard";
+import { MobileNavSheet } from "@/components/MobileNavSheet";
+import { showConfirm, showPrompt } from "@/components/Dialogs";
 
 
 
@@ -32,6 +34,7 @@ function LibraryPage() {
   const qc = useQueryClient();
   const [authReady, setAuthReady] = useState(false);
   const [query, setQuery] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -63,20 +66,29 @@ function LibraryPage() {
     );
   }
 
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    navigate({ to: "/" });
-  }
+
+
 
   async function handleRename(item: LibraryItem) {
-    const name = prompt("Rename product", item.product_name ?? "");
-    if (!name || !name.trim()) return;
-    await renameMyProduct({ data: { id: item.id, name: name.trim() } });
+    const name = await showPrompt({
+      title: "Rename product",
+      label: "Product name",
+      defaultValue: item.product_name ?? "",
+      placeholder: "e.g. Terracotta serving bowl",
+    });
+    if (!name) return;
+    await renameMyProduct({ data: { id: item.id, name } });
     qc.invalidateQueries({ queryKey: ["library"] });
   }
 
   async function handleDelete(item: LibraryItem) {
-    if (!confirm(`Delete "${item.product_name ?? "this product"}"? This can't be undone.`)) return;
+    const ok = await showConfirm({
+      title: `Delete "${item.product_name ?? "this product"}"?`,
+      body: "This can't be undone.",
+      destructive: true,
+      confirmLabel: "Delete",
+    });
+    if (!ok) return;
     await deleteMyProduct({ data: { id: item.id } });
     qc.invalidateQueries({ queryKey: ["library"] });
   }
@@ -101,16 +113,21 @@ function LibraryPage() {
             action={{ label: "Add a product", to: "/create", icon: Plus }}
           />
         </div>
-        <div className="flex items-center gap-1 lg:hidden">
+        <div className="flex items-center gap-2 lg:hidden">
           <CreditBadge />
-          <Link to="/stock" className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Stock"><Boxes className="h-5 w-5" /></Link>
-          <Link to="/calendar" className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Content calendar"><CalendarDays className="h-5 w-5" /></Link>
-          <Link to="/connect" className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Connect channels"><Link2 className="h-5 w-5" /></Link>
-          <Link to="/billing" className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Billing"><Receipt className="h-5 w-5" /></Link>
-          <Link to="/brand-kit" className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Brand kit"><Settings2 className="h-5 w-5" /></Link>
-          <button type="button" onClick={handleSignOut} className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Sign out"><LogOut className="h-5 w-5" /></button>
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Open menu"
+            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
+            style={{ background: "var(--raised)" }}
+          >
+            <MoreHorizontal className="h-5 w-5" />
+          </button>
         </div>
       </div>
+      <MobileNavSheet open={menuOpen} onClose={() => setMenuOpen(false)} />
+
 
       <ReconnectBanner />
       <LowBalanceBanner />
@@ -187,9 +204,8 @@ function ProductCard({
     month: "short",
   });
   return (
-    <li className="stagger-item group relative overflow-hidden rounded-[16px] bg-surface transition-transform duration-200 hover:-translate-y-0.5"
-        style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)" }}
-    >
+    <li className="stagger-item card-lift group relative overflow-hidden transition-transform duration-200 hover:-translate-y-0.5">
+
       <Link
         to="/results/$id"
         params={{ id: item.id }}

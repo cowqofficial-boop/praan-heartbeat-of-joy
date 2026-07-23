@@ -175,10 +175,7 @@ export function UploadWidget({ compact = false }: { compact?: boolean }) {
           className={`flex w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[16px] bg-surface text-ink ${
             compact ? "aspect-[4/3]" : "aspect-square lg:aspect-[3/2]"
           }`}
-          style={{
-            boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.05), inset 0 0 80px 0 rgba(245,166,35,0.06), 0 1px 3px rgba(0,0,0,0.4)",
-          }}
+          style={{ boxShadow: "var(--shadow-card)" }}
         >
           <span className="grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground lg:h-20 lg:w-20">
             <Camera className="h-7 w-7 lg:h-8 lg:w-8" />

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { PageHeader, HelpButton } from "@/components/PageHeader";
 import { EmptyState, IllustrationBoxes } from "@/components/EmptyState";
+import { showConfirm } from "@/components/Dialogs";
 
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -281,7 +282,7 @@ function StockPage() {
                 const chip = statusChip(it.status);
                 const profit = it.selling_price_paise - it.cost_price_paise;
                 return (
-                  <li key={it.id} className="stagger-item rounded-[16px] bg-surface p-3" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)" }}>
+                  <li key={it.id} className="stagger-item card-lift p-3">
 
                     <div className="flex items-start gap-3">
                       {it.thumb_url ? (
@@ -329,7 +330,8 @@ function StockPage() {
                           Sold 1
                         </button>
                         <button type="button" aria-label="Delete item"
-                          onClick={() => { if (confirm(`Delete "${it.name}" from stock?`)) del.mutate({ data: { id: it.id } }); }}
+                          onClick={async () => { if (await showConfirm({ title: `Delete "${it.name}" from stock?`, body: "This can't be undone.", destructive: true, confirmLabel: "Delete" })) del.mutate({ data: { id: it.id } }); }}
+
                           className="grid h-9 w-9 place-items-center rounded-full text-muted hover:text-primary">
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -341,7 +343,7 @@ function StockPage() {
             </ul>
 
             {/* Desktop: table */}
-            <div className="hidden lg:block overflow-hidden rounded-[14px] bg-surface" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)" }}>
+            <div className="hidden lg:block overflow-hidden card-lift">
               <table className="w-full text-left text-[14px] text-ink">
                 <thead>
                   <tr className="text-[11px] uppercase tracking-wider text-muted">
@@ -401,7 +403,7 @@ function StockPage() {
                               Sold 1
                             </button>
                             <button type="button" aria-label="Delete item"
-                              onClick={() => { if (confirm(`Delete "${it.name}" from stock?`)) del.mutate({ data: { id: it.id } }); }}
+                              onClick={async () => { if (await showConfirm({ title: `Delete "${it.name}" from stock?`, body: "This can't be undone.", destructive: true, confirmLabel: "Delete" })) del.mutate({ data: { id: it.id } }); }}
                               className="grid h-8 w-8 place-items-center rounded-full text-muted hover:text-primary">
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -618,7 +620,8 @@ function UndoToast({ name, onUndo, onClose }: { name: string; onUndo: () => void
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-5">
       <div className="pointer-events-auto flex items-center gap-3 rounded-full bg-raised px-4 py-2.5 text-[13px] text-ink scale-in"
-           style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
+           style={{ boxShadow: "var(--shadow-raised)" }}>
+
         <span>Sold 1 · {name}</span>
         <button type="button" onClick={onUndo} className="text-marigold font-semibold hover:brightness-110">Undo</button>
       </div>

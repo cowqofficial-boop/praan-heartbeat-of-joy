@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Download, ExternalLink, Wallet } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
+import { showAlert, showConfirm } from "@/components/Dialogs";
 
 import { supabase } from "@/integrations/supabase/client";
 import { cancelMySubscription, getMyCredits, getMyPayments } from "@/lib/billing.functions";
@@ -48,9 +49,9 @@ function BillingPage() {
     mutationFn: () => cancelMySubscription(),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["my-credits"] });
-      alert("Your subscription will end at the end of the current cycle.");
+      showAlert({ title: "Subscription cancelled", body: "Your subscription will end at the end of the current cycle." });
     },
-    onError: (e) => alert(e instanceof Error ? e.message : String(e)),
+    onError: (e) => showAlert({ title: "Couldn't cancel subscription", body: e instanceof Error ? e.message : String(e) }),
   });
 
   if (!ready || !credits) {
@@ -117,7 +118,7 @@ function BillingPage() {
           {credits.razorpay_subscription_id && (
             <button
               type="button"
-              onClick={() => confirm("Cancel your subscription at end of cycle?") && cancel.mutate()}
+              onClick={async () => { if (await showConfirm({ title: "Cancel your subscription?", body: "It will remain active until the end of the current cycle.", confirmLabel: "Cancel plan", destructive: true })) cancel.mutate(); }}
               disabled={cancel.isPending}
               className="h-11 rounded-[12px] px-4 text-[14px] font-medium text-ink disabled:opacity-60"
             >

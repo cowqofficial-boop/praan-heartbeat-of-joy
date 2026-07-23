@@ -14,6 +14,7 @@ import {
 } from "@/lib/brand-kit.functions";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { PageHeader, HelpButton } from "@/components/PageHeader";
+import { showAlert, showConfirm } from "@/components/Dialogs";
 import { Palette } from "lucide-react";
 
 
@@ -163,7 +164,7 @@ function BrandKitPage() {
  const { url } = await generateBrandModelPortrait({ data: {} });
  setKit((k) => ({ ...k, brand_model_url: url, brand_model_enabled: true, brand_model_source: "ai" }));
  } catch (e) {
- alert("Couldn't generate your brand model. Try again.\n\n" + (e as Error).message);
+ await showAlert({ title: "Couldn't generate your brand model", body: "Try again.\n\n" + (e as Error).message });
  } finally {
  setModelBusy(false);
  }
@@ -176,14 +177,14 @@ function BrandKitPage() {
  const { url } = await generateBrandModelPortrait({ data: {} });
  setKit((k) => ({ ...k, brand_model_url: url, brand_model_enabled: true, brand_model_source: "ai", brand_model_photos: [] }));
  } catch (e) {
- alert("Couldn't generate your brand model. Try again.\n\n" + (e as Error).message);
+ await showAlert({ title: "Couldn't generate your brand model", body: "Try again.\n\n" + (e as Error).message });
  } finally {
  setModelBusy(false);
  }
  }
 
  async function removeRealModel() {
- if (!confirm("Delete your model's photos permanently?")) return;
+ if (!(await showConfirm({ title: "Delete your model's photos permanently?", body: "You can add new ones any time.", destructive: true, confirmLabel: "Delete" }))) return;
  setModelBusy(true);
  try {
  await removeRealBrandModel();
@@ -628,7 +629,7 @@ function RealModelUploader({
  });
  onUploaded(urls);
  } catch (e) {
- alert("Couldn't save your model photos.\n\n" + (e as Error).message);
+ await showAlert({ title: "Couldn't save your model photos", body: (e as Error).message });
  } finally {
  setModelBusy(false);
  }

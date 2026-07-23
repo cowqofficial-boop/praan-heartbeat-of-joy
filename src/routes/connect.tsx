@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { ArrowLeft, Check, Instagram, Facebook, MessageCircle, Loader2, Link2 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
+import { showConfirm } from "@/components/Dialogs";
 
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -58,7 +59,7 @@ function ConnectPage() {
   });
 
   async function handleDisconnect(channel: ChannelStatus["channel"]) {
-    if (!confirm("Disconnect this channel?")) return;
+    if (!(await showConfirm({ title: "Disconnect this channel?", body: "You can reconnect any time from this page.", confirmLabel: "Disconnect", destructive: true }))) return;
     await disconnectChannel({ data: { channel } });
     qc.invalidateQueries({ queryKey: ["channels"] });
   }

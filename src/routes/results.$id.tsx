@@ -11,6 +11,7 @@ import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import { useAuth } from "@/lib/use-auth";
 import { getMyCredits } from "@/lib/billing.functions";
 import { watermarkImageUrl } from "@/lib/watermark";
+import { showAlert } from "@/components/Dialogs";
 
 export const Route = createFileRoute("/results/$id")({
   head: ({ params }) => ({
@@ -247,7 +248,7 @@ function PhotosSection({
           style={{
             aspectRatio: ratio === "1:1" ? "1 / 1" : "9 / 16",
             maxHeight: "72vh",
-            boxShadow: "0 24px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04)",
+            boxShadow: "var(--shadow-raised)",
           }}
         >
           {current && (
@@ -344,7 +345,7 @@ function PhotosSection({
           category={category}
           originalUrl={originalUrl}
           onDone={onDone}
-          onLimit={() => alert("You've used today's free products. Come back tomorrow.")}
+          onLimit={() => showAlert({ title: "That's today's free products used", body: "Come back tomorrow — the daily limit resets at midnight." })}
         />
       )}
     </section>
@@ -388,7 +389,7 @@ function MobileCarousel({
               className="relative w-full overflow-hidden rounded-[16px] bg-surface"
               style={{
                 aspectRatio: ratio === "1:1" ? "1 / 1" : "9 / 16",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
+                boxShadow: "var(--shadow-raised)",
               }}
             >
               <img src={img.url} alt={img.kind} className="h-full w-full object-cover img-warm" />
@@ -543,7 +544,7 @@ async function downloadAllPhotos(images: GenImage[], name: string, watermark: bo
     a.click();
     URL.revokeObjectURL(url);
   } catch {
-    alert("Couldn't build the ZIP. Try again.");
+    showAlert({ title: "Couldn't build the ZIP", body: "Try again in a moment." });
   }
 }
 
@@ -733,7 +734,7 @@ function MakeMoreButton({
         } catch (e) {
           const msg = String((e as Error).message);
           if (msg.includes("DAILY_LIMIT")) onLimit();
-          else alert("Photos didn't come through. Try again.");
+          else showAlert({ title: "Photos didn't come through", body: "Try again in a moment." });
         } finally {
           setBusy(false);
         }
