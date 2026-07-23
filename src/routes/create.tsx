@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { LibraryBig } from "lucide-react";
 import { UploadWidget } from "@/components/UploadWidget";
+import { HelpButton } from "@/components/PageHeader";
 import { useAuth } from "@/lib/use-auth";
 
 export const Route = createFileRoute("/create")({
@@ -38,9 +39,22 @@ function CreatePage() {
       )}
 
       <div className="w-full max-w-sm lg:max-w-[640px]">
-        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px] lg:text-[72px]">
-          One photo. Everything you need to sell it.
-        </h1>
+        <div className="flex items-start gap-2">
+          <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px] lg:text-[72px]">
+            One photo. Everything you need to sell it.
+          </h1>
+          <div className="mt-3 lg:mt-4">
+            <HelpButton
+              label="Photo tips"
+              content={
+                <>
+                  <p className="font-semibold text-ink">Photo tips</p>
+                  <p className="mt-1 text-muted">Take a normal photo on a normal table. Add two or three more angles if you can — the back, a close-up, the label. Better input, better output.</p>
+                </>
+              }
+            />
+          </div>
+        </div>
         <p className="mt-4 text-[15px] text-muted lg:text-[17px]">
           Studio photos, listing, and a catalog file — from your phone.
         </p>
@@ -52,3 +66,4 @@ function CreatePage() {
     </main>
   );
 }
+

@@ -1,15 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Boxes, CalendarDays, LibraryBig, LogOut, Plus, Receipt, Search, Settings2, Trash2, Pencil, Link2 } from "lucide-react";
+import { Boxes, CalendarDays, LibraryBig, LogOut, Package, Plus, Receipt, Search, Settings2, Trash2, Pencil, Link2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteMyProduct, listMyProducts, renameMyProduct, type LibraryItem } from "@/lib/library.functions";
 import { CreditBadge } from "@/components/CreditBadge";
 import { LowBalanceBanner } from "@/components/LowBalanceBanner";
 import { ReconnectBanner } from "@/components/ReconnectBanner";
 import { PageHeader } from "@/components/PageHeader";
-import { EmptyState, IllustrationProduct } from "@/components/EmptyState";
+import { EmptyState, IllustrationShelf } from "@/components/EmptyState";
 import { NudgeCard } from "@/components/NudgeCard";
+
 
 
 export const Route = createFileRoute("/library")({
@@ -86,18 +87,18 @@ function LibraryPage() {
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
           <PageHeader
-            icon={LibraryBig}
+            icon={Package}
             title="Your products"
-            subtitle="Every product you've made — reopen, rename, or start a new one."
+            subtitle="Everything you've made with CowQ lives here. Open any product to download its photos and copy again."
             help={
               <>
-                <p className="font-semibold text-ink">Your product library</p>
+                <p className="font-semibold text-ink">Your library</p>
                 <p className="mt-1 text-muted">
-                  Every product you upload shows up here as a card. Tap one to see its photos, listing text and catalog file again. Rename or delete from the corner icons.
+                  Every product you create is saved automatically. Come back any time — the photos, the listing and the catalog file are all still here. Nothing expires.
                 </p>
               </>
             }
-            action={{ label: "Add new product", to: "/create", icon: Plus }}
+            action={{ label: "Add a product", to: "/create", icon: Plus }}
           />
         </div>
         <div className="flex items-center gap-1 lg:hidden">
@@ -132,9 +133,9 @@ function LibraryPage() {
           <p className="text-[15px] text-muted">Loading…</p>
         ) : items.length === 0 ? (
           <EmptyState
-            illustration={<IllustrationProduct />}
-            title="Add your first product"
-            body="Your products will appear here once you upload a photo. One photo becomes studio images, listing text and a catalog file."
+            illustration={<IllustrationShelf />}
+            title="Your products will appear here"
+            body="Make your first one — photos, listing and catalog file, in about a minute."
             action={{ label: "Add your first product", to: "/create" }}
             help={
               <>
@@ -157,7 +158,7 @@ function LibraryPage() {
       {items.length > 0 && (
         <NudgeCard
           icon={CalendarDays}
-          text="Your products are ready. Plan a month of posts from them."
+          text="Plan a month of posts from these."
           linkLabel="Open calendar"
           to="/calendar"
         />

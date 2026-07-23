@@ -1,12 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Download, ExternalLink, Wallet } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 
 import { supabase } from "@/integrations/supabase/client";
 import { cancelMySubscription, getMyCredits, getMyPayments } from "@/lib/billing.functions";
-import { formatInr } from "@/lib/plans";
+import { formatInr, getPlan } from "@/lib/plans";
 
 export const Route = createFileRoute("/billing")({
   head: () => ({
@@ -72,29 +72,35 @@ function BillingPage() {
       </Link>
       <PageHeader
         icon={Wallet}
-        title="Billing"
-        subtitle="Your plan, credits and past payments — in one place."
+        title="Plan and credits"
+        subtitle="What you're on, what you've used, and what's left."
         help={
           <>
-            <p className="font-semibold text-ink">What's on this page</p>
-            <p className="mt-1 text-muted">Your current plan, credits remaining and every payment you've made. Change plans or top up any time — no lock-in.</p>
+            <p className="font-semibold text-ink">How credits work</p>
+            <p className="mt-1 text-muted">Credits are spent when CowQ makes something. A full product costs 90. Monthly credits reset on your billing date; credits you buy separately never expire.</p>
           </>
         }
+        action={{
+          label: credits.plan_id === "free" ? "Upgrade" : "Buy credits",
+          to: "/pricing",
+        }}
       />
-
-
 
       {/* Current plan */}
       <section className="mt-4 rounded-[16px] bg-raised p-5">
-        <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">Current plan</p>
-        <p className="mt-1 font-display text-[26px] text-ink">{credits.plan_name}</p>
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <Stat label="Credits left" value={credits.total.toLocaleString("en-IN")} />
-          <Stat
-            label={credits.period_end ? "Renews" : "Never expires"}
-            value={credits.period_end ? new Date(credits.period_end).toLocaleDateString("en-IN", { day: "numeric", month: "short" }) : "—"}
-          />
+        <div className="flex items-baseline justify-between gap-4">
+          <div>
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">Current plan</p>
+            <p className="mt-1 font-display text-[26px] text-ink">{credits.plan_name}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[12px] uppercase tracking-wide text-muted">{credits.period_end ? "Renews" : "Credits never expire"}</p>
+            <p className="mt-0.5 text-[14px] font-medium text-ink">
+              {credits.period_end ? new Date(credits.period_end).toLocaleDateString("en-IN", { day: "numeric", month: "short" }) : "—"}
+            </p>
+          </div>
         </div>
+        <CreditBar credits={credits} />
         {credits.pack_credits > 0 && (
           <p className="mt-3 text-[12px] text-muted">
             Includes {credits.pack_credits} pack credit{credits.pack_credits === 1 ? "" : "s"} that never expire.
@@ -103,7 +109,8 @@ function BillingPage() {
         <div className="mt-5 flex gap-2">
           <Link
             to="/pricing"
-            className="flex h-11 flex-1 items-center justify-center rounded-[12px] bg-primary text-[14px] font-semibold text-primary-foreground"
+            className="flex h-11 flex-1 items-center justify-center rounded-[12px] text-[14px] font-semibold"
+            style={{ background: "#3B82F6", color: "#F2F7FF" }}
           >
             {credits.plan_id === "free" ? "Upgrade" : "Change plan / top up"}
           </Link>
@@ -185,6 +192,31 @@ function Stat({ label, value }: { label: string; value: string }) {
     <div className="rounded-[12px] bg-surface p-3">
       <p className="text-[11px] uppercase tracking-wide text-muted">{label}</p>
       <p className="mt-0.5 font-display text-[20px] text-ink">{value}</p>
+    </div>
+  );
+}
+
+function CreditBar({ credits }: { credits: { plan_id: string; total: number; pack_credits: number } }) {
+  const plan = getPlan(credits.plan_id);
+  const monthlyQuota = plan.credits > 0 ? plan.credits : 300;
+  const subscriptionLeft = Math.max(0, credits.total - credits.pack_credits);
+  const used = Math.max(0, Math.min(monthlyQuota, monthlyQuota - subscriptionLeft));
+  const pct = Math.round((used / monthlyQuota) * 100);
+  return (
+    <div className="mt-5">
+      <div className="flex items-baseline justify-between text-[13px]">
+        <span className="text-muted">Used this cycle</span>
+        <span className="font-mono tabular-nums text-ink">
+          <span className="font-semibold">{used.toLocaleString("en-IN")}</span>
+          <span className="text-muted"> / {monthlyQuota.toLocaleString("en-IN")}</span>
+        </span>
+      </div>
+      <div className="mt-2 h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--surface)" }}>
+        <div className="h-full rounded-full transition-[width] duration-500" style={{ width: `${pct}%`, background: "#3B82F6" }} />
+      </div>
+      <p className="mt-2 text-[12px] text-muted">
+        <span className="font-mono tabular-nums text-ink">{credits.total.toLocaleString("en-IN")}</span> credits left · about {Math.floor(credits.total / 90)} products.
+      </p>
     </div>
   );
 }

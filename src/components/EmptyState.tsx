@@ -88,16 +88,44 @@ export function IllustrationCalendar() {
   );
 }
 
+export function IllustrationBoxes() {
+  return IllustrationStock();
+}
+
 export function IllustrationStock() {
   return (
     <svg viewBox="0 0 120 120" width="120" height="120" {...sv} className="draw-in">
-      <path d="M18 46 L60 26 L102 46 L60 66 Z" />
-      <path d="M18 46 L18 82 L60 102 L102 82 L102 46" />
-      <path d="M60 66 L60 102" />
-      <path d="M39 36 L81 56" />
+      {/* stacked boxes */}
+      <rect x="20" y="66" width="36" height="30" rx="3" />
+      <path d="M20 74 L56 74" />
+      <path d="M34 66 L34 74 M42 66 L42 74" />
+      <rect x="62" y="66" width="36" height="30" rx="3" />
+      <path d="M62 74 L98 74" />
+      <path d="M76 66 L76 74 M84 66 L84 74" />
+      <rect x="40" y="34" width="36" height="30" rx="3" />
+      <path d="M40 42 L76 42" />
+      <path d="M54 34 L54 42 M62 34 L62 42" />
     </svg>
   );
 }
+
+export function IllustrationShelf() {
+  return (
+    <svg viewBox="0 0 120 120" width="120" height="120" {...sv} className="draw-in">
+      {/* two shelves with a few products */}
+      <path d="M18 54 L102 54" />
+      <path d="M18 90 L102 90" />
+      <path d="M22 54 L22 96 M98 54 L98 96" />
+      <rect x="28" y="36" width="14" height="18" rx="2" />
+      <rect x="48" y="30" width="18" height="24" rx="2" />
+      <circle cx="82" cy="46" r="8" />
+      <rect x="30" y="70" width="20" height="20" rx="2" />
+      <rect x="58" y="66" width="14" height="24" rx="2" />
+      <rect x="80" y="74" width="14" height="16" rx="2" />
+    </svg>
+  );
+}
+
 
 export function IllustrationConnect() {
   return (
