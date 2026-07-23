@@ -61,13 +61,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "theme-color", content: "#DC3B28" },
-      { title: "CowQ Ai — one photo, everything you need to sell it" },
+      { title: "CowQ — one photo, everything you need to sell it" },
       {
         name: "description",
         content:
           "Upload one product photo. Get studio photos, sales copy, and a catalog file — ready to sell on Amazon, Flipkart, Meesho, Instagram, and WhatsApp.",
       },
-      { property: "og:title", content: "CowQ Ai — one photo, everything you need to sell it" },
+      { property: "og:title", content: "CowQ — one photo, everything you need to sell it" },
       {
         property: "og:description",
         content: "Studio photos, listing, and catalog file from one product photo.",
@@ -93,7 +93,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
-          name: "CowQ Ai",
+          name: "CowQ",
           url: "https://praan-heartbeat-of-joy.lovable.app/",
           logo: "https://praan-heartbeat-of-joy.lovable.app/icon-512.png",
         }),

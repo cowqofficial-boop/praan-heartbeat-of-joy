@@ -9,7 +9,7 @@ import { formatInr } from "@/lib/plans";
 export const Route = createFileRoute("/billing")({
   head: () => ({
     meta: [
-      { title: "Billing — CowQ Ai" },
+      { title: "Billing — CowQ" },
       { name: "robots", content: "noindex, follow" },
     ],
   }),

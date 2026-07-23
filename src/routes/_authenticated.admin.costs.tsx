@@ -6,9 +6,9 @@ import { listRecentGenerations } from "@/lib/admin.functions";
 export const Route = createFileRoute("/_authenticated/admin/costs")({
   head: () => ({
     meta: [
-      { title: "Admin — cost tracking | CowQ Ai" },
+      { title: "Admin — cost tracking | CowQ" },
       { name: "description", content: "Recent generations with model and image counts to work out cost per product." },
-      { property: "og:title", content: "CowQ Ai admin — cost tracking" },
+      { property: "og:title", content: "CowQ admin — cost tracking" },
       { property: "og:description", content: "Per-generation model + image usage." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

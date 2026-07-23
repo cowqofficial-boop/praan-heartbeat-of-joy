@@ -7,7 +7,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 function html(body: string, status = 200): Response {
   return new Response(
-    `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CowQ Ai — Instagram</title><style>
+    `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CowQ — Instagram</title><style>
       body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#FAF7F2;color:#1a1a1a;padding:32px 20px;max-width:480px;margin:0 auto;line-height:1.5}
       h1{font-size:22px;margin:0 0 12px}
       p{font-size:15px;color:#555;margin:0 0 20px}
@@ -18,7 +18,7 @@ function html(body: string, status = 200): Response {
 }
 
 function ok(msg: string) {
-  return html(`<h1>Connected ✓</h1><p>${msg}</p><a class="btn" href="/connect">Back to CowQ Ai</a><script>setTimeout(()=>{location.href="/connect"},1500)</script>`);
+  return html(`<h1>Connected ✓</h1><p>${msg}</p><a class="btn" href="/connect">Back to CowQ</a><script>setTimeout(()=>{location.href="/connect"},1500)</script>`);
 }
 function fail(msg: string) {
   return html(`<h1>Couldn't connect</h1><p>${msg}</p><a class="btn" href="/connect">Try again</a>`, 400);

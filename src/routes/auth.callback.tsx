@@ -7,7 +7,7 @@ import { useEffect } from "react";
 export const Route = createFileRoute("/auth/callback")({
   head: () => ({
     meta: [
-      { title: "Signing you in — CowQ Ai" },
+      { title: "Signing you in — CowQ" },
       { name: "robots", content: "noindex, follow" },
     ],
   }),

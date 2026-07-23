@@ -10,13 +10,13 @@ import { PrimaryButton } from "@/components/PrimaryButton";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "CowQ Ai — AI Product Photos & Listings for Indian Sellers" },
+      { title: "CowQ — AI Product Photos & Listings for Indian Sellers" },
       {
         name: "description",
         content:
           "Upload one product photo. Get studio photos, sales copy, and a Shopify catalog file — ready to sell on Amazon, Flipkart, Meesho, Instagram, and WhatsApp.",
       },
-      { property: "og:title", content: "CowQ Ai — AI Product Photos & Listings for Indian Sellers" },
+      { property: "og:title", content: "CowQ — AI Product Photos & Listings for Indian Sellers" },
       {
         property: "og:description",
         content:
@@ -32,7 +32,7 @@ export const Route = createFileRoute("/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebSite",
-          name: "CowQ Ai",
+          name: "CowQ",
           url: "https://praan-heartbeat-of-joy.lovable.app/",
         }),
       },
@@ -41,7 +41,7 @@ export const Route = createFileRoute("/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
-          name: "CowQ Ai",
+          name: "CowQ",
           url: "https://praan-heartbeat-of-joy.lovable.app/",
           logo: "https://praan-heartbeat-of-joy.lovable.app/icon-512.png",
         }),

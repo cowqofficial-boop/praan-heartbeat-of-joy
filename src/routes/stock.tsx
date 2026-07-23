@@ -26,9 +26,9 @@ import { formatInr } from "@/lib/plans";
 export const Route = createFileRoute("/stock")({
   head: () => ({
     meta: [
-      { title: "Stock — CowQ Ai" },
+      { title: "Stock — CowQ" },
       { name: "description", content: "Track what's in stock, low, or sold out. Log every movement and see your inventory value." },
-      { property: "og:title", content: "Stock — CowQ Ai" },
+      { property: "og:title", content: "Stock — CowQ" },
       { property: "og:description", content: "Stock management for Indian sellers — free on every plan." },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex, follow" },
