@@ -145,17 +145,18 @@ function StockPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col px-6 pb-24 pt-8 lg:px-10">
+    <main className="flex min-h-screen flex-col px-6 pb-24 pt-8 lg:px-0 lg:pt-12">
       <header className="flex items-center gap-3">
         <Link
           to="/library"
-          className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink"
+          className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink lg:hidden"
           aria-label="Back"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <h1 className="page-headline sm:text-[56px]">Stock</h1>
       </header>
+
 
 
       {/* Totals */}
@@ -245,106 +246,149 @@ function StockPage() {
         ) : sorted.length === 0 ? (
           <p className="text-[15px] text-muted">Nothing matches.</p>
         ) : (
-          <ul className="grid grid-cols-1 gap-2 stagger lg:grid-cols-2">
-            {sorted.map((it) => {
-              const chip = statusChip(it.status);
+          <>
+            {/* Mobile / tablet: card list */}
+            <ul className="grid grid-cols-1 gap-2 stagger lg:hidden">
+              {sorted.map((it) => {
+                const chip = statusChip(it.status);
+                const profit = it.selling_price_paise - it.cost_price_paise;
+                return (
+                  <li key={it.id} className="stagger-item rounded-[16px] bg-surface p-3" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)" }}>
 
-              const profit = it.selling_price_paise - it.cost_price_paise;
-              return (
-                <li key={it.id} className="stagger-item rounded-[16px] bg-surface p-3" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)" }}>
-
-                  <div className="flex items-start gap-3">
-                    {it.thumb_url ? (
-                      <img src={it.thumb_url} alt="" className="h-14 w-14 shrink-0 rounded-[10px] object-cover" loading="lazy" />
-                    ) : (
-                      <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[10px] bg-surface">
-                        <Package className="h-5 w-5 text-muted" />
+                    <div className="flex items-start gap-3">
+                      {it.thumb_url ? (
+                        <img src={it.thumb_url} alt="" className="h-14 w-14 shrink-0 rounded-[10px] object-cover" loading="lazy" />
+                      ) : (
+                        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[10px] bg-surface">
+                          <Package className="h-5 w-5 text-muted" />
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <button type="button" onClick={() => setEditing(it)} className="block w-full text-left">
+                          <p className="truncate text-[15px] font-semibold text-ink">{it.name}</p>
+                          <p className="mt-0.5 truncate text-[12px] text-muted">
+                            {it.sku ? `SKU ${it.sku} · ` : ""}
+                            Cost {formatInr(Math.round(it.cost_price_paise / 100))} · Sell {formatInr(Math.round(it.selling_price_paise / 100))}
+                            {profit > 0 && (<><span> · </span><span className="text-ink">+{formatInr(Math.round(profit / 100))}</span></>)}
+                          </p>
+                        </button>
                       </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <button
-                        type="button"
-                        onClick={() => setEditing(it)}
-                        className="block w-full text-left"
-                      >
-                        <p className="truncate text-[15px] font-semibold text-ink">{it.name}</p>
-                        <p className="mt-0.5 truncate text-[12px] text-muted">
-                          {it.sku ? `SKU ${it.sku} · ` : ""}
-                          Cost {formatInr(Math.round(it.cost_price_paise / 100))} · Sell {formatInr(Math.round(it.selling_price_paise / 100))}
-                          {profit > 0 && (
-                            <>
-                              {" · "}
-                              <span className="text-ink">+{formatInr(Math.round(profit / 100))}</span>
-                            </>
-                          )}
-                        </p>
-                      </button>
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${chip.cls}`}>{chip.label}</span>
                     </div>
-                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${chip.cls}`}>
-                      {chip.label}
-                    </span>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        aria-label="Decrease"
-                        disabled={it.quantity === 0 || changeQty.isPending}
-                        onClick={() =>
-                          changeQty.mutate({ data: { stock_item_id: it.id, delta: -1, reason: "adjustment" } })
-                        }
-                        className="grid h-9 w-9 place-items-center rounded-full bg-surface text-ink disabled:opacity-40"
-                      >
-                        <Minus className="h-4 w-4" />
-                      </button>
-                      <span className="min-w-[3.5rem] text-center font-mono text-[18px] font-semibold text-ink tabular-nums">
-                        {it.quantity}
-                      </span>
-                      <button
-                        type="button"
-                        aria-label="Increase"
-                        disabled={changeQty.isPending}
-                        onClick={() =>
-                          changeQty.mutate({ data: { stock_item_id: it.id, delta: 1, reason: "restocked" } })
-                        }
-                        className="grid h-9 w-9 place-items-center rounded-full bg-surface text-ink"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </button>
+                    <div className="mt-3 flex items-center justify-between">
+                      <div className="flex items-center gap-1">
+                        <button type="button" aria-label="Decrease" disabled={it.quantity === 0 || changeQty.isPending}
+                          onClick={() => changeQty.mutate({ data: { stock_item_id: it.id, delta: -1, reason: "adjustment" } })}
+                          className="grid h-9 w-9 place-items-center rounded-full bg-surface text-ink disabled:opacity-40">
+                          <Minus className="h-4 w-4" />
+                        </button>
+                        <span className="min-w-[3.5rem] text-center font-mono text-[18px] font-semibold text-ink tabular-nums">{it.quantity}</span>
+                        <button type="button" aria-label="Increase" disabled={changeQty.isPending}
+                          onClick={() => changeQty.mutate({ data: { stock_item_id: it.id, delta: 1, reason: "restocked" } })}
+                          className="grid h-9 w-9 place-items-center rounded-full bg-surface text-ink">
+                          <Plus className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <div className="flex gap-2">
+                        <button type="button" disabled={it.quantity === 0 || changeQty.isPending}
+                          onClick={() => {
+                            setPulseId(it.id);
+                            setTimeout(() => setPulseId((cur) => (cur === it.id ? null : cur)), 300);
+                            changeQty.mutate({ data: { stock_item_id: it.id, delta: -1, reason: "sold" } });
+                            setUndo({ id: it.id, name: it.name, expiresAt: Date.now() + 5000 });
+                          }}
+                          className={`h-9 rounded-full bg-primary px-3 text-[13px] font-semibold text-primary-foreground disabled:opacity-40 ${pulseId === it.id ? "pulse-once" : ""}`}>
+                          Sold 1
+                        </button>
+                        <button type="button" aria-label="Delete item"
+                          onClick={() => { if (confirm(`Delete "${it.name}" from stock?`)) del.mutate({ data: { id: it.id } }); }}
+                          className="grid h-9 w-9 place-items-center rounded-full text-muted hover:text-primary">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        disabled={it.quantity === 0 || changeQty.isPending}
-                        onClick={() => {
-                          setPulseId(it.id);
-                          setTimeout(() => setPulseId((cur) => (cur === it.id ? null : cur)), 300);
-                          changeQty.mutate({ data: { stock_item_id: it.id, delta: -1, reason: "sold" } });
-                          setUndo({ id: it.id, name: it.name, expiresAt: Date.now() + 5000 });
-                        }}
-                        className={`h-9 rounded-full bg-primary px-3 text-[13px] font-semibold text-primary-foreground disabled:opacity-40 ${pulseId === it.id ? "pulse-once" : ""}`}
-                      >
-                        Sold 1
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="Delete item"
-                        onClick={() => {
-                          if (confirm(`Delete "${it.name}" from stock?`)) del.mutate({ data: { id: it.id } });
-                        }}
-                        className="grid h-9 w-9 place-items-center rounded-full text-muted hover:text-primary"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
+                  </li>
+                );
+              })}
+            </ul>
 
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+            {/* Desktop: table */}
+            <div className="hidden lg:block overflow-hidden rounded-[14px] bg-surface" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)" }}>
+              <table className="w-full text-left text-[14px] text-ink">
+                <thead>
+                  <tr className="text-[11px] uppercase tracking-wider text-muted">
+                    <th className="px-4 py-3 font-semibold">Photo</th>
+                    <th className="px-2 py-3 font-semibold">Product</th>
+                    <th className="px-2 py-3 font-semibold">SKU</th>
+                    <th className="px-2 py-3 text-right font-semibold">Qty</th>
+                    <th className="px-2 py-3 font-semibold">Status</th>
+                    <th className="px-2 py-3 text-right font-semibold">Cost</th>
+                    <th className="px-2 py-3 text-right font-semibold">Price</th>
+                    <th className="px-2 py-3 text-right font-semibold">Profit</th>
+                    <th className="px-4 py-3 text-right font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sorted.map((it) => {
+                    const chip = statusChip(it.status);
+                    const profit = it.selling_price_paise - it.cost_price_paise;
+                    return (
+                      <tr key={it.id} className="transition-colors hover:bg-raised/60" style={{ borderTop: "1px solid var(--line)" }}>
+                        <td className="px-4 py-3">
+                          {it.thumb_url ? (
+                            <img src={it.thumb_url} alt="" className="h-10 w-10 rounded-[8px] object-cover" loading="lazy" />
+                          ) : (
+                            <div className="grid h-10 w-10 place-items-center rounded-[8px] bg-raised"><Package className="h-4 w-4 text-muted" /></div>
+                          )}
+                        </td>
+                        <td className="px-2 py-3">
+                          <button type="button" onClick={() => setEditing(it)} className="text-left font-medium text-ink hover:text-primary">{it.name}</button>
+                        </td>
+                        <td className="px-2 py-3 font-mono text-[13px] tabular-nums text-muted">{it.sku ?? "—"}</td>
+                        <td className="px-2 py-3 text-right font-mono text-[15px] font-semibold tabular-nums">{it.quantity}</td>
+                        <td className="px-2 py-3"><span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${chip.cls}`}>{chip.label}</span></td>
+                        <td className="px-2 py-3 text-right font-mono tabular-nums text-muted">{formatInr(Math.round(it.cost_price_paise / 100))}</td>
+                        <td className="px-2 py-3 text-right font-mono tabular-nums">{formatInr(Math.round(it.selling_price_paise / 100))}</td>
+                        <td className="px-2 py-3 text-right font-mono tabular-nums text-green">{profit > 0 ? `+${formatInr(Math.round(profit / 100))}` : "—"}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-end gap-1">
+                            <button type="button" aria-label="Decrease" disabled={it.quantity === 0 || changeQty.isPending}
+                              onClick={() => changeQty.mutate({ data: { stock_item_id: it.id, delta: -1, reason: "adjustment" } })}
+                              className="grid h-8 w-8 place-items-center rounded-full text-muted hover:bg-raised hover:text-ink disabled:opacity-40">
+                              <Minus className="h-4 w-4" />
+                            </button>
+                            <button type="button" aria-label="Increase" disabled={changeQty.isPending}
+                              onClick={() => changeQty.mutate({ data: { stock_item_id: it.id, delta: 1, reason: "restocked" } })}
+                              className="grid h-8 w-8 place-items-center rounded-full text-muted hover:bg-raised hover:text-ink">
+                              <Plus className="h-4 w-4" />
+                            </button>
+                            <button type="button" disabled={it.quantity === 0 || changeQty.isPending}
+                              onClick={() => {
+                                setPulseId(it.id);
+                                setTimeout(() => setPulseId((cur) => (cur === it.id ? null : cur)), 300);
+                                changeQty.mutate({ data: { stock_item_id: it.id, delta: -1, reason: "sold" } });
+                                setUndo({ id: it.id, name: it.name, expiresAt: Date.now() + 5000 });
+                              }}
+                              className={`ml-1 h-8 rounded-full bg-primary px-3 text-[12px] font-semibold text-primary-foreground disabled:opacity-40 ${pulseId === it.id ? "pulse-once" : ""}`}>
+                              Sold 1
+                            </button>
+                            <button type="button" aria-label="Delete item"
+                              onClick={() => { if (confirm(`Delete "${it.name}" from stock?`)) del.mutate({ data: { id: it.id } }); }}
+                              className="grid h-8 w-8 place-items-center rounded-full text-muted hover:text-primary">
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
+
 
       {undo && (
         <UndoToast
