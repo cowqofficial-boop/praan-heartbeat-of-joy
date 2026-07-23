@@ -152,6 +152,72 @@ async function checkAndIncrementLimit(browserId: string): Promise<void> {
   }
 }
 
+async function decrementLimit(browserId: string): Promise<void> {
+  const sb = await admin();
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: existing } = await sb
+    .from("daily_usage")
+    .select("count")
+    .eq("browser_id", browserId)
+    .eq("date", today)
+    .maybeSingle();
+  if (!existing) return;
+  await sb
+    .from("daily_usage")
+    .update({ count: Math.max((existing.count ?? 1) - 1, 0) })
+    .eq("browser_id", browserId)
+    .eq("date", today);
+}
+
+async function refundGenerationReservation(jobId: string, browserId: string, reason: string): Promise<boolean> {
+  const sb = await admin();
+  const { data: job, error } = await sb
+    .from("generation_jobs")
+    .select("id, user_id, refund_sub, refund_pack, status")
+    .eq("id", jobId)
+    .eq("browser_id", browserId)
+    .maybeSingle();
+  if (error || !job || job.status !== "reserved") return false;
+  if (job.user_id) {
+    await sb.rpc("refund_credits", {
+      _user_id: job.user_id,
+      _sub: job.refund_sub ?? 0,
+      _pack: job.refund_pack ?? 0,
+    });
+  } else {
+    await decrementLimit(browserId);
+  }
+  await sb
+    .from("generation_jobs")
+    .update({ status: "refunded", error: reason.slice(0, 1000) })
+    .eq("id", jobId)
+    .eq("status", "reserved");
+  console.info(`[generation] refunded job=${jobId} browser=${browserId} reason=${reason.slice(0, 240)}`);
+  return true;
+}
+
+async function ensureGenerationReserved(jobId: string, browserId: string): Promise<void> {
+  const sb = await admin();
+  const { data: job, error } = await sb
+    .from("generation_jobs")
+    .select("status")
+    .eq("id", jobId)
+    .eq("browser_id", browserId)
+    .maybeSingle();
+  if (error || !job) throw new Error("Generation job was not found. Try again.");
+  if (job.status !== "reserved") throw new Error("GENERATION_JOB_CLOSED");
+}
+
+async function markGenerationSucceeded(jobId: string, browserId: string): Promise<void> {
+  const sb = await admin();
+  await sb
+    .from("generation_jobs")
+    .update({ status: "succeeded", error: null })
+    .eq("id", jobId)
+    .eq("browser_id", browserId)
+    .eq("status", "reserved");
+}
+
 // ---------- Image generation ----------
 
 const NO_PEOPLE =
@@ -235,6 +301,61 @@ const KIDSWEAR_STYLES: StyleDef[] = [
   },
 ];
 
+function getGenerationStyles(data: {
+  needsPerson?: boolean;
+  isKidswear?: boolean;
+  isDrapedGarment?: boolean;
+}, modelLine: string, brandModelBinding: string): StyleDef[] {
+  return data.isKidswear
+    ? KIDSWEAR_STYLES
+    : data.needsPerson
+      ? personStyles(modelLine, brandModelBinding, !!data.isDrapedGarment)
+      : PRODUCT_STYLES;
+}
+
+async function getBrandModelContext(userId?: string | null): Promise<{
+  modelLine: string;
+  brandModelRefs: { b64: string; mime: string }[];
+  brandModelBinding: string;
+  personSource: "ai" | "user";
+}> {
+  let modelLine =
+    "Choose a clearly adult model (25 to 40 years old) who genuinely fits this product's real buyer — natural-looking Indian adult, warm approachable presence. Never a child, never a teenager.";
+  let brandModelRefs: { b64: string; mime: string }[] = [];
+  let brandModelBinding = "";
+  let personSource: "ai" | "user" = "ai";
+  if (!userId) return { modelLine, brandModelRefs, brandModelBinding, personSource };
+
+  const sb = await admin();
+  const { data: kit } = await sb
+    .from("brand_kits")
+    .select("model_gender, model_age, model_skin, model_body, model_region, brand_model_enabled, brand_model_url, brand_model_source, brand_model_photos")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!kit) return { modelLine, brandModelRefs, brandModelBinding, personSource };
+
+  const { describeModelPrefs } = await import("./brand-kit.functions");
+  const prefs = describeModelPrefs(kit);
+  if (prefs) modelLine = `The model is: ${prefs}. Always a clearly adult person, 25 to 40 years old.`;
+  if (!kit.brand_model_enabled) return { modelLine, brandModelRefs, brandModelBinding, personSource };
+
+  const source = (kit.brand_model_source as "ai" | "user" | null) ?? "ai";
+  const photos = source === "user"
+    ? ((kit.brand_model_photos as string[] | null) ?? []).filter(Boolean)
+    : (kit.brand_model_url ? [kit.brand_model_url] : []);
+  const loaded: { b64: string; mime: string }[] = [];
+  for (const p of photos.slice(0, 3)) {
+    try { loaded.push(await fetchAsBase64(p)); } catch { /* skip */ }
+  }
+  if (loaded.length === 0) return { modelLine, brandModelRefs, brandModelBinding, personSource };
+  brandModelRefs = loaded;
+  personSource = source;
+  brandModelBinding = source === "user"
+    ? "Reuse the exact same REAL person shown in the final reference photos — same face, same skin tone, same build, same hair — so this shop's photos all feature one consistent model. Keep their real facial features faithful. The person is clearly an adult."
+    : "Reuse the exact same person shown in the final reference portrait — same face, same skin tone, same build — so this shop's photos all feature one consistent brand model. The person is clearly an adult.";
+  return { modelLine, brandModelRefs, brandModelBinding, personSource };
+}
+
 async function generateOneImage(
   refs: { b64: string; mime: string }[],
   prompt: string,
@@ -248,9 +369,10 @@ async function generateOneImage(
       : "Keep the product identical to the reference photo — same shape, colour, material, branding and label.";
   const peopleRule = allowPerson ? "" : NO_PEOPLE;
 
-  async function runOnce(extraGuidance = ""): Promise<string> {
+  async function runOnce(attempt: number, extraGuidance = ""): Promise<string> {
     const full = `${prompt} ${sizeHint} ${peopleRule} ${multiHint} ${extraGuidance}`.trim();
     const [primary, ...extras] = refs;
+    console.info(`[generation] image attempt=${attempt} allow_person=${allowPerson}`);
     const out = await geminiGenerateImage({
       prompt: full,
       reference: { mimeType: primary.mime, b64: primary.b64 },
@@ -259,7 +381,8 @@ async function generateOneImage(
     return out.b64;
   }
 
-  const first = await runOnce();
+  let attemptCount = 1;
+  const first = await runOnce(attemptCount);
   if (!allowPerson) return first;
 
   // On-model shots: verify the product isn't cropped at any frame edge; retry once free if it is.
@@ -276,10 +399,18 @@ async function generateOneImage(
       maxOutputTokens: 4,
     });
     if (/^\s*yes\b/i.test(verdict)) {
-      const retry = await runOnce(
-        "PREVIOUS ATTEMPT CROPPED THE PRODUCT. Pull the camera BACK and zoom OUT significantly so the entire garment and person fit comfortably inside the frame with clear empty margin on all four sides. Prioritise showing the whole product over showing the model's face — crop the face at the top if you must, but never crop the product.",
-      );
-      return retry;
+      if (attemptCount >= 2) return first;
+      attemptCount += 1;
+      console.warn(`[generation] crop retry attempt=${attemptCount} max=2`);
+      try {
+        return await runOnce(
+          attemptCount,
+          "PREVIOUS ATTEMPT CROPPED THE PRODUCT. Pull the camera BACK and zoom OUT significantly so the entire garment and person fit comfortably inside the frame with clear empty margin on all four sides. Prioritise showing the whole product over showing the model's face — crop the face at the top if you must, but never crop the product.",
+        );
+      } catch (err) {
+        console.error(`[generation] crop retry failed; accepting first image error=${err instanceof Error ? err.message : String(err)}`);
+        return first;
+      }
     }
   } catch {
     // Verification is best-effort; if it fails, keep the first image.
@@ -429,6 +560,134 @@ export const generateImages = createServerFn({ method: "POST" })
     }
   });
 
+export const startGenerationJob = createServerFn({ method: "POST" })
+  .inputValidator((d: { browserId: string; userId?: string | null }) => d)
+  .handler(async ({ data }) => {
+    const { COSTS } = await import("./plans");
+    const productCost = COSTS.product;
+    const sb = await admin();
+    let refundSub = 0;
+    let refundPack = 0;
+    let reserved = false;
+
+    try {
+      if (data.userId) {
+        const { data: rows, error } = await sb.rpc("spend_credits", {
+          _user_id: data.userId,
+          _amount: productCost,
+        });
+        if (error) throw new Error(`credit check failed: ${error.message}`);
+        const first = Array.isArray(rows) ? rows[0] : rows;
+        if (!first?.ok) {
+          const have = first?.balance ?? 0;
+          throw new Error(`NO_CREDITS:${productCost}:${have}`);
+        }
+        refundSub = first.took_sub ?? 0;
+        refundPack = first.took_pack ?? 0;
+      } else {
+        await checkAndIncrementLimit(data.browserId);
+      }
+      reserved = true;
+
+      const { data: row, error } = await sb
+        .from("generation_jobs")
+        .insert({
+          browser_id: data.browserId,
+          user_id: data.userId ?? null,
+          refund_sub: refundSub,
+          refund_pack: refundPack,
+          status: "reserved",
+        })
+        .select("id")
+        .single();
+      if (error || !row) throw new Error(`generation start failed: ${error?.message ?? "no job"}`);
+      console.info(`[generation] start job=${row.id} browser=${data.browserId} cost=${productCost}`);
+      return { jobId: row.id as string, cost: productCost };
+    } catch (err) {
+      if (reserved) {
+        if (data.userId) {
+          await sb.rpc("refund_credits", { _user_id: data.userId, _sub: refundSub, _pack: refundPack });
+        } else {
+          await decrementLimit(data.browserId);
+        }
+      }
+      throw err;
+    }
+  });
+
+export const refundGenerationJob = createServerFn({ method: "POST" })
+  .inputValidator((d: { jobId: string; browserId: string; reason: string }) => d)
+  .handler(async ({ data }) => {
+    const refunded = await refundGenerationReservation(data.jobId, data.browserId, data.reason);
+    return { refunded };
+  });
+
+export const generateImageForJob = createServerFn({ method: "POST" })
+  .inputValidator(
+    (d: {
+      jobId: string;
+      browserId: string;
+      userId?: string | null;
+      imageUrl?: string;
+      imageUrls?: string[];
+      productName: string;
+      category: string;
+      needsPerson?: boolean;
+      isKidswear?: boolean;
+      isDrapedGarment?: boolean;
+      styleIndex: number;
+    }) => d,
+  )
+  .handler(async ({ data }) => {
+    await ensureGenerationReserved(data.jobId, data.browserId);
+    const urls = data.imageUrls && data.imageUrls.length > 0
+      ? data.imageUrls
+      : data.imageUrl
+        ? [data.imageUrl]
+        : [];
+    if (urls.length === 0) throw new Error("No image provided");
+
+    const { modelLine, brandModelRefs, brandModelBinding, personSource } = await getBrandModelContext(data.userId);
+    const styles = getGenerationStyles(data, modelLine, brandModelBinding);
+    const style = styles[data.styleIndex];
+    if (!style) throw new Error("Photo style was not found. Try again.");
+
+    const started = Date.now();
+    try {
+      console.info(`[generation] photo start job=${data.jobId} style=${style.kind} index=${data.styleIndex}`);
+      const productRefs = await Promise.all(urls.slice(0, 5).map((u) => fetchAsBase64(u)));
+      const contextLine = `Product: ${data.productName}. Category: ${data.category}.`;
+      const refs = style.hasPerson && brandModelRefs.length > 0
+        ? [...productRefs, ...brandModelRefs]
+        : productRefs;
+      const b64 = await generateOneImage(refs, `${contextLine} ${style.prompt}`, 2048, !!style.hasPerson);
+      await ensureGenerationReserved(data.jobId, data.browserId);
+      const bytes = b64ToBytes(b64);
+      const suffix = Math.random().toString(36).slice(2, 8);
+      const path = `generated/${data.browserId}/${Date.now()}-${suffix}-${style.kind}.png`;
+      const url = await uploadBytes(path, bytes, "image/png");
+      console.info(`[generation] photo done job=${data.jobId} style=${style.kind} duration_ms=${Date.now() - started}`);
+      return {
+        kind: style.kind,
+        images: [
+          { kind: style.kind, ratio: "1:1" as const, url },
+          { kind: style.kind, ratio: "9:16" as const, url },
+        ],
+        meta: {
+          image_model: GEMINI_IMAGE_MODEL,
+          image_count: 1,
+          image_resolution: 2048,
+          input_photo_count: productRefs.length,
+          person_source: personSource,
+        },
+      };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`[generation] photo failed job=${data.jobId} style=${style.kind} duration_ms=${Date.now() - started} error=${message}`);
+      throw err;
+    }
+  });
+
 
 
 
@@ -450,6 +709,7 @@ const CopySchema = z.object({
 export const generateCopyAndSave = createServerFn({ method: "POST" })
   .inputValidator(
     (d: {
+      jobId?: string | null;
       browserId: string;
       userId?: string | null;
       originalImageUrl: string;
@@ -465,6 +725,7 @@ export const generateCopyAndSave = createServerFn({ method: "POST" })
     }) => d,
   )
   .handler(async ({ data }) => {
+    if (data.jobId) await ensureGenerationReserved(data.jobId, data.browserId);
     // Look up brand kit if signed in.
     let brand: {
       business_name: string;
@@ -562,6 +823,7 @@ Return a JSON object only (no prose, no markdown fences) with these exact keys:
     const csvBytes = new TextEncoder().encode(csv);
     const csvPath = `csv/${data.browserId}/${Date.now()}-${handle}.csv`;
     const csvUrl = await uploadBytes(csvPath, csvBytes, "text/csv");
+    if (data.jobId) await ensureGenerationReserved(data.jobId, data.browserId);
 
     const sb = await admin();
     const { data: row, error } = await sb
@@ -588,6 +850,13 @@ Return a JSON object only (no prose, no markdown fences) with these exact keys:
       .select("id")
       .single();
     if (error || !row) throw new Error(`save failed: ${error?.message}`);
+    if (data.jobId) {
+      try {
+        await markGenerationSucceeded(data.jobId, data.browserId);
+      } catch (err) {
+        console.error(`[generation] mark succeeded failed job=${data.jobId} error=${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
     return { id: row.id as string, copy, csvUrl };
   });
 

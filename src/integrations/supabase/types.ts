@@ -200,6 +200,42 @@ export type Database = {
         }
         Relationships: []
       }
+      generation_jobs: {
+        Row: {
+          browser_id: string
+          created_at: string
+          error: string | null
+          id: string
+          refund_pack: number
+          refund_sub: number
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          browser_id: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          refund_pack?: number
+          refund_sub?: number
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          browser_id?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          refund_pack?: number
+          refund_sub?: number
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       generations: {
         Row: {
           browser_id: string

@@ -33,14 +33,21 @@ function classify(status: number, body: string): GeminiError["code"] {
   return "unknown";
 }
 
+const GEMINI_TIMEOUT_MS = 60_000;
+const GEMINI_MAX_ATTEMPTS = 3;
+
 async function postJSON(model: string, payload: unknown): Promise<unknown> {
   const url = `${BASE}/models/${model}:generateContent`;
   let lastErr: GeminiError | null = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < GEMINI_MAX_ATTEMPTS; attempt++) {
     let res: Response;
+    const started = Date.now();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
     try {
       res = await fetch(url, {
         method: "POST",
+        signal: controller.signal,
         headers: {
           "Content-Type": "application/json",
           "x-goog-api-key": geminiKey(),
@@ -48,27 +55,47 @@ async function postJSON(model: string, payload: unknown): Promise<unknown> {
         body: JSON.stringify(payload),
       });
     } catch (e) {
+      clearTimeout(timeoutId);
+      const duration = Date.now() - started;
+      const aborted = controller.signal.aborted;
       const msg = e instanceof Error ? e.message : String(e);
-      console.error(`[gemini] network error attempt=${attempt} model=${model}: ${msg}`);
-      lastErr = new GeminiError(0, msg, "network", `Network error calling Gemini. ||DETAIL|| ${msg}`);
+      console.error(
+        `[gemini] ${aborted ? "timeout" : "network error"} model=${model} attempt=${attempt + 1}/${GEMINI_MAX_ATTEMPTS} duration_ms=${duration} status=0 body=${msg}`,
+      );
+      const human = aborted
+        ? "Gemini took too long to respond. Try again."
+        : "Network error calling Gemini.";
+      lastErr = new GeminiError(0, msg, "network", `${human} ||DETAIL|| ${msg}`);
       await sleep(400 * (attempt + 1));
       continue;
     }
-    if (res.ok) return res.json();
+    clearTimeout(timeoutId);
+    const duration = Date.now() - started;
+    if (res.ok) {
+      console.info(
+        `[gemini] ok model=${model} attempt=${attempt + 1}/${GEMINI_MAX_ATTEMPTS} duration_ms=${duration} status=${res.status}`,
+      );
+      const body = await res.text();
+      try {
+        return JSON.parse(body) as unknown;
+      } catch {
+        console.error(
+          `[gemini] malformed json model=${model} attempt=${attempt + 1}/${GEMINI_MAX_ATTEMPTS} duration_ms=${duration} status=${res.status} body=${body}`,
+        );
+        lastErr = new GeminiError(res.status, body, "unknown", "Gemini returned a malformed response.");
+        await sleep(600 * (attempt + 1));
+        continue;
+      }
+    }
     const body = await res.text();
     const code = classify(res.status, body);
     console.error(
-      `[gemini] fail attempt=${attempt} model=${model} status=${res.status} code=${code} body=${body.slice(0, 600)}`,
+      `[gemini] fail model=${model} attempt=${attempt + 1}/${GEMINI_MAX_ATTEMPTS} duration_ms=${duration} status=${res.status} code=${code} body=${body}`,
     );
     const human = humanMessage(code, res.status, body);
     const detail = `[${code} ${res.status || "net"}] ${body.slice(0, 300).replace(/\s+/g, " ")}`;
     lastErr = new GeminiError(res.status, body, code, `${human} ||DETAIL|| ${detail}`);
-    // Only retry timeouts / rate limits / 5xx
-    if (code === "rate_limited" || code === "server" || code === "network") {
-      await sleep(600 * (attempt + 1));
-      continue;
-    }
-    throw lastErr;
+    await sleep(600 * (attempt + 1));
   }
   throw lastErr ?? new GeminiError(0, "", "unknown", "Gemini call failed");
 }
@@ -162,7 +189,8 @@ export async function geminiGenerateImage(opts: {
       responseModalities: ["IMAGE"],
     },
   };
-  const json = (await postJSON(opts.model ?? GEMINI_IMAGE_MODEL, payload)) as {
+  const model = opts.model ?? GEMINI_IMAGE_MODEL;
+  const json = (await postJSON(model, payload)) as {
     candidates?: {
       content?: { parts?: Array<{ inlineData?: { mimeType: string; data: string } }> };
     }[];
@@ -173,6 +201,8 @@ export async function geminiGenerateImage(opts: {
       return { mimeType: p.inlineData.mimeType || "image/png", b64: p.inlineData.data };
     }
   }
-  throw new GeminiError(200, JSON.stringify(json).slice(0, 400), "unknown", "Gemini returned no image data.");
+  const body = JSON.stringify(json);
+  console.error(`[gemini] no image data model=${model} status=200 body=${body}`);
+  throw new GeminiError(200, body.slice(0, 400), "unknown", "Gemini returned no image data.");
 }
 
