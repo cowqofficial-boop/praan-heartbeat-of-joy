@@ -11,8 +11,8 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import { EmptyState, IllustrationStock } from "@/components/EmptyState";
+import { PageHeader, HelpButton } from "@/components/PageHeader";
+import { EmptyState, IllustrationBoxes } from "@/components/EmptyState";
 
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -160,14 +160,14 @@ function StockPage() {
       <PageHeader
         icon={Boxes}
         title="Stock"
-        subtitle="Keep count of what's in your shop. Log sales, restocks and returns — see live value and profit."
+        subtitle="Track what you have, what's running low, and what your inventory is worth."
         help={
           <>
-            <p className="font-semibold text-ink">Why track stock</p>
-            <p className="mt-1 text-muted">CowQ uses your stock to plan smarter posts — skipping items that are out, featuring bestsellers, and posting urgency when something's running low. Free on every plan.</p>
+            <p className="font-semibold text-ink">How stock helps</p>
+            <p className="mt-1 text-muted">Add the quantity you hold of each product. CowQ warns you when something runs low, and leaves out-of-stock products out of your posting calendar so you never advertise something you can't sell.</p>
           </>
         }
-        action={{ label: "Add item", onClick: () => setCreating(true), icon: Plus }}
+        action={{ label: "Add an item", onClick: () => setCreating(true), icon: Plus }}
       />
 
 
@@ -176,13 +176,19 @@ function StockPage() {
       {/* Totals */}
       <div className="mt-4 grid grid-cols-2 gap-2">
         <div className="rounded-[14px] bg-surface p-3">
-          <p className="text-[11px] uppercase tracking-wide text-muted">Value at cost</p>
+          <div className="flex items-center gap-1">
+            <p className="text-[11px] uppercase tracking-wide text-muted">Value at cost</p>
+            <HelpButton label="What this means" content={<p className="text-muted">What your stock cost you to buy or make — quantity × cost price, added up.</p>} />
+          </div>
           <p className="mt-1 font-mono text-[20px] font-semibold text-ink tabular-nums">
             {formatInr(totals.costInr)}
           </p>
         </div>
         <div className="rounded-[14px] bg-surface p-3">
-          <p className="text-[11px] uppercase tracking-wide text-muted">Value at retail</p>
+          <div className="flex items-center gap-1">
+            <p className="text-[11px] uppercase tracking-wide text-muted">Value at retail</p>
+            <HelpButton label="What this means" content={<p className="text-muted">What your stock is worth if you sell it all at your listed prices.</p>} />
+          </div>
           <p className="mt-1 font-mono text-[20px] font-semibold text-ink tabular-nums">
             {formatInr(totals.sellInr)}
           </p>
