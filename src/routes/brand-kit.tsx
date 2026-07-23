@@ -199,7 +199,7 @@ function BrandKitPage() {
  }
 
  return (
- <main className="flex min-h-screen flex-col px-5 pb-32 pt-10">
+ <main className="flex min-h-screen flex-col px-5 pb-32 pt-10 lg:px-0 lg:pt-12">
  <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">
  {onboarding ? "Set up your brand" : "Your brand kit"}
  </h1>
@@ -209,7 +209,8 @@ function BrandKitPage() {
  : "Used in every listing CowQ writes for you."}
  </p>
 
- <div className="mt-8 flex flex-col gap-6">
+ <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-x-10">
+
  <Field label="Business name">
  <input
  className="h-12 w-full rounded-[12px] bg-raised px-4 text-[16px] text-ink"
