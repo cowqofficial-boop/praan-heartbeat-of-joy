@@ -154,7 +154,7 @@ function StockPage() {
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="font-display text-[22px] leading-tight text-ink">Stock</h1>
+        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">Stock</h1>
         <div className="h-10 w-10" />
       </header>
 

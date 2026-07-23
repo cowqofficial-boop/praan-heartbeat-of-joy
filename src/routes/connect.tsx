@@ -81,7 +81,7 @@ function ConnectPage() {
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="font-display text-[24px] leading-tight text-ink">Connect your channels</h1>
+        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">Connect your channels</h1>
       </header>
       <p className="mt-2 text-[15px] text-muted">
         Link the places you sell. CowQ Ai keeps working even if you skip this.

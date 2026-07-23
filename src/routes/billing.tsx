@@ -69,7 +69,7 @@ function BillingPage() {
         <Link to="/library" className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink" aria-label="Back">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="font-display text-[22px] leading-tight text-ink">Billing</h1>
+        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">Billing</h1>
         <div className="h-10 w-10" />
       </header>
 

@@ -200,7 +200,7 @@ function BrandKitPage() {
 
   return (
     <main className="flex min-h-screen flex-col px-5 pb-32 pt-10">
-      <h1 className="font-display text-[28px] leading-tight text-ink">
+      <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">
         {onboarding ? "Set up your brand" : "Your brand kit"}
       </h1>
       <p className="mt-2 text-[15px] text-muted">
@@ -224,7 +224,7 @@ function BrandKitPage() {
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="grid h-20 w-20 place-items-center overflow-hidden rounded-[12px] border border-dashed bg-surface"
+              className="grid h-20 w-20 place-items-center overflow-hidden rounded-[12px] border  bg-surface"
             >
               {kit.logo_url ? (
                 <img src={kit.logo_url} alt="Logo" className="h-full w-full object-contain" />
@@ -643,7 +643,7 @@ function RealModelUploader({
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="grid h-20 w-20 place-items-center rounded-[10px] border border-dashed bg-raised text-[22px] text-muted"
+            className="grid h-20 w-20 place-items-center rounded-[10px] border  bg-raised text-[22px] text-muted"
           >
             +
           </button>
