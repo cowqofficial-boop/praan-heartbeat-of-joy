@@ -389,7 +389,7 @@ function Landing() {
               The team you’d otherwise pay.
             </h2>
             <p className="mt-3 text-[15px] text-muted">
-              A proper listing usually needs four people. Here’s what each of them costs, per
+              A proper listing usually needs five people. Here’s what each of them costs, per
               month, at reasonable Indian rates.
             </p>
           </Reveal>
