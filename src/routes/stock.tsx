@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { PageHeader, HelpButton } from "@/components/PageHeader";
 import { EmptyState, IllustrationBoxes } from "@/components/EmptyState";
+import { showConfirm } from "@/components/Dialogs";
 
 import { supabase } from "@/integrations/supabase/client";
 import {
