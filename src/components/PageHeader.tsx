@@ -19,8 +19,6 @@ type Props = {
   secondary?: ReactNode;
 };
 
-const COBALT = "#3D5AFE";
-
 export function PageHeader({ icon: Icon, title, subtitle, help, action, secondary }: Props) {
   return (
     <header className="mb-6">
@@ -28,8 +26,9 @@ export function PageHeader({ icon: Icon, title, subtitle, help, action, secondar
         <div
           className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px]"
           style={{
-            background: "color-mix(in oklab, #3D5AFE 18%, var(--raised))",
-            color: COBALT,
+            background: "color-mix(in oklab, var(--page-accent) 18%, var(--raised))",
+            color: "var(--page-accent)",
+            boxShadow: "0 6px 20px color-mix(in oklab, var(--page-accent) 22%, transparent)",
           }}
           aria-hidden
         >
@@ -55,8 +54,7 @@ export function PageHeader({ icon: Icon, title, subtitle, help, action, secondar
 
 function PrimaryAction({ label, to, onClick, icon: Icon, disabled }: Action) {
   const cls =
-    "inline-flex h-12 items-center justify-center gap-2 rounded-[14px] px-5 text-[15px] font-semibold transition-[filter,transform] disabled:opacity-50";
-  const style = { background: COBALT, color: "#F5F7FF" };
+    "btn-accent inline-flex h-12 items-center justify-center gap-2 rounded-[14px] px-5 text-[15px] font-semibold transition-[filter,transform] disabled:opacity-50";
   const inner = (
     <>
       {Icon && <Icon className="h-4 w-4" />}
@@ -65,13 +63,13 @@ function PrimaryAction({ label, to, onClick, icon: Icon, disabled }: Action) {
   );
   if (to) {
     return (
-      <Link to={to} className={cls} style={style}>
+      <Link to={to} className={cls}>
         {inner}
       </Link>
     );
   }
   return (
-    <button type="button" onClick={onClick} disabled={disabled} className={cls} style={style}>
+    <button type="button" onClick={onClick} disabled={disabled} className={cls}>
       {inner}
     </button>
   );
@@ -114,7 +112,8 @@ export function HelpButton({ content, label = "What is this?" }: { content: Reac
           className="popover-in absolute left-0 top-9 z-50 w-[280px] rounded-[12px] p-3 text-[13px] leading-relaxed text-ink"
           style={{
             background: "var(--raised)",
-            boxShadow: "var(--shadow-raised)",
+            borderTop: "2px solid var(--page-accent)",
+            boxShadow: "var(--shadow-raised), 0 0 0 1px color-mix(in oklab, var(--page-accent) 25%, transparent)",
           }}
         >
           {content}
