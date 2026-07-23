@@ -18,6 +18,8 @@ export type Database = {
         Row: {
           accent_color: string
           brand_model_enabled: boolean
+          brand_model_photos: Json
+          brand_model_source: string
           brand_model_url: string | null
           business_name: string
           created_at: string
@@ -37,6 +39,8 @@ export type Database = {
         Insert: {
           accent_color?: string
           brand_model_enabled?: boolean
+          brand_model_photos?: Json
+          brand_model_source?: string
           brand_model_url?: string | null
           business_name?: string
           created_at?: string
@@ -56,6 +60,8 @@ export type Database = {
         Update: {
           accent_color?: string
           brand_model_enabled?: boolean
+          brand_model_photos?: Json
+          brand_model_source?: string
           brand_model_url?: string | null
           business_name?: string
           created_at?: string

@@ -75,6 +75,8 @@ const IdentifiedSchema = z.object({
   color: z.string(),
   features: z.array(z.string()),
   needs_person: z.boolean().optional(),
+  is_kidswear: z.boolean().optional(),
+  is_draped_garment: z.boolean().optional(),
 });
 
 export const identifyProduct = createServerFn({ method: "POST" })
@@ -98,7 +100,7 @@ export const identifyProduct = createServerFn({ method: "POST" })
       parts: [
         ...imageParts,
         {
-          text: `${guidance}\n\nIdentify this product. Return JSON: {"name": short product name (max 6 words, sentence case), "category": one broad category like Kitchen, Home Decor, Fashion, Beauty, Electronics, "material": main material or empty, "color": main color or empty, "features": array of exactly 3 short key features, "needs_person": true ONLY if this product is normally shown worn, held, or used by a person to sell it well — clothing, ethnic wear (saree, kurta, lehenga, dupatta), jewellery, footwear, bags, eyewear, watches, scarves, cosmetics and beauty products applied to skin/face. false for electronics, home decor, furniture, kitchenware, food, drink, stationery, toys, tools, plants, packaged goods.}`,
+          text: `${guidance}\n\nIdentify this product. Return JSON: {"name": short product name (max 6 words, sentence case), "category": one broad category like Kitchen, Home Decor, Fashion, Beauty, Electronics, "material": main material or empty, "color": main color or empty, "features": array of exactly 3 short key features, "needs_person": true ONLY if this product is normally shown worn, held, or used by a person to sell it well — clothing, ethnic wear (saree, kurta, lehenga, dupatta), jewellery, footwear, bags, eyewear, watches, scarves, cosmetics and beauty products applied to skin/face. false for electronics, home decor, furniture, kitchenware, food, drink, stationery, toys, tools, plants, packaged goods. "is_kidswear": true if this is clothing, footwear, or apparel intended for children under 18 (kidswear, babywear, school uniforms, kids' shoes). Otherwise false. "is_draped_garment": true only for draped Indian garments like saree, dupatta, lehenga fabric, stole; false for stitched garments (kurta, shirt, dress, trouser, blouse).}`,
         },
       ],
       responseMimeType: "application/json",
@@ -108,10 +110,15 @@ export const identifyProduct = createServerFn({ method: "POST" })
     const r = IdentifiedSchema.safeParse(parsed);
     const val = r.success
       ? r.data
-      : { name: "Product", category: "General", material: "", color: "", features: [], needs_person: false };
+      : { name: "Product", category: "General", material: "", color: "", features: [], needs_person: false, is_kidswear: false, is_draped_garment: false };
     while (val.features.length < 3) val.features.push("");
     val.features = val.features.slice(0, 3);
-    return { ...val, needs_person: val.needs_person ?? false };
+    return {
+      ...val,
+      needs_person: val.needs_person ?? false,
+      is_kidswear: val.is_kidswear ?? false,
+      is_draped_garment: val.is_draped_garment ?? false,
+    };
   });
 
 
@@ -175,16 +182,15 @@ const PRODUCT_STYLES: StyleDef[] = [
   },
 ];
 
-function personStyles(modelLine: string, brandModelBinding: string): StyleDef[] {
+function personStyles(modelLine: string, brandModelBinding: string, isDraped: boolean): StyleDef[] {
   const drapeRules = `If it is a draped Indian garment, the drape must be correct: sarees pleated at the waist with the pallu over the LEFT shoulder; dupattas placed properly. If the correct drape cannot be produced with confidence, prefer a well-lit product-only shot to a badly draped model shot.`;
-  const bodyRules = `Natural pose, natural light, hands and fingers correct (five fingers, no distortion), face calm and pleasant, nothing exaggerated, no fashion-editorial posing, no text, no logo, no watermark.`;
+  const bodyRules = `Natural pose, natural light, hands and fingers correct (five fingers, no distortion), face calm and pleasant, nothing exaggerated, no fashion-editorial posing, no text, no logo, no watermark. The person is a clearly adult model — 25 to 40 years old, unmistakably an adult. Never depict a child, teenager, or minor.`;
   const fidelity = `The garment/item must match the uploaded photos exactly — same colour, same pattern, same border, same length, same fittings. Do not restyle, do not recolour, do not shorten, do not embellish.`;
+  const whitePrompt = isDraped
+    ? "Reproduce the exact same draped garment from the input photo — same colour, weave, border, and pattern. Present it presented for e-commerce WITHOUT a person: neatly folded on a clean white surface OR partially draped over a plain wooden hanger/stand so the fabric, border and pallu/pattern read clearly. Pure clean white studio background suitable for Amazon/Flipkart marketplace main image, soft even lighting, subtle contact shadow, centred, no props, no text, high detail, photorealistic. Never a flat rectangle of cloth. No person, no hands, no mannequin face."
+    : "Reproduce the exact same product from the input photo — same shape, colour, material, branding, and label. Place it on a pure clean white studio background suitable for Amazon/Flipkart marketplace main image, soft even lighting, subtle contact shadow, centred, no props, no text, high detail, photorealistic. No person.";
   return [
-    {
-      kind: "white",
-      prompt:
-        "Reproduce the exact same product from the input photo — same shape, colour, material, branding, and label. Place it on a pure clean white studio background suitable for Amazon/Flipkart, soft even lighting, subtle contact shadow, centred, no props, no text, high detail, photorealistic.",
-    },
+    { kind: "white", prompt: whitePrompt },
     {
       kind: "studio",
       prompt:
@@ -193,15 +199,39 @@ function personStyles(modelLine: string, brandModelBinding: string): StyleDef[] 
     {
       kind: "onmodel_full",
       hasPerson: true,
-      prompt: `On-model FULL view: one person wearing/using the product so that the WHOLE product is clearly visible from head to toe (or the equivalent full view for the item). ${modelLine} ${brandModelBinding} ${fidelity} ${drapeRules} ${bodyRules} Soft natural daylight, plain neutral background, photorealistic, catalogue-quality.`,
+      prompt: `On-model FULL view: one adult person wearing/using the product so that the WHOLE product is clearly visible from head to toe (or the equivalent full view for the item). ${modelLine} ${brandModelBinding} ${fidelity} ${drapeRules} ${bodyRules} Soft natural daylight, plain neutral background, photorealistic, catalogue-quality.`,
     },
     {
       kind: "onmodel_detail",
       hasPerson: true,
-      prompt: `On-model CLOSE view of the same person: closer framing on the product to show fabric, detail, fit or how it sits — e.g. jewellery near the neckline, saree pallu detail, shoe on foot, watch on wrist, bag held at the side. ${modelLine} ${brandModelBinding} ${fidelity} ${drapeRules} ${bodyRules} Soft natural daylight, plain neutral background, photorealistic.`,
+      prompt: `On-model CLOSE view of the same adult person: closer framing on the product to show fabric, detail, fit or how it sits — e.g. jewellery near the neckline, saree pallu detail, shoe on foot, watch on wrist, bag held at the side. ${modelLine} ${brandModelBinding} ${fidelity} ${drapeRules} ${bodyRules} Soft natural daylight, plain neutral background, photorealistic.`,
     },
   ];
 }
+
+// Kidswear: never a person. Product-focused shots — folded, on a hanger, plain surface, or ghost-mannequin.
+const KIDSWEAR_STYLES: StyleDef[] = [
+  {
+    kind: "white",
+    prompt:
+      "Reproduce the exact same children's garment from the input photo — same colour, pattern, print, and stitching. Present it on a pure clean white studio background, laid flat and neatly arranged so the front is clearly visible and the shape reads well. Marketplace main image quality, soft even lighting, subtle contact shadow, centred, no props, no text, photorealistic. Absolutely no person, no child, no adult, no hands, no mannequin face.",
+  },
+  {
+    kind: "hanger",
+    prompt:
+      "Same children's garment from the input photo, kept faithful. Presented on a plain wooden or white clothing hanger against a soft neutral studio backdrop, gently lit, showing the full shape and length of the garment. No person, no child, no hands, no mannequin face.",
+  },
+  {
+    kind: "ghost",
+    prompt:
+      "Same children's garment from the input photo, kept faithful. Ghost-mannequin style: the garment appears filled out and holds its natural shape as if worn, but there is NO person and NO visible mannequin — the inside is hollow. Plain soft neutral studio background, even lighting, photorealistic e-commerce catalogue look. Absolutely no child, no adult, no hands, no face.",
+  },
+  {
+    kind: "flatlay",
+    prompt:
+      "Same children's garment from the input photo, kept faithful. Overhead flat-lay on a soft neutral textured surface, neatly arranged, one or two tasteful child-appropriate props that clearly belong (a small folded blanket, a wooden toy at a distance) — never a child, never hands, never a person. Balanced composition, soft daylight, garment centred, photorealistic.",
+  },
+];
 
 async function generateOneImage(
   refs: { b64: string; mime: string }[],
@@ -235,6 +265,8 @@ export const generateImages = createServerFn({ method: "POST" })
       productName: string;
       category: string;
       needsPerson?: boolean;
+      isKidswear?: boolean;
+      isDrapedGarment?: boolean;
     }) => d,
   )
   .handler(async ({ data }) => {
@@ -259,43 +291,55 @@ export const generateImages = createServerFn({ method: "POST" })
 
     // Look up brand kit for model prefs + saved brand model (signed-in only).
     let modelLine =
-      "Choose a model who genuinely fits this product's real buyer — natural-looking Indian adult, warm approachable presence.";
-    let brandModelRef: { b64: string; mime: string } | null = null;
+      "Choose a clearly adult model (25 to 40 years old) who genuinely fits this product's real buyer — natural-looking Indian adult, warm approachable presence. Never a child, never a teenager.";
+    let brandModelRefs: { b64: string; mime: string }[] = [];
     let brandModelBinding = "";
+    let personSource: "ai" | "user" = "ai";
     if (data.userId) {
       const sb = await admin();
       const { data: kit } = await sb
         .from("brand_kits")
-        .select("model_gender, model_age, model_skin, model_body, model_region, brand_model_enabled, brand_model_url")
+        .select("model_gender, model_age, model_skin, model_body, model_region, brand_model_enabled, brand_model_url, brand_model_source, brand_model_photos")
         .eq("user_id", data.userId)
         .maybeSingle();
       if (kit) {
         const { describeModelPrefs } = await import("./brand-kit.functions");
         const prefs = describeModelPrefs(kit);
-        if (prefs) modelLine = `The model is: ${prefs}.`;
-        if (kit.brand_model_enabled && kit.brand_model_url) {
-          try {
-            brandModelRef = await fetchAsBase64(kit.brand_model_url);
-            brandModelBinding =
-              "Reuse the exact same person shown in the final reference portrait — same face, same skin tone, same build — so this shop's photos all feature one consistent brand model.";
-          } catch {
-            brandModelRef = null;
+        if (prefs) modelLine = `The model is: ${prefs}. Always a clearly adult person, 25 to 40 years old.`;
+        if (kit.brand_model_enabled) {
+          const source = (kit.brand_model_source as "ai" | "user" | null) ?? "ai";
+          const photos = source === "user"
+            ? ((kit.brand_model_photos as string[] | null) ?? []).filter(Boolean)
+            : (kit.brand_model_url ? [kit.brand_model_url] : []);
+          const loaded: { b64: string; mime: string }[] = [];
+          for (const p of photos.slice(0, 3)) {
+            try { loaded.push(await fetchAsBase64(p)); } catch { /* skip */ }
+          }
+          if (loaded.length > 0) {
+            brandModelRefs = loaded;
+            personSource = source;
+            brandModelBinding = source === "user"
+              ? "Reuse the exact same REAL person shown in the final reference photos — same face, same skin tone, same build, same hair — so this shop's photos all feature one consistent model. Keep their real facial features faithful. The person is clearly an adult."
+              : "Reuse the exact same person shown in the final reference portrait — same face, same skin tone, same build — so this shop's photos all feature one consistent brand model. The person is clearly an adult.";
           }
         }
       }
     }
 
-    const styles = data.needsPerson
-      ? personStyles(modelLine, brandModelBinding)
-      : PRODUCT_STYLES;
+    // Kidswear overrides everything: never a person, adult or child.
+    const styles = data.isKidswear
+      ? KIDSWEAR_STYLES
+      : data.needsPerson
+        ? personStyles(modelLine, brandModelBinding, !!data.isDrapedGarment)
+        : PRODUCT_STYLES;
 
     const contextLine = `Product: ${data.productName}. Category: ${data.category}.`;
 
     // Generate ONCE per style at 2048 (square); reuse the URL for both 1:1 and 9:16
     // to halve API cost — the browser crops to 9:16 at download time.
     const tasks: Promise<{ kind: string; url: string }>[] = styles.map((style) => (async () => {
-      const refs = style.hasPerson && brandModelRef
-        ? [...productRefs, brandModelRef]
+      const refs = style.hasPerson && brandModelRefs.length > 0
+        ? [...productRefs, ...brandModelRefs]
         : productRefs;
       const b64 = await generateOneImage(refs, `${contextLine} ${style.prompt}`, 2048, !!style.hasPerson);
       const bytes = b64ToBytes(b64);
@@ -312,7 +356,6 @@ export const generateImages = createServerFn({ method: "POST" })
       const detail = firstErr ? (firstErr.reason instanceof Error ? firstErr.reason.message : String(firstErr.reason)) : "";
       throw new Error(detail || "No photos came through. Try again.");
     }
-    // Return both ratios pointing to the same underlying URL so downstream code is unchanged.
     const images = base.flatMap((b) => [
       { kind: b.kind, ratio: "1:1" as const, url: b.url },
       { kind: b.kind, ratio: "9:16" as const, url: b.url },
@@ -324,9 +367,11 @@ export const generateImages = createServerFn({ method: "POST" })
         image_count: base.length,
         image_resolution: 2048,
         input_photo_count: productRefs.length,
+        person_source: personSource,
       },
     };
   });
+
 
 
 
@@ -358,7 +403,7 @@ export const generateCopyAndSave = createServerFn({ method: "POST" })
       color: string;
       features: string[];
       images: { kind: string; ratio: string; url: string }[];
-      meta?: { image_model?: string; image_count?: number; image_resolution?: number } | null;
+      meta?: { image_model?: string; image_count?: number; image_resolution?: number; person_source?: "ai" | "user" } | null;
     }) => d,
   )
   .handler(async ({ data }) => {
@@ -479,6 +524,7 @@ Return a JSON object only (no prose, no markdown fences) with these exact keys:
           image_model: data.meta?.image_model ?? GEMINI_IMAGE_MODEL,
           image_count: data.meta?.image_count ?? 0,
           image_resolution: data.meta?.image_resolution ?? 2048,
+          person_source: data.meta?.person_source ?? "ai",
         },
       })
       .select("id")

@@ -17,6 +17,8 @@ export type BrandKit = {
   model_region: string | null;
   brand_model_enabled: boolean;
   brand_model_url: string | null;
+  brand_model_source: "ai" | "user";
+  brand_model_photos: string[];
 };
 
 export const getMyBrandKit = createServerFn({ method: "GET" })
@@ -51,6 +53,8 @@ export const saveMyBrandKit = createServerFn({ method: "POST" })
       model_region: data.model_region ?? null,
       brand_model_enabled: data.brand_model_enabled ?? false,
       brand_model_url: data.brand_model_url ?? null,
+      brand_model_source: data.brand_model_source ?? "ai",
+      brand_model_photos: (data.brand_model_photos ?? []).slice(0, 3),
     };
     const { error } = await context.supabase
       .from("brand_kits")
@@ -177,6 +181,108 @@ export const setBrandModelEnabled = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin
       .from("brand_kits")
       .update({ brand_model_enabled: data.enabled })
+      .eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ---------- Real (user-uploaded) brand model photos ----------
+
+function extractStoragePath(url: string): string | null {
+  // Match .../object/(sign|public)/<bucket>/<path>?...
+  const m = /\/object\/(?:sign|public)\/[^/]+\/([^?]+)/.exec(url);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+export const uploadBrandModelPhotos = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (d: {
+      dataUrls: string[];
+      consentAgreed: boolean;
+      consentAdult: boolean;
+      consentNotPublicFigure: boolean;
+    }) => d,
+  )
+  .handler(async ({ context, data }) => {
+    if (!data.consentAgreed || !data.consentAdult || !data.consentNotPublicFigure) {
+      throw new Error("You must confirm all three statements before uploading.");
+    }
+    if (!Array.isArray(data.dataUrls) || data.dataUrls.length === 0) {
+      throw new Error("Add at least one photo.");
+    }
+    const dataUrls = data.dataUrls.slice(0, 3);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Remove any previously uploaded real-model photos first.
+    const { data: existing } = await supabaseAdmin
+      .from("brand_kits")
+      .select("brand_model_photos")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    const prev = (existing?.brand_model_photos ?? []) as string[];
+    if (prev.length > 0) {
+      const paths = prev.map(extractStoragePath).filter((p): p is string => !!p);
+      if (paths.length > 0) await supabaseAdmin.storage.from("praan").remove(paths);
+    }
+
+    const urls: string[] = [];
+    for (let i = 0; i < dataUrls.length; i++) {
+      const url = dataUrls[i];
+      const m = /^data:([^;]+);base64,(.+)$/.exec(url);
+      if (!m) throw new Error("Invalid image");
+      const mime = m[1];
+      const bin = atob(m[2]);
+      const bytes = new Uint8Array(bin.length);
+      for (let j = 0; j < bin.length; j++) bytes[j] = bin.charCodeAt(j);
+      const ext = mime.split("/")[1] || "png";
+      const path = `brand-models/${context.userId}/real-${Date.now()}-${i}.${ext}`;
+      const { error } = await supabaseAdmin.storage
+        .from("praan")
+        .upload(path, bytes, { contentType: mime, upsert: true });
+      if (error) throw new Error(error.message);
+      const { data: signed, error: sErr } = await supabaseAdmin.storage
+        .from("praan")
+        .createSignedUrl(path, 60 * 60 * 24 * 365);
+      if (sErr || !signed) throw new Error(sErr?.message ?? "sign failed");
+      urls.push(signed.signedUrl);
+    }
+
+    const { error: updErr } = await supabaseAdmin
+      .from("brand_kits")
+      .update({
+        brand_model_photos: urls,
+        brand_model_source: "user",
+        brand_model_enabled: true,
+        brand_model_url: urls[0],
+      })
+      .eq("user_id", context.userId);
+    if (updErr) throw new Error(updErr.message);
+    return { urls };
+  });
+
+export const removeRealBrandModel = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: existing } = await supabaseAdmin
+      .from("brand_kits")
+      .select("brand_model_photos")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    const prev = (existing?.brand_model_photos ?? []) as string[];
+    if (prev.length > 0) {
+      const paths = prev.map(extractStoragePath).filter((p): p is string => !!p);
+      if (paths.length > 0) await supabaseAdmin.storage.from("praan").remove(paths);
+    }
+    const { error } = await supabaseAdmin
+      .from("brand_kits")
+      .update({
+        brand_model_photos: [],
+        brand_model_source: "ai",
+        brand_model_enabled: false,
+        brand_model_url: null,
+      })
       .eq("user_id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
