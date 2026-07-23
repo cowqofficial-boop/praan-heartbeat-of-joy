@@ -111,6 +111,11 @@ body {
   font-size: 40px;
   color: var(--text);
 }
+@media (min-width: 1024px) {
+  .page-headline {
+    font-size: 56px;
+  }
+}
 @utility section-heading {
   font-family: var(--font-display);
   font-weight: 700;
