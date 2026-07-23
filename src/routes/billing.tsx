@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Download, ExternalLink } from "lucide-react";
+import { ArrowLeft, Download, ExternalLink, Wallet } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
+
 import { supabase } from "@/integrations/supabase/client";
 import { cancelMySubscription, getMyCredits, getMyPayments } from "@/lib/billing.functions";
 import { formatInr } from "@/lib/plans";
