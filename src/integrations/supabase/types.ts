@@ -435,6 +435,94 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_items: {
+        Row: {
+          cost_price_paise: number
+          created_at: string
+          id: string
+          low_stock_alert: number
+          name: string
+          product_id: string | null
+          quantity: number
+          selling_price_paise: number
+          sku: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cost_price_paise?: number
+          created_at?: string
+          id?: string
+          low_stock_alert?: number
+          name: string
+          product_id?: string | null
+          quantity?: number
+          selling_price_paise?: number
+          sku?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cost_price_paise?: number
+          created_at?: string
+          id?: string
+          low_stock_alert?: number
+          name?: string
+          product_id?: string | null
+          quantity?: number
+          selling_price_paise?: number
+          sku?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "generations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_movements: {
+        Row: {
+          created_at: string
+          delta: number
+          id: string
+          note: string | null
+          reason: string
+          stock_item_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: string
+          note?: string | null
+          reason: string
+          stock_item_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: string
+          note?: string | null
+          reason?: string
+          stock_item_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_stock_item_id_fkey"
+            columns: ["stock_item_id"]
+            isOneToOne: false
+            referencedRelation: "stock_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_credits: {
         Row: {
           pack_credits: number
@@ -543,6 +631,15 @@ export type Database = {
       }
     }
     Functions: {
+      apply_stock_movement: {
+        Args: {
+          _delta: number
+          _note?: string
+          _reason: string
+          _stock_item_id: string
+        }
+        Returns: number
+      }
       consume_credit: {
         Args: { _amount?: number; _user_id: string }
         Returns: boolean
@@ -553,6 +650,19 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      refund_credits: {
+        Args: { _pack: number; _sub: number; _user_id: string }
+        Returns: undefined
+      }
+      spend_credits: {
+        Args: { _amount: number; _user_id: string }
+        Returns: {
+          balance: number
+          ok: boolean
+          took_pack: number
+          took_sub: number
+        }[]
       }
     }
     Enums: {

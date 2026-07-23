@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StockRouteImport } from './routes/stock'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LibraryRouteImport } from './routes/library'
@@ -29,6 +30,11 @@ import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicMetaOauthCallbackRouteImport } from './routes/api/public/meta-oauth-callback'
 import { Route as AuthenticatedAdminCostsRouteImport } from './routes/_authenticated.admin.costs'
 
+const StockRoute = StockRouteImport.update({
+  id: '/stock',
+  path: '/stock',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/library': typeof LibraryRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/stock': typeof StockRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/connect/instagram': typeof ConnectInstagramRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/library': typeof LibraryRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/stock': typeof StockRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/connect/instagram': typeof ConnectInstagramRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/library': typeof LibraryRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/stock': typeof StockRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/connect/instagram': typeof ConnectInstagramRoute
@@ -202,6 +211,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/pricing'
     | '/sitemap.xml'
+    | '/stock'
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/connect/instagram'
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/pricing'
     | '/sitemap.xml'
+    | '/stock'
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/connect/instagram'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/pricing'
     | '/sitemap.xml'
+    | '/stock'
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/connect/instagram'
@@ -265,6 +277,7 @@ export interface RootRouteChildren {
   LibraryRoute: typeof LibraryRoute
   PricingRoute: typeof PricingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  StockRoute: typeof StockRoute
   BlogFlatLayGuideRoute: typeof BlogFlatLayGuideRoute
   ResultsIdRoute: typeof ResultsIdRoute
   ApiPublicMetaOauthCallbackRoute: typeof ApiPublicMetaOauthCallbackRoute
@@ -273,6 +286,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/stock': {
+      id: '/stock'
+      path: '/stock'
+      fullPath: '/stock'
+      preLoaderRoute: typeof StockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -454,6 +474,7 @@ const rootRouteChildren: RootRouteChildren = {
   LibraryRoute: LibraryRoute,
   PricingRoute: PricingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  StockRoute: StockRoute,
   BlogFlatLayGuideRoute: BlogFlatLayGuideRoute,
   ResultsIdRoute: ResultsIdRoute,
   ApiPublicMetaOauthCallbackRoute: ApiPublicMetaOauthCallbackRoute,

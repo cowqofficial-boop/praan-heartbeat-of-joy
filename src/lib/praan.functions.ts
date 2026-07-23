@@ -270,107 +270,132 @@ export const generateImages = createServerFn({ method: "POST" })
     }) => d,
   )
   .handler(async ({ data }) => {
+    const { COSTS } = await import("./plans");
+    const PRODUCT_COST = COSTS.product;
+    let refundInfo: { userId: string; sub: number; pack: number } | null = null;
+
     if (data.userId) {
       const sb = await admin();
-      const { data: ok, error } = await sb.rpc("consume_credit", {
+      const { data: rows, error } = await sb.rpc("spend_credits", {
         _user_id: data.userId,
-        _amount: 1,
+        _amount: PRODUCT_COST,
       });
       if (error) throw new Error(`credit check failed: ${error.message}`);
-      if (!ok) throw new Error("NO_CREDITS");
+      const first = Array.isArray(rows) ? rows[0] : rows;
+      if (!first?.ok) {
+        const have = first?.balance ?? 0;
+        throw new Error(`NO_CREDITS:${PRODUCT_COST}:${have}`);
+      }
+      refundInfo = { userId: data.userId, sub: first.took_sub ?? 0, pack: first.took_pack ?? 0 };
     } else {
       await checkAndIncrementLimit(data.browserId);
     }
-    const urls = data.imageUrls && data.imageUrls.length > 0
-      ? data.imageUrls
-      : data.imageUrl
-        ? [data.imageUrl]
-        : [];
-    if (urls.length === 0) throw new Error("No image provided");
-    const productRefs = await Promise.all(urls.slice(0, 5).map((u) => fetchAsBase64(u)));
 
-    // Look up brand kit for model prefs + saved brand model (signed-in only).
-    let modelLine =
-      "Choose a clearly adult model (25 to 40 years old) who genuinely fits this product's real buyer — natural-looking Indian adult, warm approachable presence. Never a child, never a teenager.";
-    let brandModelRefs: { b64: string; mime: string }[] = [];
-    let brandModelBinding = "";
-    let personSource: "ai" | "user" = "ai";
-    if (data.userId) {
-      const sb = await admin();
-      const { data: kit } = await sb
-        .from("brand_kits")
-        .select("model_gender, model_age, model_skin, model_body, model_region, brand_model_enabled, brand_model_url, brand_model_source, brand_model_photos")
-        .eq("user_id", data.userId)
-        .maybeSingle();
-      if (kit) {
-        const { describeModelPrefs } = await import("./brand-kit.functions");
-        const prefs = describeModelPrefs(kit);
-        if (prefs) modelLine = `The model is: ${prefs}. Always a clearly adult person, 25 to 40 years old.`;
-        if (kit.brand_model_enabled) {
-          const source = (kit.brand_model_source as "ai" | "user" | null) ?? "ai";
-          const photos = source === "user"
-            ? ((kit.brand_model_photos as string[] | null) ?? []).filter(Boolean)
-            : (kit.brand_model_url ? [kit.brand_model_url] : []);
-          const loaded: { b64: string; mime: string }[] = [];
-          for (const p of photos.slice(0, 3)) {
-            try { loaded.push(await fetchAsBase64(p)); } catch { /* skip */ }
-          }
-          if (loaded.length > 0) {
-            brandModelRefs = loaded;
-            personSource = source;
-            brandModelBinding = source === "user"
-              ? "Reuse the exact same REAL person shown in the final reference photos — same face, same skin tone, same build, same hair — so this shop's photos all feature one consistent model. Keep their real facial features faithful. The person is clearly an adult."
-              : "Reuse the exact same person shown in the final reference portrait — same face, same skin tone, same build — so this shop's photos all feature one consistent brand model. The person is clearly an adult.";
+    try {
+      const urls = data.imageUrls && data.imageUrls.length > 0
+        ? data.imageUrls
+        : data.imageUrl
+          ? [data.imageUrl]
+          : [];
+      if (urls.length === 0) throw new Error("No image provided");
+      const productRefs = await Promise.all(urls.slice(0, 5).map((u) => fetchAsBase64(u)));
+
+      // Look up brand kit for model prefs + saved brand model (signed-in only).
+      let modelLine =
+        "Choose a clearly adult model (25 to 40 years old) who genuinely fits this product's real buyer — natural-looking Indian adult, warm approachable presence. Never a child, never a teenager.";
+      let brandModelRefs: { b64: string; mime: string }[] = [];
+      let brandModelBinding = "";
+      let personSource: "ai" | "user" = "ai";
+      if (data.userId) {
+        const sb = await admin();
+        const { data: kit } = await sb
+          .from("brand_kits")
+          .select("model_gender, model_age, model_skin, model_body, model_region, brand_model_enabled, brand_model_url, brand_model_source, brand_model_photos")
+          .eq("user_id", data.userId)
+          .maybeSingle();
+        if (kit) {
+          const { describeModelPrefs } = await import("./brand-kit.functions");
+          const prefs = describeModelPrefs(kit);
+          if (prefs) modelLine = `The model is: ${prefs}. Always a clearly adult person, 25 to 40 years old.`;
+          if (kit.brand_model_enabled) {
+            const source = (kit.brand_model_source as "ai" | "user" | null) ?? "ai";
+            const photos = source === "user"
+              ? ((kit.brand_model_photos as string[] | null) ?? []).filter(Boolean)
+              : (kit.brand_model_url ? [kit.brand_model_url] : []);
+            const loaded: { b64: string; mime: string }[] = [];
+            for (const p of photos.slice(0, 3)) {
+              try { loaded.push(await fetchAsBase64(p)); } catch { /* skip */ }
+            }
+            if (loaded.length > 0) {
+              brandModelRefs = loaded;
+              personSource = source;
+              brandModelBinding = source === "user"
+                ? "Reuse the exact same REAL person shown in the final reference photos — same face, same skin tone, same build, same hair — so this shop's photos all feature one consistent model. Keep their real facial features faithful. The person is clearly an adult."
+                : "Reuse the exact same person shown in the final reference portrait — same face, same skin tone, same build — so this shop's photos all feature one consistent brand model. The person is clearly an adult.";
+            }
           }
         }
       }
+
+      const styles = data.isKidswear
+        ? KIDSWEAR_STYLES
+        : data.needsPerson
+          ? personStyles(modelLine, brandModelBinding, !!data.isDrapedGarment)
+          : PRODUCT_STYLES;
+
+      const contextLine = `Product: ${data.productName}. Category: ${data.category}.`;
+
+      const tasks: Promise<{ kind: string; url: string }>[] = styles.map((style) => (async () => {
+        const refs = style.hasPerson && brandModelRefs.length > 0
+          ? [...productRefs, ...brandModelRefs]
+          : productRefs;
+        const b64 = await generateOneImage(refs, `${contextLine} ${style.prompt}`, 2048, !!style.hasPerson);
+        const bytes = b64ToBytes(b64);
+        const path = `generated/${data.browserId}/${Date.now()}-${style.kind}.png`;
+        const url = await uploadBytes(path, bytes, "image/png");
+        return { kind: style.kind, url };
+      })());
+      const settled = await Promise.allSettled(tasks);
+      const base = settled
+        .filter((r): r is PromiseFulfilledResult<{ kind: string; url: string }> => r.status === "fulfilled")
+        .map((r) => r.value);
+      if (base.length === 0) {
+        const firstErr = settled.find((r) => r.status === "rejected") as PromiseRejectedResult | undefined;
+        const detail = firstErr ? (firstErr.reason instanceof Error ? firstErr.reason.message : String(firstErr.reason)) : "";
+        throw new Error(detail || "No photos came through. Try again.");
+      }
+      const images = base.flatMap((b) => [
+        { kind: b.kind, ratio: "1:1" as const, url: b.url },
+        { kind: b.kind, ratio: "9:16" as const, url: b.url },
+      ]);
+      // Success — do not refund.
+      refundInfo = null;
+      return {
+        images,
+        meta: {
+          image_model: GEMINI_IMAGE_MODEL,
+          image_count: base.length,
+          image_resolution: 2048,
+          input_photo_count: productRefs.length,
+          person_source: personSource,
+        },
+      };
+    } catch (err) {
+      // Automatic refund on our-side failure.
+      if (refundInfo) {
+        try {
+          const sb = await admin();
+          await sb.rpc("refund_credits", {
+            _user_id: refundInfo.userId,
+            _sub: refundInfo.sub,
+            _pack: refundInfo.pack,
+          });
+        } catch { /* swallow refund errors */ }
+      }
+      throw err;
     }
-
-    // Kidswear overrides everything: never a person, adult or child.
-    const styles = data.isKidswear
-      ? KIDSWEAR_STYLES
-      : data.needsPerson
-        ? personStyles(modelLine, brandModelBinding, !!data.isDrapedGarment)
-        : PRODUCT_STYLES;
-
-    const contextLine = `Product: ${data.productName}. Category: ${data.category}.`;
-
-    // Generate ONCE per style at 2048 (square); reuse the URL for both 1:1 and 9:16
-    // to halve API cost — the browser crops to 9:16 at download time.
-    const tasks: Promise<{ kind: string; url: string }>[] = styles.map((style) => (async () => {
-      const refs = style.hasPerson && brandModelRefs.length > 0
-        ? [...productRefs, ...brandModelRefs]
-        : productRefs;
-      const b64 = await generateOneImage(refs, `${contextLine} ${style.prompt}`, 2048, !!style.hasPerson);
-      const bytes = b64ToBytes(b64);
-      const path = `generated/${data.browserId}/${Date.now()}-${style.kind}.png`;
-      const url = await uploadBytes(path, bytes, "image/png");
-      return { kind: style.kind, url };
-    })());
-    const settled = await Promise.allSettled(tasks);
-    const base = settled
-      .filter((r): r is PromiseFulfilledResult<{ kind: string; url: string }> => r.status === "fulfilled")
-      .map((r) => r.value);
-    if (base.length === 0) {
-      const firstErr = settled.find((r) => r.status === "rejected") as PromiseRejectedResult | undefined;
-      const detail = firstErr ? (firstErr.reason instanceof Error ? firstErr.reason.message : String(firstErr.reason)) : "";
-      throw new Error(detail || "No photos came through. Try again.");
-    }
-    const images = base.flatMap((b) => [
-      { kind: b.kind, ratio: "1:1" as const, url: b.url },
-      { kind: b.kind, ratio: "9:16" as const, url: b.url },
-    ]);
-    return {
-      images,
-      meta: {
-        image_model: GEMINI_IMAGE_MODEL,
-        image_count: base.length,
-        image_resolution: 2048,
-        input_photo_count: productRefs.length,
-        person_source: personSource,
-      },
-    };
   });
+
 
 
 
