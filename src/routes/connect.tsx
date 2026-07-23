@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { ArrowLeft, Check, Instagram, Facebook, MessageCircle, Loader2, Link2 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
+import { showConfirm } from "@/components/Dialogs";
 
 import { supabase } from "@/integrations/supabase/client";
 import {
