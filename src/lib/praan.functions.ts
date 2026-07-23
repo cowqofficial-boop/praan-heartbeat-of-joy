@@ -77,16 +77,27 @@ const IdentifiedSchema = z.object({
 });
 
 export const identifyProduct = createServerFn({ method: "POST" })
-  .inputValidator((d: { imageUrl: string }) => d)
+  .inputValidator((d: { imageUrl?: string; imageUrls?: string[] }) => d)
   .handler(async ({ data }) => {
-    const { b64, mime } = await fetchAsBase64(data.imageUrl);
+    const urls = data.imageUrls && data.imageUrls.length > 0
+      ? data.imageUrls
+      : data.imageUrl
+        ? [data.imageUrl]
+        : [];
+    if (urls.length === 0) throw new Error("No image provided");
+    const refs = await Promise.all(urls.slice(0, 5).map((u) => fetchAsBase64(u)));
+    const imageParts = refs.map((r) => ({ inlineData: { mimeType: r.mime, data: r.b64 } }));
+    const guidance =
+      refs.length > 1
+        ? `You are shown ${refs.length} photos of the SAME single product taken from different angles (front, back, close-up, label, etc.). Combine them into one accurate understanding of the item — its true shape from every side, its material, its true colour, any text or labels, and how it is constructed. The first photo is the primary reference.`
+        : "You are shown one photo of a product.";
     const text = await geminiGenerateText({
       systemInstruction:
-        "You identify products from a photo for Indian e-commerce sellers. Reply with a compact JSON object only, no prose, no markdown fences.",
+        "You identify products from photos for Indian e-commerce sellers. Reply with a compact JSON object only, no prose, no markdown fences.",
       parts: [
-        { inlineData: { mimeType: mime, data: b64 } },
+        ...imageParts,
         {
-          text: 'Identify this product. Return JSON: {"name": short product name (max 6 words, sentence case), "category": one broad category like Kitchen, Home Decor, Fashion, Beauty, Electronics, "material": main material or empty, "color": main color or empty, "features": array of exactly 3 short key features}',
+          text: `${guidance}\n\nIdentify this product. Return JSON: {"name": short product name (max 6 words, sentence case), "category": one broad category like Kitchen, Home Decor, Fashion, Beauty, Electronics, "material": main material or empty, "color": main color or empty, "features": array of exactly 3 short key features}`,
         },
       ],
       responseMimeType: "application/json",
@@ -101,6 +112,7 @@ export const identifyProduct = createServerFn({ method: "POST" })
     val.features = val.features.slice(0, 3);
     return val;
   });
+
 
 
 // ---------- Rate limit ----------
