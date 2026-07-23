@@ -343,7 +343,7 @@ function StockPage() {
             </ul>
 
             {/* Desktop: table */}
-            <div className="hidden lg:block overflow-hidden rounded-[14px] bg-surface" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)" }}>
+            <div className="hidden lg:block overflow-hidden card-lift">
               <table className="w-full text-left text-[14px] text-ink">
                 <thead>
                   <tr className="text-[11px] uppercase tracking-wider text-muted">
