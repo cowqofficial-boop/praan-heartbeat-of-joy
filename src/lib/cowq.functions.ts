@@ -301,6 +301,61 @@ const KIDSWEAR_STYLES: StyleDef[] = [
   },
 ];
 
+function getGenerationStyles(data: {
+  needsPerson?: boolean;
+  isKidswear?: boolean;
+  isDrapedGarment?: boolean;
+}, modelLine: string, brandModelBinding: string): StyleDef[] {
+  return data.isKidswear
+    ? KIDSWEAR_STYLES
+    : data.needsPerson
+      ? personStyles(modelLine, brandModelBinding, !!data.isDrapedGarment)
+      : PRODUCT_STYLES;
+}
+
+async function getBrandModelContext(userId?: string | null): Promise<{
+  modelLine: string;
+  brandModelRefs: { b64: string; mime: string }[];
+  brandModelBinding: string;
+  personSource: "ai" | "user";
+}> {
+  let modelLine =
+    "Choose a clearly adult model (25 to 40 years old) who genuinely fits this product's real buyer — natural-looking Indian adult, warm approachable presence. Never a child, never a teenager.";
+  let brandModelRefs: { b64: string; mime: string }[] = [];
+  let brandModelBinding = "";
+  let personSource: "ai" | "user" = "ai";
+  if (!userId) return { modelLine, brandModelRefs, brandModelBinding, personSource };
+
+  const sb = await admin();
+  const { data: kit } = await sb
+    .from("brand_kits")
+    .select("model_gender, model_age, model_skin, model_body, model_region, brand_model_enabled, brand_model_url, brand_model_source, brand_model_photos")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!kit) return { modelLine, brandModelRefs, brandModelBinding, personSource };
+
+  const { describeModelPrefs } = await import("./brand-kit.functions");
+  const prefs = describeModelPrefs(kit);
+  if (prefs) modelLine = `The model is: ${prefs}. Always a clearly adult person, 25 to 40 years old.`;
+  if (!kit.brand_model_enabled) return { modelLine, brandModelRefs, brandModelBinding, personSource };
+
+  const source = (kit.brand_model_source as "ai" | "user" | null) ?? "ai";
+  const photos = source === "user"
+    ? ((kit.brand_model_photos as string[] | null) ?? []).filter(Boolean)
+    : (kit.brand_model_url ? [kit.brand_model_url] : []);
+  const loaded: { b64: string; mime: string }[] = [];
+  for (const p of photos.slice(0, 3)) {
+    try { loaded.push(await fetchAsBase64(p)); } catch { /* skip */ }
+  }
+  if (loaded.length === 0) return { modelLine, brandModelRefs, brandModelBinding, personSource };
+  brandModelRefs = loaded;
+  personSource = source;
+  brandModelBinding = source === "user"
+    ? "Reuse the exact same REAL person shown in the final reference photos — same face, same skin tone, same build, same hair — so this shop's photos all feature one consistent model. Keep their real facial features faithful. The person is clearly an adult."
+    : "Reuse the exact same person shown in the final reference portrait — same face, same skin tone, same build — so this shop's photos all feature one consistent brand model. The person is clearly an adult.";
+  return { modelLine, brandModelRefs, brandModelBinding, personSource };
+}
+
 async function generateOneImage(
   refs: { b64: string; mime: string }[],
   prompt: string,
@@ -314,9 +369,10 @@ async function generateOneImage(
       : "Keep the product identical to the reference photo — same shape, colour, material, branding and label.";
   const peopleRule = allowPerson ? "" : NO_PEOPLE;
 
-  async function runOnce(extraGuidance = ""): Promise<string> {
+  async function runOnce(attempt: number, extraGuidance = ""): Promise<string> {
     const full = `${prompt} ${sizeHint} ${peopleRule} ${multiHint} ${extraGuidance}`.trim();
     const [primary, ...extras] = refs;
+    console.info(`[generation] image attempt=${attempt} allow_person=${allowPerson}`);
     const out = await geminiGenerateImage({
       prompt: full,
       reference: { mimeType: primary.mime, b64: primary.b64 },
@@ -325,7 +381,8 @@ async function generateOneImage(
     return out.b64;
   }
 
-  const first = await runOnce();
+  let attemptCount = 1;
+  const first = await runOnce(attemptCount);
   if (!allowPerson) return first;
 
   // On-model shots: verify the product isn't cropped at any frame edge; retry once free if it is.
@@ -342,7 +399,11 @@ async function generateOneImage(
       maxOutputTokens: 4,
     });
     if (/^\s*yes\b/i.test(verdict)) {
+      if (attemptCount >= 2) return first;
+      attemptCount += 1;
+      console.warn(`[generation] crop retry attempt=${attemptCount} max=2`);
       const retry = await runOnce(
+        attemptCount,
         "PREVIOUS ATTEMPT CROPPED THE PRODUCT. Pull the camera BACK and zoom OUT significantly so the entire garment and person fit comfortably inside the frame with clear empty margin on all four sides. Prioritise showing the whole product over showing the model's face — crop the face at the top if you must, but never crop the product.",
       );
       return retry;
