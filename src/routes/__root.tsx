@@ -12,6 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSidebar } from "../components/AppSidebar";
+import { QueueRunner } from "../lib/queue-runner";
+import { QueueIndicator } from "../components/QueueIndicator";
 
 
 function NotFoundComponent() {
@@ -132,6 +134,8 @@ function RootComponent() {
           <Outlet />
         </div>
       </div>
+      <QueueRunner />
+      <QueueIndicator />
     </QueryClientProvider>
   );
 }
