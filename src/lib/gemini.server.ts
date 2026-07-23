@@ -2,8 +2,8 @@
 
 const BASE = "https://generativelanguage.googleapis.com/v1beta";
 
-export const GEMINI_TEXT_MODEL = "gemini-3-pro-preview";
-export const GEMINI_IMAGE_MODEL = "gemini-3-pro-image-preview";
+export const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
+export const GEMINI_IMAGE_MODEL = "gemini-3-pro-image";
 
 export function geminiKey(): string {
   const k = process.env.GEMINI_API_KEY;
