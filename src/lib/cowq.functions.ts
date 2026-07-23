@@ -705,6 +705,7 @@ const CopySchema = z.object({
 export const generateCopyAndSave = createServerFn({ method: "POST" })
   .inputValidator(
     (d: {
+      jobId?: string | null;
       browserId: string;
       userId?: string | null;
       originalImageUrl: string;
@@ -720,6 +721,7 @@ export const generateCopyAndSave = createServerFn({ method: "POST" })
     }) => d,
   )
   .handler(async ({ data }) => {
+    if (data.jobId) await ensureGenerationReserved(data.jobId, data.browserId);
     // Look up brand kit if signed in.
     let brand: {
       business_name: string;
@@ -843,6 +845,7 @@ Return a JSON object only (no prose, no markdown fences) with these exact keys:
       .select("id")
       .single();
     if (error || !row) throw new Error(`save failed: ${error?.message}`);
+    if (data.jobId) await markGenerationSucceeded(data.jobId, data.browserId);
     return { id: row.id as string, copy, csvUrl };
   });
 
