@@ -10,7 +10,6 @@ export function CopyButton({ text, label = "Copy" }: { text: string; label?: str
         try {
           await navigator.clipboard.writeText(text);
         } catch {
-          // fallback
           const ta = document.createElement("textarea");
           ta.value = text;
           document.body.appendChild(ta);
@@ -19,15 +18,15 @@ export function CopyButton({ text, label = "Copy" }: { text: string; label?: str
           document.body.removeChild(ta);
         }
         setCopied(true);
-        setTimeout(() => setCopied(false), 1600);
+        setTimeout(() => setCopied(false), 1200);
       }}
-      className="inline-flex items-center gap-1.5 rounded-[12px] border border-[color:var(--color-border)] bg-raised px-3 py-2 text-[13px] font-medium text-ink transition-colors active:bg-surface"
-      aria-label={label}
+      className="inline-flex items-center gap-1.5 rounded-[12px] bg-raised px-3 py-2 text-[13px] font-medium text-ink hover:brightness-110"
+      aria-label={copied ? "Copied" : label}
     >
       {copied ? (
         <>
-          <Check className="h-4 w-4 text-highlight" />
-          <span className="text-highlight">Copied</span>
+          <Check key="c" className="h-4 w-4 text-marigold scale-in" />
+          <span className="text-marigold">Copied</span>
         </>
       ) : (
         <>

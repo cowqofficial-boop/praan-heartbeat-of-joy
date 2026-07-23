@@ -1,4 +1,4 @@
-import { Check, Loader2 } from "lucide-react";
+import { Check } from "lucide-react";
 
 export type StepState = "pending" | "active" | "done" | "error";
 
@@ -12,22 +12,20 @@ export function ProgressSteps({
       {steps.map((s, i) => (
         <li key={i} className="flex items-center gap-4">
           <span
-            className={`grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors ${
+            className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${
               s.state === "done"
-                ? "bg-highlight text-white"
+                ? "bg-marigold text-background"
                 : s.state === "active"
-                  ? "bg-primary/10 text-primary"
+                  ? "bg-raised text-ink breathe"
                   : s.state === "error"
-                    ? "bg-primary text-white"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-surface text-muted"
             }`}
           >
             {s.state === "done" ? (
-              <Check className="h-5 w-5" />
-            ) : s.state === "active" ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <Check className="h-5 w-5 scale-in" />
             ) : (
-              <span className="text-[13px] font-semibold">{i + 1}</span>
+              <span className="font-mono text-[13px] font-semibold tabular-nums">{i + 1}</span>
             )}
           </span>
           <span
