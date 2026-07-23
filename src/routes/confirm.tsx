@@ -1,7 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useCowqStore } from "@/lib/cowq-store";
+import { useQueueStore, MAX_QUEUE, queueCounts } from "@/lib/queue-store";
 import { PrimaryButton } from "@/components/PrimaryButton";
+import { COSTS } from "@/lib/plans";
+import { useAuth, hasUsedFreeGeneration } from "@/lib/use-auth";
+import { getMyCredits } from "@/lib/billing.functions";
 
 export const Route = createFileRoute("/confirm")({
   head: () => ({
@@ -28,10 +33,21 @@ export const Route = createFileRoute("/confirm")({
 
 function Confirm() {
   const navigate = useNavigate();
-  const { originalDataUrl, identified, setForm } = useCowqStore();
+  const { photos, originalDataUrl, identified, reset: resetUpload } = useCowqStore();
+  const items = useQueueStore((s) => s.items);
+  const enqueue = useQueueStore((s) => s.enqueue);
+  const { user } = useAuth();
+  const { data: credits } = useQuery({
+    queryKey: ["my-credits"],
+    queryFn: () => getMyCredits(),
+    enabled: !!user,
+    staleTime: 15_000,
+  });
+
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [detail, setDetail] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!identified || !originalDataUrl) {
@@ -42,9 +58,38 @@ function Confirm() {
     setDetail(identified.features?.[0] ?? identified.material ?? "");
   }, [identified, originalDataUrl, navigate]);
 
+  const activeCount = useMemo(
+    () => queueCounts(items).active,
+    [items],
+  );
+
   if (!identified || !originalDataUrl) return null;
 
+  const cost = COSTS.product;
   const canSubmit = name.trim().length > 0 && price.trim().length > 0;
+
+  function preflight(): string | null {
+    if (activeCount >= MAX_QUEUE) {
+      return "3 is the most we'll do at once. One more slot opens as each finishes.";
+    }
+    if (!user) {
+      if (activeCount > 0 || hasUsedFreeGeneration()) {
+        return "Sign up to make more than one product.";
+      }
+      return null;
+    }
+    const have = credits?.total ?? null;
+    if (have == null) return null; // don't block on unknown; server will refund on shortfall
+    const needed = cost * (activeCount + 1);
+    if (have < needed) {
+      if (activeCount === 0) {
+        return `You have ${have} credits — you need ${cost} to make one product. Top up to keep going.`;
+      }
+      const canQueue = Math.floor(have / cost);
+      return `You have ${have} credits — enough for ${canQueue} more product${canQueue === 1 ? "" : "s"}. Top up to queue more.`;
+    }
+    return null;
+  }
 
   return (
     <main className="flex min-h-screen flex-col px-5 pb-28 pt-8">
@@ -92,15 +137,43 @@ function Confirm() {
         </Field>
       </div>
 
+      {activeCount > 0 && (
+        <p className="mt-4 text-[13px] text-muted">
+          {activeCount} product{activeCount === 1 ? "" : "s"} already in your queue. This one will start when they finish.
+        </p>
+      )}
+      {error && <p className="mt-3 text-[14px] text-primary">{error}</p>}
+
       <PrimaryButton
         fixed
         disabled={!canSubmit}
         onClick={() => {
-          setForm({ name: name.trim(), price: price.trim(), detail: detail.trim() });
+          const block = preflight();
+          if (block) {
+            setError(block);
+            return;
+          }
+          const imageUrls = (photos.length > 0
+            ? photos.map((p) => p.url)
+            : []
+          ).filter((u): u is string => Boolean(u));
+          if (imageUrls.length === 0) {
+            setError("We lost your uploaded photo. Please upload again.");
+            return;
+          }
+          enqueue({
+            productName: name.trim(),
+            price: price.trim(),
+            detail: detail.trim(),
+            imageUrls,
+            identified,
+            cost,
+          });
+          resetUpload();
           navigate({ to: "/generating" });
         }}
       >
-        Create my listing
+        {activeCount > 0 ? "Add to queue" : "Make my photos"}
       </PrimaryButton>
     </main>
   );

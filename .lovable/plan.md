@@ -1,107 +1,99 @@
-# Razorpay Payments & Credit System
 
-## Overview
+# Product queue
 
-Add a full credit + subscription system to PRAAN using Razorpay. Free tier gains a watermark, paid tiers remove it and unlock features (calendar for Growth+).
+Today: seller uploads one product, waits on `/generating`, then can start the next. This plan replaces that with a background queue of up to 3, a redesigned queue screen, a persistent indicator, and a combined download when the batch finishes.
 
-## Database (new migration)
+## Behaviour
 
-**`plans` (seed table)** — static catalog of plans/packs
-- `id` (text pk: `free`, `starter_m`, `starter_y`, `growth_m`, `growth_y`, `pro_m`, `pro_y`, `pack_10`, `pack_25`, `pack_60`)
-- `kind` (`subscription` | `pack` | `free`), `name`, `credits`, `price_inr`, `interval` (`month` | `year` | null), `features` jsonb
+**Queue rules**
+- Max 3 products at once (currently generating + waiting).
+- Strictly sequential — one runs at a time to respect Gemini rate limits.
+- Next item auto-starts the moment the previous finishes.
+- Generation continues in the background; seller can be anywhere in the app.
 
-**`user_credits`**
-- `user_id` pk, `plan_id` (current active plan), `subscription_credits` (resets on renewal), `pack_credits` (never expire), `period_start`, `period_end`, `razorpay_subscription_id`, `updated_at`
-- View helper: `total_credits = subscription_credits + pack_credits`
+**Credits**
+- Check balance at *queue time* using cost × (already-queued items + 1). Refuse with the exact copy from the brief.
+- Deduct credits at *start time* (inside the existing `generateCopyAndSave` / job flow). Removing a waiting item before it starts costs nothing.
 
-**`payments`** (invoice history)
-- `id`, `user_id`, `razorpay_payment_id`, `razorpay_order_id`, `razorpay_subscription_id` (nullable), `plan_id`, `amount_inr`, `credits_granted`, `status` (`created`/`paid`/`failed`), `invoice_url`, `created_at`
+**Removing**
+- Waiting rows have a small × to remove. The active one cannot be cancelled.
 
-All tables: RLS scoped to `auth.uid()`, GRANTs for authenticated + service_role.
+## Screens & UI
 
-## Backend
+**Queue screen (replaces `/generating`, kept at same URL)**
+- Top: active product — hero photo, three `ProgressSteps`, live "N of 4 photos done" line (as today).
+- Middle: waiting rows — thumbnail, product name, quiet "Waiting" pill; finished rows become "Ready" with Sindoor tick, tappable to `/results/$id`.
+- Below: **Add another product** button on `--raised` with supporting line. Greys out when queue is full with the exact copy.
+- When everything is done: summary "N products ready" listing each, plus **Download everything** (zip of all photos + one combined Shopify CSV).
 
-**Secrets**: `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` (via `add_secret`).
+**Persistent indicator (`QueueIndicator`)**
+- Fixed pill: bottom-right on desktop, above bottom bar on mobile.
+- Hidden on `/generating` itself.
+- Shows "⚡ N generating · M ready" with a subtle pulse while running.
+- On completion: "N products ready", stays 10s then fades.
+- Tap → `/generating`.
 
-**Server functions** (`src/lib/billing.functions.ts`):
-- `getMyCredits()` — balance + plan for header/UI
-- `getMyPayments()` — invoice history
-- `createOrder({ planId })` — creates Razorpay order (one-time packs) or subscription; returns checkout params
-- `verifyPayment({ ... })` — verifies signature client-side callback (belt-and-suspenders)
+**Add-another flow**
+- "Add another product" navigates back to `/` (Upload) with a query flag so it knows to enqueue instead of replacing the current job. After Confirm, it pushes onto the queue and returns to `/generating`.
 
-**Webhook route** `src/routes/api/public/razorpay-webhook.ts`:
-- Verifies HMAC signature
-- Handles `payment.captured`, `subscription.charged`, `subscription.cancelled`
-- Grants credits atomically (packs → `pack_credits`, subs → resets `subscription_credits` and updates `period_end`)
-- Records payment row + invoice URL
+## Technical
 
-**Credit consumption**:
-- Wrap existing `generateOnePost`, `generateCopyAndSave`, and the initial product-generation entrypoint with a `consumeCredit(userId)` helper that deducts 1 credit atomically. Prefers `subscription_credits` first, then `pack_credits`.
-- Anonymous path unchanged (browser_id, 1 free).
-- Signed-in without paid plan: 3 free lifetime credits (tracked via `subscription_credits` on `free` plan seeded at signup).
+**Queue store (`src/lib/queue-store.ts`, zustand + `persist` to localStorage)**
+```ts
+type QueueItem = {
+  id: string;                    // local uuid
+  status: 'waiting' | 'running' | 'ready' | 'error';
+  productName: string;
+  price: string;
+  detail: string;
+  photos: CowqPhoto[];           // dataUrls persisted (base64) — needed for background start after nav
+  identified: Identified;
+  cost: number;                  // credits, computed at enqueue
+  jobId?: string;
+  resultId?: string;             // generation id when ready
+  photoProgress?: { done: number; total: number };
+  error?: string;
+};
+```
+Actions: `enqueue`, `remove`, `markRunning`, `updateProgress`, `markReady`, `markError`, `clearFinished`.
 
-**Watermark**:
-- New `applyWatermark(imageBase64)` helper server-side using canvas/sharp-free approach — actually simpler: pass a `watermark: true` flag into image generation prompt so Gemini adds "Made with PRAAN" text corner. Fallback: overlay via server-side canvas using `@napi-rs/canvas` if worker supports; else client-side draw at display/download time.
-- Decision: **client-side overlay at download time** using canvas — reliable on Cloudflare Worker runtime. Display shows watermark badge overlay in `<img>` container for free users too.
+**Runner (`src/lib/queue-runner.tsx`)**
+- Mounted once inside `__root.tsx` (client-only).
+- `useEffect` watches the queue: if nothing running and there's a `waiting` item, start it — run the same three-phase pipeline currently in `generating.tsx` (`startGenerationJob` → parallel `generateImageForJob` × 4 → `generateCopyAndSave`) with the same 3-minute watchdog and refund logic.
+- Updates the store as it progresses.
+- Because `.persist` keeps items across navigation, generation survives route changes; a hard refresh resumes any `waiting` items (any `running` item at refresh is marked error + refunded via existing `refundGenerationJob`).
 
-## Frontend
+**Enqueue path**
+- Confirm screen's "Make my photos" → compute cost via existing pricing helper → check `useAuth`'s credit balance + queued costs → if OK, `enqueue()` and `navigate('/generating')`. Old direct-hand-off through `useCowqStore` is removed for the queue path; `useCowqStore` stays only as the transient buffer between Upload and Confirm.
 
-**Pricing page** `/pricing`:
-- Toggle: Monthly / **Annual (2 months free)** — annual pre-selected
-- Three subscription cards (Starter/Growth/Pro) with feature list
-- "One-time packs" section below (10/25/60)
-- CTA per card → Razorpay Checkout modal (loads `checkout.razorpay.com/v1/checkout.js`)
+**Generating route rewrite**
+- Reads from `useQueueStore`. Renders active card + waiting list + finished list + Add-another CTA + all-done summary.
+- No longer starts jobs itself — the runner does. This lets the seller leave and come back.
 
-**Header credit badge** (added to library, calendar, results):
-- `<CreditBadge />` component reads `getMyCredits` via useQuery
-- Shows `⚡ 12 left` — click → `/pricing`
+**Persistent indicator**
+- Small component in `__root.tsx` shell. Reads counts from `useQueueStore`. Hidden when `location.pathname === '/generating'`.
 
-**Out-of-credits modal**:
-- Friendly banner "You've used your products for this month" + Upgrade button
-- Replaces generation attempt when balance is 0
+**Combined download**
+- New `src/lib/bulk-download.ts`: fetches each ready generation's images + copy (already in DB), builds one `buildShopifyCsv`-style multi-product CSV, zips with `jszip` (add dep), triggers Blob download.
 
-**Billing page** `/billing`:
-- Current plan card (name, renewal date, credits used/remaining this period)
-- Cancel subscription button (calls Razorpay API)
-- Invoice history table with download links
+**Copy strings** — use the exact wording from the brief.
 
-**Calendar gating**:
-- `/calendar` checks plan; if `free`/`starter_*`/`pack_*` → shows locked state: "The Calendar plans 30 days of posts for you. Available on Growth and Pro." + Upgrade button
-- Growth/Pro → normal calendar
-
-**Brand kit gating**:
-- Already accessible; keep as-is but note in pricing that Growth+ formally includes it (Starter can still access but this matches spec — actually spec says Starter doesn't list brand kit; keep it available since it's already built and useful. Only calendar is explicitly locked).
-
-**Watermark**:
-- Free plan images show a small "Made with PRAAN" tag in bottom-right corner via CSS overlay in display
-- On download (ZIP or single image), draw watermark onto canvas before saving
+## Non-goals
+- No parallel execution.
+- No Pro bulk-upload (noted for later).
+- No server-side queue persistence — queue lives in the browser (matches "per browser" model already used for free tier).
 
 ## Files
 
-**New**:
-- `supabase/migrations/*_billing.sql`
-- `src/lib/billing.functions.ts`
-- `src/lib/razorpay.server.ts` (SDK wrapper)
-- `src/routes/api/public/razorpay-webhook.ts`
-- `src/routes/pricing.tsx`
-- `src/routes/billing.tsx`
-- `src/components/CreditBadge.tsx`
-- `src/components/UpgradeModal.tsx`
-- `src/lib/watermark.ts` (client canvas helper)
+New:
+- `src/lib/queue-store.ts`
+- `src/lib/queue-runner.tsx`
+- `src/lib/bulk-download.ts`
+- `src/components/QueueIndicator.tsx`
 
-**Modified**:
-- `src/lib/praan.functions.ts` — consume credit, tag images with watermark flag
-- `src/lib/calendar.functions.ts` — consume credit per post
-- `src/routes/index.tsx`, `library.tsx`, `calendar.tsx`, `results.$id.tsx` — add CreditBadge, watermark overlay
-- `src/routes/calendar.tsx` — plan gate
-- `src/routes/auth/callback.tsx` — seed `user_credits` row with 3 free credits on first signup
-
-## Pricing math (verification)
-
-- Annual = monthly × 10 (2 months free): Starter ₹9,990/yr, Growth ₹29,990/yr, Pro ₹69,990/yr
-
-## Open questions
-
-1. **Watermark placement**: I'll do bottom-right corner, semi-transparent white text on dark pill background — matches brand.
-2. **Credit cost per action**: 1 credit = 1 product generation (initial 4-photo + copy + CSV bundle). Calendar posts also cost 1 credit each. Confirm?
-3. **Razorpay account**: You'll need to create Razorpay Plans (for subscriptions) in the Razorpay dashboard and paste the plan IDs, OR I create them via API on first use. I'll do API-on-first-use to avoid manual setup.
+Changed:
+- `src/routes/generating.tsx` — full rewrite as queue screen.
+- `src/routes/confirm.tsx` — enqueue instead of direct navigate; pre-flight credit check with new copy.
+- `src/routes/__root.tsx` — mount `QueueRunner` + `QueueIndicator`.
+- `src/routes/index.tsx` — "Add another product" entry recognises `?add=1` (minor: just wording of a small banner if a queue item is running).
+- `package.json` — add `jszip`.

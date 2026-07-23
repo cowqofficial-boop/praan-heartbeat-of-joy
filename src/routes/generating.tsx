@@ -1,31 +1,24 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useRef, useState } from "react";
-import { useCowqStore } from "@/lib/cowq-store";
-import { getBrowserId } from "@/lib/browser-id";
-import {
-  generateCopyAndSave,
-  generateImageForJob,
-  refundGenerationJob,
-  startGenerationJob,
-} from "@/lib/cowq.functions";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { Check, X, Plus, Download } from "lucide-react";
+import { useQueueStore, queueCounts, MAX_QUEUE, type QueueItem } from "@/lib/queue-store";
 import { ProgressSteps, type StepState } from "@/components/ProgressSteps";
-import { PrimaryButton } from "@/components/PrimaryButton";
-import { markFreeGenerationUsed, useAuth } from "@/lib/use-auth";
+import { getGeneration } from "@/lib/cowq.functions";
+import { downloadBulkZip, type BulkProduct } from "@/lib/bulk-download";
 
 export const Route = createFileRoute("/generating")({
   head: () => ({
     meta: [
-      { title: "Making your listing — CowQ" },
+      { title: "Your product queue — CowQ" },
       {
         name: "description",
         content:
-          "CowQ is studying your product, shooting studio photos, and writing your marketplace listing. This usually takes under a minute.",
+          "CowQ works through your products one at a time. Add up to three at once, then get back to what you were doing.",
       },
-      { property: "og:title", content: "Making your listing — CowQ" },
+      { property: "og:title", content: "Your product queue — CowQ" },
       {
         property: "og:description",
-        content: "Studio photos, marketplace copy, and a catalog file are being prepared.",
+        content: "Studio photos and listings, made in the background while you get on with your day.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://praan-heartbeat-of-joy.lovable.app/generating" },
@@ -33,236 +26,279 @@ export const Route = createFileRoute("/generating")({
     ],
     links: [{ rel: "canonical", href: "https://praan-heartbeat-of-joy.lovable.app/generating" }],
   }),
-  component: Generating,
+  component: QueueScreen,
 });
 
-function Generating() {
+function QueueScreen() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { photos, originalImageUrl, identified, form } = useCowqStore();
-  const [states, setStates] = useState<StepState[]>(["done", "active", "pending"]);
-  const [photoProgress, setPhotoProgress] = useState({ done: 0, total: 4 });
-  const [error, setError] = useState<string | null>(null);
-  const [detail, setDetail] = useState<string | null>(null);
-  const [showDetail, setShowDetail] = useState(false);
-  const startedRef = useRef(false);
-  const startJob = useServerFn(startGenerationJob);
-  const makePhoto = useServerFn(generateImageForJob);
-  const writeAndSave = useServerFn(generateCopyAndSave);
-  const refundJob = useServerFn(refundGenerationJob);
+  const items = useQueueStore((s) => s.items);
+  const remove = useQueueStore((s) => s.remove);
+  const clearFinished = useQueueStore((s) => s.clearFinished);
+  const [downloading, setDownloading] = useState(false);
 
-  useEffect(() => {
-    if (!originalImageUrl || !identified || !form) {
-      navigate({ to: "/", replace: true });
-      return;
-    }
-    if (startedRef.current) return;
-    startedRef.current = true;
-    run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const counts = useMemo(() => queueCounts(items), [items]);
+  const active = items.find((i) => i.status === "running");
+  const waiting = items.filter((i) => i.status === "waiting");
+  const finished = items.filter((i) => i.status === "ready" || i.status === "error");
+  const readyItems = items.filter((i) => i.status === "ready");
+  const allDone = items.length > 0 && counts.running === 0 && counts.waiting === 0;
+  const queueFull = counts.active >= MAX_QUEUE;
 
-  async function run() {
-    if (!originalImageUrl || !identified || !form) return;
-    setError(null);
-    setDetail(null);
-    setPhotoProgress({ done: 0, total: 4 });
-    setStates(["done", "active", "pending"]);
-    const browserId = getBrowserId();
-    const imageUrls = (photos.length > 0 ? photos.map((p) => p.url) : [originalImageUrl]).filter(
-      (u): u is string => Boolean(u),
-    );
-    let jobId: string | null = null;
-    const deadline = Date.now() + 180_000;
-    const timeoutMessage = "This is taking longer than it should. Your credits have been returned — try again.";
+  async function handleDownloadAll() {
+    if (downloading) return;
+    setDownloading(true);
     try {
-      const idFlags = identified as { needs_person?: boolean; is_kidswear?: boolean; is_draped_garment?: boolean };
-      const job = await startJob({ data: { browserId, userId: user?.id ?? null } });
-      jobId = job.jobId;
-
-      const photoJobs = Array.from({ length: 4 }, (_, styleIndex) =>
-        makePhoto({
-          data: {
-            jobId: job.jobId,
-            browserId,
-            userId: user?.id ?? null,
-            imageUrls,
-            productName: form.name,
-            category: identified.category,
-            needsPerson: idFlags.needs_person ?? false,
-            isKidswear: idFlags.is_kidswear ?? false,
-            isDrapedGarment: idFlags.is_draped_garment ?? false,
-            styleIndex,
-          },
-        }).then((result) => {
-          setPhotoProgress((p) => ({ ...p, done: Math.min(p.done + 1, p.total) }));
-          return result;
+      const details = await Promise.all(
+        readyItems.map(async (i) => {
+          if (!i.resultId) return null;
+          const row = (await getGeneration({ data: { id: i.resultId } })) as {
+            product_name: string;
+            price: number | null;
+            category: string;
+            generated_images: BulkProduct["images"];
+            copy: BulkProduct["copy"];
+          } | null;
+          if (!row) return null;
+          return {
+            productName: row.product_name || i.productName,
+            price: row.price != null ? String(row.price) : i.price,
+            category: row.category || i.identified.category,
+            images: row.generated_images ?? [],
+            copy: row.copy,
+          } satisfies BulkProduct;
         }),
       );
-
-      const settled = await withTimeout(
-        Promise.allSettled(photoJobs),
-        timeLeft(deadline),
-        timeoutMessage,
-      );
-      const photoResults = settled.flatMap((result) =>
-        result.status === "fulfilled" ? [result.value] : [],
-      );
-      if (photoResults.length === 0) {
-        const firstError = settled.find((r) => r.status === "rejected") as PromiseRejectedResult | undefined;
-        const message = firstError?.reason instanceof Error ? firstError.reason.message : String(firstError?.reason ?? "No photos came through. Try again.");
-        throw new Error(message);
-      }
-      const images = photoResults.flatMap((result) => result.images);
-      const meta = {
-        image_model: photoResults[0]?.meta.image_model,
-        image_count: photoResults.length,
-        image_resolution: photoResults[0]?.meta.image_resolution,
-        input_photo_count: photoResults[0]?.meta.input_photo_count,
-        person_source: photoResults[0]?.meta.person_source,
-      };
-
-      setPhotoProgress((p) => ({ ...p, done: photoResults.length }));
-      setStates(["done", "done", "active"]);
-      const { id } = await withTimeout(writeAndSave({
-        data: {
-          jobId: job.jobId,
-          browserId,
-          userId: user?.id ?? null,
-          originalImageUrl,
-          productName: form.name,
-          price: form.price,
-          detail: form.detail,
-          category: identified.category,
-          material: identified.material,
-          color: identified.color,
-          features: identified.features,
-          images,
-          meta,
-        },
-      }), timeLeft(deadline), timeoutMessage);
-      setStates(["done", "done", "done"]);
-      jobId = null;
-      if (!user) markFreeGenerationUsed();
-      navigate({ to: "/results/$id", params: { id } });
-
-    } catch (e) {
-      console.error(e);
-      const raw = String((e as Error).message || e);
-      const [human, tech] = raw.split("||DETAIL||").map((s) => s.trim());
-      const msg = human || raw;
-      setDetail(tech || raw);
-      setShowDetail(false);
-      if (jobId) {
-        try {
-          await refundJob({ data: { jobId, browserId, reason: msg } });
-        } catch (refundError) {
-          console.error(refundError);
-        }
-      }
-      if (msg.includes("NO_CREDITS")) {
-        setError("You've used your products for this month. Upgrade or top up to keep going.");
-      } else if (msg.includes("DAILY_LIMIT")) {
-        setError("You've used today's 5 free products. Come back tomorrow.");
-      } else if (msg.includes("This is taking longer")) {
-        setError("This is taking longer than it should. Your credits have been returned — try again.");
-      } else {
-        setError(msg);
-      }
-      setStates((s) => s.map((v) => (v === "active" ? "error" : v)) as StepState[]);
+      const products = details.filter((p): p is BulkProduct => Boolean(p));
+      if (products.length === 0) return;
+      await downloadBulkZip(products);
+    } finally {
+      setDownloading(false);
     }
   }
 
-  const heroPhoto = photos[0]?.dataUrl ?? originalImageUrl ?? null;
+  if (items.length === 0) {
+    return (
+      <main className="flex min-h-screen flex-col items-center px-5 pb-28 pt-12">
+        <div className="w-full max-w-sm text-center">
+          <h1 className="font-display text-[40px] leading-[1.02] text-ink">
+            No products in the queue.
+          </h1>
+          <p className="mt-3 text-[15px] text-muted">
+            Add a product and CowQ starts on it right away.
+          </p>
+          <button
+            onClick={() => navigate({ to: "/" })}
+            className="mt-8 inline-flex h-12 items-center justify-center rounded-[12px] bg-primary px-6 text-[15px] font-medium text-primary-foreground"
+          >
+            Add a product
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <main className="flex min-h-screen flex-col items-center px-5 pb-28 pt-12">
-      <div className="w-full max-w-sm text-center">
-        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[48px]">
-          Making your listing.
-        </h1>
-        <p className="mt-2 text-[15px] text-muted">This takes under a minute.</p>
+    <main className="flex min-h-screen flex-col px-5 pb-28 pt-8 lg:pt-12">
+      <div className="mx-auto w-full max-w-[520px]">
+        {allDone ? (
+          <>
+            <h1 className="font-display text-[40px] leading-[1.02] text-ink">
+              {counts.ready} product{counts.ready === 1 ? "" : "s"} ready.
+            </h1>
+            <p className="mt-2 text-[15px] text-muted">
+              Tap any to see the results, or download everything as one file.
+            </p>
+          </>
+        ) : (
+          <>
+            <h1 className="font-display text-[40px] leading-[1.02] text-ink">
+              Making your listing.
+            </h1>
+            <p className="mt-2 text-[15px] text-muted">
+              You can leave this screen — we'll keep going in the background.
+            </p>
+          </>
+        )}
 
-        {heroPhoto && (
-          <div className="mx-auto mt-10 w-[78%]">
-            <div
-              className="sweep-mask relative aspect-square overflow-hidden rounded-[16px] bg-surface"
-              style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05)" }}
-            >
-              <img
-                src={heroPhoto}
-                alt="Your product"
-                className="absolute inset-0 h-full w-full object-cover"
-                style={{ opacity: 0.55, filter: "saturate(0.85)" }}
-                draggable={false}
-              />
-            </div>
+        {/* Currently generating */}
+        {active && <ActiveCard item={active} />}
+
+        {/* Waiting */}
+        {waiting.length > 0 && (
+          <div className="mt-8">
+            <p className="eyebrow mb-3">Waiting</p>
+            <ul className="flex flex-col gap-2">
+              {waiting.map((i) => (
+                <QueueRow key={i.id} item={i} onRemove={() => remove(i.id)} />
+              ))}
+            </ul>
           </div>
         )}
 
-        <div className="mx-auto mt-10 max-w-[280px] text-left">
-          <ProgressSteps
-            steps={[
-              { label: "Studying your product", state: states[0] },
-              {
-                label: "Shooting the photos",
-                state: states[1],
-                detail: states[1] === "active" ? `${photoProgress.done} of ${photoProgress.total} photos done` : null,
-              },
-              { label: "Writing your listing", state: states[2] },
-            ]}
-          />
-        </div>
-      </div>
+        {/* Finished */}
+        {finished.length > 0 && (
+          <div className="mt-8">
+            <p className="eyebrow mb-3">{allDone ? "Ready" : "Done"}</p>
+            <ul className="flex flex-col gap-2">
+              {finished.map((i) => (
+                <QueueRow key={i.id} item={i} />
+              ))}
+            </ul>
+          </div>
+        )}
 
-      {error && (
-        <div className="mt-8 w-full max-w-sm text-center">
-          <p className="text-[15px] text-primary">{error}</p>
-          {detail && (
+        {/* Add another / queue full */}
+        <div className="mt-8 rounded-[14px] bg-raised p-5">
+          {queueFull ? (
+            <>
+              <p className="text-[15px] font-medium text-ink">Queue is full.</p>
+              <p className="mt-1 text-[14px] text-muted">
+                3 is the most we'll do at once. One more slot opens as each finishes.
+              </p>
+            </>
+          ) : (
             <>
               <button
-                type="button"
-                onClick={() => setShowDetail((v) => !v)}
-                className="mt-1 text-[12px] text-muted underline"
+                onClick={() => navigate({ to: "/" })}
+                className="flex w-full items-center justify-center gap-2 rounded-[12px] bg-primary py-3.5 text-[15px] font-medium text-primary-foreground transition hover:brightness-110"
               >
-                {showDetail ? "Hide details" : "Details"}
+                <Plus className="h-4 w-4" />
+                Add another product
               </button>
-              {showDetail && (
-                <p className="mt-1 break-all text-left text-[11px] leading-snug text-muted">{detail}</p>
-              )}
+              <p className="mt-3 text-center text-[13px] text-muted">
+                This takes about a minute. Add your next one instead of waiting.
+              </p>
             </>
           )}
-          {error.includes("Upgrade") ? (
-            <PrimaryButton fixed onClick={() => navigate({ to: "/pricing" })}>
-              See plans
-            </PrimaryButton>
-          ) : error.includes("today's 5") ? (
-            <PrimaryButton fixed onClick={() => navigate({ to: "/" })}>
-              Back to start
-            </PrimaryButton>
-          ) : (
-            <PrimaryButton fixed onClick={run}>
-              Try again
-            </PrimaryButton>
-          )}
         </div>
-      )}
+
+        {/* All done actions */}
+        {allDone && readyItems.length > 0 && (
+          <div className="mt-6 flex flex-col gap-3">
+            <button
+              onClick={handleDownloadAll}
+              disabled={downloading}
+              className="flex items-center justify-center gap-2 rounded-[12px] bg-raised py-3.5 text-[15px] font-medium text-ink transition hover:brightness-110 disabled:opacity-60"
+            >
+              <Download className="h-4 w-4" />
+              {downloading ? "Zipping…" : "Download everything"}
+            </button>
+            <button
+              onClick={clearFinished}
+              className="text-[13px] text-muted underline"
+            >
+              Clear this list
+            </button>
+          </div>
+        )}
+      </div>
     </main>
   );
 }
 
-function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
-  if (ms <= 0) return Promise.reject(new Error(message));
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-  const timeout = new Promise<never>((_, reject) => {
-    timeoutId = setTimeout(() => reject(new Error(message)), ms);
-  });
-  return Promise.race([promise, timeout]).finally(() => {
-    if (timeoutId) clearTimeout(timeoutId);
-  });
+function ActiveCard({ item }: { item: QueueItem }) {
+  const step = item.activeStep ?? 0;
+  const states: StepState[] = [
+    step > 0 ? "done" : "active",
+    step === 1 ? "active" : step > 1 ? "done" : "pending",
+    step === 2 ? "active" : step > 2 ? "done" : "pending",
+  ];
+  const hero = item.imageUrls[0];
+  return (
+    <div className="mt-8 rounded-[14px] bg-surface p-5">
+      <p className="eyebrow mb-3">Generating now</p>
+      <div className="flex items-start gap-4">
+        {hero && (
+          <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-[12px] bg-raised">
+            <img
+              src={hero}
+              alt={item.productName}
+              className="absolute inset-0 h-full w-full object-cover"
+              style={{ opacity: 0.75 }}
+            />
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[16px] font-medium text-ink">{item.productName}</p>
+          <p className="mt-0.5 text-[13px] text-muted">₹{item.price}</p>
+        </div>
+      </div>
+      <div className="mt-5">
+        <ProgressSteps
+          steps={[
+            { label: "Studying your product", state: states[0] },
+            {
+              label: "Shooting the photos",
+              state: states[1],
+              detail:
+                states[1] === "active" && item.photoProgress
+                  ? `${item.photoProgress.done} of ${item.photoProgress.total} photos done`
+                  : null,
+            },
+            { label: "Writing your listing", state: states[2] },
+          ]}
+        />
+      </div>
+    </div>
+  );
 }
 
-function timeLeft(deadline: number) {
-  return Math.max(deadline - Date.now(), 0);
+function QueueRow({ item, onRemove }: { item: QueueItem; onRemove?: () => void }) {
+  const thumb = item.imageUrls[0];
+  const isReady = item.status === "ready";
+  const isError = item.status === "error";
+  const body = (
+    <div className="flex items-center gap-3">
+      {thumb ? (
+        <img
+          src={thumb}
+          alt=""
+          className="h-11 w-11 shrink-0 rounded-[10px] bg-raised object-cover"
+        />
+      ) : (
+        <div className="h-11 w-11 shrink-0 rounded-[10px] bg-raised" />
+      )}
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[15px] text-ink">{item.productName}</p>
+        {isError && item.error && (
+          <p className="mt-0.5 truncate text-[12px] text-primary">{item.error}</p>
+        )}
+      </div>
+      {isReady ? (
+        <span className="flex items-center gap-1.5 text-[13px] font-medium text-primary">
+          <Check className="h-4 w-4" /> Ready
+        </span>
+      ) : isError ? (
+        <span className="text-[13px] font-medium text-primary">Failed</span>
+      ) : (
+        <span className="text-[13px] font-medium text-muted">Waiting</span>
+      )}
+      {onRemove && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onRemove();
+          }}
+          className="ml-1 grid h-7 w-7 place-items-center rounded-full text-muted hover:bg-raised hover:text-ink"
+          aria-label={`Remove ${item.productName} from queue`}
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
+    </div>
+  );
+  const rowClass =
+    "block rounded-[12px] bg-surface p-3 transition " +
+    (isReady ? "hover:brightness-110" : "");
+  if (isReady && item.resultId) {
+    return (
+      <li>
+        <Link to="/results/$id" params={{ id: item.resultId }} className={rowClass}>
+          {body}
+        </Link>
+      </li>
+    );
+  }
+  return <li className={rowClass}>{body}</li>;
 }
-
