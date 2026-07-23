@@ -168,14 +168,10 @@ function Results() {
               name={(data.product_name as string) || "cowq"}
               watermark={watermark}
             />
-            <a
-              href={data.csv_url as string}
-              download
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-[12px] border border-[color:var(--color-border)] bg-white text-[15px] font-semibold text-ink"
-            >
-              <Download className="h-4 w-4" />
-              Download catalog file (CSV)
-            </a>
+            <DownloadCsvButton
+              url={data.csv_url as string}
+              name={(data.product_name as string) || "cowq"}
+            />
           </div>
         ) : (
           <SignUpGate
@@ -468,6 +464,42 @@ function DownloadAllButton({ images, name, watermark }: { images: GenImage[]; na
     >
       <Download className="h-4 w-4" />
       {busy ? "Packing photos…" : "Download all photos"}
+    </button>
+  );
+}
+
+function DownloadCsvButton({ url, name }: { url: string; name: string }) {
+  const [busy, setBusy] = useState(false);
+  const slug = (name || "cowq").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "cowq";
+  return (
+    <button
+      type="button"
+      disabled={busy}
+      onClick={async () => {
+        setBusy(true);
+        try {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const text = await res.text();
+          const blob = new Blob([text], { type: "text/csv;charset=utf-8;" });
+          const objectUrl = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = objectUrl;
+          a.download = `cowq-${slug}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+        } catch {
+          window.open(url, "_blank");
+        } finally {
+          setBusy(false);
+        }
+      }}
+      className="flex h-12 w-full items-center justify-center gap-2 rounded-[12px] border border-[color:var(--color-border)] bg-white text-[15px] font-semibold text-ink disabled:opacity-60"
+    >
+      <Download className="h-4 w-4" />
+      {busy ? "Preparing CSV…" : "Download catalog file (CSV)"}
     </button>
   );
 }

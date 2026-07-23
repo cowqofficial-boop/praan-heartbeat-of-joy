@@ -78,7 +78,7 @@ function BillingPage() {
         <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">Current plan</p>
         <p className="mt-1 font-display text-[26px] text-ink">{credits.plan_name}</p>
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <Stat label="Products left" value={String(credits.total)} />
+          <Stat label="Credits left" value={credits.total.toLocaleString("en-IN")} />
           <Stat
             label={credits.period_end ? "Renews" : "Never expires"}
             value={credits.period_end ? new Date(credits.period_end).toLocaleDateString("en-IN", { day: "numeric", month: "short" }) : "—"}

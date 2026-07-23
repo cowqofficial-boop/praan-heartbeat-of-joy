@@ -133,7 +133,7 @@ function PricingPage() {
 
       {credits && (
         <p className="mt-2 text-center text-[13px] text-muted">
-          You're on <span className="font-semibold text-ink">{credits.plan_name}</span> — {credits.total} products left.
+          You're on <span className="font-semibold text-ink">{credits.plan_name}</span> — {credits.total.toLocaleString("en-IN")} credits left, about {estimateProducts(credits.total)} products.
         </p>
       )}
 
@@ -212,9 +212,13 @@ function PlanCard({
   onBuy: () => void;
   highlight?: boolean;
 }) {
-  const perPeriod = plan.interval === "year" ? "year" : "month";
+  const isYearly = plan.interval === "year";
+  const yearlyCredits = plan.credits * 12;
+  const creditLine = isYearly
+    ? `${yearlyCredits.toLocaleString("en-IN")} credits a year · ${plan.credits.toLocaleString("en-IN")} a month`
+    : `${plan.credits.toLocaleString("en-IN")} credits a month · about ${estimateProducts(plan.credits)} products`;
   const features = [
-    `${plan.credits.toLocaleString("en-IN")} credits / ${perPeriod} · about ${estimateProducts(plan.credits)} products`,
+    creditLine,
     "Library of all your products",
     "Stock management",
     plan.features.calendar ? "Full 30-day content calendar" : "Content calendar — Growth or Pro",

@@ -40,7 +40,7 @@ const F = (o: Partial<PlanFeatures>): PlanFeatures => ({
 });
 
 export const PLANS: Plan[] = [
-  { id: "free",      kind: "free",         name: "Free",           credits: 200,  priceInr: 0,     interval: null,    features: F({ calendar: false, watermark: true }) },
+  { id: "free",      kind: "free",         name: "Free",           credits: 300,  priceInr: 0,     interval: null,    features: F({ calendar: false, watermark: true }) },
   { id: "starter_m", kind: "subscription", name: "Starter",        credits: 800,  priceInr: 999,   interval: "month", features: F({ calendar: false }) },
   { id: "starter_y", kind: "subscription", name: "Starter",        credits: 800,  priceInr: 9990,  interval: "year",  features: F({ calendar: false }) },
   { id: "growth_m",  kind: "subscription", name: "Growth",         credits: 2400, priceInr: 2999,  interval: "month", features: F({ calendar: true, auto_post: true }) },
