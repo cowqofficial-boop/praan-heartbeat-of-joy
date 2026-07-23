@@ -88,17 +88,17 @@ function Generating() {
       navigate({ to: "/results/$id", params: { id } });
     } catch (e) {
       console.error(e);
-      const msg = String((e as Error).message || e);
+      const raw = String((e as Error).message || e);
+      const [human, tech] = raw.split("||DETAIL||").map((s) => s.trim());
+      const msg = human || raw;
+      setDetail(tech || raw);
+      setShowDetail(false);
       if (msg.includes("NO_CREDITS")) {
         setError("You've used your products for this month. Upgrade or top up to keep going.");
       } else if (msg.includes("DAILY_LIMIT")) {
         setError("You've used today's 5 free products. Come back tomorrow.");
-      } else if (msg.includes("image gen") || msg.includes("photos")) {
-        setError("The photos didn't come through. Try again.");
-      } else if (msg.includes("copy") || msg.includes("Listing")) {
-        setError("The listing text didn't come through. Try again.");
       } else {
-        setError("Something didn't work. Try again.");
+        setError(msg);
       }
       setStates((s) => s.map((v) => (v === "active" ? "error" : v)) as StepState[]);
     }
