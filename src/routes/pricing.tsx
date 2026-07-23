@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Check, Loader2, Receipt } from "lucide-react";
+import { ArrowLeft, Check, Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckout, getMyCredits } from "@/lib/billing.functions";
 import { creditPacks, estimateProducts, formatInr, subscriptionPairs, type Plan } from "@/lib/plans";
@@ -131,9 +131,9 @@ function PricingPage() {
         </Link>
       </div>
       <PageHeader
-        icon={Receipt}
-        title="Pricing"
-        subtitle="Pick a plan or top up credits. Every plan includes stock, calendar (Growth+), and no lock-in."
+        icon={Sparkles}
+        title="Plans"
+        subtitle="Start free. Upgrade when you're making more than a few products a month."
         help={
           <>
             <p className="font-semibold text-ink">How credits work</p>
@@ -244,15 +244,21 @@ function PlanCard({
   const yearlyCredits = plan.credits * 12;
   const creditLine = isYearly
     ? `${yearlyCredits.toLocaleString("en-IN")} credits a year · ${plan.credits.toLocaleString("en-IN")} a month`
-    : `${plan.credits.toLocaleString("en-IN")} credits a month · about ${estimateProducts(plan.credits)} products`;
-  const features = [
-    creditLine,
-    "Library of all your products",
-    "Stock management",
-    plan.features.calendar ? "Full 30-day content calendar" : "Content calendar — Growth or Pro",
-    plan.features.auto_post ? "Automatic posting" : "Manual posting",
-    plan.features.priority ? "Priority generation" : "Standard generation",
-    "No watermark",
+    : `${plan.credits.toLocaleString("en-IN")} credits a month`;
+  const features: Array<{ label: string; plain: string }> = [
+    { label: creditLine, plain: `About ${estimateProducts(plan.credits)} full products a month.` },
+    { label: "Library of all your products", plain: "Every product you make, saved forever." },
+    { label: "Stock management", plain: "Track what you have and what it's worth." },
+    plan.features.calendar
+      ? { label: "Full 30-day content calendar", plain: "A month of posts, planned for you." }
+      : { label: "Content calendar — Growth or Pro", plain: "Upgrade to unlock the posting calendar." },
+    plan.features.auto_post
+      ? { label: "Automatic posting", plain: "CowQ posts to Instagram for you." }
+      : { label: "Manual posting", plain: "One tap to share — you approve every post." },
+    plan.features.priority
+      ? { label: "Priority generation", plain: "Your photos jump the queue." }
+      : { label: "Standard generation", plain: "Usually ready in under a minute." },
+    { label: "No watermark", plain: "Photos are clean, ready to sell." },
   ];
   return (
     <div
@@ -286,11 +292,14 @@ function PlanCard({
       {monthlyEquivalent != null && (
         <p className="mt-1 text-[12px] text-muted">≈ {formatInr(monthlyEquivalent)}/mo, billed yearly</p>
       )}
-      <ul className="mt-4 space-y-1.5">
+      <ul className="mt-4 space-y-3">
         {features.map((f) => (
-          <li key={f} className="flex items-start gap-2 text-[14px] text-ink">
+          <li key={f.label} className="flex items-start gap-2 text-[14px]">
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-marigold" />
-            <span>{f}</span>
+            <div>
+              <p className="text-ink">{f.label}</p>
+              <p className="mt-0.5 text-[12px] text-muted">{f.plain}</p>
+            </div>
           </li>
         ))}
       </ul>

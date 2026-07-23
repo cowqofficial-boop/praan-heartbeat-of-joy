@@ -195,3 +195,28 @@ function Stat({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+function CreditBar({ credits }: { credits: { plan_id: string; total: number; pack_credits: number } }) {
+  const plan = getPlan(credits.plan_id);
+  const monthlyQuota = plan.credits > 0 ? plan.credits : 300;
+  const subscriptionLeft = Math.max(0, credits.total - credits.pack_credits);
+  const used = Math.max(0, Math.min(monthlyQuota, monthlyQuota - subscriptionLeft));
+  const pct = Math.round((used / monthlyQuota) * 100);
+  return (
+    <div className="mt-5">
+      <div className="flex items-baseline justify-between text-[13px]">
+        <span className="text-muted">Used this cycle</span>
+        <span className="font-mono tabular-nums text-ink">
+          <span className="font-semibold">{used.toLocaleString("en-IN")}</span>
+          <span className="text-muted"> / {monthlyQuota.toLocaleString("en-IN")}</span>
+        </span>
+      </div>
+      <div className="mt-2 h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--surface)" }}>
+        <div className="h-full rounded-full transition-[width] duration-500" style={{ width: `${pct}%`, background: "#3B82F6" }} />
+      </div>
+      <p className="mt-2 text-[12px] text-muted">
+        <span className="font-mono tabular-nums text-ink">{credits.total.toLocaleString("en-IN")}</span> credits left · about {Math.floor(credits.total / 90)} products.
+      </p>
+    </div>
+  );
+}
