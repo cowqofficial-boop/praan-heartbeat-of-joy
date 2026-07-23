@@ -145,8 +145,8 @@ function StockPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col px-5 pb-24 pt-8">
-      <header className="flex items-center justify-between">
+    <main className="flex min-h-screen flex-col px-6 pb-24 pt-8 lg:px-10">
+      <header className="flex items-center gap-3">
         <Link
           to="/library"
           className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink"
@@ -154,9 +154,9 @@ function StockPage() {
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">Stock</h1>
-        <div className="h-10 w-10" />
+        <h1 className="page-headline sm:text-[56px]">Stock</h1>
       </header>
+
 
       {/* Totals */}
       <div className="mt-4 grid grid-cols-2 gap-2">
@@ -245,7 +245,7 @@ function StockPage() {
         ) : sorted.length === 0 ? (
           <p className="text-[15px] text-muted">Nothing matches.</p>
         ) : (
-          <ul className="space-y-2 stagger">
+          <ul className="grid grid-cols-1 gap-2 stagger lg:grid-cols-2">
             {sorted.map((it) => {
               const chip = statusChip(it.status);
 
