@@ -330,7 +330,8 @@ function StockPage() {
                           Sold 1
                         </button>
                         <button type="button" aria-label="Delete item"
-                          onClick={() => { if (confirm(`Delete "${it.name}" from stock?`)) del.mutate({ data: { id: it.id } }); }}
+                          onClick={async () => { if (await showConfirm({ title: `Delete "${it.name}" from stock?`, body: "This can't be undone.", destructive: true, confirmLabel: "Delete" })) del.mutate({ data: { id: it.id } }); }}
+
                           className="grid h-9 w-9 place-items-center rounded-full text-muted hover:text-primary">
                           <Trash2 className="h-4 w-4" />
                         </button>
