@@ -12,9 +12,9 @@ export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
       { title: "Pricing — CowQ" },
-      { name: "description", content: "Simple pricing for Indian sellers: pay per product or subscribe monthly. Two months free on annual plans." },
+      { name: "description", content: "Simple pricing for Indian sellers: pay per product or subscribe monthly. Two months free on yearly plans." },
       { property: "og:title", content: "Pricing — CowQ" },
-      { property: "og:description", content: "Pay per product or subscribe. 2 months free on annual." },
+      { property: "og:description", content: "Pay per product or subscribe. 2 months free on yearly." },
       { property: "og:type", content: "website" },
     ],
   }),
