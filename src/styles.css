@@ -3,24 +3,24 @@
 @import "tw-animate-css";
 
 @theme inline {
-  --color-background: #08090a;
-  --color-surface: #101214;
-  --color-raised: #16191c;
-  --color-line: #22262a;
-  --color-border: #22262a;
-  --color-ink: #f2f4f5;
-  --color-muted: #7c858c;
-  --color-primary: #d4ff3f;
-  --color-primary-foreground: #1a2000;
-  /* Coral — reserved for slider handle + posting streak. Not for general accents. */
-  --color-highlight: #ff5c38;
-  /* Legacy alias: mapped to muted grey so old text-marigold/bg-marigold usages
-     collapse into quiet greyscale instead of appearing as a rogue accent.
-     Coral must be applied deliberately via --coral / text-coral. */
-  --color-marigold: #7c858c;
-  --color-coral: #ff5c38;
-  --color-green: #34d399;
-  --color-success: #34d399;
+  --color-background: #06070A;
+  --color-surface: #0E1017;
+  --color-raised: #161923;
+  --color-line: #232734;
+  --color-border: #232734;
+  --color-ink: #F5F7FF;
+  --color-muted: #AEB6C2;
+  --color-primary: #3D5AFE;
+  --color-primary-foreground: #F5F7FF;
+  /* Magenta — the transformation moment. Slider handle, ready state, streak, out-of-stock. */
+  --color-highlight: #FF2FA3;
+  /* Legacy alias — Titanium Fog so old text-marigold usages collapse to secondary text. */
+  --color-marigold: #AEB6C2;
+  --color-coral: #FF2FA3;
+  --color-magenta: #FF2FA3;
+  --color-amber: #FF8A1E;
+  --color-green: #3D5AFE;
+  --color-success: #3D5AFE;
 
   --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -34,33 +34,33 @@
 
 :root {
   color-scheme: dark;
-  --background: #08090a;
-  --foreground: #f2f4f5;
-  --void: #08090a;
-  --surface: #101214;
-  --raised: #16191c;
-  --line: #22262a;
-  --text: #f2f4f5;
-  --text-dim: #7c858c;
-  --accent: #d4ff3f;
-  --accent-ink: #1a2000;
-  --cobalt: #3b82f6;
-  --cobalt-ink: #f2f7ff;
-  --coral: #ff5c38;
-  --success: #34d399;
+  --background: #06070A;
+  --foreground: #F5F7FF;
+  --void: #06070A;
+  --surface: #0E1017;
+  --raised: #161923;
+  --line: #232734;
+  --text: #F5F7FF;
+  --text-dim: #AEB6C2;
+  --accent: #3D5AFE;
+  --accent-ink: #F5F7FF;
+  --cobalt: #3D5AFE;
+  --cobalt-ink: #F5F7FF;
+  --magenta: #FF2FA3;
+  --amber: #FF8A1E;
+  --coral: #FF2FA3;
+  --success: #3D5AFE;
 
-  /* Legacy aliases — kept so older components keep compiling. --sindoor now
-     resolves to the lime accent; --marigold collapses to muted grey. Coral is
-     only applied via --coral. */
-  --sindoor: #d4ff3f;
-  --marigold: #7c858c;
+  /* Legacy aliases — collapsed to system tokens so any lingering usage stays on-palette. */
+  --sindoor: #3D5AFE;
+  --marigold: #AEB6C2;
 
   /* signature easing */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* depth */
-  --shadow-card: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-raised: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 40px rgba(0, 0, 0, 0.55);
+  --shadow-card: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-raised: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 40px rgba(0, 0, 0, 0.6);
 }
 
 html,

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { HelpButton } from "./PageHeader";
 
-const COBALT = "#3B82F6";
+const COBALT = "#3D5AFE";
 
 type Props = {
   illustration: ReactNode;
@@ -25,7 +25,7 @@ export function EmptyState({ illustration, title, body, action, help }: Props) {
           <Link
             to={action.to}
             className="inline-flex h-11 items-center justify-center rounded-[12px] px-5 text-[14px] font-semibold"
-            style={{ background: COBALT, color: "#F2F7FF" }}
+            style={{ background: COBALT, color: "#F5F7FF" }}
           >
             {action.label}
           </Link>
@@ -34,7 +34,7 @@ export function EmptyState({ illustration, title, body, action, help }: Props) {
             type="button"
             onClick={action.onClick}
             className="inline-flex h-11 items-center justify-center rounded-[12px] px-5 text-[14px] font-semibold"
-            style={{ background: COBALT, color: "#F2F7FF" }}
+            style={{ background: COBALT, color: "#F5F7FF" }}
           >
             {action.label}
           </button>

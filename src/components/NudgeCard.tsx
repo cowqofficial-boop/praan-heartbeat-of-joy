@@ -18,12 +18,12 @@ export function NudgeCard({ icon: Icon, text, linkLabel, to }: Props) {
     >
       <div
         className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px]"
-        style={{ background: "color-mix(in oklab, #3B82F6 18%, transparent)", color: "#3B82F6" }}
+        style={{ background: "color-mix(in oklab, #3D5AFE 18%, transparent)", color: "#3D5AFE" }}
       >
         <Icon className="h-5 w-5" strokeWidth={1.75} />
       </div>
       <p className="flex-1 text-ink">{text}</p>
-      <span className="inline-flex items-center gap-1 text-[13px] font-semibold" style={{ color: "#3B82F6" }}>
+      <span className="inline-flex items-center gap-1 text-[13px] font-semibold" style={{ color: "#3D5AFE" }}>
         {linkLabel} <ArrowRight className="h-4 w-4" />
       </span>
     </Link>

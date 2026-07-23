@@ -87,7 +87,7 @@ export function BeforeAfterSlider({
         style={{
           left: `${pos}%`,
           background: "var(--coral)",
-          boxShadow: "0 6px 18px rgba(255, 92, 56, 0.35), inset 0 1px 0 rgba(255,255,255,0.4)",
+          boxShadow: "0 6px 18px rgba(255, 47, 163, 0.4), inset 0 1px 0 rgba(255,255,255,0.4)",
         }}
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

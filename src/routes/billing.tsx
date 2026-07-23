@@ -110,7 +110,7 @@ function BillingPage() {
           <Link
             to="/pricing"
             className="flex h-11 flex-1 items-center justify-center rounded-[12px] text-[14px] font-semibold"
-            style={{ background: "#3B82F6", color: "#F2F7FF" }}
+            style={{ background: "#3D5AFE", color: "#F5F7FF" }}
           >
             {credits.plan_id === "free" ? "Upgrade" : "Change plan / top up"}
           </Link>
@@ -216,7 +216,7 @@ function CreditBar({ credits }: { credits: { plan_id: string; total: number; pac
         </span>
       </div>
       <div className="mt-2 h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--surface)" }}>
-        <div className="h-full rounded-full transition-[width] duration-500" style={{ width: `${pct}%`, background: "#3B82F6" }} />
+        <div className="h-full rounded-full transition-[width] duration-500" style={{ width: `${pct}%`, background: "#3D5AFE" }} />
       </div>
       <p className="mt-2 text-[12px] text-muted">
         <span className="font-mono tabular-nums text-ink">{credits.total.toLocaleString("en-IN")}</span> credits left · about {Math.floor(credits.total / 90)} products.

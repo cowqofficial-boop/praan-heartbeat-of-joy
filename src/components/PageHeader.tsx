@@ -19,7 +19,7 @@ type Props = {
   secondary?: ReactNode;
 };
 
-const COBALT = "#3B82F6";
+const COBALT = "#3D5AFE";
 
 export function PageHeader({ icon: Icon, title, subtitle, help, action, secondary }: Props) {
   return (
@@ -28,7 +28,7 @@ export function PageHeader({ icon: Icon, title, subtitle, help, action, secondar
         <div
           className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px]"
           style={{
-            background: "color-mix(in oklab, #3B82F6 18%, var(--raised))",
+            background: "color-mix(in oklab, #3D5AFE 18%, var(--raised))",
             color: COBALT,
           }}
           aria-hidden
@@ -56,7 +56,7 @@ export function PageHeader({ icon: Icon, title, subtitle, help, action, secondar
 function PrimaryAction({ label, to, onClick, icon: Icon, disabled }: Action) {
   const cls =
     "inline-flex h-12 items-center justify-center gap-2 rounded-[14px] px-5 text-[15px] font-semibold transition-[filter,transform] disabled:opacity-50";
-  const style = { background: COBALT, color: "#F2F7FF" };
+  const style = { background: COBALT, color: "#F5F7FF" };
   const inner = (
     <>
       {Icon && <Icon className="h-4 w-4" />}

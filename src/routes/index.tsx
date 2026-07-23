@@ -6,6 +6,13 @@ import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import { useAuth } from "@/lib/use-auth";
 import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/site";
 import { showcasePairs } from "@/data/showcase";
+import how1 from "@/assets/landing/how-1.jpg.asset.json";
+import how2 from "@/assets/landing/how-2.jpg.asset.json";
+import how3 from "@/assets/landing/how-3.jpg.asset.json";
+import who1 from "@/assets/landing/who-1.jpg.asset.json";
+import who2 from "@/assets/landing/who-2.jpg.asset.json";
+import who3 from "@/assets/landing/who-3.jpg.asset.json";
+import who4 from "@/assets/landing/who-4.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -159,8 +166,14 @@ function Landing() {
       </header>
 
       {/* ================ HERO ================ */}
-      <section className="px-6 pb-16 pt-10 lg:pt-20">
-        <div className="mx-auto max-w-[820px] text-center">
+      <section className="relative px-6 pb-16 pt-10 lg:pt-20">
+        {/* The one gradient — Cobalt → Magenta glow behind hero headline. Used nowhere else. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-8 -z-0 h-[520px] w-[900px] max-w-[95vw] -translate-x-1/2 rounded-full opacity-[0.22] blur-[120px]"
+          style={{ background: "linear-gradient(120deg, #3D5AFE 0%, #FF2FA3 100%)" }}
+        />
+        <div className="relative mx-auto max-w-[820px] text-center">
           <h1 className="font-display text-[40px] leading-[1.02] tracking-[-0.03em] text-ink sm:text-[56px] lg:text-[72px]">
             One photo. A complete business, ready to sell.
           </h1>
@@ -169,12 +182,11 @@ function Landing() {
           </p>
         </div>
 
-        <div className="mx-auto mt-10 max-w-[560px]">
+        <div className="relative mx-auto mt-10 max-w-[560px]">
           <UploadWidget />
         </div>
-
-        {/* Free-offer line is rendered by UploadWidget itself when signed out — no need to repeat it here. */}
       </section>
+
 
       {/* ================ 1. Before / After ================ */}
       <section className="px-6 py-16 lg:py-24">
@@ -362,21 +374,28 @@ function Landing() {
                 icon={<Camera className="h-5 w-5" />}
                 title="Photograph your product."
                 body="Any phone, any table. No lights, no studio, no props."
+                photo={how1.url}
+                alt="Hand holding a phone photographing a product on a wooden table"
               />
               <Step
                 n="2"
                 icon={<Sparkles className="h-5 w-5" />}
                 title="CowQ studies it."
                 body="It works out what it is, what it’s made of, and who buys it."
+                photo={how2.url}
+                alt="Extreme close-up of woven fibres"
               />
               <Step
                 n="3"
                 icon={<Package className="h-5 w-5" />}
                 title="Everything arrives."
                 body="Photos, listing, posts, catalog file — under a minute."
+                photo={how3.url}
+                alt="Phone on a desk showing a finished product listing"
               />
             </ol>
           </Reveal>
+
         </div>
       </section>
 
@@ -516,14 +535,19 @@ function Landing() {
           <Reveal delay={80}>
             <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {[
-                { t: "Marketplace sellers", b: "Amazon, Flipkart, Meesho." },
-                { t: "Instagram & WhatsApp shops", b: "Post daily without a designer." },
-                { t: "Physical shops going online", b: "Your first proper catalog." },
-                { t: "Anyone with a product", b: "And no team behind them." },
+                { t: "Marketplace sellers", b: "Amazon, Flipkart, Meesho.", src: who1.url, alt: "Marketplace packing table with boxes" },
+                { t: "Instagram & WhatsApp shops", b: "Post daily without a designer.", src: who2.url, alt: "Phone showing an Instagram shop grid" },
+                { t: "Physical shops going online", b: "Your first proper catalog.", src: who3.url, alt: "Small retail shop counter" },
+                { t: "Anyone with a product", b: "And no team behind them.", src: who4.url, alt: "Artisan workbench with tools" },
               ].map((c) => (
-                <div key={c.t} className="rounded-[16px] bg-background p-5">
-                  <p className="text-[15px] font-semibold text-ink">{c.t}</p>
-                  <p className="mt-1 text-[13px] text-muted">{c.b}</p>
+                <div key={c.t} className="overflow-hidden rounded-[16px] bg-background">
+                  <div className="relative aspect-[4/3]">
+                    <img src={c.src} alt={c.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                  </div>
+                  <div className="p-5">
+                    <p className="text-[15px] font-semibold text-ink">{c.t}</p>
+                    <p className="mt-1 text-[13px] text-muted">{c.b}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -662,27 +686,39 @@ function Step({
   icon,
   title,
   body,
+  photo,
+  alt,
 }: {
   n: string;
   icon: ReactNode;
   title: string;
   body: string;
+  photo?: string;
+  alt?: string;
 }) {
   return (
-    <li className="rounded-[16px] bg-surface p-6">
-      <div className="flex items-center gap-3">
-        <span className="grid h-8 w-8 place-items-center rounded-full bg-raised font-mono text-[13px] text-ink">
-          {n}
-        </span>
-        <span className="grid h-8 w-8 place-items-center rounded-full bg-raised text-marigold">
-          {icon}
-        </span>
+    <li className="overflow-hidden rounded-[16px] bg-surface">
+      {photo && (
+        <div className="relative aspect-[4/3]">
+          <img src={photo} alt={alt ?? ""} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+        </div>
+      )}
+      <div className="p-6">
+        <div className="flex items-center gap-3">
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-raised font-mono text-[13px] text-ink">
+            {n}
+          </span>
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-raised text-muted">
+            {icon}
+          </span>
+        </div>
+        <p className="mt-4 text-[17px] font-semibold text-ink">{title}</p>
+        <p className="mt-2 text-[14px] leading-relaxed text-muted">{body}</p>
       </div>
-      <p className="mt-4 text-[17px] font-semibold text-ink">{title}</p>
-      <p className="mt-2 text-[14px] leading-relaxed text-muted">{body}</p>
     </li>
   );
 }
+
 
 function TrustCard({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
   return (
