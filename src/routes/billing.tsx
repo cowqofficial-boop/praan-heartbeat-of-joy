@@ -118,7 +118,7 @@ function BillingPage() {
           {credits.razorpay_subscription_id && (
             <button
               type="button"
-              onClick={() => confirm("Cancel your subscription at end of cycle?") && cancel.mutate()}
+              onClick={async () => { if (await showConfirm({ title: "Cancel your subscription?", body: "It will remain active until the end of the current cycle.", confirmLabel: "Cancel plan", destructive: true })) cancel.mutate(); }}
               disabled={cancel.isPending}
               className="h-11 rounded-[12px] px-4 text-[14px] font-medium text-ink disabled:opacity-60"
             >
