@@ -5,7 +5,7 @@ export type StepState = "pending" | "active" | "done" | "error";
 export function ProgressSteps({
   steps,
 }: {
-  steps: { label: string; state: StepState }[];
+  steps: { label: string; state: StepState; detail?: string | null }[];
 }) {
   return (
     <ul className="flex flex-col gap-5">
@@ -28,12 +28,19 @@ export function ProgressSteps({
               <span className="font-mono text-[13px] font-semibold tabular-nums">{i + 1}</span>
             )}
           </span>
-          <span
-            className={`text-[16px] ${
-              s.state === "pending" ? "text-muted" : "text-ink font-medium"
-            }`}
-          >
-            {s.label}
+          <span className="min-w-0">
+            <span
+              className={`block text-[16px] ${
+                s.state === "pending" ? "text-muted" : "text-ink font-medium"
+              }`}
+            >
+              {s.label}
+            </span>
+            {s.detail && s.state === "active" && (
+              <span className="mt-1 block font-mono text-[12px] text-muted tabular-nums">
+                {s.detail}
+              </span>
+            )}
           </span>
         </li>
       ))}
