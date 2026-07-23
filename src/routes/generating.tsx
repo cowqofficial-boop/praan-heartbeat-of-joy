@@ -36,6 +36,8 @@ function Generating() {
   const { originalImageUrl, identified, form } = usePraanStore();
   const [states, setStates] = useState<StepState[]>(["done", "active", "pending"]);
   const [error, setError] = useState<string | null>(null);
+  const [detail, setDetail] = useState<string | null>(null);
+  const [showDetail, setShowDetail] = useState(false);
   const startedRef = useRef(false);
 
   useEffect(() => {
@@ -86,17 +88,17 @@ function Generating() {
       navigate({ to: "/results/$id", params: { id } });
     } catch (e) {
       console.error(e);
-      const msg = String((e as Error).message || e);
+      const raw = String((e as Error).message || e);
+      const [human, tech] = raw.split("||DETAIL||").map((s) => s.trim());
+      const msg = human || raw;
+      setDetail(tech || raw);
+      setShowDetail(false);
       if (msg.includes("NO_CREDITS")) {
         setError("You've used your products for this month. Upgrade or top up to keep going.");
       } else if (msg.includes("DAILY_LIMIT")) {
         setError("You've used today's 5 free products. Come back tomorrow.");
-      } else if (msg.includes("image gen") || msg.includes("photos")) {
-        setError("The photos didn't come through. Try again.");
-      } else if (msg.includes("copy") || msg.includes("Listing")) {
-        setError("The listing text didn't come through. Try again.");
       } else {
-        setError("Something didn't work. Try again.");
+        setError(msg);
       }
       setStates((s) => s.map((v) => (v === "active" ? "error" : v)) as StepState[]);
     }
@@ -122,6 +124,20 @@ function Generating() {
       {error && (
         <>
           <p className="mt-8 text-[15px] text-primary">{error}</p>
+          {detail && (
+            <>
+              <button
+                type="button"
+                onClick={() => setShowDetail((v) => !v)}
+                className="mt-1 text-[12px] text-muted underline"
+              >
+                {showDetail ? "Hide details" : "Details"}
+              </button>
+              {showDetail && (
+                <p className="mt-1 break-all text-[11px] leading-snug text-muted">{detail}</p>
+              )}
+            </>
+          )}
           {error.includes("Upgrade") ? (
             <PrimaryButton fixed onClick={() => navigate({ to: "/pricing" })}>
               See plans

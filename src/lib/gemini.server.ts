@@ -2,8 +2,8 @@
 
 const BASE = "https://generativelanguage.googleapis.com/v1beta";
 
-export const GEMINI_TEXT_MODEL = "gemini-3-pro-preview";
-export const GEMINI_IMAGE_MODEL = "gemini-3-pro-image-preview";
+export const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
+export const GEMINI_IMAGE_MODEL = "gemini-3-pro-image";
 
 export function geminiKey(): string {
   const k = process.env.GEMINI_API_KEY;
@@ -50,7 +50,7 @@ async function postJSON(model: string, payload: unknown): Promise<unknown> {
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       console.error(`[gemini] network error attempt=${attempt} model=${model}: ${msg}`);
-      lastErr = new GeminiError(0, msg, "network", `Network error calling Gemini: ${msg}`);
+      lastErr = new GeminiError(0, msg, "network", `Network error calling Gemini. ||DETAIL|| ${msg}`);
       await sleep(400 * (attempt + 1));
       continue;
     }
@@ -60,7 +60,9 @@ async function postJSON(model: string, payload: unknown): Promise<unknown> {
     console.error(
       `[gemini] fail attempt=${attempt} model=${model} status=${res.status} code=${code} body=${body.slice(0, 600)}`,
     );
-    lastErr = new GeminiError(res.status, body, code, humanMessage(code, res.status, body));
+    const human = humanMessage(code, res.status, body);
+    const detail = `[${code} ${res.status || "net"}] ${body.slice(0, 300).replace(/\s+/g, " ")}`;
+    lastErr = new GeminiError(res.status, body, code, `${human} ||DETAIL|| ${detail}`);
     // Only retry timeouts / rate limits / 5xx
     if (code === "rate_limited" || code === "server" || code === "network") {
       await sleep(600 * (attempt + 1));
@@ -76,6 +78,9 @@ function humanMessage(code: GeminiError["code"], status: number, body: string): 
   if (code === "rate_limited") return "Gemini is rate-limiting us right now. Try again in a moment.";
   if (code === "server") return "Google's servers had a temporary problem. Try again.";
   if (code === "bad_request") {
+    if (/API key not valid|API_KEY_INVALID|invalid api key/i.test(body)) return "Gemini API key is invalid.";
+    if (/billing|not enabled|permission denied|PERMISSION_DENIED/i.test(body)) return "Billing isn't enabled on the Gemini API key.";
+    if (/not found|NOT_FOUND|does not exist|is not supported/i.test(body)) return "Gemini model ID is wrong or unavailable.";
     if (/too large|payload|size/i.test(body)) return "Image is too large. Try a smaller photo.";
     if (/unsupported|mime|format/i.test(body)) return "That image format isn't supported. Use JPG or PNG.";
     return "Gemini rejected the request.";
