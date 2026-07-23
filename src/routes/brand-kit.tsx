@@ -13,6 +13,9 @@ import {
  type BrandKit,
 } from "@/lib/brand-kit.functions";
 import { PrimaryButton } from "@/components/PrimaryButton";
+import { PageHeader } from "@/components/PageHeader";
+import { Palette } from "lucide-react";
+
 
 const searchSchema = z.object({ onboarding: z.boolean().optional() });
 
