@@ -127,11 +127,18 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const { user } = useAuth();
+  // Only offset the content by the sidebar width when the sidebar actually
+  // renders. Landing/auth visitors get true page-centre layouts.
+  const shellClass = user
+    ? "mx-auto min-h-screen w-full max-w-[520px] bg-transparent lg:ml-[240px] lg:max-w-none lg:pl-0"
+    : "mx-auto min-h-screen w-full bg-transparent";
+  const innerClass = user ? "lg:mx-auto lg:max-w-[1200px] lg:px-12" : "";
   return (
     <QueryClientProvider client={queryClient}>
       <AppSidebar />
-      <div className="mx-auto min-h-screen w-full max-w-[520px] bg-transparent lg:ml-[240px] lg:max-w-none lg:pl-0">
-        <div className="lg:mx-auto lg:max-w-[1200px] lg:px-12">
+      <div className={shellClass}>
+        <div className={innerClass}>
           <Outlet />
         </div>
       </div>
