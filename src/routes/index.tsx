@@ -686,27 +686,39 @@ function Step({
   icon,
   title,
   body,
+  photo,
+  alt,
 }: {
   n: string;
   icon: ReactNode;
   title: string;
   body: string;
+  photo?: string;
+  alt?: string;
 }) {
   return (
-    <li className="rounded-[16px] bg-surface p-6">
-      <div className="flex items-center gap-3">
-        <span className="grid h-8 w-8 place-items-center rounded-full bg-raised font-mono text-[13px] text-ink">
-          {n}
-        </span>
-        <span className="grid h-8 w-8 place-items-center rounded-full bg-raised text-marigold">
-          {icon}
-        </span>
+    <li className="overflow-hidden rounded-[16px] bg-surface">
+      {photo && (
+        <div className="relative aspect-[4/3]">
+          <img src={photo} alt={alt ?? ""} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+        </div>
+      )}
+      <div className="p-6">
+        <div className="flex items-center gap-3">
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-raised font-mono text-[13px] text-ink">
+            {n}
+          </span>
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-raised text-muted">
+            {icon}
+          </span>
+        </div>
+        <p className="mt-4 text-[17px] font-semibold text-ink">{title}</p>
+        <p className="mt-2 text-[14px] leading-relaxed text-muted">{body}</p>
       </div>
-      <p className="mt-4 text-[17px] font-semibold text-ink">{title}</p>
-      <p className="mt-2 text-[14px] leading-relaxed text-muted">{body}</p>
     </li>
   );
 }
+
 
 function TrustCard({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
   return (
