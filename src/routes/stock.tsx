@@ -620,7 +620,8 @@ function UndoToast({ name, onUndo, onClose }: { name: string; onUndo: () => void
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-5">
       <div className="pointer-events-auto flex items-center gap-3 rounded-full bg-raised px-4 py-2.5 text-[13px] text-ink scale-in"
-           style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
+           style={{ boxShadow: "var(--shadow-raised)" }}>
+
         <span>Sold 1 · {name}</span>
         <button type="button" onClick={onUndo} className="text-marigold font-semibold hover:brightness-110">Undo</button>
       </div>
