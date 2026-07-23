@@ -220,22 +220,22 @@ function Upload() {
   const canContinue = photos.length > 0 && !anyUploading && !busy && photos.every((p) => p.url);
 
   return (
-    <main className="flex min-h-screen flex-col items-center px-5 pb-28 pt-16">
+    <main className="flex min-h-screen flex-col items-center px-5 pb-28 pt-16 lg:min-h-[calc(100vh-4rem)] lg:justify-center lg:pb-16 lg:pt-16">
       {user && (
         <Link
           to="/library"
-          className="absolute left-5 top-5 flex items-center gap-1.5 text-[14px] font-medium text-muted"
+          className="absolute left-5 top-5 flex items-center gap-1.5 text-[14px] font-medium text-muted lg:hidden"
         >
           <LibraryBig className="h-4 w-4" />
           Your library
         </Link>
       )}
 
-      <div className="w-full max-w-sm">
-        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">
+      <div className="w-full max-w-sm lg:max-w-[640px]">
+        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px] lg:text-[72px]">
           One photo. Everything you need to sell it.
         </h1>
-        <p className="mt-4 text-[15px] text-muted">
+        <p className="mt-4 text-[15px] text-muted lg:text-[17px]">
           Studio photos, listing, and a catalog file — from your phone.
         </p>
 
@@ -243,18 +243,19 @@ function Upload() {
           <button
             type="button"
             onClick={() => mainInputRef.current?.click()}
-            className="mt-10 flex aspect-square w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[16px] bg-surface text-ink"
+            className="mt-10 flex aspect-square w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[16px] bg-surface text-ink lg:aspect-[3/2]"
             style={{
               boxShadow:
                 "inset 0 1px 0 rgba(255,255,255,0.05), inset 0 0 80px 0 rgba(245,166,35,0.06), 0 1px 3px rgba(0,0,0,0.4)",
             }}
           >
-            <span className="grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground">
-              <Camera className="h-7 w-7" />
+            <span className="grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground lg:h-20 lg:w-20">
+              <Camera className="h-7 w-7 lg:h-8 lg:w-8" />
             </span>
-            <span className="text-[17px] font-semibold">Add a product photo</span>
-            <span className="text-[13px] text-muted">Tap to open camera or pick from your phone</span>
+            <span className="text-[17px] font-semibold lg:text-[19px]">Add a product photo</span>
+            <span className="text-[13px] text-muted lg:text-[14px]">Tap to open camera or pick from your phone</span>
           </button>
+
         ) : (
           <>
             <div className="mt-8 overflow-hidden rounded-[16px] bg-surface">
