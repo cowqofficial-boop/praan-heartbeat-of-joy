@@ -150,16 +150,26 @@ function StockPage() {
 
   return (
     <main className="flex min-h-screen flex-col px-6 pb-24 pt-8 lg:px-0 lg:pt-12">
-      <header className="flex items-center gap-3">
-        <Link
-          to="/library"
-          className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink lg:hidden"
-          aria-label="Back"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <h1 className="page-headline sm:text-[56px]">Stock</h1>
-      </header>
+      <Link
+        to="/library"
+        className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink lg:hidden"
+        aria-label="Back"
+      >
+        <ArrowLeft className="h-5 w-5" />
+      </Link>
+      <PageHeader
+        icon={Boxes}
+        title="Stock"
+        subtitle="Keep count of what's in your shop. Log sales, restocks and returns — see live value and profit."
+        help={
+          <>
+            <p className="font-semibold text-ink">Why track stock</p>
+            <p className="mt-1 text-muted">CowQ uses your stock to plan smarter posts — skipping items that are out, featuring bestsellers, and posting urgency when something's running low. Free on every plan.</p>
+          </>
+        }
+        action={{ label: "Add item", onClick: () => setCreating(true), icon: Plus }}
+      />
+
 
 
 
