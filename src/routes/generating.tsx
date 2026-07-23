@@ -60,6 +60,7 @@ function Generating() {
       (u): u is string => Boolean(u),
     );
     try {
+      const idFlags = identified as { needs_person?: boolean; is_kidswear?: boolean; is_draped_garment?: boolean };
       const { images, meta } = await generateImages({
         data: {
           browserId,
@@ -67,7 +68,9 @@ function Generating() {
           imageUrls,
           productName: form.name,
           category: identified.category,
-          needsPerson: (identified as { needs_person?: boolean }).needs_person ?? false,
+          needsPerson: idFlags.needs_person ?? false,
+          isKidswear: idFlags.is_kidswear ?? false,
+          isDrapedGarment: idFlags.is_draped_garment ?? false,
         },
       });
 
