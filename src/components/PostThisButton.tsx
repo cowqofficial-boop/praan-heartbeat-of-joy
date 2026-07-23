@@ -82,7 +82,7 @@ export function PostThisButton({
     }
     setBusy(dest);
     try {
-      const filename = `${(filenameHint || productName || "praan").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.png`;
+      const filename = `${(filenameHint || productName || "cowq").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.png`;
       const file = await fetchAsFile(imageUrl, filename, watermark);
       const nav = navigator as Navigator & {
         share?: (d: ShareData) => Promise<void>;

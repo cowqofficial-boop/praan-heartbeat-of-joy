@@ -124,7 +124,7 @@ function Results() {
           imageUrl={whiteAfter}
           caption={copy ? `${copy.instagram}\n\n${copy.instagramHashtags.join(" ")}` : ""}
           productName={(data.product_name as string) || undefined}
-          filenameHint={(data.product_name as string) || "praan"}
+          filenameHint={(data.product_name as string) || "cowq"}
           watermark={watermark}
         />
       </Section>
@@ -165,7 +165,7 @@ function Results() {
           <div className="flex flex-col gap-3">
             <DownloadAllButton
               images={images}
-              name={(data.product_name as string) || "praan"}
+              name={(data.product_name as string) || "cowq"}
               watermark={watermark}
             />
             <a
