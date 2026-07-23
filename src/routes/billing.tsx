@@ -67,13 +67,21 @@ function BillingPage() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[720px] flex-col px-5 pb-16 pt-8">
-      <header className="flex items-center justify-between">
-        <Link to="/library" className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink lg:hidden" aria-label="Back">
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">Billing</h1>
-        <div className="h-10 w-10 lg:hidden" />
-      </header>
+      <Link to="/library" className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink lg:hidden" aria-label="Back">
+        <ArrowLeft className="h-5 w-5" />
+      </Link>
+      <PageHeader
+        icon={Wallet}
+        title="Billing"
+        subtitle="Your plan, credits and past payments — in one place."
+        help={
+          <>
+            <p className="font-semibold text-ink">What's on this page</p>
+            <p className="mt-1 text-muted">Your current plan, credits remaining and every payment you've made. Change plans or top up any time — no lock-in.</p>
+          </>
+        }
+      />
+
 
 
       {/* Current plan */}
