@@ -6,6 +6,13 @@ import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import { useAuth } from "@/lib/use-auth";
 import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/site";
 import { showcasePairs } from "@/data/showcase";
+import how1 from "@/assets/landing/how-1.jpg.asset.json";
+import how2 from "@/assets/landing/how-2.jpg.asset.json";
+import how3 from "@/assets/landing/how-3.jpg.asset.json";
+import who1 from "@/assets/landing/who-1.jpg.asset.json";
+import who2 from "@/assets/landing/who-2.jpg.asset.json";
+import who3 from "@/assets/landing/who-3.jpg.asset.json";
+import who4 from "@/assets/landing/who-4.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
