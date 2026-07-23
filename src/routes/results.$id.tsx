@@ -345,7 +345,7 @@ function PhotosSection({
           category={category}
           originalUrl={originalUrl}
           onDone={onDone}
-          onLimit={() => alert("You've used today's free products. Come back tomorrow.")}
+          onLimit={() => showAlert({ title: "That's today's free products used", body: "Come back tomorrow — the daily limit resets at midnight." })}
         />
       )}
     </section>
