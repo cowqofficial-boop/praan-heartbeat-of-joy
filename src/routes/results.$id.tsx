@@ -544,7 +544,7 @@ async function downloadAllPhotos(images: GenImage[], name: string, watermark: bo
     a.click();
     URL.revokeObjectURL(url);
   } catch {
-    alert("Couldn't build the ZIP. Try again.");
+    showAlert({ title: "Couldn't build the ZIP", body: "Try again in a moment." });
   }
 }
 
