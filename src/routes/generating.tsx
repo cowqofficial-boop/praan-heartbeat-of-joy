@@ -67,8 +67,10 @@ function Generating() {
           imageUrls,
           productName: form.name,
           category: identified.category,
+          needsPerson: (identified as { needs_person?: boolean }).needs_person ?? false,
         },
       });
+
       setStates(["done", "done", "active"]);
       const { id } = await generateCopyAndSave({
         data: {

@@ -17,9 +17,16 @@ export type Database = {
       brand_kits: {
         Row: {
           accent_color: string
+          brand_model_enabled: boolean
+          brand_model_url: string | null
           business_name: string
           created_at: string
           logo_url: string | null
+          model_age: string | null
+          model_body: string | null
+          model_gender: string | null
+          model_region: string | null
+          model_skin: string | null
           primary_color: string
           sells_to: string
           sells_what: string
@@ -29,9 +36,16 @@ export type Database = {
         }
         Insert: {
           accent_color?: string
+          brand_model_enabled?: boolean
+          brand_model_url?: string | null
           business_name?: string
           created_at?: string
           logo_url?: string | null
+          model_age?: string | null
+          model_body?: string | null
+          model_gender?: string | null
+          model_region?: string | null
+          model_skin?: string | null
           primary_color?: string
           sells_to?: string
           sells_what?: string
@@ -41,9 +55,16 @@ export type Database = {
         }
         Update: {
           accent_color?: string
+          brand_model_enabled?: boolean
+          brand_model_url?: string | null
           business_name?: string
           created_at?: string
           logo_url?: string | null
+          model_age?: string | null
+          model_body?: string | null
+          model_gender?: string | null
+          model_region?: string | null
+          model_skin?: string | null
           primary_color?: string
           sells_to?: string
           sells_what?: string

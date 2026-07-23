@@ -2,7 +2,14 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { getMyBrandKit, saveMyBrandKit, uploadBrandLogo, type BrandKit } from "@/lib/brand-kit.functions";
+import {
+  generateBrandModelPortrait,
+  getMyBrandKit,
+  saveMyBrandKit,
+  setBrandModelEnabled,
+  uploadBrandLogo,
+  type BrandKit,
+} from "@/lib/brand-kit.functions";
 import { PrimaryButton } from "@/components/PrimaryButton";
 
 const searchSchema = z.object({ onboarding: z.boolean().optional() });
@@ -12,9 +19,9 @@ export const Route = createFileRoute("/brand-kit")({
   head: () => ({
     meta: [
       { title: "Your brand kit — PRAAN" },
-      { name: "description", content: "Set your business name, logo, brand colours, and voice so every listing PRAAN writes sounds like you." },
+      { name: "description", content: "Set your business name, logo, brand colours, voice, and AI model preferences so every listing PRAAN writes and shoots sounds and looks like you." },
       { property: "og:title", content: "Your brand kit — PRAAN" },
-      { property: "og:description", content: "Business name, logo, colours, and voice — used in every future listing." },
+      { property: "og:description", content: "Business name, logo, colours, voice, and model preferences — used in every future listing." },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex, follow" },
     ],
@@ -29,21 +36,66 @@ const TONES = [
   { value: "traditional", label: "Traditional" },
 ];
 
+const GENDER = [
+  { value: "", label: "Let PRAAN decide" },
+  { value: "woman", label: "Woman" },
+  { value: "man", label: "Man" },
+  { value: "non-binary", label: "Non-binary" },
+];
+const AGE = [
+  { value: "", label: "Let PRAAN decide" },
+  { value: "18-25", label: "18–25" },
+  { value: "25-35", label: "25–35" },
+  { value: "35-50", label: "35–50" },
+  { value: "50+", label: "50+" },
+];
+const SKIN = [
+  { value: "", label: "Let PRAAN decide" },
+  { value: "fair", label: "Fair" },
+  { value: "wheatish", label: "Wheatish" },
+  { value: "medium", label: "Medium" },
+  { value: "deep", label: "Deep" },
+];
+const BODY = [
+  { value: "", label: "Let PRAAN decide" },
+  { value: "slim", label: "Slim" },
+  { value: "average", label: "Average" },
+  { value: "curvy", label: "Curvy" },
+  { value: "plus", label: "Plus" },
+];
+const REGION = [
+  { value: "", label: "Let PRAAN decide" },
+  { value: "North Indian", label: "North Indian" },
+  { value: "South Indian", label: "South Indian" },
+  { value: "East Indian / North-east", label: "East / North-east" },
+  { value: "West Indian", label: "West Indian" },
+];
+
+const EMPTY_KIT: BrandKit = {
+  business_name: "",
+  logo_url: null,
+  primary_color: "#E0402F",
+  accent_color: "#F5A623",
+  sells_what: "",
+  sells_to: "",
+  tone: "friendly",
+  model_gender: null,
+  model_age: null,
+  model_skin: null,
+  model_body: null,
+  model_region: null,
+  brand_model_enabled: false,
+  brand_model_url: null,
+};
+
 function BrandKitPage() {
   const { onboarding } = Route.useSearch();
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
-  const [kit, setKit] = useState<BrandKit>({
-    business_name: "",
-    logo_url: null,
-    primary_color: "#E0402F",
-    accent_color: "#F5A623",
-    sells_what: "",
-    sells_to: "",
-    tone: "friendly",
-  });
+  const [kit, setKit] = useState<BrandKit>(EMPTY_KIT);
   const [busy, setBusy] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
+  const [modelBusy, setModelBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -55,17 +107,7 @@ function BrandKitPage() {
       }
       try {
         const existing = await getMyBrandKit();
-        if (existing) {
-          setKit({
-            business_name: existing.business_name,
-            logo_url: existing.logo_url,
-            primary_color: existing.primary_color,
-            accent_color: existing.accent_color,
-            sells_what: existing.sells_what,
-            sells_to: existing.sells_to,
-            tone: existing.tone,
-          });
-        }
+        if (existing) setKit({ ...EMPTY_KIT, ...existing });
       } catch { /* first-time user */ }
       setReady(true);
     })();
@@ -98,6 +140,38 @@ function BrandKitPage() {
       }
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function toggleBrandModel(next: boolean) {
+    if (!next) {
+      setKit((k) => ({ ...k, brand_model_enabled: false }));
+      try { await setBrandModelEnabled({ data: { enabled: false } }); } catch { /* ignore */ }
+      return;
+    }
+    // Turning on: save current prefs, then generate.
+    setModelBusy(true);
+    try {
+      await saveMyBrandKit({ data: kit });
+      const { url } = await generateBrandModelPortrait({ data: {} });
+      setKit((k) => ({ ...k, brand_model_url: url, brand_model_enabled: true }));
+    } catch (e) {
+      alert("Couldn't generate your brand model. Try again.\n\n" + (e as Error).message);
+    } finally {
+      setModelBusy(false);
+    }
+  }
+
+  async function regenerateBrandModel() {
+    setModelBusy(true);
+    try {
+      await saveMyBrandKit({ data: kit });
+      const { url } = await generateBrandModelPortrait({ data: {} });
+      setKit((k) => ({ ...k, brand_model_url: url, brand_model_enabled: true }));
+    } catch (e) {
+      alert("Couldn't generate your brand model. Try again.\n\n" + (e as Error).message);
+    } finally {
+      setModelBusy(false);
     }
   }
 
@@ -204,6 +278,75 @@ function BrandKitPage() {
             ))}
           </div>
         </Field>
+
+        <div className="mt-2 border-t border-[color:var(--color-border)] pt-6">
+          <h2 className="font-display text-[20px] leading-tight text-ink">Model preferences</h2>
+          <p className="mt-1 text-[13px] text-muted">
+            Only used when PRAAN needs a person in the shot — clothing, jewellery, footwear, bags, cosmetics. All optional.
+          </p>
+
+          <div className="mt-5 flex flex-col gap-4">
+            <SelectField label="Gender" options={GENDER} value={kit.model_gender ?? ""} onChange={(v) => setKit({ ...kit, model_gender: v || null })} />
+            <SelectField label="Age range" options={AGE} value={kit.model_age ?? ""} onChange={(v) => setKit({ ...kit, model_age: v || null })} />
+            <SelectField label="Skin tone" options={SKIN} value={kit.model_skin ?? ""} onChange={(v) => setKit({ ...kit, model_skin: v || null })} />
+            <SelectField label="Body type" options={BODY} value={kit.model_body ?? ""} onChange={(v) => setKit({ ...kit, model_body: v || null })} />
+            <SelectField label="Regional look" options={REGION} value={kit.model_region ?? ""} onChange={(v) => setKit({ ...kit, model_region: v || null })} />
+          </div>
+        </div>
+
+        <div className="border-t border-[color:var(--color-border)] pt-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h2 className="font-display text-[20px] leading-tight text-ink">Brand model</h2>
+              <p className="mt-1 text-[13px] text-muted">
+                Use the same person in every photo, so your shop looks like one brand.
+              </p>
+            </div>
+            <label className="relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center">
+              <input
+                type="checkbox"
+                className="peer sr-only"
+                checked={kit.brand_model_enabled}
+                onChange={(e) => toggleBrandModel(e.target.checked)}
+                disabled={modelBusy}
+              />
+              <span className="h-7 w-12 rounded-full bg-[color:var(--color-border)] transition-colors peer-checked:bg-primary" />
+              <span className="absolute left-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5" />
+            </label>
+          </div>
+
+          {kit.brand_model_enabled && (
+            <div className="mt-4 flex items-center gap-4 rounded-[12px] border border-[color:var(--color-border)] bg-surface p-3">
+              <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-[10px] bg-white">
+                {modelBusy ? (
+                  <span className="text-[11px] text-muted">Making…</span>
+                ) : kit.brand_model_url ? (
+                  <img src={kit.brand_model_url} alt="Your brand model" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="text-[11px] text-muted">No model yet</span>
+                )}
+              </div>
+              <div className="flex flex-1 flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={regenerateBrandModel}
+                  disabled={modelBusy}
+                  className="h-10 rounded-[10px] border border-[color:var(--color-border)] bg-white text-[13px] font-semibold text-ink disabled:opacity-60"
+                >
+                  {modelBusy ? "Generating…" : "Change model"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleBrandModel(false)}
+                  disabled={modelBusy}
+                  className="h-10 rounded-[10px] text-[13px] font-medium text-muted underline disabled:opacity-60"
+                >
+                  Turn off
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="mt-8 flex flex-col gap-3">
@@ -230,6 +373,33 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="text-[15px] font-medium text-ink">{label}</span>
       {children}
     </div>
+  );
+}
+
+function SelectField({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: { value: string; label: string }[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <label className="flex items-center justify-between gap-3">
+      <span className="text-[14px] text-ink">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-11 min-w-[180px] rounded-[10px] border border-[color:var(--color-border)] bg-white px-3 text-[14px] text-ink"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
+    </label>
   );
 }
 

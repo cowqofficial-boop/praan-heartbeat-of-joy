@@ -318,38 +318,49 @@ function PhotosSection({
         ))}
       </div>
       <div className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 no-scrollbar">
-        {filtered.map((img, i) => (
-          <div
-            key={`${img.kind}-${img.ratio}-${i}`}
-            className="relative shrink-0 snap-center overflow-hidden rounded-[12px] bg-surface"
-            style={{
-              width: ratio === "1:1" ? "78%" : "64%",
-              aspectRatio: ratio === "1:1" ? "1 / 1" : "9 / 16",
-            }}
-          >
-            <img
-              src={img.url}
-              alt={`${img.kind} ${img.ratio}`}
-              className="h-full w-full object-cover"
-            />
-            {watermark && (
-              <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
-                Made with PRAAN
-              </span>
-            )}
-            {hasAccount && (
-              <button
-                type="button"
-                onClick={() => handleDownload(img)}
-                className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-ink shadow-md"
-                aria-label="Download photo"
+        {filtered.map((img, i) => {
+          const isOnModel = img.kind.startsWith("onmodel");
+          return (
+            <div
+              key={`${img.kind}-${img.ratio}-${i}`}
+              className="flex shrink-0 snap-center flex-col gap-1.5"
+              style={{ width: ratio === "1:1" ? "78%" : "64%" }}
+            >
+              <div
+                className="relative overflow-hidden rounded-[12px] bg-surface"
+                style={{ aspectRatio: ratio === "1:1" ? "1 / 1" : "9 / 16" }}
               >
-                <Download className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-        ))}
+                <img
+                  src={img.url}
+                  alt={`${img.kind} ${img.ratio}`}
+                  className="h-full w-full object-cover"
+                />
+                {watermark && (
+                  <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
+                    Made with PRAAN
+                  </span>
+                )}
+                {hasAccount && (
+                  <button
+                    type="button"
+                    onClick={() => handleDownload(img)}
+                    className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-ink shadow-md"
+                    aria-label="Download photo"
+                  >
+                    <Download className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              {isOnModel && (
+                <p className="px-0.5 text-[11px] leading-snug text-muted">
+                  AI-generated model. Check the fit and drape before you list this.
+                </p>
+              )}
+            </div>
+          );
+        })}
       </div>
+
       {hasAccount && (
         <MakeMoreButton
           id={id}
