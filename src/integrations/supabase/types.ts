@@ -603,6 +603,24 @@ export type Database = {
           },
         ]
       }
+      user_preferences: {
+        Row: {
+          tour_completed_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          tour_completed_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          tour_completed_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
