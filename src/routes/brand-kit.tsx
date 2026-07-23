@@ -184,7 +184,7 @@ function BrandKitPage() {
  }
 
  async function removeRealModel() {
- if (!confirm("Delete your model's photos permanently?")) return;
+ if (!(await showConfirm({ title: "Delete your model's photos permanently?", body: "You can add new ones any time.", destructive: true, confirmLabel: "Delete" }))) return;
  setModelBusy(true);
  try {
  await removeRealBrandModel();
