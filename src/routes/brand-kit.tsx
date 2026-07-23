@@ -420,3 +420,301 @@ function ColorInput({ label, value, onChange }: { label: string; value: string; 
     </label>
   );
 }
+
+function BrandModelPanel({
+  kit,
+  setKit,
+  modelBusy,
+  setModelBusy,
+  onRegenerateAi,
+  onRemoveReal,
+  onUploadedReal,
+}: {
+  kit: BrandKit;
+  setKit: React.Dispatch<React.SetStateAction<BrandKit>>;
+  modelBusy: boolean;
+  setModelBusy: (v: boolean) => void;
+  onRegenerateAi: () => Promise<void>;
+  onRemoveReal: () => Promise<void>;
+  onUploadedReal: (urls: string[]) => void;
+}) {
+  const source = kit.brand_model_source;
+  const realPhotos = kit.brand_model_photos ?? [];
+  return (
+    <div className="mt-4 flex flex-col gap-4">
+      <div className="grid grid-cols-2 gap-2">
+        {(["ai", "user"] as const).map((v) => (
+          <button
+            type="button"
+            key={v}
+            onClick={() => setKit((k) => ({ ...k, brand_model_source: v }))}
+            className={`h-11 rounded-[10px] border text-[13px] font-semibold transition-colors ${
+              source === v
+                ? "border-primary bg-primary/10 text-ink"
+                : "border-[color:var(--color-border)] bg-white text-ink"
+            }`}
+          >
+            {v === "ai" ? "AI model" : "My own model"}
+          </button>
+        ))}
+      </div>
+
+      {source === "ai" ? (
+        <div className="flex items-center gap-4 rounded-[12px] border border-[color:var(--color-border)] bg-surface p-3">
+          <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-[10px] bg-white">
+            {modelBusy ? (
+              <span className="text-[11px] text-muted">Making…</span>
+            ) : kit.brand_model_url ? (
+              <img src={kit.brand_model_url} alt="Your brand model" className="h-full w-full object-cover" />
+            ) : (
+              <span className="text-[11px] text-muted">No model yet</span>
+            )}
+          </div>
+          <div className="flex flex-1 flex-col gap-2">
+            <button
+              type="button"
+              onClick={onRegenerateAi}
+              disabled={modelBusy}
+              className="h-10 rounded-[10px] border border-[color:var(--color-border)] bg-white text-[13px] font-semibold text-ink disabled:opacity-60"
+            >
+              {modelBusy ? "Generating…" : "Change model"}
+            </button>
+          </div>
+        </div>
+      ) : realPhotos.length > 0 ? (
+        <RealModelSaved
+          photos={realPhotos}
+          modelBusy={modelBusy}
+          setModelBusy={setModelBusy}
+          onRemove={onRemoveReal}
+          onReplaced={onUploadedReal}
+        />
+      ) : (
+        <RealModelUploader
+          modelBusy={modelBusy}
+          setModelBusy={setModelBusy}
+          onUploaded={onUploadedReal}
+        />
+      )}
+    </div>
+  );
+}
+
+async function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result as string);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+function RealModelSaved({
+  photos,
+  modelBusy,
+  setModelBusy,
+  onRemove,
+  onReplaced,
+}: {
+  photos: string[];
+  modelBusy: boolean;
+  setModelBusy: (v: boolean) => void;
+  onRemove: () => Promise<void>;
+  onReplaced: (urls: string[]) => void;
+}) {
+  const [changing, setChanging] = useState(false);
+  if (changing) {
+    return (
+      <RealModelUploader
+        modelBusy={modelBusy}
+        setModelBusy={setModelBusy}
+        onUploaded={(urls) => { setChanging(false); onReplaced(urls); }}
+        onCancel={() => setChanging(false)}
+      />
+    );
+  }
+  return (
+    <div className="flex flex-col gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-surface p-3">
+      <div className="flex gap-2">
+        {photos.map((p, i) => (
+          <img
+            key={i}
+            src={p}
+            alt={`Your model ${i + 1}`}
+            className="h-20 w-20 rounded-[10px] object-cover"
+          />
+        ))}
+      </div>
+      <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={() => setChanging(true)}
+          disabled={modelBusy}
+          className="h-10 rounded-[10px] border border-[color:var(--color-border)] bg-white text-[13px] font-semibold text-ink disabled:opacity-60"
+        >
+          Change model
+        </button>
+        <button
+          type="button"
+          onClick={onRemove}
+          disabled={modelBusy}
+          className="h-10 rounded-[10px] text-[13px] font-medium text-muted underline disabled:opacity-60"
+        >
+          Remove model
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function RealModelUploader({
+  modelBusy,
+  setModelBusy,
+  onUploaded,
+  onCancel,
+}: {
+  modelBusy: boolean;
+  setModelBusy: (v: boolean) => void;
+  onUploaded: (urls: string[]) => void;
+  onCancel?: () => void;
+}) {
+  const [files, setFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [c1, setC1] = useState(false);
+  const [c2, setC2] = useState(false);
+  const [c3, setC3] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function addFiles(fl: FileList | null) {
+    if (!fl) return;
+    const arr = Array.from(fl).slice(0, 3 - files.length);
+    Promise.all(arr.map(fileToDataUrl)).then((urls) => {
+      setFiles((f) => [...f, ...arr].slice(0, 3));
+      setPreviews((p) => [...p, ...urls].slice(0, 3));
+    });
+  }
+
+  const canSubmit = files.length > 0 && c1 && c2 && c3 && !modelBusy;
+
+  async function submit() {
+    if (!canSubmit) return;
+    setModelBusy(true);
+    try {
+      const dataUrls = await Promise.all(files.map(fileToDataUrl));
+      const { urls } = await uploadBrandModelPhotos({
+        data: {
+          dataUrls,
+          consentAgreed: c1,
+          consentAdult: c2,
+          consentNotPublicFigure: c3,
+        },
+      });
+      onUploaded(urls);
+    } catch (e) {
+      alert("Couldn't save your model photos.\n\n" + (e as Error).message);
+    } finally {
+      setModelBusy(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-4 rounded-[12px] border border-[color:var(--color-border)] bg-surface p-3">
+      <p className="text-[13px] text-muted">
+        Upload 1–3 clear photos of your model. One good face shot, and if possible a full-length shot.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {previews.map((p, i) => (
+          <div key={i} className="relative h-20 w-20">
+            <img src={p} alt={`Model ${i + 1}`} className="h-20 w-20 rounded-[10px] object-cover" />
+            <button
+              type="button"
+              onClick={() => {
+                setFiles((f) => f.filter((_, j) => j !== i));
+                setPreviews((pp) => pp.filter((_, j) => j !== i));
+              }}
+              className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-black/70 text-[11px] font-bold text-white"
+              aria-label="Remove"
+            >
+              ×
+            </button>
+          </div>
+        ))}
+        {previews.length < 3 && (
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="grid h-20 w-20 place-items-center rounded-[10px] border border-dashed border-[color:var(--color-border)] bg-white text-[22px] text-muted"
+          >
+            +
+          </button>
+        )}
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={(e) => addFiles(e.target.files)}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2 rounded-[10px] bg-white p-3">
+        <ConsentRow checked={c1} onChange={setC1}>
+          This person has agreed to their photos being used to create product images for my shop.
+        </ConsentRow>
+        <ConsentRow checked={c2} onChange={setC2}>
+          This person is 18 or older.
+        </ConsentRow>
+        <ConsentRow checked={c3} onChange={setC3}>
+          This person is not a celebrity or public figure.
+        </ConsentRow>
+      </div>
+      <p className="text-[12px] text-muted">
+        You're responsible for having this person's permission. We delete these photos whenever you ask.
+      </p>
+
+      <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={submit}
+          disabled={!canSubmit}
+          className="h-11 rounded-[10px] bg-primary text-[14px] font-semibold text-white disabled:opacity-50"
+        >
+          {modelBusy ? "Saving…" : "Save my model"}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={modelBusy}
+            className="h-10 rounded-[10px] text-[13px] font-medium text-muted underline disabled:opacity-60"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ConsentRow({
+  checked,
+  onChange,
+  children,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="flex items-start gap-3 text-[13px] leading-snug text-ink">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+      />
+      <span>{children}</span>
+    </label>
+  );
+}
