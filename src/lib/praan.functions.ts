@@ -254,6 +254,7 @@ export const generateCopyAndSave = createServerFn({ method: "POST" })
       color: string;
       features: string[];
       images: { kind: string; ratio: string; url: string }[];
+      meta?: { image_model?: string; image_count?: number; image_resolution?: number } | null;
     }) => d,
   )
   .handler(async ({ data }) => {
