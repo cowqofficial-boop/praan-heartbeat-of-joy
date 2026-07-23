@@ -1,12 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Boxes, CalendarDays, LogOut, Plus, Receipt, Search, Settings2, Trash2, Pencil, Link2 } from "lucide-react";
+import { Boxes, CalendarDays, LibraryBig, LogOut, Plus, Receipt, Search, Settings2, Trash2, Pencil, Link2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteMyProduct, listMyProducts, renameMyProduct, type LibraryItem } from "@/lib/library.functions";
 import { CreditBadge } from "@/components/CreditBadge";
 import { LowBalanceBanner } from "@/components/LowBalanceBanner";
 import { ReconnectBanner } from "@/components/ReconnectBanner";
+import { PageHeader } from "@/components/PageHeader";
+import { EmptyState, IllustrationProduct } from "@/components/EmptyState";
+import { NudgeCard } from "@/components/NudgeCard";
+
 
 export const Route = createFileRoute("/library")({
   head: () => ({
@@ -77,71 +81,38 @@ function LibraryPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col px-6 pb-16 pt-8 lg:px-0 lg:pt-12">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="page-headline sm:text-[56px]">Your products</h1>
 
+    <main className="flex min-h-screen flex-col px-6 pb-16 pt-8 lg:px-0 lg:pt-12">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1">
+          <PageHeader
+            icon={LibraryBig}
+            title="Your products"
+            subtitle="Every product you've made — reopen, rename, or start a new one."
+            help={
+              <>
+                <p className="font-semibold text-ink">Your product library</p>
+                <p className="mt-1 text-muted">
+                  Every product you upload shows up here as a card. Tap one to see its photos, listing text and catalog file again. Rename or delete from the corner icons.
+                </p>
+              </>
+            }
+            action={{ label: "Add new product", to: "/create", icon: Plus }}
+          />
+        </div>
         <div className="flex items-center gap-1 lg:hidden">
           <CreditBadge />
-          <Link
-            to="/stock"
-            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
-            aria-label="Stock"
-          >
-            <Boxes className="h-5 w-5" />
-          </Link>
-          <Link
-            to="/calendar"
-            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
-            aria-label="Content calendar"
-          >
-            <CalendarDays className="h-5 w-5" />
-          </Link>
-          <Link
-            to="/connect"
-            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
-            aria-label="Connect channels"
-          >
-            <Link2 className="h-5 w-5" />
-          </Link>
-          <Link
-            to="/billing"
-            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
-            aria-label="Billing"
-          >
-            <Receipt className="h-5 w-5" />
-          </Link>
-          <Link
-            to="/brand-kit"
-            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
-            aria-label="Brand kit"
-          >
-            <Settings2 className="h-5 w-5" />
-          </Link>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
-            aria-label="Sign out"
-          >
-            <LogOut className="h-5 w-5" />
-          </button>
+          <Link to="/stock" className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Stock"><Boxes className="h-5 w-5" /></Link>
+          <Link to="/calendar" className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Content calendar"><CalendarDays className="h-5 w-5" /></Link>
+          <Link to="/connect" className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Connect channels"><Link2 className="h-5 w-5" /></Link>
+          <Link to="/billing" className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Billing"><Receipt className="h-5 w-5" /></Link>
+          <Link to="/brand-kit" className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Brand kit"><Settings2 className="h-5 w-5" /></Link>
+          <button type="button" onClick={handleSignOut} className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Sign out"><LogOut className="h-5 w-5" /></button>
         </div>
-      </header>
-
+      </div>
 
       <ReconnectBanner />
       <LowBalanceBanner />
-
-
-
-      <Link
-        to="/create"
-        className="mt-6 flex h-14 items-center justify-center gap-2 rounded-[12px] bg-primary text-[16px] font-semibold text-primary-foreground"
-      >
-        <Plus className="h-5 w-5" />
-        Add new product
-      </Link>
 
       {items.length > 0 && (
         <label className="mt-6 flex h-11 items-center gap-2 rounded-[12px] bg-raised px-3">
@@ -160,10 +131,18 @@ function LibraryPage() {
         {isLoading ? (
           <p className="text-[15px] text-muted">Loading…</p>
         ) : items.length === 0 ? (
-          <div className="mt-16 rounded-[16px] bg-surface p-8 text-center" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)" }}>
-            <p className="text-[16px] font-medium text-ink">Add your first product — it's free.</p>
-            <p className="mt-2 text-[14px] text-muted">One photo, and you're set up to sell.</p>
-          </div>
+          <EmptyState
+            illustration={<IllustrationProduct />}
+            title="Add your first product"
+            body="Your products will appear here once you upload a photo. One photo becomes studio images, listing text and a catalog file."
+            action={{ label: "Add your first product", to: "/create" }}
+            help={
+              <>
+                <p className="font-semibold text-ink">How this works</p>
+                <p className="mt-1 text-muted">Take one clear phone photo of your product in daylight. CowQ turns it into 4 studio-style photos, marketplace-ready copy, social posts and a Shopify catalog file — in about a minute.</p>
+              </>
+            }
+          />
         ) : filtered.length === 0 ? (
           <p className="text-[15px] text-muted">Nothing matches "{query}".</p>
         ) : (
@@ -174,9 +153,19 @@ function LibraryPage() {
           </ul>
         )}
       </div>
+
+      {items.length > 0 && (
+        <NudgeCard
+          icon={CalendarDays}
+          text="Your products are ready. Plan a month of posts from them."
+          linkLabel="Open calendar"
+          to="/calendar"
+        />
+      )}
     </main>
   );
 }
+
 
 function ProductCard({
   item,

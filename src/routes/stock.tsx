@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
+  Boxes,
   Minus,
   Package,
   Plus,
@@ -10,6 +11,9 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
+import { EmptyState, IllustrationStock } from "@/components/EmptyState";
+
 import { supabase } from "@/integrations/supabase/client";
 import {
   changeQuantity,
@@ -146,16 +150,26 @@ function StockPage() {
 
   return (
     <main className="flex min-h-screen flex-col px-6 pb-24 pt-8 lg:px-0 lg:pt-12">
-      <header className="flex items-center gap-3">
-        <Link
-          to="/library"
-          className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink lg:hidden"
-          aria-label="Back"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <h1 className="page-headline sm:text-[56px]">Stock</h1>
-      </header>
+      <Link
+        to="/library"
+        className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink lg:hidden"
+        aria-label="Back"
+      >
+        <ArrowLeft className="h-5 w-5" />
+      </Link>
+      <PageHeader
+        icon={Boxes}
+        title="Stock"
+        subtitle="Keep count of what's in your shop. Log sales, restocks and returns — see live value and profit."
+        help={
+          <>
+            <p className="font-semibold text-ink">Why track stock</p>
+            <p className="mt-1 text-muted">CowQ uses your stock to plan smarter posts — skipping items that are out, featuring bestsellers, and posting urgency when something's running low. Free on every plan.</p>
+          </>
+        }
+        action={{ label: "Add item", onClick: () => setCreating(true), icon: Plus }}
+      />
+
 
 
 
@@ -237,11 +251,19 @@ function StockPage() {
         {isLoading ? (
           <p className="text-[15px] text-muted">Loading…</p>
         ) : items.length === 0 ? (
-          <div className="mt-10 rounded-[16px] bg-surface p-8 text-center" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)" }}>
-            <Package className="mx-auto h-8 w-8 text-muted" />
-            <p className="mt-3 text-[16px] font-medium text-ink">Add your first item — it's free.</p>
-            <p className="mt-1 text-[14px] text-muted">Track what's in stock, low, or sold out.</p>
-          </div>
+          <EmptyState
+            illustration={<IllustrationStock />}
+            title="Add your first item"
+            body="Your stock will show up here once you add an item. Track quantity, cost, price and profit — plus low-stock alerts."
+            action={{ label: "Add item", onClick: () => setCreating(true) }}
+            help={
+              <>
+                <p className="font-semibold text-ink">How stock helps</p>
+                <p className="mt-1 text-muted">Each item shows a live status: in stock, low, or out. Log sales in one tap; the number goes down. Your content calendar uses this to skip out-of-stock products automatically.</p>
+              </>
+            }
+          />
+
 
         ) : sorted.length === 0 ? (
           <p className="text-[15px] text-muted">Nothing matches.</p>

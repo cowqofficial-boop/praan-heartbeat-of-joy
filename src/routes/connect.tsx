@@ -2,7 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
-import { ArrowLeft, Check, Instagram, Facebook, MessageCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, Instagram, Facebook, MessageCircle, Loader2, Link2 } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
+
 import { supabase } from "@/integrations/supabase/client";
 import {
   disconnectChannel,
@@ -73,20 +75,25 @@ function ConnectPage() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[720px] flex-col px-5 pb-16 pt-8">
-      <header className="flex items-center gap-3">
-        <Link
-          to={onboarding ? "/library" : "/library"}
-          className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink lg:hidden"
-          aria-label="Back"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">Connect your channels</h1>
-      </header>
+      <Link
+        to={onboarding ? "/library" : "/library"}
+        className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink lg:hidden"
+        aria-label="Back"
+      >
+        <ArrowLeft className="h-5 w-5" />
+      </Link>
+      <PageHeader
+        icon={Link2}
+        title="Connect your channels"
+        subtitle="Link the places you sell so CowQ can post for you. Optional — everything else keeps working if you skip."
+        help={
+          <>
+            <p className="font-semibold text-ink">What connecting does</p>
+            <p className="mt-1 text-muted">Once linked, "Post this" sends photos and captions straight to Instagram, Facebook or WhatsApp. Tokens are encrypted; you can disconnect any time.</p>
+          </>
+        }
+      />
 
-      <p className="mt-2 text-[15px] text-muted">
-        Link the places you sell. CowQ keeps working even if you skip this.
-      </p>
 
       <div className="mt-6 flex flex-col gap-3">
         <ChannelCard

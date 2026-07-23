@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, Loader2, Receipt } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckout, getMyCredits } from "@/lib/billing.functions";
 import { creditPacks, estimateProducts, formatInr, subscriptionPairs, type Plan } from "@/lib/plans";
+import { PageHeader } from "@/components/PageHeader";
+
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -119,17 +121,28 @@ function PricingPage() {
 
   return (
     <main className="flex min-h-screen flex-col px-5 pb-16 pt-8 lg:px-0 lg:pt-12">
-      <header className="flex items-center justify-between">
+      <div className="flex items-center gap-2 lg:hidden">
         <Link
           to={signedIn ? "/library" : "/"}
-          className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink lg:hidden"
+          className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink"
           aria-label="Back"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">Pricing</h1>
-        <div className="h-10 w-10 lg:hidden" />
-      </header>
+      </div>
+      <PageHeader
+        icon={Receipt}
+        title="Pricing"
+        subtitle="Pick a plan or top up credits. Every plan includes stock, calendar (Growth+), and no lock-in."
+        help={
+          <>
+            <p className="font-semibold text-ink">How credits work</p>
+            <p className="mt-1 text-muted">One product uses about 90 credits. Plans reset monthly; top-ups never expire. If a generation fails, its credits come straight back to your balance.</p>
+          </>
+        }
+      />
+
+
 
 
       {credits && (
