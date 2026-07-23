@@ -88,6 +88,8 @@ const EMPTY_KIT: BrandKit = {
   model_region: null,
   brand_model_enabled: false,
   brand_model_url: null,
+  brand_model_source: "ai",
+  brand_model_photos: [],
 };
 
 function BrandKitPage() {
