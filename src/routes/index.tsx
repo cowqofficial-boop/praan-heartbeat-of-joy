@@ -173,19 +173,7 @@ function Landing() {
           <UploadWidget />
         </div>
 
-        {!user && (
-          <p className="mx-auto mt-5 max-w-[560px] text-center text-[13px] text-muted">
-            Your first product is free — no account needed.{" "}
-            <Link
-              to="/auth"
-              search={{ mode: "signup" }}
-              className="font-medium text-ink underline underline-offset-2"
-            >
-              Sign up
-            </Link>{" "}
-            and get 3 more.
-          </p>
-        )}
+        {/* Free-offer line is rendered by UploadWidget itself when signed out — no need to repeat it here. */}
       </section>
 
       {/* ================ 1. Before / After ================ */}
