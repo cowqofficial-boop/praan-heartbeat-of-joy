@@ -39,7 +39,7 @@ export function ReconnectBanner() {
       <span>{label} needs reconnecting.</span>
       <Link
         to="/connect"
-        className="rounded-[10px] bg-amber px-3 py-1.5 text-[13px] font-semibold text-void"
+        className="rounded-[10px] bg-amber px-3 py-1.5 text-[13px] font-semibold text-background"
       >
         Reconnect
       </Link>
