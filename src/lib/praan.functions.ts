@@ -159,37 +159,19 @@ const IMAGE_STYLES = [
   },
 ];
 
-async function generateOneImage(refB64: string, refMime: string, prompt: string, ratio: "1:1" | "9:16") {
-  const ratioHint =
-    ratio === "1:1"
-      ? "Square 1:1 aspect ratio, 1024x1024. The full product must be centred and completely visible with comfortable margin — nothing important cropped."
-      : "Vertical 9:16 aspect ratio, 1024x1820, tall portrait orientation. Product centred, fully visible.";
-  const body = {
-    model: "google/gemini-2.5-flash-image",
-    messages: [
-      {
-        role: "user",
-        content: [
-          { type: "text", text: `${prompt} ${ratioHint} ${NO_PEOPLE}` },
-          { type: "image_url", image_url: { url: `data:${refMime};base64,${refB64}` } },
-        ],
-      },
-    ],
-    modalities: ["image", "text"],
-  };
-  const res = await fetch(`${GATEWAY}/images/generations`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey()}`,
-    },
-    body: JSON.stringify(body),
+async function generateOneImage(
+  refB64: string,
+  refMime: string,
+  prompt: string,
+  targetSize = 2048,
+): Promise<string> {
+  const sizeHint = `Render at ${targetSize} by ${targetSize} pixels, square 1:1, photorealistic, catalogue-quality, high detail. Product centred with generous margin so nothing important is cropped when reframed to vertical.`;
+  const full = `${prompt} ${sizeHint} ${NO_PEOPLE} Keep the product identical to the reference photo — same shape, colour, material, branding and label.`;
+  const out = await geminiGenerateImage({
+    prompt: full,
+    reference: { mimeType: refMime, b64: refB64 },
   });
-  if (!res.ok) throw new Error(`image gen failed: ${res.status} ${await res.text()}`);
-  const json = (await res.json()) as { data?: { b64_json: string }[] };
-  const b64 = json.data?.[0]?.b64_json;
-  if (!b64) throw new Error("image gen returned no image");
-  return b64;
+  return out.b64;
 }
 
 export const generateImages = createServerFn({ method: "POST" })
@@ -211,32 +193,39 @@ export const generateImages = createServerFn({ method: "POST" })
     const { b64: refB64, mime: refMime } = await fetchAsBase64(data.imageUrl);
     const contextLine = `Product: ${data.productName}. Category: ${data.category}.`;
 
-    const tasks: Promise<{ kind: string; ratio: "1:1" | "9:16"; url: string }>[] = [];
-    for (const style of IMAGE_STYLES) {
-      for (const ratio of ["1:1", "9:16"] as const) {
-        tasks.push(
-          (async () => {
-            const b64 = await generateOneImage(
-              refB64,
-              refMime,
-              `${contextLine} ${style.prompt}`,
-              ratio,
-            );
-            const bytes = b64ToBytes(b64);
-            const path = `generated/${data.browserId}/${Date.now()}-${style.kind}-${ratio.replace(":", "x")}.png`;
-            const url = await uploadBytes(path, bytes, "image/png");
-            return { kind: style.kind, ratio, url };
-          })(),
-        );
-      }
-    }
+    // Generate ONCE per style at 2048 (square); reuse the URL for both 1:1 and 9:16
+    // to halve API cost — the browser crops to 9:16 at download time.
+    const tasks: Promise<{ kind: string; url: string }>[] = IMAGE_STYLES.map((style) => (async () => {
+      const b64 = await generateOneImage(refB64, refMime, `${contextLine} ${style.prompt}`, 2048);
+      const bytes = b64ToBytes(b64);
+      const path = `generated/${data.browserId}/${Date.now()}-${style.kind}.png`;
+      const url = await uploadBytes(path, bytes, "image/png");
+      return { kind: style.kind, url };
+    })());
     const settled = await Promise.allSettled(tasks);
-    const images = settled
-      .filter((r): r is PromiseFulfilledResult<{ kind: string; ratio: "1:1" | "9:16"; url: string }> => r.status === "fulfilled")
+    const base = settled
+      .filter((r): r is PromiseFulfilledResult<{ kind: string; url: string }> => r.status === "fulfilled")
       .map((r) => r.value);
-    if (images.length === 0) throw new Error("No photos came through. Try again.");
-    return { images };
+    if (base.length === 0) {
+      const firstErr = settled.find((r) => r.status === "rejected") as PromiseRejectedResult | undefined;
+      const detail = firstErr ? (firstErr.reason instanceof Error ? firstErr.reason.message : String(firstErr.reason)) : "";
+      throw new Error(detail || "No photos came through. Try again.");
+    }
+    // Return both ratios pointing to the same underlying URL so downstream code is unchanged.
+    const images = base.flatMap((b) => [
+      { kind: b.kind, ratio: "1:1" as const, url: b.url },
+      { kind: b.kind, ratio: "9:16" as const, url: b.url },
+    ]);
+    return {
+      images,
+      meta: {
+        image_model: GEMINI_IMAGE_MODEL,
+        image_count: base.length,
+        image_resolution: 2048,
+      },
+    };
   });
+
 
 // ---------- Copy generation ----------
 
