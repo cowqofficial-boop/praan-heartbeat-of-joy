@@ -165,7 +165,7 @@ export const changeQuantity = createServerFn({ method: "POST" })
       _stock_item_id: data.stock_item_id,
       _delta: data.delta,
       _reason: data.reason,
-      _note: data.note ?? null,
+      _note: data.note ?? undefined,
     });
     if (error) throw new Error(error.message);
     return { quantity: (qty as number) ?? 0 };
