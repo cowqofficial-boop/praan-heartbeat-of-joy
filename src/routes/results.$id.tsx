@@ -271,6 +271,7 @@ function PhotosSection({
   onDone,
   hasAccount,
   watermark,
+  personSource,
 }: {
   images: GenImage[];
   id: string;
@@ -280,6 +281,7 @@ function PhotosSection({
   onDone: () => void;
   hasAccount: boolean;
   watermark: boolean;
+  personSource: "ai" | "user";
 }) {
   const [ratio, setRatio] = useState<"1:1" | "9:16">("1:1");
   const filtered = images.filter((i) => i.ratio === ratio);
