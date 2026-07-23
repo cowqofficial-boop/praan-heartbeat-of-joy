@@ -103,6 +103,7 @@ export function AppSidebar() {
         <div className="mt-auto flex flex-col gap-2">
           <Link
             to="/pricing"
+            data-tour="credits"
             className="flex h-11 items-center justify-between rounded-[10px] px-3 text-[13px] text-muted hover:text-ink"
             style={{ background: "var(--raised)" }}
             aria-label="View plans"
