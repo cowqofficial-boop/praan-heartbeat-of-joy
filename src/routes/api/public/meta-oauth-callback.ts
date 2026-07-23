@@ -11,7 +11,7 @@ function html(body: string, status = 200): Response {
       body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#FAF7F2;color:#1a1a1a;padding:32px 20px;max-width:480px;margin:0 auto;line-height:1.5}
       h1{font-size:22px;margin:0 0 12px}
       p{font-size:15px;color:#555;margin:0 0 20px}
-      a.btn{display:inline-block;background:#E0402F;color:#fff;text-decoration:none;padding:14px 20px;border-radius:12px;font-weight:600}
+      a.btn{display:inline-block;background:#3D5AFE;color:#fff;text-decoration:none;padding:14px 20px;border-radius:12px;font-weight:600}
     </style></head><body>${body}</body></html>`,
     { status, headers: { "Content-Type": "text/html; charset=utf-8" } },
   );

@@ -294,7 +294,7 @@ function Landing() {
               <Artefact title="Social posts">
                 <div className="space-y-2">
                   <div className="rounded-[10px] bg-raised p-3 text-left">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-marigold">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--page-accent)]">
                       Instagram
                     </p>
                     <p className="mt-1 text-[12px] leading-snug text-ink">
@@ -305,7 +305,7 @@ function Landing() {
                     </p>
                   </div>
                   <div className="rounded-[10px] bg-raised p-3 text-left">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-marigold">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--page-accent)]">
                       WhatsApp broadcast
                     </p>
                     <p className="mt-1 text-[12px] leading-snug text-ink">
@@ -313,7 +313,7 @@ function Landing() {
                     </p>
                   </div>
                   <div className="rounded-[10px] bg-raised p-3 text-left">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-marigold">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--page-accent)]">
                       Festival line
                     </p>
                     <p className="mt-1 text-[12px] leading-snug text-ink">
@@ -673,7 +673,7 @@ function Artefact({
   return (
     <div className={`rounded-[16px] bg-background p-5 ${wide ? "md:col-span-3" : ""}`}>
       <div className="mb-3 flex items-center gap-2">
-        <Check className="h-4 w-4 text-marigold" />
+        <Check className="h-4 w-4 text-[color:var(--page-accent)]" />
         <p className="text-[13px] font-semibold text-ink">{title}</p>
       </div>
       {children}
@@ -723,7 +723,7 @@ function Step({
 function TrustCard({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
   return (
     <div className="rounded-[16px] bg-surface p-5">
-      <span className="grid h-9 w-9 place-items-center rounded-full bg-raised text-marigold">
+      <span className="grid h-9 w-9 place-items-center rounded-full bg-raised text-[color:var(--page-accent)]">
         {icon}
       </span>
       <p className="mt-4 text-[15px] font-semibold text-ink">{title}</p>

@@ -80,8 +80,8 @@ const REGION = [
 const EMPTY_KIT: BrandKit = {
  business_name: "",
  logo_url: null,
- primary_color: "#E0402F",
- accent_color: "#F5A623",
+ primary_color: "#3D5AFE",
+ accent_color: "#FF2FA3",
  sells_what: "",
  sells_to: "",
  tone: "friendly",

@@ -25,8 +25,8 @@ export function CopyButton({ text, label = "Copy" }: { text: string; label?: str
     >
       {copied ? (
         <>
-          <Check key="c" className="h-4 w-4 text-marigold scale-in" />
-          <span className="text-marigold">Copied</span>
+          <Check key="c" className="h-4 w-4 text-[color:var(--page-accent)] scale-in" />
+          <span className="text-[color:var(--page-accent)]">Copied</span>
         </>
       ) : (
         <>

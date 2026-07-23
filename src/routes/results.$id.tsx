@@ -284,7 +284,7 @@ function PhotosSection({
               type="button"
               onClick={() => setActive(i)}
               className={`relative shrink-0 overflow-hidden rounded-[10px] bg-surface transition-all ${
-                i === active ? "ring-2 ring-marigold" : "opacity-70 hover:opacity-100"
+                i === active ? "ring-2 ring-[color:var(--page-accent)]" : "opacity-70 hover:opacity-100"
               }`}
               style={{
                 width: ratio === "1:1" ? 72 : 56,
@@ -652,7 +652,7 @@ function ListingRow({
           aria-label={copied ? "Copied" : `Copy ${row.label}`}
           className="grid h-8 w-8 shrink-0 place-items-center text-muted hover:text-ink"
         >
-          {copied ? <Check className="h-4 w-4 text-marigold scale-in" /> : <Copy className="h-4 w-4" />}
+          {copied ? <Check className="h-4 w-4 text-[color:var(--page-accent)] scale-in" /> : <Copy className="h-4 w-4" />}
         </span>
         <ChevronDown
           className={`h-4 w-4 shrink-0 text-muted transition-transform ${isOpen ? "rotate-180" : ""}`}
@@ -764,7 +764,7 @@ function Feedback({ id }: { id: string }) {
           type="button"
           onClick={() => setRating(1)}
           aria-label="Yes"
-          className={`grid h-7 w-7 place-items-center rounded-full ${rating === 1 ? "text-marigold" : "hover:text-ink"}`}
+          className={`grid h-7 w-7 place-items-center rounded-full ${rating === 1 ? "text-[color:var(--page-accent)]" : "hover:text-ink"}`}
         >
           <ThumbsUp className="h-3.5 w-3.5" />
         </button>
@@ -776,7 +776,7 @@ function Feedback({ id }: { id: string }) {
         >
           <ThumbsDown className="h-3.5 w-3.5" />
         </button>
-        {sent && <span className="text-marigold">Thanks.</span>}
+        {sent && <span className="text-[color:var(--page-accent)]">Thanks.</span>}
       </div>
       {rating != null && !sent && (
         <textarea
