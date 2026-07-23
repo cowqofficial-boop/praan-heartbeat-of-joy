@@ -57,7 +57,7 @@ function loadRazorpayScript(): Promise<boolean> {
 
 function PricingPage() {
   const navigate = useNavigate();
-  const [cycle, setCycle] = useState<Cycle>("yearly");
+  const [cycle, setCycle] = useState<Cycle>("monthly");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [buying, setBuying] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
