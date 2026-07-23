@@ -53,6 +53,8 @@ export const saveMyBrandKit = createServerFn({ method: "POST" })
       model_region: data.model_region ?? null,
       brand_model_enabled: data.brand_model_enabled ?? false,
       brand_model_url: data.brand_model_url ?? null,
+      brand_model_source: data.brand_model_source ?? "ai",
+      brand_model_photos: (data.brand_model_photos ?? []).slice(0, 3),
     };
     const { error } = await context.supabase
       .from("brand_kits")
