@@ -402,11 +402,15 @@ async function generateOneImage(
       if (attemptCount >= 2) return first;
       attemptCount += 1;
       console.warn(`[generation] crop retry attempt=${attemptCount} max=2`);
-      const retry = await runOnce(
-        attemptCount,
-        "PREVIOUS ATTEMPT CROPPED THE PRODUCT. Pull the camera BACK and zoom OUT significantly so the entire garment and person fit comfortably inside the frame with clear empty margin on all four sides. Prioritise showing the whole product over showing the model's face — crop the face at the top if you must, but never crop the product.",
-      );
-      return retry;
+      try {
+        return await runOnce(
+          attemptCount,
+          "PREVIOUS ATTEMPT CROPPED THE PRODUCT. Pull the camera BACK and zoom OUT significantly so the entire garment and person fit comfortably inside the frame with clear empty margin on all four sides. Prioritise showing the whole product over showing the model's face — crop the face at the top if you must, but never crop the product.",
+        );
+      } catch (err) {
+        console.error(`[generation] crop retry failed; accepting first image error=${err instanceof Error ? err.message : String(err)}`);
+        return first;
+      }
     }
   } catch {
     // Verification is best-effort; if it fails, keep the first image.
