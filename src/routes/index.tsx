@@ -159,8 +159,14 @@ function Landing() {
       </header>
 
       {/* ================ HERO ================ */}
-      <section className="px-6 pb-16 pt-10 lg:pt-20">
-        <div className="mx-auto max-w-[820px] text-center">
+      <section className="relative px-6 pb-16 pt-10 lg:pt-20">
+        {/* The one gradient — Cobalt → Magenta glow behind hero headline. Used nowhere else. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-8 -z-0 h-[520px] w-[900px] max-w-[95vw] -translate-x-1/2 rounded-full opacity-[0.22] blur-[120px]"
+          style={{ background: "linear-gradient(120deg, #3D5AFE 0%, #FF2FA3 100%)" }}
+        />
+        <div className="relative mx-auto max-w-[820px] text-center">
           <h1 className="font-display text-[40px] leading-[1.02] tracking-[-0.03em] text-ink sm:text-[56px] lg:text-[72px]">
             One photo. A complete business, ready to sell.
           </h1>
@@ -169,12 +175,11 @@ function Landing() {
           </p>
         </div>
 
-        <div className="mx-auto mt-10 max-w-[560px]">
+        <div className="relative mx-auto mt-10 max-w-[560px]">
           <UploadWidget />
         </div>
-
-        {/* Free-offer line is rendered by UploadWidget itself when signed out — no need to repeat it here. */}
       </section>
+
 
       {/* ================ 1. Before / After ================ */}
       <section className="px-6 py-16 lg:py-24">
