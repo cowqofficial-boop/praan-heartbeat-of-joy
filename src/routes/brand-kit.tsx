@@ -331,35 +331,21 @@ function BrandKitPage() {
           </div>
 
           {kit.brand_model_enabled && (
-            <div className="mt-4 flex items-center gap-4 rounded-[12px] border border-[color:var(--color-border)] bg-surface p-3">
-              <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-[10px] bg-white">
-                {modelBusy ? (
-                  <span className="text-[11px] text-muted">Making…</span>
-                ) : kit.brand_model_url ? (
-                  <img src={kit.brand_model_url} alt="Your brand model" className="h-full w-full object-cover" />
-                ) : (
-                  <span className="text-[11px] text-muted">No model yet</span>
-                )}
-              </div>
-              <div className="flex flex-1 flex-col gap-2">
-                <button
-                  type="button"
-                  onClick={regenerateBrandModel}
-                  disabled={modelBusy}
-                  className="h-10 rounded-[10px] border border-[color:var(--color-border)] bg-white text-[13px] font-semibold text-ink disabled:opacity-60"
-                >
-                  {modelBusy ? "Generating…" : "Change model"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => toggleBrandModel(false)}
-                  disabled={modelBusy}
-                  className="h-10 rounded-[10px] text-[13px] font-medium text-muted underline disabled:opacity-60"
-                >
-                  Turn off
-                </button>
-              </div>
-            </div>
+            <BrandModelPanel
+              kit={kit}
+              setKit={setKit}
+              modelBusy={modelBusy}
+              onRegenerateAi={regenerateAiBrandModel}
+              onRemoveReal={removeRealModel}
+              onUploadedReal={(urls) => setKit((k) => ({
+                ...k,
+                brand_model_photos: urls,
+                brand_model_source: "user",
+                brand_model_url: urls[0],
+                brand_model_enabled: true,
+              }))}
+              setModelBusy={setModelBusy}
+            />
           )}
         </div>
       </div>
