@@ -151,10 +151,12 @@ function PricingPage() {
         </p>
       )}
 
-      {/* Cycle toggle — sliding pill */}
-      <div className="mt-6 flex items-center justify-center">
-        <div className="relative inline-flex rounded-full bg-raised p-1"
-             style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)" }}>
+      {/* Cycle toggle — sliding pill (equal-width buttons so the pill aligns) */}
+      <div className="mt-6 flex flex-col items-center">
+        <div
+          className="relative inline-flex w-[280px] rounded-full bg-raised p-1"
+          style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)" }}
+        >
           <span
             aria-hidden
             className="absolute top-1 bottom-1 rounded-full bg-primary transition-transform duration-300"
@@ -168,19 +170,27 @@ function PricingPage() {
           <button
             type="button"
             onClick={() => setCycle("monthly")}
-            className={`relative z-10 h-9 rounded-full px-4 text-[13px] font-semibold ${cycle === "monthly" ? "text-primary-foreground" : "text-muted"}`}
+            className={`relative z-10 flex-1 h-9 rounded-full text-[13px] font-semibold ${cycle === "monthly" ? "text-primary-foreground" : "text-muted"}`}
           >
             Monthly
           </button>
           <button
             type="button"
             onClick={() => setCycle("yearly")}
-            className={`relative z-10 h-9 rounded-full px-4 text-[13px] font-semibold ${cycle === "yearly" ? "text-primary-foreground" : "text-muted"}`}
+            className={`relative z-10 flex-1 h-9 rounded-full text-[13px] font-semibold ${cycle === "yearly" ? "text-primary-foreground" : "text-muted"}`}
           >
-            Annual · 2 months free
+            Yearly
           </button>
         </div>
+        <p
+          className={`mt-2 text-[11px] font-semibold uppercase tracking-[0.14em] ${cycle === "yearly" ? "text-ink" : "invisible"}`}
+          style={cycle === "yearly" ? { color: "var(--page-accent)" } : undefined}
+          aria-hidden={cycle !== "yearly"}
+        >
+          2 months free
+        </p>
       </div>
+
 
       {/* Subscriptions */}
       <section className="mt-6 grid grid-cols-1 gap-4 stagger lg:grid-cols-3 lg:items-start lg:gap-6">
