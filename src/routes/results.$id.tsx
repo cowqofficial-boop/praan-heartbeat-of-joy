@@ -11,6 +11,7 @@ import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import { useAuth } from "@/lib/use-auth";
 import { getMyCredits } from "@/lib/billing.functions";
 import { watermarkImageUrl } from "@/lib/watermark";
+import { showAlert } from "@/components/Dialogs";
 
 export const Route = createFileRoute("/results/$id")({
   head: ({ params }) => ({
