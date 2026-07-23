@@ -191,20 +191,42 @@ function Landing() {
           </Reveal>
 
           <Reveal delay={80}>
-            <div className="mt-10 grid gap-8 lg:grid-cols-2">
-              <div>
-                <div className="mx-auto max-w-[560px] lg:max-w-none">
-                  <BeforeAfterSlider before={SLIDER_BEFORE} after={SLIDER_AFTER} />
+            {showcasePairs.length === 0 ? (
+              <div className="mt-10 rounded-[16px] bg-surface p-8 text-center">
+                <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-raised">
+                  <ImageIcon className="h-5 w-5 text-muted" />
                 </div>
-                <p className="mt-3 text-[13px] text-muted">
-                  Handwoven cotton stole · Jaipur
+                <p className="mt-4 text-[15px] font-medium text-ink">
+                  Real before/after pairs will live here.
+                </p>
+                <p className="mx-auto mt-2 max-w-[520px] text-[13px] leading-relaxed text-muted">
+                  We&rsquo;re only showing this section once we have real seller photos to put in
+                  it — no invented examples, no stock imagery. In the meantime, the strongest
+                  proof is upstairs: upload your own product and see what comes out.
                 </p>
               </div>
-              <div className="grid gap-6">
-                <StaticPair caption="Brass diya set · Moradabad" />
-                <StaticPair caption="Wireless speaker · Chennai" />
+            ) : (
+              <div className="mt-10 grid gap-8 lg:grid-cols-2">
+                <div>
+                  <div className="mx-auto max-w-[560px] lg:max-w-none">
+                    <BeforeAfterSlider
+                      before={showcasePairs[0].before}
+                      after={showcasePairs[0].after}
+                    />
+                  </div>
+                  <p className="mt-3 text-[13px] text-muted">
+                    {showcasePairs[0].productName} · {showcasePairs[0].location}
+                  </p>
+                </div>
+                {showcasePairs.length > 1 && (
+                  <div className="grid gap-6">
+                    {showcasePairs.slice(1, 3).map((p) => (
+                      <ShowcasePairCard key={p.after} pair={p} />
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </Reveal>
         </div>
       </section>
