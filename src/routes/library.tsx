@@ -158,14 +158,14 @@ function LibraryPage() {
         {isLoading ? (
           <p className="text-[15px] text-muted">Loading…</p>
         ) : items.length === 0 ? (
-          <div className="mt-16 rounded-[12px] border border-dashed border-[color:var(--color-border)] bg-surface p-8 text-center">
-            <p className="text-[16px] font-medium text-ink">Your products will live here.</p>
-            <p className="mt-2 text-[14px] text-muted">Add your first one.</p>
+          <div className="mt-16 rounded-[16px] bg-surface p-8 text-center" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)" }}>
+            <p className="text-[16px] font-medium text-ink">Add your first product — it's free.</p>
+            <p className="mt-2 text-[14px] text-muted">One photo, and you're set up to sell.</p>
           </div>
         ) : filtered.length === 0 ? (
-          <p className="text-[15px] text-muted">No products match "{query}".</p>
+          <p className="text-[15px] text-muted">Nothing matches "{query}".</p>
         ) : (
-          <ul className="grid grid-cols-2 gap-3">
+          <ul className="grid grid-cols-2 gap-3 stagger">
             {filtered.map((it) => (
               <ProductCard key={it.id} item={it} onRename={handleRename} onDelete={handleDelete} />
             ))}
@@ -195,44 +195,52 @@ function ProductCard({
     month: "short",
   });
   return (
-    <li className="overflow-hidden rounded-[12px] border border-[color:var(--color-border)] bg-raised">
+    <li className="stagger-item group relative overflow-hidden rounded-[16px] bg-surface transition-transform duration-200 hover:-translate-y-0.5"
+        style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)" }}
+    >
       <Link
         to="/results/$id"
         params={{ id: item.id }}
-        className="block aspect-square w-full overflow-hidden bg-surface"
+        className="block aspect-[4/5] w-full overflow-hidden bg-surface"
       >
         {thumb ? (
-          <img src={thumb} alt={item.product_name ?? "Product"} className="h-full w-full object-cover" loading="lazy" />
+          <img
+            src={thumb}
+            alt={item.product_name ?? "Product"}
+            className="h-full w-full object-cover img-warm transition-[filter] duration-200 group-hover:brightness-110"
+            loading="lazy"
+          />
         ) : (
           <div className="h-full w-full" />
         )}
-      </Link>
-      <div className="flex items-start justify-between gap-2 p-3">
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-[14px] font-semibold text-ink">
+        {/* scrim + name */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
+          <p className="line-clamp-2 text-[14px] font-semibold text-white">
             {item.product_name ?? "Untitled"}
           </p>
-          <p className="mt-0.5 text-[12px] text-muted">{date}</p>
+          <p className="mt-0.5 text-[11px] text-white/70">{date}</p>
         </div>
-        <div className="flex gap-1">
-          <button
-            type="button"
-            onClick={() => onRename(item)}
-            aria-label="Rename"
-            className="grid h-8 w-8 place-items-center rounded-full text-muted hover:text-ink"
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => onDelete(item)}
-            aria-label="Delete"
-            className="grid h-8 w-8 place-items-center rounded-full text-muted hover:text-primary"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </div>
+      </Link>
+      <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+        <button
+          type="button"
+          onClick={() => onRename(item)}
+          aria-label="Rename"
+          className="grid h-8 w-8 place-items-center rounded-full bg-background/70 text-ink backdrop-blur-sm hover:brightness-110"
+        >
+          <Pencil className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => onDelete(item)}
+          aria-label="Delete"
+          className="grid h-8 w-8 place-items-center rounded-full bg-background/70 text-ink backdrop-blur-sm hover:text-primary"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
       </div>
     </li>
   );
 }
+
