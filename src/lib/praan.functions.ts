@@ -150,7 +150,9 @@ async function checkAndIncrementLimit(browserId: string): Promise<void> {
 const NO_PEOPLE =
   "Absolutely no people, no humans, no hands, no fingers, no arms, no models, no figures, no silhouettes — not even blurred in the background.";
 
-const IMAGE_STYLES = [
+type StyleDef = { kind: string; prompt: string; hasPerson?: boolean };
+
+const PRODUCT_STYLES: StyleDef[] = [
   {
     kind: "white",
     prompt:
@@ -164,7 +166,7 @@ const IMAGE_STYLES = [
   {
     kind: "lifestyle",
     prompt:
-      "Same product from the input photo, kept faithful. First determine where this specific product is actually used or kept in real life, then set the scene in exactly that place — e.g. a speaker on a desk or bedside table, a kurta on a wardrobe rail or chair, a spice jar on a kitchen shelf, a cushion on a sofa, a mug on a breakfast table. Never use a generic shop, market stall, bazaar, workshop, or warehouse backdrop unless the product itself is shop equipment. Keep the scene simple: one clear surface, at most two or three small props that genuinely belong with this product. The product remains the clear hero, centred and uncrowded. Soft natural daylight, shallow depth of field, photorealistic, no text.",
+      "Same product from the input photo, kept faithful. First determine where this specific product is actually used or kept in real life, then set the scene in exactly that place — e.g. a speaker on a desk or bedside table, a spice jar on a kitchen shelf, a cushion on a sofa, a mug on a breakfast table. Never use a generic shop, market stall, bazaar, workshop, or warehouse backdrop unless the product itself is shop equipment. Keep the scene simple: one clear surface, at most two or three small props that genuinely belong with this product. The product remains the clear hero, centred and uncrowded. Soft natural daylight, shallow depth of field, photorealistic, no text.",
   },
   {
     kind: "flatlay",
@@ -173,17 +175,47 @@ const IMAGE_STYLES = [
   },
 ];
 
+function personStyles(modelLine: string, brandModelBinding: string): StyleDef[] {
+  const drapeRules = `If it is a draped Indian garment, the drape must be correct: sarees pleated at the waist with the pallu over the LEFT shoulder; dupattas placed properly. If the correct drape cannot be produced with confidence, prefer a well-lit product-only shot to a badly draped model shot.`;
+  const bodyRules = `Natural pose, natural light, hands and fingers correct (five fingers, no distortion), face calm and pleasant, nothing exaggerated, no fashion-editorial posing, no text, no logo, no watermark.`;
+  const fidelity = `The garment/item must match the uploaded photos exactly — same colour, same pattern, same border, same length, same fittings. Do not restyle, do not recolour, do not shorten, do not embellish.`;
+  return [
+    {
+      kind: "white",
+      prompt:
+        "Reproduce the exact same product from the input photo — same shape, colour, material, branding, and label. Place it on a pure clean white studio background suitable for Amazon/Flipkart, soft even lighting, subtle contact shadow, centred, no props, no text, high detail, photorealistic.",
+    },
+    {
+      kind: "studio",
+      prompt:
+        "Same product from the input photo, kept faithful in every detail. Place it on or against a neutral warm studio backdrop with soft lighting, gentle side shadow, minimal styling, premium e-commerce look, photorealistic. No people.",
+    },
+    {
+      kind: "onmodel_full",
+      hasPerson: true,
+      prompt: `On-model FULL view: one person wearing/using the product so that the WHOLE product is clearly visible from head to toe (or the equivalent full view for the item). ${modelLine} ${brandModelBinding} ${fidelity} ${drapeRules} ${bodyRules} Soft natural daylight, plain neutral background, photorealistic, catalogue-quality.`,
+    },
+    {
+      kind: "onmodel_detail",
+      hasPerson: true,
+      prompt: `On-model CLOSE view of the same person: closer framing on the product to show fabric, detail, fit or how it sits — e.g. jewellery near the neckline, saree pallu detail, shoe on foot, watch on wrist, bag held at the side. ${modelLine} ${brandModelBinding} ${fidelity} ${drapeRules} ${bodyRules} Soft natural daylight, plain neutral background, photorealistic.`,
+    },
+  ];
+}
+
 async function generateOneImage(
   refs: { b64: string; mime: string }[],
   prompt: string,
   targetSize = 2048,
+  allowPerson = false,
 ): Promise<string> {
-  const sizeHint = `Render at ${targetSize} by ${targetSize} pixels, square 1:1, photorealistic, catalogue-quality, high detail. Product centred with generous margin so nothing important is cropped when reframed to vertical.`;
+  const sizeHint = `Render at ${targetSize} by ${targetSize} pixels, square 1:1, photorealistic, catalogue-quality, high detail. Subject centred with generous margin so nothing important is cropped when reframed to vertical.`;
   const multiHint =
     refs.length > 1
-      ? `You are given ${refs.length} reference photos of the SAME single product from different angles. Use all of them together to keep the product's true shape, colour, material, branding and any labels faithful from every side. The first photo is the primary reference.`
+      ? `You are given ${refs.length} reference images. The FIRST images are photos of the same single product from different angles — use them together to keep the product's true shape, colour, material, branding and any labels faithful from every side. Any final reference (if present) is a PERSON portrait to keep the model's face and appearance consistent — reuse that same person.`
       : "Keep the product identical to the reference photo — same shape, colour, material, branding and label.";
-  const full = `${prompt} ${sizeHint} ${NO_PEOPLE} ${multiHint}`;
+  const peopleRule = allowPerson ? "" : NO_PEOPLE;
+  const full = `${prompt} ${sizeHint} ${peopleRule} ${multiHint}`;
   const [primary, ...extras] = refs;
   const out = await geminiGenerateImage({
     prompt: full,
@@ -202,6 +234,7 @@ export const generateImages = createServerFn({ method: "POST" })
       imageUrls?: string[];
       productName: string;
       category: string;
+      needsPerson?: boolean;
     }) => d,
   )
   .handler(async ({ data }) => {
@@ -222,13 +255,49 @@ export const generateImages = createServerFn({ method: "POST" })
         ? [data.imageUrl]
         : [];
     if (urls.length === 0) throw new Error("No image provided");
-    const refs = await Promise.all(urls.slice(0, 5).map((u) => fetchAsBase64(u)));
+    const productRefs = await Promise.all(urls.slice(0, 5).map((u) => fetchAsBase64(u)));
+
+    // Look up brand kit for model prefs + saved brand model (signed-in only).
+    let modelLine =
+      "Choose a model who genuinely fits this product's real buyer — natural-looking Indian adult, warm approachable presence.";
+    let brandModelRef: { b64: string; mime: string } | null = null;
+    let brandModelBinding = "";
+    if (data.userId) {
+      const sb = await admin();
+      const { data: kit } = await sb
+        .from("brand_kits")
+        .select("model_gender, model_age, model_skin, model_body, model_region, brand_model_enabled, brand_model_url")
+        .eq("user_id", data.userId)
+        .maybeSingle();
+      if (kit) {
+        const { describeModelPrefs } = await import("./brand-kit.functions");
+        const prefs = describeModelPrefs(kit);
+        if (prefs) modelLine = `The model is: ${prefs}.`;
+        if (kit.brand_model_enabled && kit.brand_model_url) {
+          try {
+            brandModelRef = await fetchAsBase64(kit.brand_model_url);
+            brandModelBinding =
+              "Reuse the exact same person shown in the final reference portrait — same face, same skin tone, same build — so this shop's photos all feature one consistent brand model.";
+          } catch {
+            brandModelRef = null;
+          }
+        }
+      }
+    }
+
+    const styles = data.needsPerson
+      ? personStyles(modelLine, brandModelBinding)
+      : PRODUCT_STYLES;
+
     const contextLine = `Product: ${data.productName}. Category: ${data.category}.`;
 
     // Generate ONCE per style at 2048 (square); reuse the URL for both 1:1 and 9:16
     // to halve API cost — the browser crops to 9:16 at download time.
-    const tasks: Promise<{ kind: string; url: string }>[] = IMAGE_STYLES.map((style) => (async () => {
-      const b64 = await generateOneImage(refs, `${contextLine} ${style.prompt}`, 2048);
+    const tasks: Promise<{ kind: string; url: string }>[] = styles.map((style) => (async () => {
+      const refs = style.hasPerson && brandModelRef
+        ? [...productRefs, brandModelRef]
+        : productRefs;
+      const b64 = await generateOneImage(refs, `${contextLine} ${style.prompt}`, 2048, !!style.hasPerson);
       const bytes = b64ToBytes(b64);
       const path = `generated/${data.browserId}/${Date.now()}-${style.kind}.png`;
       const url = await uploadBytes(path, bytes, "image/png");
@@ -254,10 +323,11 @@ export const generateImages = createServerFn({ method: "POST" })
         image_model: GEMINI_IMAGE_MODEL,
         image_count: base.length,
         image_resolution: 2048,
-        input_photo_count: refs.length,
+        input_photo_count: productRefs.length,
       },
     };
   });
+
 
 
 
