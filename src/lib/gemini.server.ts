@@ -144,14 +144,16 @@ export function parseJsonLoose<T = unknown>(text: string): T | null {
 export async function geminiGenerateImage(opts: {
   prompt: string;
   reference: InlineImage;
+  extraReferences?: InlineImage[];
   model?: string;
 }): Promise<{ mimeType: string; b64: string }> {
+  const refs = [opts.reference, ...(opts.extraReferences ?? [])];
   const payload = {
     contents: [
       {
         role: "user",
         parts: [
-          { inlineData: { mimeType: opts.reference.mimeType, data: opts.reference.b64 } },
+          ...refs.map((r) => ({ inlineData: { mimeType: r.mimeType, data: r.b64 } })),
           { text: opts.prompt },
         ],
       },
@@ -173,3 +175,4 @@ export async function geminiGenerateImage(opts: {
   }
   throw new GeminiError(200, JSON.stringify(json).slice(0, 400), "unknown", "Gemini returned no image data.");
 }
+

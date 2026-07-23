@@ -8,24 +8,40 @@ export type Identified = {
   features: string[];
 };
 
+export type PraanPhoto = { url: string; dataUrl: string };
+
 type PraanState = {
-  originalImageUrl: string | null;
-  originalDataUrl: string | null; // for before/after preview
+  photos: PraanPhoto[]; // index 0 is the main photo
   identified: Identified | null;
   form: { name: string; price: string; detail: string } | null;
-  setUpload: (data: { url: string; dataUrl: string; identified: Identified }) => void;
+  // Legacy convenience accessors (main photo).
+  originalImageUrl: string | null;
+  originalDataUrl: string | null;
+  setUpload: (data: { photos: PraanPhoto[]; identified: Identified }) => void;
   setForm: (form: { name: string; price: string; detail: string }) => void;
   reset: () => void;
 };
 
 export const usePraanStore = create<PraanState>((set) => ({
-  originalImageUrl: null,
-  originalDataUrl: null,
+  photos: [],
   identified: null,
   form: null,
-  setUpload: ({ url, dataUrl, identified }) =>
-    set({ originalImageUrl: url, originalDataUrl: dataUrl, identified }),
+  originalImageUrl: null,
+  originalDataUrl: null,
+  setUpload: ({ photos, identified }) =>
+    set({
+      photos,
+      identified,
+      originalImageUrl: photos[0]?.url ?? null,
+      originalDataUrl: photos[0]?.dataUrl ?? null,
+    }),
   setForm: (form) => set({ form }),
   reset: () =>
-    set({ originalImageUrl: null, originalDataUrl: null, identified: null, form: null }),
+    set({
+      photos: [],
+      identified: null,
+      form: null,
+      originalImageUrl: null,
+      originalDataUrl: null,
+    }),
 }));

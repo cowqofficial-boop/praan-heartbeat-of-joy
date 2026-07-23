@@ -77,16 +77,27 @@ const IdentifiedSchema = z.object({
 });
 
 export const identifyProduct = createServerFn({ method: "POST" })
-  .inputValidator((d: { imageUrl: string }) => d)
+  .inputValidator((d: { imageUrl?: string; imageUrls?: string[] }) => d)
   .handler(async ({ data }) => {
-    const { b64, mime } = await fetchAsBase64(data.imageUrl);
+    const urls = data.imageUrls && data.imageUrls.length > 0
+      ? data.imageUrls
+      : data.imageUrl
+        ? [data.imageUrl]
+        : [];
+    if (urls.length === 0) throw new Error("No image provided");
+    const refs = await Promise.all(urls.slice(0, 5).map((u) => fetchAsBase64(u)));
+    const imageParts = refs.map((r) => ({ inlineData: { mimeType: r.mime, data: r.b64 } }));
+    const guidance =
+      refs.length > 1
+        ? `You are shown ${refs.length} photos of the SAME single product taken from different angles (front, back, close-up, label, etc.). Combine them into one accurate understanding of the item — its true shape from every side, its material, its true colour, any text or labels, and how it is constructed. The first photo is the primary reference.`
+        : "You are shown one photo of a product.";
     const text = await geminiGenerateText({
       systemInstruction:
-        "You identify products from a photo for Indian e-commerce sellers. Reply with a compact JSON object only, no prose, no markdown fences.",
+        "You identify products from photos for Indian e-commerce sellers. Reply with a compact JSON object only, no prose, no markdown fences.",
       parts: [
-        { inlineData: { mimeType: mime, data: b64 } },
+        ...imageParts,
         {
-          text: 'Identify this product. Return JSON: {"name": short product name (max 6 words, sentence case), "category": one broad category like Kitchen, Home Decor, Fashion, Beauty, Electronics, "material": main material or empty, "color": main color or empty, "features": array of exactly 3 short key features}',
+          text: `${guidance}\n\nIdentify this product. Return JSON: {"name": short product name (max 6 words, sentence case), "category": one broad category like Kitchen, Home Decor, Fashion, Beauty, Electronics, "material": main material or empty, "color": main color or empty, "features": array of exactly 3 short key features}`,
         },
       ],
       responseMimeType: "application/json",
@@ -101,6 +112,7 @@ export const identifyProduct = createServerFn({ method: "POST" })
     val.features = val.features.slice(0, 3);
     return val;
   });
+
 
 
 // ---------- Rate limit ----------
@@ -160,23 +172,35 @@ const IMAGE_STYLES = [
 ];
 
 async function generateOneImage(
-  refB64: string,
-  refMime: string,
+  refs: { b64: string; mime: string }[],
   prompt: string,
   targetSize = 2048,
 ): Promise<string> {
   const sizeHint = `Render at ${targetSize} by ${targetSize} pixels, square 1:1, photorealistic, catalogue-quality, high detail. Product centred with generous margin so nothing important is cropped when reframed to vertical.`;
-  const full = `${prompt} ${sizeHint} ${NO_PEOPLE} Keep the product identical to the reference photo — same shape, colour, material, branding and label.`;
+  const multiHint =
+    refs.length > 1
+      ? `You are given ${refs.length} reference photos of the SAME single product from different angles. Use all of them together to keep the product's true shape, colour, material, branding and any labels faithful from every side. The first photo is the primary reference.`
+      : "Keep the product identical to the reference photo — same shape, colour, material, branding and label.";
+  const full = `${prompt} ${sizeHint} ${NO_PEOPLE} ${multiHint}`;
+  const [primary, ...extras] = refs;
   const out = await geminiGenerateImage({
     prompt: full,
-    reference: { mimeType: refMime, b64: refB64 },
+    reference: { mimeType: primary.mime, b64: primary.b64 },
+    extraReferences: extras.map((e) => ({ mimeType: e.mime, b64: e.b64 })),
   });
   return out.b64;
 }
 
 export const generateImages = createServerFn({ method: "POST" })
   .inputValidator(
-    (d: { browserId: string; userId?: string | null; imageUrl: string; productName: string; category: string }) => d,
+    (d: {
+      browserId: string;
+      userId?: string | null;
+      imageUrl?: string;
+      imageUrls?: string[];
+      productName: string;
+      category: string;
+    }) => d,
   )
   .handler(async ({ data }) => {
     if (data.userId) {
@@ -190,13 +214,19 @@ export const generateImages = createServerFn({ method: "POST" })
     } else {
       await checkAndIncrementLimit(data.browserId);
     }
-    const { b64: refB64, mime: refMime } = await fetchAsBase64(data.imageUrl);
+    const urls = data.imageUrls && data.imageUrls.length > 0
+      ? data.imageUrls
+      : data.imageUrl
+        ? [data.imageUrl]
+        : [];
+    if (urls.length === 0) throw new Error("No image provided");
+    const refs = await Promise.all(urls.slice(0, 5).map((u) => fetchAsBase64(u)));
     const contextLine = `Product: ${data.productName}. Category: ${data.category}.`;
 
     // Generate ONCE per style at 2048 (square); reuse the URL for both 1:1 and 9:16
     // to halve API cost — the browser crops to 9:16 at download time.
     const tasks: Promise<{ kind: string; url: string }>[] = IMAGE_STYLES.map((style) => (async () => {
-      const b64 = await generateOneImage(refB64, refMime, `${contextLine} ${style.prompt}`, 2048);
+      const b64 = await generateOneImage(refs, `${contextLine} ${style.prompt}`, 2048);
       const bytes = b64ToBytes(b64);
       const path = `generated/${data.browserId}/${Date.now()}-${style.kind}.png`;
       const url = await uploadBytes(path, bytes, "image/png");
@@ -222,9 +252,11 @@ export const generateImages = createServerFn({ method: "POST" })
         image_model: GEMINI_IMAGE_MODEL,
         image_count: base.length,
         image_resolution: 2048,
+        input_photo_count: refs.length,
       },
     };
   });
+
 
 
 // ---------- Copy generation ----------

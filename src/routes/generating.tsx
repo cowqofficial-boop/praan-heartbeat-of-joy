@@ -33,7 +33,7 @@ export const Route = createFileRoute("/generating")({
 function Generating() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { originalImageUrl, identified, form } = usePraanStore();
+  const { photos, originalImageUrl, identified, form } = usePraanStore();
   const [states, setStates] = useState<StepState[]>(["done", "active", "pending"]);
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
@@ -56,12 +56,15 @@ function Generating() {
     setError(null);
     setStates(["done", "active", "pending"]);
     const browserId = getBrowserId();
+    const imageUrls = (photos.length > 0 ? photos.map((p) => p.url) : [originalImageUrl]).filter(
+      (u): u is string => Boolean(u),
+    );
     try {
       const { images, meta } = await generateImages({
         data: {
           browserId,
           userId: user?.id ?? null,
-          imageUrl: originalImageUrl,
+          imageUrls,
           productName: form.name,
           category: identified.category,
         },
@@ -86,6 +89,7 @@ function Generating() {
       setStates(["done", "done", "done"]);
       if (!user) markFreeGenerationUsed();
       navigate({ to: "/results/$id", params: { id } });
+
     } catch (e) {
       console.error(e);
       const raw = String((e as Error).message || e);
