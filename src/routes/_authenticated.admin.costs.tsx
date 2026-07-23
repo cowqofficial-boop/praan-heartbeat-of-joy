@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_authenticated/admin/costs")({
               router.invalidate();
               reset();
             }}
-            className="mt-4 h-11 rounded-[12px] border border-[color:var(--color-border)] px-4 text-sm font-semibold"
+            className="mt-4 h-11 rounded-[12px] px-4 text-sm font-semibold"
           >
             Retry
           </button>
@@ -66,7 +66,7 @@ function AdminCosts() {
       {isLoading ? (
         <p className="mt-6 text-sm text-mute">Loading…</p>
       ) : (
-        <div className="mt-4 overflow-hidden rounded-[12px] border border-[color:var(--color-border)] bg-raised">
+        <div className="mt-4 overflow-hidden rounded-[12px] bg-raised">
           <table className="w-full text-left text-xs">
             <thead className="bg-[color:var(--color-surface)] text-[11px] uppercase text-mute">
               <tr>
@@ -80,7 +80,7 @@ function AdminCosts() {
             </thead>
             <tbody>
               {(data ?? []).map((r) => (
-                <tr key={r.id} className="border-t border-[color:var(--color-border)]">
+                <tr key={r.id} className="border-t">
                   <td className="px-3 py-2 whitespace-nowrap text-mute">
                     {new Date(r.created_at).toLocaleString()}
                   </td>

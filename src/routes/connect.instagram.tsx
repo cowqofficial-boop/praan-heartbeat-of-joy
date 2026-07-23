@@ -108,7 +108,7 @@ function InstagramWizard() {
             We'll open Facebook so you can approve access. You'll come right back here.
           </p>
           {notConfigured && (
-            <div className="mt-4 rounded-[12px] border border-[color:var(--color-border)] bg-[#FDECEC] p-3 text-[13px] text-ink">
+            <div className="mt-4 rounded-[12px] bg-[#FDECEC] p-3 text-[13px] text-ink">
               Instagram connect isn't switched on yet on this app. Ask the CowQ Ai team to finish setup — you'll be able to connect right after.
             </div>
           )}

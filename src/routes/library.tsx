@@ -142,7 +142,7 @@ function LibraryPage() {
       </Link>
 
       {items.length > 0 && (
-        <label className="mt-6 flex h-11 items-center gap-2 rounded-[12px] border border-[color:var(--color-border)] bg-raised px-3">
+        <label className="mt-6 flex h-11 items-center gap-2 rounded-[12px] bg-raised px-3">
           <Search className="h-4 w-4 text-muted" />
           <input
             aria-label="Search products"

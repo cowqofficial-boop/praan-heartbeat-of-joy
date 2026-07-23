@@ -142,7 +142,7 @@ function ChannelCard(props: {
   const connected = props.status?.connected;
   const needsReconnect = props.status?.needs_reconnect;
   return (
-    <section className="rounded-[12px] border border-[color:var(--color-border)] bg-raised p-4">
+    <section className="rounded-[12px] bg-raised p-4">
       <div className="flex items-center gap-3">
         <div className="grid h-10 w-10 place-items-center rounded-full bg-highlight/10 text-ink">
           {props.icon}
@@ -172,7 +172,7 @@ function ChannelCard(props: {
           <button
             type="button"
             onClick={props.onDisconnect}
-            className="h-10 rounded-[10px] border border-[color:var(--color-border)] px-3 text-[13px] font-medium text-ink"
+            className="h-10 rounded-[10px] px-3 text-[13px] font-medium text-ink"
           >
             Disconnect
           </button>

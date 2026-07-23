@@ -212,7 +212,7 @@ function BrandKitPage() {
       <div className="mt-8 flex flex-col gap-6">
         <Field label="Business name">
           <input
-            className="h-12 w-full rounded-[12px] border border-[color:var(--color-border)] bg-raised px-4 text-[16px] text-ink"
+            className="h-12 w-full rounded-[12px] bg-raised px-4 text-[16px] text-ink"
             value={kit.business_name}
             onChange={(e) => setKit({ ...kit, business_name: e.target.value })}
             placeholder="e.g. Rani Handicrafts"
@@ -224,7 +224,7 @@ function BrandKitPage() {
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="grid h-20 w-20 place-items-center overflow-hidden rounded-[12px] border border-dashed border-[color:var(--color-border)] bg-surface"
+              className="grid h-20 w-20 place-items-center overflow-hidden rounded-[12px] border border-dashed bg-surface"
             >
               {kit.logo_url ? (
                 <img src={kit.logo_url} alt="Logo" className="h-full w-full object-contain" />
@@ -257,7 +257,7 @@ function BrandKitPage() {
 
         <Field label="What you sell">
           <input
-            className="h-12 w-full rounded-[12px] border border-[color:var(--color-border)] bg-raised px-4 text-[16px] text-ink"
+            className="h-12 w-full rounded-[12px] bg-raised px-4 text-[16px] text-ink"
             value={kit.sells_what}
             onChange={(e) => setKit({ ...kit, sells_what: e.target.value })}
             placeholder="e.g. Handmade brass diyas and puja items"
@@ -267,7 +267,7 @@ function BrandKitPage() {
 
         <Field label="Who you sell to">
           <input
-            className="h-12 w-full rounded-[12px] border border-[color:var(--color-border)] bg-raised px-4 text-[16px] text-ink"
+            className="h-12 w-full rounded-[12px] bg-raised px-4 text-[16px] text-ink"
             value={kit.sells_to}
             onChange={(e) => setKit({ ...kit, sells_to: e.target.value })}
             placeholder="e.g. Families in metros buying gifts for festivals"
@@ -285,7 +285,7 @@ function BrandKitPage() {
                 className={`h-12 rounded-[12px] border text-[14px] font-semibold transition-colors ${
                   kit.tone === t.value
                     ? "border-primary bg-primary/10 text-ink"
-                    : "border-[color:var(--color-border)] bg-raised text-ink"
+                    : "bg-raised text-ink"
                 }`}
               >
                 {t.label}
@@ -294,7 +294,7 @@ function BrandKitPage() {
           </div>
         </Field>
 
-        <div className="mt-2 border-t border-[color:var(--color-border)] pt-6">
+        <div className="mt-2 border-t pt-6">
           <h2 className="font-display text-[20px] leading-tight text-ink">Model preferences</h2>
           <p className="mt-1 text-[13px] text-muted">
             Only used when CowQ Ai needs a person in the shot — clothing, jewellery, footwear, bags, cosmetics. All optional.
@@ -309,7 +309,7 @@ function BrandKitPage() {
           </div>
         </div>
 
-        <div className="border-t border-[color:var(--color-border)] pt-6">
+        <div className="border-t pt-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               <h2 className="font-display text-[20px] leading-tight text-ink">Brand model</h2>
@@ -394,7 +394,7 @@ function SelectField({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-11 min-w-[180px] rounded-[10px] border border-[color:var(--color-border)] bg-raised px-3 text-[14px] text-ink"
+        className="h-11 min-w-[180px] rounded-[10px] bg-raised px-3 text-[14px] text-ink"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>{o.label}</option>
@@ -406,12 +406,12 @@ function SelectField({
 
 function ColorInput({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
-    <label className="flex flex-1 items-center gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-raised px-3 py-2">
+    <label className="flex flex-1 items-center gap-3 rounded-[12px] bg-raised px-3 py-2">
       <input
         type="color"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-9 w-9 cursor-pointer rounded-md border border-[color:var(--color-border)] bg-raised"
+        className="h-9 w-9 cursor-pointer rounded-md bg-raised"
       />
       <div className="flex flex-col">
         <span className="text-[12px] text-muted">{label}</span>
@@ -451,7 +451,7 @@ function BrandModelPanel({
             className={`h-11 rounded-[10px] border text-[13px] font-semibold transition-colors ${
               source === v
                 ? "border-primary bg-primary/10 text-ink"
-                : "border-[color:var(--color-border)] bg-raised text-ink"
+                : "bg-raised text-ink"
             }`}
           >
             {v === "ai" ? "AI model" : "My own model"}
@@ -460,7 +460,7 @@ function BrandModelPanel({
       </div>
 
       {source === "ai" ? (
-        <div className="flex items-center gap-4 rounded-[12px] border border-[color:var(--color-border)] bg-surface p-3">
+        <div className="flex items-center gap-4 rounded-[12px] bg-surface p-3">
           <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-[10px] bg-raised">
             {modelBusy ? (
               <span className="text-[11px] text-muted">Making…</span>
@@ -475,7 +475,7 @@ function BrandModelPanel({
               type="button"
               onClick={onRegenerateAi}
               disabled={modelBusy}
-              className="h-10 rounded-[10px] border border-[color:var(--color-border)] bg-raised text-[13px] font-semibold text-ink disabled:opacity-60"
+              className="h-10 rounded-[10px] bg-raised text-[13px] font-semibold text-ink disabled:opacity-60"
             >
               {modelBusy ? "Generating…" : "Change model"}
             </button>
@@ -534,7 +534,7 @@ function RealModelSaved({
     );
   }
   return (
-    <div className="flex flex-col gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-surface p-3">
+    <div className="flex flex-col gap-3 rounded-[12px] bg-surface p-3">
       <div className="flex gap-2">
         {photos.map((p, i) => (
           <img
@@ -550,7 +550,7 @@ function RealModelSaved({
           type="button"
           onClick={() => setChanging(true)}
           disabled={modelBusy}
-          className="h-10 rounded-[10px] border border-[color:var(--color-border)] bg-raised text-[13px] font-semibold text-ink disabled:opacity-60"
+          className="h-10 rounded-[10px] bg-raised text-[13px] font-semibold text-ink disabled:opacity-60"
         >
           Change model
         </button>
@@ -618,7 +618,7 @@ function RealModelUploader({
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-[12px] border border-[color:var(--color-border)] bg-surface p-3">
+    <div className="flex flex-col gap-4 rounded-[12px] bg-surface p-3">
       <p className="text-[13px] text-muted">
         Upload 1–3 clear photos of your model. One good face shot, and if possible a full-length shot.
       </p>
@@ -643,7 +643,7 @@ function RealModelUploader({
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="grid h-20 w-20 place-items-center rounded-[10px] border border-dashed border-[color:var(--color-border)] bg-raised text-[22px] text-muted"
+            className="grid h-20 w-20 place-items-center rounded-[10px] border border-dashed bg-raised text-[22px] text-muted"
           >
             +
           </button>
