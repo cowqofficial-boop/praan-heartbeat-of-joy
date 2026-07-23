@@ -14,6 +14,7 @@ import {
 } from "@/lib/brand-kit.functions";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { PageHeader, HelpButton } from "@/components/PageHeader";
+import { showAlert, showConfirm } from "@/components/Dialogs";
 import { Palette } from "lucide-react";
 
 
