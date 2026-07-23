@@ -74,6 +74,7 @@ const IdentifiedSchema = z.object({
   material: z.string(),
   color: z.string(),
   features: z.array(z.string()),
+  needs_person: z.boolean().optional(),
 });
 
 export const identifyProduct = createServerFn({ method: "POST" })
@@ -97,7 +98,7 @@ export const identifyProduct = createServerFn({ method: "POST" })
       parts: [
         ...imageParts,
         {
-          text: `${guidance}\n\nIdentify this product. Return JSON: {"name": short product name (max 6 words, sentence case), "category": one broad category like Kitchen, Home Decor, Fashion, Beauty, Electronics, "material": main material or empty, "color": main color or empty, "features": array of exactly 3 short key features}`,
+          text: `${guidance}\n\nIdentify this product. Return JSON: {"name": short product name (max 6 words, sentence case), "category": one broad category like Kitchen, Home Decor, Fashion, Beauty, Electronics, "material": main material or empty, "color": main color or empty, "features": array of exactly 3 short key features, "needs_person": true ONLY if this product is normally shown worn, held, or used by a person to sell it well — clothing, ethnic wear (saree, kurta, lehenga, dupatta), jewellery, footwear, bags, eyewear, watches, scarves, cosmetics and beauty products applied to skin/face. false for electronics, home decor, furniture, kitchenware, food, drink, stationery, toys, tools, plants, packaged goods.}`,
         },
       ],
       responseMimeType: "application/json",
@@ -107,11 +108,12 @@ export const identifyProduct = createServerFn({ method: "POST" })
     const r = IdentifiedSchema.safeParse(parsed);
     const val = r.success
       ? r.data
-      : { name: "Product", category: "General", material: "", color: "", features: [] };
+      : { name: "Product", category: "General", material: "", color: "", features: [], needs_person: false };
     while (val.features.length < 3) val.features.push("");
     val.features = val.features.slice(0, 3);
-    return val;
+    return { ...val, needs_person: val.needs_person ?? false };
   });
+
 
 
 
