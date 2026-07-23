@@ -177,7 +177,7 @@ function BrandKitPage() {
  const { url } = await generateBrandModelPortrait({ data: {} });
  setKit((k) => ({ ...k, brand_model_url: url, brand_model_enabled: true, brand_model_source: "ai", brand_model_photos: [] }));
  } catch (e) {
- alert("Couldn't generate your brand model. Try again.\n\n" + (e as Error).message);
+ await showAlert({ title: "Couldn't generate your brand model", body: "Try again.\n\n" + (e as Error).message });
  } finally {
  setModelBusy(false);
  }
