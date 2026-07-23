@@ -94,15 +94,17 @@ function Results() {
   const personSource = ((data.gen_metadata as { person_source?: "ai" | "user" } | null)?.person_source) ?? "ai";
 
   return (
-    <main className="flex min-h-screen flex-col gap-10 px-5 pb-16 pt-8">
-      <header>
-        <h1 className="font-display text-[28px] leading-tight text-ink">
+    <main className="flex min-h-screen flex-col gap-10 pb-16 pt-8">
+      <header className="px-5">
+        <p className="eyebrow">Ready</p>
+        <h1 className="mt-2 font-display text-[40px] leading-[1.02] text-ink sm:text-[48px]">
           Ready to sell.
         </h1>
-        <p className="mt-1 text-[15px] text-muted">
+        <p className="mt-2 text-[15px] text-muted">
           Copy anything with one tap.
         </p>
       </header>
+
 
       {/* 1. Photos */}
       <PhotosSection
@@ -119,73 +121,85 @@ function Results() {
 
 
       {/* 2. Post this — primary action */}
-      <Section title="Post this">
-        <PostThisButton
-          imageUrl={whiteAfter}
-          caption={copy ? `${copy.instagram}\n\n${copy.instagramHashtags.join(" ")}` : ""}
-          productName={(data.product_name as string) || undefined}
-          filenameHint={(data.product_name as string) || "cowq"}
-          watermark={watermark}
-        />
-      </Section>
+      <div className="px-5">
+        <Section title="Post this">
+          <PostThisButton
+            imageUrl={whiteAfter}
+            caption={copy ? `${copy.instagram}\n\n${copy.instagramHashtags.join(" ")}` : ""}
+            productName={(data.product_name as string) || undefined}
+            filenameHint={(data.product_name as string) || "cowq"}
+            watermark={watermark}
+          />
+        </Section>
+      </div>
 
       {/* 3. Before / after */}
-      <Section title="See the change">
-        {whiteAfter && (
-          <BeforeAfterSlider before={original} after={whiteAfter} />
-        )}
-      </Section>
+      <div className="px-5">
+        <Section title="See the change">
+          {whiteAfter && (
+            <BeforeAfterSlider before={original} after={whiteAfter} />
+          )}
+        </Section>
+      </div>
 
       {/* 3. Marketplace listing */}
-      <Section title="Marketplace listing">
-        <Block label="Title" text={copy.seoTitle} />
-        <Block label="Description" text={copy.description} multiline />
-        <Block
-          label="Bullet points"
-          text={copy.bullets.map((b) => `• ${b}`).join("\n")}
-          multiline
-        />
-        <Block label="Search tags" text={copy.tags.join(", ")} />
-      </Section>
+      <div className="px-5">
+        <Section title="Marketplace listing">
+          <Block label="Title" text={copy.seoTitle} />
+          <Block label="Description" text={copy.description} multiline />
+          <Block
+            label="Bullet points"
+            text={copy.bullets.map((b) => `• ${b}`).join("\n")}
+            multiline
+          />
+          <Block label="Search tags" text={copy.tags.join(", ")} />
+        </Section>
+      </div>
 
       {/* 4. Social */}
-      <Section title="Social">
-        <Block
-          label="Instagram caption"
-          text={`${copy.instagram}\n\n${copy.instagramHashtags.join(" ")}`}
-          multiline
-        />
-        <Block label="WhatsApp broadcast" text={copy.whatsapp} multiline />
-        <Block label="Festival line" text={copy.festival} />
-      </Section>
+      <div className="px-5">
+        <Section title="Social">
+          <Block
+            label="Instagram caption"
+            text={`${copy.instagram}\n\n${copy.instagramHashtags.join(" ")}`}
+            multiline
+          />
+          <Block label="WhatsApp broadcast" text={copy.whatsapp} multiline />
+          <Block label="Festival line" text={copy.festival} />
+        </Section>
+      </div>
 
       {/* 5. Download */}
-      <Section title="Download">
-        {user ? (
-          <div className="flex flex-col gap-3">
-            <DownloadAllButton
-              images={images}
-              name={(data.product_name as string) || "cowq"}
-              watermark={watermark}
+      <div className="px-5">
+        <Section title="Download">
+          {user ? (
+            <div className="flex flex-col gap-3">
+              <DownloadAllButton
+                images={images}
+                name={(data.product_name as string) || "cowq"}
+                watermark={watermark}
+              />
+              <DownloadCsvButton
+                url={data.csv_url as string}
+                name={(data.product_name as string) || "cowq"}
+              />
+            </div>
+          ) : (
+            <SignUpGate
+              title="Sign up to save and download"
+              body="Free forever. Keep this product in your library and download all photos plus the Shopify catalog file."
+              next={`/results/${id}`}
             />
-            <DownloadCsvButton
-              url={data.csv_url as string}
-              name={(data.product_name as string) || "cowq"}
-            />
-          </div>
-        ) : (
-          <SignUpGate
-            title="Sign up to save & download"
-            body="Free forever. Keep this product in your library and download all photos + the Shopify CSV."
-            next={`/results/${id}`}
-          />
-        )}
-      </Section>
+          )}
+        </Section>
+      </div>
 
       {/* Feedback */}
-      <Feedback id={id} />
+      <div className="px-5">
+        <Feedback id={id} />
+      </div>
 
-      <div className="pt-6 text-center">
+      <div className="px-5 pt-6 text-center">
         <button
           onClick={() => navigate({ to: user ? "/library" : "/" })}
           className="text-[14px] font-medium text-muted underline"
@@ -193,6 +207,7 @@ function Results() {
           {user ? "Back to your library" : "Start another product"}
         </button>
       </div>
+
     </main>
   );
 }
