@@ -346,6 +346,19 @@ function StockPage() {
         )}
       </div>
 
+      {undo && (
+        <UndoToast
+          key={undo.expiresAt}
+          name={undo.name}
+          onUndo={() => {
+            changeQty.mutate({ data: { stock_item_id: undo.id, delta: 1, reason: "returned" } });
+            setUndo(null);
+          }}
+          onClose={() => setUndo(null)}
+        />
+      )}
+
+
       {(creating || editing) && (
         <StockSheet
           initial={editing}
@@ -520,10 +533,27 @@ function StockSheet({
         </button>
       </div>
 
-      <style>{`.input{height:44px;width:100%;border-radius:12px;background:var(--color-surface,#F4F4F2);padding:0 12px;color:#111;font-size:15px;outline:none}`}</style>
+      <style>{`.input{height:44px;width:100%;border-radius:12px;background:var(--raised);padding:0 12px;color:var(--text);font-size:15px;outline:none;box-shadow:inset 0 0 0 1px var(--line)}`}</style>
     </div>
   );
 }
+
+function UndoToast({ name, onUndo, onClose }: { name: string; onUndo: () => void; onClose: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 5000);
+    return () => clearTimeout(t);
+  }, [onClose]);
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-5">
+      <div className="pointer-events-auto flex items-center gap-3 rounded-full bg-raised px-4 py-2.5 text-[13px] text-ink scale-in"
+           style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
+        <span>Sold 1 · {name}</span>
+        <button type="button" onClick={onUndo} className="text-marigold font-semibold hover:brightness-110">Undo</button>
+      </div>
+    </div>
+  );
+}
+
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
