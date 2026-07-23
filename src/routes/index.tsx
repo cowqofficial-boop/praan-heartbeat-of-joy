@@ -374,21 +374,28 @@ function Landing() {
                 icon={<Camera className="h-5 w-5" />}
                 title="Photograph your product."
                 body="Any phone, any table. No lights, no studio, no props."
+                photo={how1.url}
+                alt="Hand holding a phone photographing a product on a wooden table"
               />
               <Step
                 n="2"
                 icon={<Sparkles className="h-5 w-5" />}
                 title="CowQ studies it."
                 body="It works out what it is, what it’s made of, and who buys it."
+                photo={how2.url}
+                alt="Extreme close-up of woven fibres"
               />
               <Step
                 n="3"
                 icon={<Package className="h-5 w-5" />}
                 title="Everything arrives."
                 body="Photos, listing, posts, catalog file — under a minute."
+                photo={how3.url}
+                alt="Phone on a desk showing a finished product listing"
               />
             </ol>
           </Reveal>
+
         </div>
       </section>
 
