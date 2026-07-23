@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { SITE_URL } from "@/lib/site";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useCowqStore } from "@/lib/cowq-store";
@@ -23,10 +24,10 @@ export const Route = createFileRoute("/confirm")({
         content: "Review the product details CowQ detected before generating your listing.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://praan-heartbeat-of-joy.lovable.app/confirm" },
+      { property: "og:url", content: `${SITE_URL}/confirm` },
       { name: "robots", content: "noindex, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://praan-heartbeat-of-joy.lovable.app/confirm" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/confirm` }],
   }),
   component: Confirm,
 });

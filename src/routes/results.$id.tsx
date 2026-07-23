@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { SITE_URL } from "@/lib/site";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, Copy, Check, Download, FileText, Image as ImageIcon, Lock, Share2, ThumbsDown, ThumbsUp } from "lucide-react";
@@ -19,11 +20,11 @@ export const Route = createFileRoute("/results/$id")({
       { property: "og:title", content: "Your listing is ready — CowQ" },
       { property: "og:description", content: "Download studio photos, copy marketplace text, and export a Shopify CSV." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: `https://praan-heartbeat-of-joy.lovable.app/results/${params.id}` },
+      { property: "og:url", content: `${SITE_URL}/results/${params.id}` },
       { name: "robots", content: "noindex, follow" },
     ],
     links: [
-      { rel: "canonical", href: `https://praan-heartbeat-of-joy.lovable.app/results/${params.id}` },
+      { rel: "canonical", href: `${SITE_URL}/results/${params.id}` },
     ],
   }),
   component: Results,

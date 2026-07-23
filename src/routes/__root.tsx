@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { SITE_URL } from "@/lib/site";
 import {
   Outlet,
   Link,
@@ -98,8 +99,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "CowQ",
-          url: "https://praan-heartbeat-of-joy.lovable.app/",
-          logo: "https://praan-heartbeat-of-joy.lovable.app/icon-512.png",
+          url: `${SITE_URL}/`,
+          logo: `${SITE_URL}/icon-512.png`,
         }),
       },
     ],
