@@ -81,60 +81,7 @@ function LibraryPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col px-6 pb-16 pt-8 lg:px-0 lg:pt-12">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="page-headline sm:text-[56px]">Your products</h1>
 
-        <div className="flex items-center gap-1 lg:hidden">
-          <CreditBadge />
-          <Link
-            to="/stock"
-            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
-            aria-label="Stock"
-          >
-            <Boxes className="h-5 w-5" />
-          </Link>
-          <Link
-            to="/calendar"
-            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
-            aria-label="Content calendar"
-          >
-            <CalendarDays className="h-5 w-5" />
-          </Link>
-          <Link
-            to="/connect"
-            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
-            aria-label="Connect channels"
-          >
-            <Link2 className="h-5 w-5" />
-          </Link>
-          <Link
-            to="/billing"
-            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
-            aria-label="Billing"
-          >
-            <Receipt className="h-5 w-5" />
-          </Link>
-          <Link
-            to="/brand-kit"
-            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
-            aria-label="Brand kit"
-          >
-            <Settings2 className="h-5 w-5" />
-          </Link>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
-            aria-label="Sign out"
-          >
-            <LogOut className="h-5 w-5" />
-          </button>
-        </div>
-      </header>
-
-
-  return (
     <main className="flex min-h-screen flex-col px-6 pb-16 pt-8 lg:px-0 lg:pt-12">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
