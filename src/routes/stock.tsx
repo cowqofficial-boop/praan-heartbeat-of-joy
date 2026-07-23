@@ -258,10 +258,10 @@ function StockPage() {
           <p className="text-[15px] text-muted">Loading…</p>
         ) : items.length === 0 ? (
           <EmptyState
-            illustration={<IllustrationStock />}
-            title="Add your first item"
-            body="Your stock will show up here once you add an item. Track quantity, cost, price and profit — plus low-stock alerts."
-            action={{ label: "Add item", onClick: () => setCreating(true) }}
+            illustration={<IllustrationBoxes />}
+            title="Nothing tracked yet"
+            body="Add your first item and CowQ will keep count as you sell. Free on every plan."
+            action={{ label: "Add your first item", onClick: () => setCreating(true) }}
             help={
               <>
                 <p className="font-semibold text-ink">How stock helps</p>
