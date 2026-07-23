@@ -209,7 +209,7 @@ function TourOverlay({ onDone }: TourOverlayProps) {
             rx={14}
             ry={14}
             fill="none"
-            stroke="#3B82F6"
+            stroke="#3D5AFE"
             strokeWidth={2}
             style={{ filter: "drop-shadow(0 0 12px rgba(59,130,246,0.6))" }}
           />
@@ -271,7 +271,7 @@ function TourOverlay({ onDone }: TourOverlayProps) {
             type="button"
             onClick={next}
             className="h-10 rounded-[10px] px-5 text-[14px] font-semibold"
-            style={{ background: "#3B82F6", color: "#F2F7FF" }}
+            style={{ background: "#3D5AFE", color: "#F5F7FF" }}
           >
             {isLast ? step.cta ?? "Done" : "Next"}
           </button>

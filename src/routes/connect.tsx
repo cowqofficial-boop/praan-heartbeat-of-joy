@@ -152,14 +152,14 @@ function ChannelCard(props: {
   return (
     <section className="rounded-[12px] bg-raised p-4">
       <div className="flex items-center gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-full" style={{ background: "color-mix(in oklab, #3B82F6 18%, transparent)", color: "#3B82F6" }}>
+        <div className="grid h-10 w-10 place-items-center rounded-full" style={{ background: "color-mix(in oklab, #3D5AFE 18%, transparent)", color: "#3D5AFE" }}>
           {props.icon}
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <h2 className="text-[16px] font-semibold text-ink">{props.title}</h2>
             {connected && !needsReconnect && (
-              <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ background: "color-mix(in oklab, #3B82F6 20%, transparent)", color: "#3B82F6" }}>
+              <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ background: "color-mix(in oklab, #3D5AFE 20%, transparent)", color: "#3D5AFE" }}>
                 <Check className="h-3 w-3" /> Connected
               </span>
             )}

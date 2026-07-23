@@ -288,7 +288,7 @@ function CalendarLocked({ planName }: { planName: string }) {
           <Link
             to="/pricing"
             className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-[12px] px-5 text-[14px] font-semibold"
-            style={{ background: "#3B82F6", color: "#F2F7FF" }}
+            style={{ background: "#3D5AFE", color: "#F5F7FF" }}
           >
             See plans
           </Link>
