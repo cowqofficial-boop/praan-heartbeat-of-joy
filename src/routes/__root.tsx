@@ -16,6 +16,7 @@ import { AppSidebar } from "../components/AppSidebar";
 import { QueueRunner } from "../lib/queue-runner";
 import { QueueIndicator } from "../components/QueueIndicator";
 import { Tour } from "../components/Tour";
+import { Dialogs } from "../components/Dialogs";
 import { useAuth } from "../lib/use-auth";
 
 
