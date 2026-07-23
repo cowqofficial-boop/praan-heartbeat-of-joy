@@ -17,6 +17,8 @@ export type BrandKit = {
   model_region: string | null;
   brand_model_enabled: boolean;
   brand_model_url: string | null;
+  brand_model_source: "ai" | "user";
+  brand_model_photos: string[];
 };
 
 export const getMyBrandKit = createServerFn({ method: "GET" })
