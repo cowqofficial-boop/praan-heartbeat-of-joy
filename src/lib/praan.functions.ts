@@ -80,57 +80,28 @@ export const identifyProduct = createServerFn({ method: "POST" })
   .inputValidator((d: { imageUrl: string }) => d)
   .handler(async ({ data }) => {
     const { b64, mime } = await fetchAsBase64(data.imageUrl);
-    const body = {
-      model: "google/gemini-2.5-flash",
-      messages: [
+    const text = await geminiGenerateText({
+      systemInstruction:
+        "You identify products from a photo for Indian e-commerce sellers. Reply with a compact JSON object only, no prose, no markdown fences.",
+      parts: [
+        { inlineData: { mimeType: mime, data: b64 } },
         {
-          role: "system",
-          content:
-            "You identify products from a photo for Indian e-commerce sellers. Reply with a compact JSON object only, no prose, no markdown fences.",
-        },
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: 'Identify this product. Return JSON: {"name": short product name (max 6 words, sentence case), "category": one broad category like Kitchen, Home Decor, Fashion, Beauty, Electronics, "material": main material or empty, "color": main color or empty, "features": array of exactly 3 short key features}',
-            },
-            { type: "image_url", image_url: { url: `data:${mime};base64,${b64}` } },
-          ],
+          text: 'Identify this product. Return JSON: {"name": short product name (max 6 words, sentence case), "category": one broad category like Kitchen, Home Decor, Fashion, Beauty, Electronics, "material": main material or empty, "color": main color or empty, "features": array of exactly 3 short key features}',
         },
       ],
-    };
-    const res = await fetch(`${GATEWAY}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey()}`,
-      },
-      body: JSON.stringify(body),
+      responseMimeType: "application/json",
+      temperature: 0.2,
     });
-    if (!res.ok) throw new Error(`identify failed: ${res.status} ${await res.text()}`);
-    const json = (await res.json()) as {
-      choices: { message: { content: string } }[];
-    };
-    let text = json.choices?.[0]?.message?.content?.trim() ?? "";
-    text = text.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(text);
-    } catch {
-      const m2 = text.match(/\{[\s\S]*\}/);
-      parsed = m2 ? JSON.parse(m2[0]) : {};
-    }
+    const parsed = parseJsonLoose<unknown>(text) ?? {};
     const r = IdentifiedSchema.safeParse(parsed);
     const val = r.success
       ? r.data
       : { name: "Product", category: "General", material: "", color: "", features: [] };
-    if (val.features.length < 3) {
-      while (val.features.length < 3) val.features.push("");
-    }
+    while (val.features.length < 3) val.features.push("");
     val.features = val.features.slice(0, 3);
     return val;
   });
+
 
 // ---------- Rate limit ----------
 
