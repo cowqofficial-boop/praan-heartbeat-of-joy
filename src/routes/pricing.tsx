@@ -269,12 +269,9 @@ function PlanCard({
         highlight
           ? {
               boxShadow:
-                "inset 0 0 0 1px var(--sindoor), inset 0 1px 0 rgba(255,255,255,0.06), 0 20px 60px rgba(0,0,0,0.55)",
+                "inset 0 0 0 1px var(--cobalt), var(--shadow-raised)",
             }
-          : {
-              boxShadow:
-                "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)",
-            }
+          : { boxShadow: "var(--shadow-card)" }
       }
     >
       {highlight && (
