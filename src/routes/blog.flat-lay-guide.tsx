@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SITE_URL } from "@/lib/site";
 
-const URL = "https://praan-heartbeat-of-joy.lovable.app/blog/flat-lay-guide";
+const URL = `${SITE_URL}/blog/flat-lay-guide`;
 const TITLE = "Flat Lay Product Photography: How to Shoot Perfect Photos with Your Phone";
 const DESCRIPTION =
   "A practical flat lay product photography guide for Indian sellers: phone setup, lighting, backgrounds, styling, and how to hand the result to CowQ for AI-enhanced marketplace photos.";
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/blog/flat-lay-guide")({
             name: "CowQ",
             logo: {
               "@type": "ImageObject",
-              url: "https://praan-heartbeat-of-joy.lovable.app/icon-512.png",
+              url: `${SITE_URL}/icon-512.png`,
             },
           },
         }),

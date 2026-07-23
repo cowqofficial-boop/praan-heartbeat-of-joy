@@ -1,40 +1,147 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Camera, Sparkles, Package, Check } from "lucide-react";
+import { Camera, Sparkles, Package, Check, Shield, Lock, RefreshCw, ImageIcon } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { UploadWidget } from "@/components/UploadWidget";
+import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import { useAuth } from "@/lib/use-auth";
+import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/site";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "CowQ — One photo. A complete business, ready to sell." },
-      {
-        name: "description",
-        content:
-          "Upload one product photo. CowQ makes studio images, a full listing, social posts, and a Shopify catalog file — in under a minute. Your first product is free.",
-      },
-      { property: "og:title", content: "CowQ — One photo. A complete business, ready to sell." },
-      {
-        property: "og:description",
-        content:
-          "Studio photos, listings, social posts and a catalog file from one phone photo. Free to try.",
-      },
+      { title: SITE_TITLE },
+      { name: "description", content: SITE_DESCRIPTION },
+      { property: "og:title", content: SITE_TITLE },
+      { property: "og:description", content: SITE_DESCRIPTION },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://praan-heartbeat-of-joy.lovable.app/" },
+      { property: "og:url", content: `${SITE_URL}/` },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: SITE_TITLE },
+      { name: "twitter:description", content: SITE_DESCRIPTION },
     ],
-    links: [{ rel: "canonical", href: "https://praan-heartbeat-of-joy.lovable.app/" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/` }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "CowQ",
+          url: `${SITE_URL}/`,
+          description: SITE_DESCRIPTION,
+        }),
+      },
+    ],
   }),
   component: Landing,
 });
 
+/* ---------------- Reveal on scroll ---------------- */
+function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (reduce) {
+      setShown(true);
+      return;
+    }
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            setShown(true);
+            io.disconnect();
+          }
+        });
+      },
+      { threshold: 0.12 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <div
+      ref={ref}
+      style={{
+        opacity: shown ? 1 : 0,
+        transform: shown ? "translateY(0)" : "translateY(24px)",
+        transition: `opacity 700ms cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 700ms cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+/* ---------------- Placeholder art ---------------- */
+function PlaceholderShot({ tone, label }: { tone: "dim" | "bright"; label?: string }) {
+  return (
+    <div
+      className="absolute inset-0"
+      style={{
+        background:
+          tone === "dim"
+            ? "linear-gradient(135deg, #2a2620 0%, #171512 100%)"
+            : "linear-gradient(135deg, #efe6d4 0%, #d9c9a6 100%)",
+      }}
+    >
+      {label && (
+        <div className="absolute inset-0 grid place-items-center">
+          <ImageIcon
+            className={`h-10 w-10 ${tone === "dim" ? "text-white/10" : "text-black/15"}`}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Data URIs used as slider inputs (works without hosted assets).
+const SLIDER_BEFORE =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 1000'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#2a2620'/><stop offset='1' stop-color='#141210'/></linearGradient></defs><rect width='800' height='1000' fill='url(#g)'/><rect x='260' y='330' width='280' height='340' rx='24' fill='#3a352d'/><rect x='300' y='370' width='200' height='40' rx='6' fill='#524a3f'/></svg>`,
+  );
+const SLIDER_AFTER =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 1000'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#efe6d4'/><stop offset='1' stop-color='#d0bd93'/></linearGradient></defs><rect width='800' height='1000' fill='url(#g)'/><rect x='260' y='330' width='280' height='340' rx='24' fill='#8a6b3d'/><rect x='300' y='370' width='200' height='40' rx='6' fill='#6b5230'/></svg>`,
+  );
+
+function StaticPair({ caption }: { caption: string }) {
+  return (
+    <div>
+      <div className="grid grid-cols-2 overflow-hidden rounded-[16px] bg-surface">
+        <div className="relative aspect-[4/5]">
+          <PlaceholderShot tone="dim" label="before" />
+          <span className="absolute left-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white">
+            Phone photo, taken in a shop
+          </span>
+        </div>
+        <div className="relative aspect-[4/5]">
+          <PlaceholderShot tone="bright" label="after" />
+          <span className="absolute right-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white">
+            What CowQ made
+          </span>
+        </div>
+      </div>
+      {caption && <p className="mt-3 text-[13px] text-muted">{caption}</p>}
+    </div>
+  );
+}
+
+/* ---------------- Page ---------------- */
 function Landing() {
   const { user } = useAuth();
   return (
     <main className="w-full">
-      {/* Top bar */}
-      <header className="flex items-center justify-between px-5 pt-6 lg:hidden">
+      {/* Top bar — mobile only. Sidebar handles desktop chrome. */}
+      <header className="flex items-center justify-between px-6 pt-6 lg:hidden">
         <span className="font-display text-[22px] leading-none text-ink">CowQ</span>
-        <nav className="flex items-center gap-4 text-[14px] text-muted">
+        <nav className="flex items-center gap-5 text-[14px] text-muted">
           <Link to="/pricing" className="hover:text-ink">
             Pricing
           </Link>
@@ -50,13 +157,13 @@ function Landing() {
         </nav>
       </header>
 
-      {/* Hero */}
-      <section className="px-5 pb-16 pt-10 lg:pt-16">
-        <div className="mx-auto max-w-[680px] text-center">
-          <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[52px] lg:text-[64px]">
+      {/* ================ HERO ================ */}
+      <section className="px-6 pb-16 pt-10 lg:pt-20">
+        <div className="mx-auto max-w-[820px] text-center">
+          <h1 className="font-display text-[40px] leading-[1.02] tracking-[-0.03em] text-ink sm:text-[56px] lg:text-[72px]">
             One photo. A complete business, ready to sell.
           </h1>
-          <p className="mx-auto mt-5 max-w-[560px] text-[16px] text-muted lg:text-[18px]">
+          <p className="mx-auto mt-6 max-w-[620px] text-[16px] leading-relaxed text-muted lg:text-[18px]">
             Studio photos, listings, social posts and a catalog file — in under a minute.
           </p>
         </div>
@@ -68,7 +175,11 @@ function Landing() {
         {!user && (
           <p className="mx-auto mt-5 max-w-[560px] text-center text-[13px] text-muted">
             Your first product is free — no account needed.{" "}
-            <Link to="/auth" search={{ mode: "signup" }} className="font-medium text-ink underline">
+            <Link
+              to="/auth"
+              search={{ mode: "signup" }}
+              className="font-medium text-ink underline underline-offset-2"
+            >
               Sign up
             </Link>{" "}
             and get 3 more.
@@ -76,303 +187,417 @@ function Landing() {
         )}
       </section>
 
-      {/* Section 1 — Before / After */}
-      <section className="px-5 py-16 lg:py-24">
-        <div className="mx-auto max-w-[900px]">
-          <p className="eyebrow text-muted">The proof</p>
-          <h2 className="mt-2 font-display text-[32px] leading-[1.05] text-ink lg:text-[44px]">
-            Real photos, taken in real shops.
-          </h2>
-          <p className="mt-3 max-w-[560px] text-[15px] text-muted">
-            Drag the slider. Left is the phone photo the seller sent us. Right is what CowQ made
-            from it — no studio, no retouching, no waiting.
-          </p>
+      {/* ================ 1. Before / After ================ */}
+      <section className="px-6 py-16 lg:py-24">
+        <div className="mx-auto max-w-[1200px]">
+          <Reveal>
+            <p className="eyebrow text-muted">The proof</p>
+            <h2 className="mt-2 font-display text-[32px] leading-[1.05] tracking-[-0.03em] text-ink lg:text-[48px]">
+              Real photos, taken in real shops.
+            </h2>
+            <p className="mt-3 max-w-[620px] text-[15px] text-muted">
+              Drag the slider. Left is the phone photo the seller sent us. Right is what CowQ made
+              from it — no studio, no retouching, no waiting.
+            </p>
+          </Reveal>
 
-          <div className="mt-10 space-y-8">
-            <BeforeAfterPair
-              beforeLabel="Phone photo, taken in a shop"
-              afterLabel="What CowQ made"
-              beforeTone="dim"
-              afterTone="bright"
-              caption="Handwoven cotton stole · Jaipur"
-            />
-            <div className="grid gap-8 md:grid-cols-2">
-              <StaticPair caption="Brass diya set · Moradabad" />
-              <StaticPair caption="Wireless speaker · Chennai" />
+          <Reveal delay={80}>
+            <div className="mt-10 grid gap-8 lg:grid-cols-2">
+              <div>
+                <div className="mx-auto max-w-[560px] lg:max-w-none">
+                  <BeforeAfterSlider before={SLIDER_BEFORE} after={SLIDER_AFTER} />
+                </div>
+                <p className="mt-3 text-[13px] text-muted">
+                  Handwoven cotton stole · Jaipur
+                </p>
+              </div>
+              <div className="grid gap-6">
+                <StaticPair caption="Brass diya set · Moradabad" />
+                <StaticPair caption="Wireless speaker · Chennai" />
+              </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
-      {/* Section 2 — Everything you get */}
-      <section className="bg-surface px-5 py-16 lg:py-24">
-        <div className="mx-auto max-w-[1000px]">
-          <p className="eyebrow text-muted">One upload</p>
-          <h2 className="mt-2 font-display text-[32px] leading-[1.05] text-ink lg:text-[44px]">
-            Everything you get from one photo.
-          </h2>
+      {/* ================ 2. Everything you get ================ */}
+      <section className="bg-surface px-6 py-16 lg:py-24">
+        <div className="mx-auto max-w-[1200px]">
+          <Reveal>
+            <p className="eyebrow text-muted">One upload</p>
+            <h2 className="mt-2 font-display text-[32px] leading-[1.05] tracking-[-0.03em] text-ink lg:text-[48px]">
+              Everything you get from one photo.
+            </h2>
+          </Reveal>
 
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
-            <Artefact title="4 studio photos" >
-              <div className="grid grid-cols-2 gap-2">
-                {["White background", "Soft studio", "Lifestyle scene", "Flat-lay"].map((s) => (
-                  <div
-                    key={s}
-                    className="flex aspect-square items-end rounded-[10px] bg-raised p-2 text-[11px] text-muted"
-                  >
-                    {s}
-                  </div>
-                ))}
-              </div>
-              <p className="mt-3 text-[12px] text-muted">Square and vertical, both sizes.</p>
-            </Artefact>
-
-            <Artefact title="Marketplace listing">
-              <div className="rounded-[10px] bg-raised p-3 text-left">
-                <p className="text-[13px] font-semibold text-ink">
-                  Handwoven cotton stole, natural dye, 200 × 70 cm
-                </p>
-                <p className="mt-2 text-[11px] leading-snug text-muted">
-                  Three tight paragraphs of description, five plain bullets of facts, fifteen search
-                  tags — written the way sellers actually talk.
-                </p>
-                <div className="mt-3 flex flex-wrap gap-1">
-                  {["cotton stole", "handwoven", "natural dye", "jaipur", "gift"].map((t) => (
-                    <span
-                      key={t}
-                      className="rounded-full bg-background px-2 py-0.5 text-[10px] text-muted"
+          <Reveal delay={80}>
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              <Artefact title="4 studio photos">
+                <div className="grid grid-cols-2 gap-2">
+                  {["White background", "Soft studio", "Lifestyle scene", "Flat-lay"].map((s) => (
+                    <div
+                      key={s}
+                      className="flex aspect-square items-end rounded-[10px] bg-raised p-2 text-[11px] text-muted"
                     >
-                      {t}
-                    </span>
+                      {s}
+                    </div>
                   ))}
                 </div>
-              </div>
-            </Artefact>
+                <p className="mt-3 text-[12px] text-muted">Square and vertical, both sizes.</p>
+              </Artefact>
 
-            <Artefact title="Social posts">
-              <div className="space-y-2">
+              <Artefact title="Marketplace listing">
                 <div className="rounded-[10px] bg-raised p-3 text-left">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-marigold">
-                    Instagram
+                  <p className="text-[13px] font-semibold text-ink">
+                    Handwoven cotton stole, natural dye, 200 × 70 cm
                   </p>
-                  <p className="mt-1 text-[12px] leading-snug text-ink">
-                    Woven on a wooden handloom in Sanganer. Natural indigo, soft as breath.
+                  <p className="mt-2 text-[11px] leading-snug text-muted">
+                    Three tight paragraphs of description, five plain bullets of facts, fifteen
+                    search tags — written the way sellers actually talk.
                   </p>
-                  <p className="mt-1 text-[10px] text-muted">
-                    #handwoven #jaipur #cottonstole …
-                  </p>
-                </div>
-                <div className="rounded-[10px] bg-raised p-3 text-left">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-marigold">
-                    WhatsApp broadcast
-                  </p>
-                  <p className="mt-1 text-[12px] leading-snug text-ink">
-                    New handloom stoles just came in. ₹1,499 with free shipping today.
-                  </p>
-                </div>
-                <div className="rounded-[10px] bg-raised p-3 text-left">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-marigold">
-                    Festival line
-                  </p>
-                  <p className="mt-1 text-[12px] leading-snug text-ink">
-                    Diwali gifting — order by Sunday to reach in time.
-                  </p>
-                </div>
-              </div>
-            </Artefact>
-
-            <Artefact title="Shopify catalog file" wide>
-              <div className="overflow-hidden rounded-[10px] bg-raised">
-                <div className="grid grid-cols-6 gap-2 border-b border-white/5 bg-background/40 px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-muted">
-                  <span>Handle</span>
-                  <span className="col-span-2">Title</span>
-                  <span>Vendor</span>
-                  <span>Price</span>
-                  <span>Image</span>
-                </div>
-                {[
-                  ["stole-01", "Handwoven cotton stole", "Jaipur Loom", "₹1,499", "img_1.jpg"],
-                  ["diya-set", "Brass diya set of 6", "Moradabad", "₹899", "img_1.jpg"],
-                  ["speaker", "Wireless speaker", "Sound&Co", "₹2,999", "img_1.jpg"],
-                ].map((r) => (
-                  <div
-                    key={r[0]}
-                    className="grid grid-cols-6 gap-2 px-3 py-2 font-mono text-[11px] text-ink"
-                  >
-                    <span>{r[0]}</span>
-                    <span className="col-span-2 truncate">{r[1]}</span>
-                    <span className="truncate text-muted">{r[2]}</span>
-                    <span>{r[3]}</span>
-                    <span className="truncate text-muted">{r[4]}</span>
+                  <div className="mt-3 flex flex-wrap gap-1">
+                    {["cotton stole", "handwoven", "natural dye", "jaipur", "gift"].map((t) => (
+                      <span
+                        key={t}
+                        className="rounded-full bg-background px-2 py-0.5 text-[10px] text-muted"
+                      >
+                        {t}
+                      </span>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <p className="mt-3 text-[12px] text-muted">
-                Imports straight into Shopify. Same file works for Amazon and Flipkart.
-              </p>
-            </Artefact>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 3 — How it works */}
-      <section className="px-5 py-16 lg:py-24">
-        <div className="mx-auto max-w-[1000px]">
-          <p className="eyebrow text-muted">How it works</p>
-          <h2 className="mt-2 font-display text-[32px] leading-[1.05] text-ink lg:text-[44px]">
-            Three steps. Under a minute.
-          </h2>
-
-          <ol className="mt-10 grid gap-6 md:grid-cols-3">
-            <Step
-              n="1"
-              icon={<Camera className="h-5 w-5" />}
-              title="Photograph your product."
-              body="Any phone, any table. No lights, no studio, no props."
-            />
-            <Step
-              n="2"
-              icon={<Sparkles className="h-5 w-5" />}
-              title="CowQ studies it."
-              body="It works out what it is, what it’s made of, and who buys it."
-            />
-            <Step
-              n="3"
-              icon={<Package className="h-5 w-5" />}
-              title="Everything arrives."
-              body="Photos, listing, posts, catalog file — under a minute."
-            />
-          </ol>
-        </div>
-      </section>
-
-      {/* Section 4 — What it replaces */}
-      <section className="bg-surface px-5 py-16 lg:py-24">
-        <div className="mx-auto max-w-[720px]">
-          <p className="eyebrow text-muted">What it replaces</p>
-          <h2 className="mt-2 font-display text-[32px] leading-[1.05] text-ink lg:text-[44px]">
-            The people you’d otherwise pay.
-          </h2>
-          <p className="mt-3 text-[15px] text-muted">
-            A single product listing, done properly, usually needs four people. Here’s what each of
-            them charges — before we get to their time.
-          </p>
-
-          <div className="mt-10 divide-y divide-white/5 rounded-[14px] bg-raised">
-            {[
-              { role: "Product photographer", note: "half-day shoot, one product", cost: 3500 },
-              { role: "Copywriter", note: "title, description, bullets, tags", cost: 1200 },
-              { role: "Social media manager", note: "Instagram + WhatsApp posts", cost: 800 },
-              { role: "Catalog assistant", note: "Shopify / Amazon CSV", cost: 500 },
-            ].map((r) => (
-              <div key={r.role} className="flex items-center justify-between px-5 py-4">
-                <div>
-                  <p className="text-[15px] font-medium text-ink">{r.role}</p>
-                  <p className="text-[12px] text-muted">{r.note}</p>
                 </div>
-                <p className="font-mono text-[15px] text-ink">
-                  ₹{r.cost.toLocaleString("en-IN")}
+              </Artefact>
+
+              <Artefact title="Social posts">
+                <div className="space-y-2">
+                  <div className="rounded-[10px] bg-raised p-3 text-left">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-marigold">
+                      Instagram
+                    </p>
+                    <p className="mt-1 text-[12px] leading-snug text-ink">
+                      Woven on a wooden handloom in Sanganer. Natural indigo, soft as breath.
+                    </p>
+                    <p className="mt-1 text-[10px] text-muted">
+                      #handwoven #jaipur #cottonstole …
+                    </p>
+                  </div>
+                  <div className="rounded-[10px] bg-raised p-3 text-left">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-marigold">
+                      WhatsApp broadcast
+                    </p>
+                    <p className="mt-1 text-[12px] leading-snug text-ink">
+                      New handloom stoles just came in. ₹1,499 with free shipping today.
+                    </p>
+                  </div>
+                  <div className="rounded-[10px] bg-raised p-3 text-left">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-marigold">
+                      Festival line
+                    </p>
+                    <p className="mt-1 text-[12px] leading-snug text-ink">
+                      Diwali gifting — order by Sunday to reach in time.
+                    </p>
+                  </div>
+                </div>
+              </Artefact>
+
+              <Artefact title="Shopify catalog file" wide>
+                <div className="overflow-hidden rounded-[10px] bg-raised">
+                  <div className="grid grid-cols-6 gap-2 bg-background/40 px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-muted">
+                    <span>Handle</span>
+                    <span className="col-span-2">Title</span>
+                    <span>Vendor</span>
+                    <span>Price</span>
+                    <span>Image</span>
+                  </div>
+                  {[
+                    ["stole-01", "Handwoven cotton stole", "Jaipur Loom", "₹1,499", "img_1.jpg"],
+                    ["diya-set", "Brass diya set of 6", "Moradabad", "₹899", "img_1.jpg"],
+                    ["speaker", "Wireless speaker", "Sound&Co", "₹2,999", "img_1.jpg"],
+                  ].map((r) => (
+                    <div
+                      key={r[0]}
+                      className="grid grid-cols-6 gap-2 px-3 py-2 font-mono text-[11px] text-ink"
+                    >
+                      <span>{r[0]}</span>
+                      <span className="col-span-2 truncate">{r[1]}</span>
+                      <span className="truncate text-muted">{r[2]}</span>
+                      <span>{r[3]}</span>
+                      <span className="truncate text-muted">{r[4]}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-3 text-[12px] text-muted">
+                  Imports straight into Shopify. Same file works for Amazon and Flipkart.
+                </p>
+              </Artefact>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ================ 3. How it works ================ */}
+      <section className="px-6 py-16 lg:py-24">
+        <div className="mx-auto max-w-[1200px]">
+          <Reveal>
+            <p className="eyebrow text-muted">How it works</p>
+            <h2 className="mt-2 font-display text-[32px] leading-[1.05] tracking-[-0.03em] text-ink lg:text-[48px]">
+              Three steps. Under a minute.
+            </h2>
+          </Reveal>
+          <Reveal delay={80}>
+            <ol className="mt-10 grid gap-6 md:grid-cols-3">
+              <Step
+                n="1"
+                icon={<Camera className="h-5 w-5" />}
+                title="Photograph your product."
+                body="Any phone, any table. No lights, no studio, no props."
+              />
+              <Step
+                n="2"
+                icon={<Sparkles className="h-5 w-5" />}
+                title="CowQ studies it."
+                body="It works out what it is, what it’s made of, and who buys it."
+              />
+              <Step
+                n="3"
+                icon={<Package className="h-5 w-5" />}
+                title="Everything arrives."
+                body="Photos, listing, posts, catalog file — under a minute."
+              />
+            </ol>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ================ 4. What it replaces ================ */}
+      <section className="bg-surface px-6 py-16 lg:py-24">
+        <div className="mx-auto max-w-[820px]">
+          <Reveal>
+            <p className="eyebrow text-muted">What it replaces</p>
+            <h2 className="mt-2 font-display text-[32px] leading-[1.05] tracking-[-0.03em] text-ink lg:text-[48px]">
+              The team you’d otherwise pay.
+            </h2>
+            <p className="mt-3 text-[15px] text-muted">
+              A proper listing usually needs four people. Here’s what each of them costs, per
+              month, at reasonable Indian rates.
+            </p>
+          </Reveal>
+
+          <Reveal delay={80}>
+            <div className="mt-10 divide-y divide-white/5 rounded-[14px] bg-raised">
+              {[
+                { role: "Product photographer", note: "10–20 products a month", cost: "₹40,000 – ₹70,000" },
+                { role: "Copywriter", note: "titles, descriptions, tags", cost: "₹30,000 – ₹60,000" },
+                { role: "Social media manager", note: "Instagram + WhatsApp posts", cost: "₹40,000 – ₹80,000" },
+                { role: "Catalog assistant", note: "marketplace uploads", cost: "₹25,000 – ₹45,000" },
+                { role: "Designer, part-time", note: "banners, thumbnails, edits", cost: "₹50,000 – ₹70,000" },
+              ].map((r) => (
+                <div key={r.role} className="flex items-center justify-between gap-4 px-5 py-4">
+                  <div>
+                    <p className="text-[15px] font-medium text-ink">{r.role}</p>
+                    <p className="text-[12px] text-muted">{r.note}</p>
+                  </div>
+                  <p className="font-mono text-[14px] text-ink">{r.cost}</p>
+                </div>
+              ))}
+              <div className="flex items-center justify-between px-5 py-4">
+                <p className="text-[15px] font-medium text-ink">Total, per month</p>
+                <p className="font-mono text-[16px] font-semibold text-ink">
+                  ₹1.85 – 3.25 lakh
                 </p>
               </div>
-            ))}
-            <div className="flex items-center justify-between px-5 py-4">
-              <p className="text-[15px] font-medium text-ink">Total, per product</p>
-              <p className="font-mono text-[18px] font-semibold text-ink">₹6,000</p>
             </div>
-          </div>
+          </Reveal>
 
-          <div className="mt-8 rounded-[14px] bg-background p-6">
-            <p className="text-[13px] uppercase tracking-wider text-muted">CowQ</p>
-            <p className="mt-1 font-display text-[32px] leading-none text-ink">
-              ₹90 <span className="text-[15px] font-normal text-muted">per product</span>
-            </p>
-            <p className="mt-2 text-[14px] text-muted">
-              Same output. One upload. Under a minute.
-            </p>
-            <Link
-              to="/create"
-              className="mt-6 inline-flex h-12 items-center rounded-[12px] bg-primary px-5 text-[15px] font-semibold text-primary-foreground"
-            >
-              Try it with your photo
-            </Link>
-          </div>
+          <Reveal delay={120}>
+            <div className="mt-8 rounded-[14px] bg-background p-6">
+              <p className="text-[13px] uppercase tracking-wider text-muted">CowQ starts at</p>
+              <p className="mt-1 font-display text-[40px] leading-none text-ink">
+                ₹999 <span className="text-[15px] font-normal text-muted">/ month</span>
+              </p>
+              <p className="mt-3 text-[14px] leading-relaxed text-muted">
+                CowQ does the work. You still decide what to sell and what your brand stands for.
+              </p>
+              <Link
+                to="/pricing"
+                className="mt-6 inline-flex h-11 items-center rounded-[12px] bg-raised px-5 text-[14px] font-medium text-ink hover:brightness-110"
+              >
+                See plans
+              </Link>
+            </div>
+          </Reveal>
         </div>
       </section>
 
-      <footer className="px-5 py-10 text-center text-[12px] text-muted">
-        CowQ · Complete Operations With Quality
+      {/* ================ 5. Trust ================ */}
+      <section className="px-6 py-16 lg:py-24">
+        <div className="mx-auto max-w-[1000px]">
+          <Reveal>
+            <p className="eyebrow text-muted">Trust</p>
+            <h2 className="mt-2 font-display text-[32px] leading-[1.05] tracking-[-0.03em] text-ink lg:text-[48px]">
+              Why you can believe this works.
+            </h2>
+          </Reveal>
+
+          <Reveal delay={80}>
+            <div className="mt-10 grid gap-4 md:grid-cols-2">
+              <TrustCard
+                icon={<Sparkles className="h-5 w-5" />}
+                title="Try it before you sign up."
+                body="One product free, no account, no card. Nothing else on this page proves as much."
+              />
+              <TrustCard
+                icon={<Lock className="h-5 w-5" />}
+                title="Your photos stay yours."
+                body="We don’t sell them, share them, or use them to train anything."
+              />
+              <TrustCard
+                icon={<Shield className="h-5 w-5" />}
+                title="The product stays exactly as it is."
+                body="CowQ changes the background and the light — never the product."
+              />
+              <TrustCard
+                icon={<RefreshCw className="h-5 w-5" />}
+                title="No lock-in."
+                body="Cancel any time. Download everything you’ve made."
+              />
+            </div>
+          </Reveal>
+
+          <Reveal delay={140}>
+            <div className="mt-10 rounded-[16px] bg-surface p-6 lg:p-8">
+              <div className="flex items-start gap-4">
+                <div
+                  className="h-14 w-14 shrink-0 rounded-full bg-raised"
+                  aria-hidden
+                  style={{ background: "linear-gradient(135deg, #3a352d 0%, #1a1815 100%)" }}
+                />
+                <div>
+                  <p className="text-[13px] uppercase tracking-wider text-muted">
+                    A note from the founder
+                  </p>
+                  <p className="mt-2 text-[15px] leading-relaxed text-ink">
+                    I built CowQ after watching my mother spend three days on one product listing.
+                    She had the goods and the eye — she just didn’t have a photographer, a
+                    copywriter, or a spare afternoon. If that sounds like you, this is for you.
+                  </p>
+                  <p className="mt-3 text-[13px] text-muted">— Aarav Mehta, founder</p>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ================ 6. Who it's for ================ */}
+      <section className="bg-surface px-6 py-16 lg:py-24">
+        <div className="mx-auto max-w-[1200px]">
+          <Reveal>
+            <p className="eyebrow text-muted">Who it’s for</p>
+            <h2 className="mt-2 font-display text-[32px] leading-[1.05] tracking-[-0.03em] text-ink lg:text-[48px]">
+              Small sellers with a product and no team.
+            </h2>
+          </Reveal>
+          <Reveal delay={80}>
+            <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {[
+                { t: "Marketplace sellers", b: "Amazon, Flipkart, Meesho." },
+                { t: "Instagram & WhatsApp shops", b: "Post daily without a designer." },
+                { t: "Physical shops going online", b: "Your first proper catalog." },
+                { t: "Anyone with a product", b: "And no team behind them." },
+              ].map((c) => (
+                <div key={c.t} className="rounded-[16px] bg-background p-5">
+                  <p className="text-[15px] font-semibold text-ink">{c.t}</p>
+                  <p className="mt-1 text-[13px] text-muted">{c.b}</p>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ================ 7. Questions ================ */}
+      <section className="px-6 py-16 lg:py-24">
+        <div className="mx-auto max-w-[820px]">
+          <Reveal>
+            <p className="eyebrow text-muted">Questions</p>
+            <h2 className="mt-2 font-display text-[32px] leading-[1.05] tracking-[-0.03em] text-ink lg:text-[48px]">
+              The things sellers actually ask.
+            </h2>
+          </Reveal>
+          <Reveal delay={80}>
+            <div className="mt-10 divide-y divide-white/5 rounded-[16px] bg-surface">
+              <Faq
+                q="Will my product look different from the real thing?"
+                a="No. Only the background and lighting change. Colour, texture, pattern and shape stay exactly as they are."
+              />
+              <Faq
+                q="Can I use these on Amazon and Flipkart?"
+                a="Yes. Keep scenes honest to the product and they meet marketplace guidelines."
+              />
+              <Faq
+                q="What if I don’t like the photos?"
+                a="Regenerate. If a generation fails, credits come back automatically."
+              />
+              <Faq
+                q="Do I need a good camera?"
+                a="No. A clear phone photo in daylight is enough."
+              />
+              <Faq
+                q="What does it cost?"
+                a={
+                  <>
+                    First product free. Plans from ₹999 —{" "}
+                    <Link to="/pricing" className="underline underline-offset-2">
+                      see pricing
+                    </Link>
+                    .
+                  </>
+                }
+              />
+              <Faq
+                q="Is my product data private?"
+                a="Yes. Yours only, deleted on request."
+              />
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ================ 8. Close ================ */}
+      <section className="bg-surface px-6 py-20 lg:py-28">
+        <div className="mx-auto max-w-[820px] text-center">
+          <Reveal>
+            <h2 className="font-display text-[36px] leading-[1.05] tracking-[-0.03em] text-ink lg:text-[56px]">
+              Try it on your own product. Free.
+            </h2>
+            <p className="mx-auto mt-5 max-w-[520px] text-[16px] text-muted">
+              One photo. No account. Under a minute.
+            </p>
+          </Reveal>
+          <Reveal delay={80}>
+            <div className="mx-auto mt-10 max-w-[560px]">
+              <UploadWidget />
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      <footer className="px-6 py-10 text-center text-[12px] text-muted">
+        CowQ · Complete Operations With Quality ·{" "}
+        <Link to="/pricing" className="hover:text-ink">
+          Pricing
+        </Link>{" "}
+        ·{" "}
+        <Link to="/auth" search={{ mode: "signin" }} className="hover:text-ink">
+          Sign in
+        </Link>
       </footer>
     </main>
   );
 }
 
-function BeforeAfterPair({
-  beforeLabel,
-  afterLabel,
-  caption,
-}: {
-  beforeLabel: string;
-  afterLabel: string;
-  beforeTone?: string;
-  afterTone?: string;
-  caption?: string;
-}) {
-  return (
-    <div>
-      <div className="grid grid-cols-2 overflow-hidden rounded-[16px] bg-surface">
-        <div className="relative aspect-[4/5]">
-          <PlaceholderShot tone="dim" />
-          <span className="absolute left-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
-            {beforeLabel}
-          </span>
-        </div>
-        <div className="relative aspect-[4/5]">
-          <PlaceholderShot tone="bright" />
-          <span className="absolute right-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
-            {afterLabel}
-          </span>
-        </div>
-      </div>
-      {caption && <p className="mt-2 text-[12px] text-muted">{caption}</p>}
-    </div>
-  );
-}
-
-function StaticPair({ caption }: { caption: string }) {
-  return (
-    <div>
-      <div className="grid grid-cols-2 overflow-hidden rounded-[16px] bg-surface">
-        <div className="relative aspect-[4/5]">
-          <PlaceholderShot tone="dim" />
-          <span className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
-            Phone
-          </span>
-        </div>
-        <div className="relative aspect-[4/5]">
-          <PlaceholderShot tone="bright" />
-          <span className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
-            CowQ
-          </span>
-        </div>
-      </div>
-      <p className="mt-2 text-[12px] text-muted">{caption}</p>
-    </div>
-  );
-}
-
-function PlaceholderShot({ tone }: { tone: "dim" | "bright" }) {
-  return (
-    <div
-      className="absolute inset-0"
-      style={{
-        background:
-          tone === "dim"
-            ? "linear-gradient(135deg, #2a2620 0%, #1a1815 100%)"
-            : "linear-gradient(135deg, #f5efe4 0%, #e8dcc4 100%)",
-      }}
-    />
-  );
-}
+/* ---------------- Small pieces ---------------- */
 
 function Artefact({
   title,
@@ -380,7 +605,7 @@ function Artefact({
   wide,
 }: {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
   wide?: boolean;
 }) {
   return (
@@ -401,7 +626,7 @@ function Step({
   body,
 }: {
   n: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   body: string;
 }) {
@@ -416,7 +641,36 @@ function Step({
         </span>
       </div>
       <p className="mt-4 text-[17px] font-semibold text-ink">{title}</p>
-      <p className="mt-2 text-[14px] text-muted">{body}</p>
+      <p className="mt-2 text-[14px] leading-relaxed text-muted">{body}</p>
     </li>
+  );
+}
+
+function TrustCard({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
+  return (
+    <div className="rounded-[16px] bg-surface p-5">
+      <span className="grid h-9 w-9 place-items-center rounded-full bg-raised text-marigold">
+        {icon}
+      </span>
+      <p className="mt-4 text-[15px] font-semibold text-ink">{title}</p>
+      <p className="mt-1 text-[13px] leading-relaxed text-muted">{body}</p>
+    </div>
+  );
+}
+
+function Faq({ q, a }: { q: string; a: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => setOpen((v) => !v)}
+      className="w-full px-5 py-4 text-left"
+    >
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-[15px] font-medium text-ink">{q}</p>
+        <span className="font-mono text-[16px] text-muted">{open ? "–" : "+"}</span>
+      </div>
+      {open && <p className="mt-2 text-[14px] leading-relaxed text-muted">{a}</p>}
+    </button>
   );
 }

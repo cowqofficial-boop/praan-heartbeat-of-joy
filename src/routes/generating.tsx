@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { SITE_URL } from "@/lib/site";
 import { useMemo, useState } from "react";
 import { Check, X, Plus, Download } from "lucide-react";
 import { useQueueStore, queueCounts, MAX_QUEUE, type QueueItem } from "@/lib/queue-store";
@@ -21,10 +22,10 @@ export const Route = createFileRoute("/generating")({
         content: "Studio photos and listings, made in the background while you get on with your day.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://praan-heartbeat-of-joy.lovable.app/generating" },
+      { property: "og:url", content: `${SITE_URL}/generating` },
       { name: "robots", content: "noindex, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://praan-heartbeat-of-joy.lovable.app/generating" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/generating` }],
   }),
   component: QueueScreen,
 });
