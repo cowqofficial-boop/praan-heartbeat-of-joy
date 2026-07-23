@@ -77,9 +77,10 @@ function LibraryPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col px-5 pb-16 pt-8">
-      <header className="flex items-center justify-between">
-        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">Your products</h1>
+    <main className="flex min-h-screen flex-col px-6 pb-16 pt-8 lg:px-10">
+      <header className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="page-headline sm:text-[56px]">Your products</h1>
+
         <div className="flex items-center gap-1">
           <CreditBadge />
           <Link
@@ -165,7 +166,7 @@ function LibraryPage() {
         ) : filtered.length === 0 ? (
           <p className="text-[15px] text-muted">Nothing matches "{query}".</p>
         ) : (
-          <ul className="grid grid-cols-2 gap-3 stagger">
+          <ul className="grid grid-cols-2 gap-3 stagger sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {filtered.map((it) => (
               <ProductCard key={it.id} item={it} onRename={handleRename} onDelete={handleDelete} />
             ))}

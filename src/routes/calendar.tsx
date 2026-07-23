@@ -152,12 +152,12 @@ function CalendarPage() {
   const openPost = posts.find((p) => p.id === openPostId) ?? null;
 
   return (
-    <main className="flex min-h-screen flex-col px-5 pb-16 pt-8">
+    <main className="flex min-h-screen flex-col px-6 pb-16 pt-8 lg:px-10">
       <header className="flex items-center justify-between">
         <Link to="/library" className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink" aria-label="Back">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">Content calendar</h1>
+        <h1 className="page-headline sm:text-[56px]">Content calendar</h1>
         <CreditBadge />
       </header>
 
