@@ -66,7 +66,7 @@ function AdminCosts() {
       {isLoading ? (
         <p className="mt-6 text-sm text-mute">Loading…</p>
       ) : (
-        <div className="mt-4 overflow-hidden rounded-[12px] border border-[color:var(--color-border)] bg-white">
+        <div className="mt-4 overflow-hidden rounded-[12px] border border-[color:var(--color-border)] bg-raised">
           <table className="w-full text-left text-xs">
             <thead className="bg-[color:var(--color-surface)] text-[11px] uppercase text-mute">
               <tr>

@@ -14,7 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white px-5">
+    <div className="flex min-h-screen items-center justify-center bg-raised px-5">
       <div className="max-w-sm text-center">
         <h1 className="font-display text-4xl text-ink">Not here.</h1>
         <p className="mt-2 text-[15px] text-muted">This page doesn't exist.</p>
@@ -37,7 +37,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white px-5">
+    <div className="flex min-h-screen items-center justify-center bg-raised px-5">
       <div className="max-w-sm text-center">
         <h1 className="font-display text-3xl text-ink">Something didn't load.</h1>
         <p className="mt-2 text-[15px] text-muted">Try again in a moment.</p>
@@ -124,7 +124,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="mx-auto min-h-screen w-full max-w-[480px] bg-white">
+      <div className="mx-auto min-h-screen w-full max-w-[480px] bg-raised">
         <Outlet />
       </div>
     </QueryClientProvider>

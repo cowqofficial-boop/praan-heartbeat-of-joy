@@ -21,7 +21,7 @@ export function CopyButton({ text, label = "Copy" }: { text: string; label?: str
         setCopied(true);
         setTimeout(() => setCopied(false), 1600);
       }}
-      className="inline-flex items-center gap-1.5 rounded-[12px] border border-[color:var(--color-border)] bg-white px-3 py-2 text-[13px] font-medium text-ink transition-colors active:bg-surface"
+      className="inline-flex items-center gap-1.5 rounded-[12px] border border-[color:var(--color-border)] bg-raised px-3 py-2 text-[13px] font-medium text-ink transition-colors active:bg-surface"
       aria-label={label}
     >
       {copied ? (

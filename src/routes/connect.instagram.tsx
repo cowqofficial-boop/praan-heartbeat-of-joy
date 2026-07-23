@@ -102,7 +102,7 @@ function InstagramWizard() {
       )}
       {step === 2 && (
         <div className="mt-8 flex flex-1 flex-col">
-          <div className="grid h-32 place-items-center rounded-[16px] bg-[#FFF6EC] text-4xl">🎉</div>
+          <div className="grid h-32 place-items-center rounded-[16px] bg-highlight/10 text-4xl">🎉</div>
           <h2 className="mt-6 font-display text-[24px] leading-tight text-ink">Now link it to CowQ Ai</h2>
           <p className="mt-2 text-[15px] text-muted">
             We'll open Facebook so you can approve access. You'll come right back here.
@@ -156,7 +156,7 @@ function WizardStep({
 }) {
   return (
     <div className="mt-8 flex flex-1 flex-col">
-      <div className="grid h-32 place-items-center rounded-[16px] bg-[#FFF6EC] text-4xl">{illustration}</div>
+      <div className="grid h-32 place-items-center rounded-[16px] bg-highlight/10 text-4xl">{illustration}</div>
       <h2 className="mt-6 font-display text-[24px] leading-tight text-ink">{title}</h2>
       <p className="mt-2 text-[15px] text-muted">{body}</p>
       <div className="mt-3 rounded-[12px] bg-[#F5F1EA] p-3 text-[14px] font-medium text-ink">{path}</div>

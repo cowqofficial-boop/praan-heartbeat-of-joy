@@ -139,7 +139,7 @@ function PricingPage() {
 
       {/* Cycle toggle */}
       <div className="mt-6 flex items-center justify-center">
-        <div className="inline-flex rounded-full border border-[color:var(--color-border)] bg-white p-1">
+        <div className="inline-flex rounded-full border border-[color:var(--color-border)] bg-raised p-1">
           <button
             type="button"
             onClick={() => setCycle("monthly")}
@@ -229,7 +229,7 @@ function PlanCard({
   return (
     <div
       className={`rounded-[16px] border p-5 ${
-        highlight ? "border-primary bg-primary/[.03]" : "border-[color:var(--color-border)] bg-white"
+        highlight ? "border-primary bg-primary/[.03]" : "border-[color:var(--color-border)] bg-raised"
       }`}
     >
       <div className="flex items-baseline justify-between">
@@ -273,7 +273,7 @@ function PlanCard({
 
 function PackCard({ plan, busy, onBuy }: { plan: Plan; busy: boolean; onBuy: () => void }) {
   return (
-    <div className="flex items-center justify-between rounded-[16px] border border-[color:var(--color-border)] bg-white p-4">
+    <div className="flex items-center justify-between rounded-[16px] border border-[color:var(--color-border)] bg-raised p-4">
       <div>
         <p className="text-[15px] font-semibold text-ink">{plan.name}</p>
         <p className="mt-0.5 text-[12px] text-muted">One-time · credits never expire</p>

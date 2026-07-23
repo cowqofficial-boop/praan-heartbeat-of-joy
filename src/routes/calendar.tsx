@@ -311,7 +311,7 @@ function TodayCard({ post, onOpen }: { post: Post; onOpen: () => void }) {
     <button
       type="button"
       onClick={onOpen}
-      className="mt-2 flex w-full items-center gap-3 overflow-hidden rounded-[16px] border border-[color:var(--color-border)] bg-white p-3 text-left"
+      className="mt-2 flex w-full items-center gap-3 overflow-hidden rounded-[16px] border border-[color:var(--color-border)] bg-raised p-3 text-left"
     >
       <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[10px] bg-surface">
         {post.image_url ? (
@@ -334,7 +334,7 @@ function TodayCard({ post, onOpen }: { post: Post; onOpen: () => void }) {
         </p>
       </div>
       {post.posted && (
-        <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#e8f6ea] text-[#2f8f3d]">
+        <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-green/15 text-green">
           <Check className="h-4 w-4" />
         </div>
       )}
@@ -368,7 +368,7 @@ function MonthGrid({ posts, onOpen }: { posts: Post[]; onOpen: (id: string) => v
               {new Date(p.post_date + "T00:00:00").getDate()}
             </span>
             {p.posted && (
-              <span className="absolute right-1 top-1 grid h-4 w-4 place-items-center rounded-full bg-[#2f8f3d] text-white">
+              <span className="absolute right-1 top-1 grid h-4 w-4 place-items-center rounded-full bg-green text-white">
                 <Check className="h-2.5 w-2.5" />
               </span>
             )}
@@ -428,12 +428,12 @@ function PostSheet({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center bg-black/40 px-3 py-6 sm:items-center">
-      <div className="relative flex max-h-[92vh] w-full max-w-[440px] flex-col overflow-hidden rounded-[16px] bg-white">
+      <div className="relative flex max-h-[92vh] w-full max-w-[440px] flex-col overflow-hidden rounded-[16px] bg-raised">
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-ink shadow"
+          className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full bg-raised/90 text-ink shadow"
         >
           <X className="h-5 w-5" />
         </button>
@@ -485,16 +485,16 @@ function PostSheet({
                   type="button"
                   onClick={handleCopy}
                   disabled={!post.caption}
-                  className="flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-white text-[14px] font-medium text-ink disabled:opacity-50"
+                  className="flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-raised text-[14px] font-medium text-ink disabled:opacity-50"
                 >
-                  {copied ? <Check className="h-4 w-4 text-[#2f8f3d]" /> : <Copy className="h-4 w-4" />}
+                  {copied ? <Check className="h-4 w-4 text-green" /> : <Copy className="h-4 w-4" />}
                   {copied ? "Copied" : "Copy caption"}
                 </button>
                 <button
                   type="button"
                   onClick={handleDownload}
                   disabled={!post.image_url}
-                  className="flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-white text-[14px] font-medium text-ink disabled:opacity-50"
+                  className="flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-raised text-[14px] font-medium text-ink disabled:opacity-50"
                 >
                   <Download className="h-4 w-4" />
                   Download image
@@ -503,7 +503,7 @@ function PostSheet({
                   type="button"
                   onClick={() => regen.mutate()}
                   disabled={regen.isPending}
-                  className="flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-white text-[14px] font-medium text-ink disabled:opacity-50"
+                  className="flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-raised text-[14px] font-medium text-ink disabled:opacity-50"
                 >
                   {regen.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -517,8 +517,8 @@ function PostSheet({
                   onClick={() => toggle.mutate()}
                   className={`flex h-11 items-center justify-center gap-2 rounded-[10px] text-[14px] font-medium ${
                     post.posted
-                      ? "bg-[#e8f6ea] text-[#2f8f3d]"
-                      : "border border-[color:var(--color-border)] bg-white text-ink"
+                      ? "bg-green/15 text-green"
+                      : "border border-[color:var(--color-border)] bg-raised text-ink"
                   }`}
                 >
                   <Check className="h-4 w-4" />

@@ -114,7 +114,7 @@ function Auth() {
         type="button"
         onClick={handleGoogle}
         disabled={busy}
-        className="mt-8 flex h-12 w-full items-center justify-center gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-white text-[15px] font-semibold text-ink disabled:opacity-60"
+        className="mt-8 flex h-12 w-full items-center justify-center gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-raised text-[15px] font-semibold text-ink disabled:opacity-60"
       >
         <GoogleIcon />
         Continue with Google
@@ -134,7 +134,7 @@ function Auth() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-12 rounded-[12px] border border-[color:var(--color-border)] bg-white px-4 text-[16px] text-ink"
+            className="h-12 rounded-[12px] border border-[color:var(--color-border)] bg-raised px-4 text-[16px] text-ink"
             placeholder="you@example.com"
           />
         </label>
@@ -146,7 +146,7 @@ function Auth() {
             minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="h-12 rounded-[12px] border border-[color:var(--color-border)] bg-white px-4 text-[16px] text-ink"
+            className="h-12 rounded-[12px] border border-[color:var(--color-border)] bg-raised px-4 text-[16px] text-ink"
             placeholder="At least 6 characters"
           />
         </label>

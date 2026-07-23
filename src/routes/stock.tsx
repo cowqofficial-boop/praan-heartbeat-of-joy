@@ -184,7 +184,7 @@ function StockPage() {
       )}
 
       {/* Search + filter */}
-      <label className="mt-4 flex h-11 items-center gap-2 rounded-[14px] bg-white px-3 ring-1 ring-inset ring-[color:var(--color-border)]">
+      <label className="mt-4 flex h-11 items-center gap-2 rounded-[14px] bg-raised px-3 ring-1 ring-inset ring-[color:var(--color-border)]">
         <Search className="h-4 w-4 text-muted" />
         <input
           className="flex-1 bg-transparent text-[15px] text-ink outline-none"
@@ -200,7 +200,7 @@ function StockPage() {
             type="button"
             onClick={() => setFilter(k)}
             className={`h-8 rounded-full px-3 ${
-              filter === k ? "bg-white text-ink shadow-sm" : "text-muted"
+              filter === k ? "bg-raised text-ink shadow-sm" : "text-muted"
             }`}
           >
             {k === "all" ? "All" : k === "low" ? "Low" : "Out"}
@@ -245,7 +245,7 @@ function StockPage() {
               const chip = statusChip(it.status);
               const profit = it.selling_price_paise - it.cost_price_paise;
               return (
-                <li key={it.id} className="rounded-[14px] bg-white p-3 ring-1 ring-inset ring-[color:var(--color-border)]">
+                <li key={it.id} className="rounded-[14px] bg-raised p-3 ring-1 ring-inset ring-[color:var(--color-border)]">
                   <div className="flex items-start gap-3">
                     {it.thumb_url ? (
                       <img src={it.thumb_url} alt="" className="h-14 w-14 shrink-0 rounded-[10px] object-cover" loading="lazy" />
@@ -416,7 +416,7 @@ function StockSheet({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4" onClick={onClose}>
       <div
-        className="w-full max-w-[480px] rounded-t-[20px] bg-white p-5 sm:rounded-[20px]"
+        className="w-full max-w-[480px] rounded-t-[20px] bg-raised p-5 sm:rounded-[20px]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
@@ -533,7 +533,7 @@ function MovementLog({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40" onClick={onClose}>
       <div
-        className="max-h-[80vh] w-full max-w-[480px] overflow-y-auto rounded-t-[20px] bg-white p-5"
+        className="max-h-[80vh] w-full max-w-[480px] overflow-y-auto rounded-t-[20px] bg-raised p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
