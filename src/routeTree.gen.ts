@@ -26,6 +26,7 @@ import { Route as BlogFlatLayGuideRouteImport } from './routes/blog.flat-lay-gui
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 import { Route as ApiPublicMetaOauthCallbackRouteImport } from './routes/api/public/meta-oauth-callback'
+import { Route as AuthenticatedAdminCostsRouteImport } from './routes/_authenticated.admin.costs'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -114,6 +115,11 @@ const ApiPublicMetaOauthCallbackRoute =
     path: '/api/public/meta-oauth-callback',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAdminCostsRoute = AuthenticatedAdminCostsRouteImport.update({
+  id: '/_authenticated/admin/costs',
+  path: '/admin/costs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/connect/instagram': typeof ConnectInstagramRoute
   '/results/$id': typeof ResultsIdRoute
+  '/admin/costs': typeof AuthenticatedAdminCostsRoute
   '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/connect/instagram': typeof ConnectInstagramRoute
   '/results/$id': typeof ResultsIdRoute
+  '/admin/costs': typeof AuthenticatedAdminCostsRoute
   '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
@@ -170,6 +178,7 @@ export interface FileRoutesById {
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/connect/instagram': typeof ConnectInstagramRoute
   '/results/$id': typeof ResultsIdRoute
+  '/_authenticated/admin/costs': typeof AuthenticatedAdminCostsRoute
   '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
     | '/blog/flat-lay-guide'
     | '/connect/instagram'
     | '/results/$id'
+    | '/admin/costs'
     | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -210,6 +220,7 @@ export interface FileRouteTypes {
     | '/blog/flat-lay-guide'
     | '/connect/instagram'
     | '/results/$id'
+    | '/admin/costs'
     | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
   id:
@@ -229,6 +240,7 @@ export interface FileRouteTypes {
     | '/blog/flat-lay-guide'
     | '/connect/instagram'
     | '/results/$id'
+    | '/_authenticated/admin/costs'
     | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
   fileRoutesById: FileRoutesById
@@ -247,6 +259,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   BlogFlatLayGuideRoute: typeof BlogFlatLayGuideRoute
   ResultsIdRoute: typeof ResultsIdRoute
+  AuthenticatedAdminCostsRoute: typeof AuthenticatedAdminCostsRoute
   ApiPublicMetaOauthCallbackRoute: typeof ApiPublicMetaOauthCallbackRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
 }
@@ -372,6 +385,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMetaOauthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/costs': {
+      id: '/_authenticated/admin/costs'
+      path: '/admin/costs'
+      fullPath: '/admin/costs'
+      preLoaderRoute: typeof AuthenticatedAdminCostsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -410,6 +430,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   BlogFlatLayGuideRoute: BlogFlatLayGuideRoute,
   ResultsIdRoute: ResultsIdRoute,
+  AuthenticatedAdminCostsRoute: AuthenticatedAdminCostsRoute,
   ApiPublicMetaOauthCallbackRoute: ApiPublicMetaOauthCallbackRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
 }

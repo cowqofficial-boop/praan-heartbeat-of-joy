@@ -1,14 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { buildShopifyCsv, slugify } from "./csv";
-
-const GATEWAY = "https://ai.gateway.lovable.dev/v1";
-
-function apiKey(): string {
-  const k = process.env.LOVABLE_API_KEY;
-  if (!k) throw new Error("Missing LOVABLE_API_KEY");
-  return k;
-}
+import {
+  GEMINI_IMAGE_MODEL,
+  GEMINI_TEXT_MODEL,
+  geminiGenerateImage,
+  geminiGenerateText,
+  parseJsonLoose,
+} from "./gemini.server";
 
 async function admin() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -81,57 +80,28 @@ export const identifyProduct = createServerFn({ method: "POST" })
   .inputValidator((d: { imageUrl: string }) => d)
   .handler(async ({ data }) => {
     const { b64, mime } = await fetchAsBase64(data.imageUrl);
-    const body = {
-      model: "google/gemini-2.5-flash",
-      messages: [
+    const text = await geminiGenerateText({
+      systemInstruction:
+        "You identify products from a photo for Indian e-commerce sellers. Reply with a compact JSON object only, no prose, no markdown fences.",
+      parts: [
+        { inlineData: { mimeType: mime, data: b64 } },
         {
-          role: "system",
-          content:
-            "You identify products from a photo for Indian e-commerce sellers. Reply with a compact JSON object only, no prose, no markdown fences.",
-        },
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: 'Identify this product. Return JSON: {"name": short product name (max 6 words, sentence case), "category": one broad category like Kitchen, Home Decor, Fashion, Beauty, Electronics, "material": main material or empty, "color": main color or empty, "features": array of exactly 3 short key features}',
-            },
-            { type: "image_url", image_url: { url: `data:${mime};base64,${b64}` } },
-          ],
+          text: 'Identify this product. Return JSON: {"name": short product name (max 6 words, sentence case), "category": one broad category like Kitchen, Home Decor, Fashion, Beauty, Electronics, "material": main material or empty, "color": main color or empty, "features": array of exactly 3 short key features}',
         },
       ],
-    };
-    const res = await fetch(`${GATEWAY}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey()}`,
-      },
-      body: JSON.stringify(body),
+      responseMimeType: "application/json",
+      temperature: 0.2,
     });
-    if (!res.ok) throw new Error(`identify failed: ${res.status} ${await res.text()}`);
-    const json = (await res.json()) as {
-      choices: { message: { content: string } }[];
-    };
-    let text = json.choices?.[0]?.message?.content?.trim() ?? "";
-    text = text.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(text);
-    } catch {
-      const m2 = text.match(/\{[\s\S]*\}/);
-      parsed = m2 ? JSON.parse(m2[0]) : {};
-    }
+    const parsed = parseJsonLoose<unknown>(text) ?? {};
     const r = IdentifiedSchema.safeParse(parsed);
     const val = r.success
       ? r.data
       : { name: "Product", category: "General", material: "", color: "", features: [] };
-    if (val.features.length < 3) {
-      while (val.features.length < 3) val.features.push("");
-    }
+    while (val.features.length < 3) val.features.push("");
     val.features = val.features.slice(0, 3);
     return val;
   });
+
 
 // ---------- Rate limit ----------
 
@@ -189,37 +159,19 @@ const IMAGE_STYLES = [
   },
 ];
 
-async function generateOneImage(refB64: string, refMime: string, prompt: string, ratio: "1:1" | "9:16") {
-  const ratioHint =
-    ratio === "1:1"
-      ? "Square 1:1 aspect ratio, 1024x1024. The full product must be centred and completely visible with comfortable margin — nothing important cropped."
-      : "Vertical 9:16 aspect ratio, 1024x1820, tall portrait orientation. Product centred, fully visible.";
-  const body = {
-    model: "google/gemini-2.5-flash-image",
-    messages: [
-      {
-        role: "user",
-        content: [
-          { type: "text", text: `${prompt} ${ratioHint} ${NO_PEOPLE}` },
-          { type: "image_url", image_url: { url: `data:${refMime};base64,${refB64}` } },
-        ],
-      },
-    ],
-    modalities: ["image", "text"],
-  };
-  const res = await fetch(`${GATEWAY}/images/generations`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey()}`,
-    },
-    body: JSON.stringify(body),
+async function generateOneImage(
+  refB64: string,
+  refMime: string,
+  prompt: string,
+  targetSize = 2048,
+): Promise<string> {
+  const sizeHint = `Render at ${targetSize} by ${targetSize} pixels, square 1:1, photorealistic, catalogue-quality, high detail. Product centred with generous margin so nothing important is cropped when reframed to vertical.`;
+  const full = `${prompt} ${sizeHint} ${NO_PEOPLE} Keep the product identical to the reference photo — same shape, colour, material, branding and label.`;
+  const out = await geminiGenerateImage({
+    prompt: full,
+    reference: { mimeType: refMime, b64: refB64 },
   });
-  if (!res.ok) throw new Error(`image gen failed: ${res.status} ${await res.text()}`);
-  const json = (await res.json()) as { data?: { b64_json: string }[] };
-  const b64 = json.data?.[0]?.b64_json;
-  if (!b64) throw new Error("image gen returned no image");
-  return b64;
+  return out.b64;
 }
 
 export const generateImages = createServerFn({ method: "POST" })
@@ -241,32 +193,39 @@ export const generateImages = createServerFn({ method: "POST" })
     const { b64: refB64, mime: refMime } = await fetchAsBase64(data.imageUrl);
     const contextLine = `Product: ${data.productName}. Category: ${data.category}.`;
 
-    const tasks: Promise<{ kind: string; ratio: "1:1" | "9:16"; url: string }>[] = [];
-    for (const style of IMAGE_STYLES) {
-      for (const ratio of ["1:1", "9:16"] as const) {
-        tasks.push(
-          (async () => {
-            const b64 = await generateOneImage(
-              refB64,
-              refMime,
-              `${contextLine} ${style.prompt}`,
-              ratio,
-            );
-            const bytes = b64ToBytes(b64);
-            const path = `generated/${data.browserId}/${Date.now()}-${style.kind}-${ratio.replace(":", "x")}.png`;
-            const url = await uploadBytes(path, bytes, "image/png");
-            return { kind: style.kind, ratio, url };
-          })(),
-        );
-      }
-    }
+    // Generate ONCE per style at 2048 (square); reuse the URL for both 1:1 and 9:16
+    // to halve API cost — the browser crops to 9:16 at download time.
+    const tasks: Promise<{ kind: string; url: string }>[] = IMAGE_STYLES.map((style) => (async () => {
+      const b64 = await generateOneImage(refB64, refMime, `${contextLine} ${style.prompt}`, 2048);
+      const bytes = b64ToBytes(b64);
+      const path = `generated/${data.browserId}/${Date.now()}-${style.kind}.png`;
+      const url = await uploadBytes(path, bytes, "image/png");
+      return { kind: style.kind, url };
+    })());
     const settled = await Promise.allSettled(tasks);
-    const images = settled
-      .filter((r): r is PromiseFulfilledResult<{ kind: string; ratio: "1:1" | "9:16"; url: string }> => r.status === "fulfilled")
+    const base = settled
+      .filter((r): r is PromiseFulfilledResult<{ kind: string; url: string }> => r.status === "fulfilled")
       .map((r) => r.value);
-    if (images.length === 0) throw new Error("No photos came through. Try again.");
-    return { images };
+    if (base.length === 0) {
+      const firstErr = settled.find((r) => r.status === "rejected") as PromiseRejectedResult | undefined;
+      const detail = firstErr ? (firstErr.reason instanceof Error ? firstErr.reason.message : String(firstErr.reason)) : "";
+      throw new Error(detail || "No photos came through. Try again.");
+    }
+    // Return both ratios pointing to the same underlying URL so downstream code is unchanged.
+    const images = base.flatMap((b) => [
+      { kind: b.kind, ratio: "1:1" as const, url: b.url },
+      { kind: b.kind, ratio: "9:16" as const, url: b.url },
+    ]);
+    return {
+      images,
+      meta: {
+        image_model: GEMINI_IMAGE_MODEL,
+        image_count: base.length,
+        image_resolution: 2048,
+      },
+    };
   });
+
 
 // ---------- Copy generation ----------
 
@@ -295,6 +254,7 @@ export const generateCopyAndSave = createServerFn({ method: "POST" })
       color: string;
       features: string[];
       images: { kind: string; ratio: string; url: string }[];
+      meta?: { image_model?: string; image_count?: number; image_resolution?: number } | null;
     }) => d,
   )
   .handler(async ({ data }) => {
@@ -363,31 +323,14 @@ Return a JSON object only (no prose, no markdown fences) with these exact keys:
   "festival": "one festival or offer line, single sentence"
 }`;
 
-    const res = await fetch(`${GATEWAY}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey()}`,
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: sys },
-          { role: "user", content: userPrompt },
-        ],
-      }),
+    const raw = await geminiGenerateText({
+      systemInstruction: sys,
+      parts: [{ text: userPrompt }],
+      responseMimeType: "application/json",
+      temperature: 0.8,
+      maxOutputTokens: 3072,
     });
-    if (!res.ok) throw new Error(`copy failed: ${res.status} ${await res.text()}`);
-    const json = (await res.json()) as { choices: { message: { content: string } }[] };
-    let text = json.choices?.[0]?.message?.content?.trim() ?? "";
-    text = text.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(text);
-    } catch {
-      const m = text.match(/\{[\s\S]*\}/);
-      parsed = m ? JSON.parse(m[0]) : {};
-    }
+    const parsed = parseJsonLoose<unknown>(raw) ?? {};
     const r = CopySchema.safeParse(parsed);
     if (!r.success) throw new Error("Listing text didn't come through cleanly. Try again.");
     const copy = r.data;
@@ -427,6 +370,12 @@ Return a JSON object only (no prose, no markdown fences) with these exact keys:
         generated_images: data.images,
         copy,
         csv_url: csvUrl,
+        gen_metadata: {
+          text_model: GEMINI_TEXT_MODEL,
+          image_model: data.meta?.image_model ?? GEMINI_IMAGE_MODEL,
+          image_count: data.meta?.image_count ?? 0,
+          image_resolution: data.meta?.image_resolution ?? 2048,
+        },
       })
       .select("id")
       .single();

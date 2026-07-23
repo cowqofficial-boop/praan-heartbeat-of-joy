@@ -55,7 +55,7 @@ function Generating() {
     setStates(["done", "active", "pending"]);
     const browserId = getBrowserId();
     try {
-      const { images } = await generateImages({
+      const { images, meta } = await generateImages({
         data: {
           browserId,
           userId: user?.id ?? null,
@@ -78,6 +78,7 @@ function Generating() {
           color: identified.color,
           features: identified.features,
           images,
+          meta,
         },
       });
       setStates(["done", "done", "done"]);

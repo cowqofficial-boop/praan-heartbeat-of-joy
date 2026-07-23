@@ -1,14 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import {
+  GEMINI_IMAGE_MODEL,
+  geminiGenerateImage,
+  geminiGenerateText,
+  parseJsonLoose,
+} from "./gemini.server";
 
-const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 const BUCKET = "praan";
 
-function apiKey(): string {
-  const k = process.env.LOVABLE_API_KEY;
-  if (!k) throw new Error("Missing LOVABLE_API_KEY");
-  return k;
-}
 
 // ---------- Post types ----------
 
@@ -306,33 +306,14 @@ async function generatePostArtifacts(post: {
     post.post_type === "festival" ? nearestFestival(post.post_date) : { name: "", date: "" };
   const festHint = post.post_type === "festival" ? ` Festival: ${fest.name}.` : "";
   const context = `Product: ${post.product_name ?? "Product"}.${festHint}`;
-  const ratioHint =
-    "Square 1:1 aspect ratio, 1024x1024. The full product must be centred and completely visible with comfortable margin — nothing important cropped.";
-  const imgBody = {
-    model: "google/gemini-2.5-flash-image",
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text: `${context} ${stylePrompt} ${ratioHint} ${NO_PEOPLE} Keep product identical to the reference photo in shape, colour, branding and label.`,
-          },
-          { type: "image_url", image_url: { url: `data:${refMime};base64,${refB64}` } },
-        ],
-      },
-    ],
-    modalities: ["image", "text"],
-  };
-  const imgRes = await fetch(`${GATEWAY}/images/generations`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey()}` },
-    body: JSON.stringify(imgBody),
+  const sizeHint =
+    "Render at 1024 by 1024 pixels, square 1:1, photorealistic. Product centred with comfortable margin so nothing important is cropped.";
+  const imgOut = await geminiGenerateImage({
+    prompt: `${context} ${stylePrompt} ${sizeHint} ${NO_PEOPLE} Keep product identical to the reference photo in shape, colour, branding and label.`,
+    reference: { mimeType: refMime, b64: refB64 },
   });
-  if (!imgRes.ok) throw new Error(`image gen: ${imgRes.status} ${await imgRes.text()}`);
-  const imgJson = (await imgRes.json()) as { data?: { b64_json: string }[] };
-  const imgB64 = imgJson.data?.[0]?.b64_json;
-  if (!imgB64) throw new Error("no image returned");
+  const imgB64 = imgOut.b64;
+
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const bytes = b64ToBytes(imgB64);
@@ -386,39 +367,16 @@ Post type: ${POST_TYPE_LABELS[post.post_type]}.
 Brief: ${typeBrief[post.post_type]}
 Return JSON: {"caption": string (2-4 short paragraphs, 400-700 chars, line breaks between paragraphs), "hashtags": string (10-15 relevant Indian-market hashtags space-separated starting with #)}`;
 
-  const capRes = await fetch(`${GATEWAY}/chat/completions`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey()}` },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: sys },
-        { role: "user", content: user },
-      ],
-    }),
+  const txt = await geminiGenerateText({
+    systemInstruction: sys,
+    parts: [{ text: user }],
+    responseMimeType: "application/json",
+    temperature: 0.8,
+    maxOutputTokens: 1024,
   });
-  if (!capRes.ok) throw new Error(`caption: ${capRes.status} ${await capRes.text()}`);
-  const capJson = (await capRes.json()) as { choices: { message: { content: string } }[] };
-  let txt = capJson.choices?.[0]?.message?.content?.trim() ?? "";
-  txt = txt.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
-  let caption = "";
-  let hashtags = "";
-  try {
-    const j = JSON.parse(txt);
-    caption = String(j.caption ?? "").trim();
-    hashtags = String(j.hashtags ?? "").trim();
-  } catch {
-    const m = txt.match(/\{[\s\S]*\}/);
-    if (m) {
-      try {
-        const j = JSON.parse(m[0]);
-        caption = String(j.caption ?? "").trim();
-        hashtags = String(j.hashtags ?? "").trim();
-      } catch {
-        /* ignore */
-      }
-    }
-  }
+  const parsed = parseJsonLoose<{ caption?: unknown; hashtags?: unknown }>(txt) ?? {};
+  let caption = String(parsed.caption ?? "").trim();
+  let hashtags = String(parsed.hashtags ?? "").trim();
   if (!caption) caption = txt.slice(0, 700);
 
   return { image_url: imageUrl, caption, hashtags };
