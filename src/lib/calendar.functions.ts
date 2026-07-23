@@ -306,33 +306,14 @@ async function generatePostArtifacts(post: {
     post.post_type === "festival" ? nearestFestival(post.post_date) : { name: "", date: "" };
   const festHint = post.post_type === "festival" ? ` Festival: ${fest.name}.` : "";
   const context = `Product: ${post.product_name ?? "Product"}.${festHint}`;
-  const ratioHint =
-    "Square 1:1 aspect ratio, 1024x1024. The full product must be centred and completely visible with comfortable margin — nothing important cropped.";
-  const imgBody = {
-    model: "google/gemini-2.5-flash-image",
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text: `${context} ${stylePrompt} ${ratioHint} ${NO_PEOPLE} Keep product identical to the reference photo in shape, colour, branding and label.`,
-          },
-          { type: "image_url", image_url: { url: `data:${refMime};base64,${refB64}` } },
-        ],
-      },
-    ],
-    modalities: ["image", "text"],
-  };
-  const imgRes = await fetch(`${GATEWAY}/images/generations`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey()}` },
-    body: JSON.stringify(imgBody),
+  const sizeHint =
+    "Render at 1024 by 1024 pixels, square 1:1, photorealistic. Product centred with comfortable margin so nothing important is cropped.";
+  const imgOut = await geminiGenerateImage({
+    prompt: `${context} ${stylePrompt} ${sizeHint} ${NO_PEOPLE} Keep product identical to the reference photo in shape, colour, branding and label.`,
+    reference: { mimeType: refMime, b64: refB64 },
   });
-  if (!imgRes.ok) throw new Error(`image gen: ${imgRes.status} ${await imgRes.text()}`);
-  const imgJson = (await imgRes.json()) as { data?: { b64_json: string }[] };
-  const imgB64 = imgJson.data?.[0]?.b64_json;
-  if (!imgB64) throw new Error("no image returned");
+  const imgB64 = imgOut.b64;
+
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const bytes = b64ToBytes(imgB64);
