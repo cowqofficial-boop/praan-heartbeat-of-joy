@@ -22,7 +22,7 @@ export function BeforeAfterSlider({
   return (
     <div
       ref={ref}
-      className="relative w-full overflow-hidden rounded-[12px] bg-surface select-none touch-none cursor-ew-resize"
+      className="relative w-full overflow-hidden bg-surface select-none touch-none cursor-ew-resize"
       style={{ aspectRatio: "4 / 5" }}
       onPointerDown={(e) => {
         dragging.current = true;
@@ -61,11 +61,11 @@ export function BeforeAfterSlider({
 
       <div
         className="pointer-events-none absolute inset-y-0"
-        style={{ left: `calc(${pos}% - 1.5px)`, width: "3px", background: "#F5A623" }}
+        style={{ left: `calc(${pos}% - 1.5px)`, width: "3px", background: "#F2A73B" }}
       />
       <div
-        className="pointer-events-none absolute top-1/2 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-white shadow-[0_4px_14px_rgba(0,0,0,0.25)]"
-        style={{ left: `${pos}%`, background: "#F5A623" }}
+        className="pointer-events-none absolute top-1/2 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-white"
+        style={{ left: `${pos}%`, background: "#F2A73B" }}
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="14 6 8 12 14 18" />

@@ -232,23 +232,23 @@ function Upload() {
       )}
 
       <div className="w-full max-w-sm">
-        <h1 className="font-display text-[44px] leading-[1.05] text-ink">
-          PRAAN — AI Product Photos &amp; Listings
+        <h1 className="font-display text-[32px] leading-[1.05] text-ink">
+          One photo. Everything you need to sell it.
         </h1>
         <p className="mt-3 text-[15px] text-muted">
-          One photo. Everything you need to sell it.
+          Studio photos, listing, and a catalog file — from your phone.
         </p>
 
         {photos.length === 0 ? (
           <button
             type="button"
             onClick={() => mainInputRef.current?.click()}
-            className="mt-10 flex aspect-square w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[12px] border-2 border-dashed border-[color:var(--color-border)] bg-surface text-ink transition-colors active:bg-[#eeeeeb]"
+            className="mt-8 flex aspect-square w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[14px] bg-surface text-ink transition-colors active:bg-[#eeeeeb]"
           >
             <span className="grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground">
               <Camera className="h-7 w-7" />
             </span>
-            <span className="text-[17px] font-semibold">Add your product photo</span>
+            <span className="text-[17px] font-semibold">Add a product photo</span>
           </button>
         ) : (
           <>
@@ -345,7 +345,7 @@ function Upload() {
 
       {photos.length > 0 && (
         <PrimaryButton fixed disabled={!canContinue} onClick={handleContinue}>
-          {busy ? "Reading your photos…" : anyUploading ? "Uploading…" : "Continue"}
+          {busy ? "Reading your photos…" : anyUploading ? "Uploading…" : "Make my photos"}
         </PrimaryButton>
       )}
 
