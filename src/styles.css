@@ -147,7 +147,12 @@ body {
   letter-spacing: -0.03em;
   line-height: 1.02;
   font-size: 40px;
-  color: var(--text);
+  /* Gradient fill — page colour into pearl (or accent2 for brand-kit). */
+  background: linear-gradient(90deg, var(--page-accent) 0%, var(--page-accent-2) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 @media (min-width: 1024px) {
   .page-headline {
@@ -170,14 +175,31 @@ body {
   color: var(--text);
 }
 
-/* Eyebrow labels: PHOTOS, MARKETPLACE LISTING, STOCK */
+/* Eyebrow labels — take the page accent so section markers carry identity. */
 @utility eyebrow {
   font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-dim);
+  color: var(--page-accent);
+}
+
+/* Primary CTA — vertical gradient of page accent + soft coloured glow. */
+@utility btn-accent {
+  background: linear-gradient(180deg, var(--page-accent) 0%, color-mix(in oklab, var(--page-accent) 88%, #000) 100%);
+  color: #F5F7FF;
+  box-shadow: 0 8px 32px color-mix(in oklab, var(--page-accent) 25%, transparent), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+@utility btn-accent-glow {
+  box-shadow: 0 8px 32px color-mix(in oklab, var(--page-accent) 25%, transparent), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+/* Card that carries a faint tint of the page colour. */
+@utility card-accent {
+  background: linear-gradient(180deg, color-mix(in oklab, var(--page-accent) 4%, var(--surface)) 0%, var(--surface) 100%);
+  border-radius: 14px;
+  box-shadow: var(--shadow-card);
 }
 
 /* Elevation utilities */
