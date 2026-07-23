@@ -241,9 +241,7 @@ function SignUpGate({ title, body, next }: { title: string; body: string; next: 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-muted">
-        {title}
-      </h2>
+      <h2 className="eyebrow">{title}</h2>
       {children}
     </section>
   );
@@ -259,9 +257,12 @@ function Block({
   multiline?: boolean;
 }) {
   return (
-    <div className="rounded-[12px] border border-[color:var(--color-border)] bg-surface p-4">
+    <div
+      className="rounded-[16px] bg-surface p-4"
+      style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)" }}
+    >
       <div className="flex items-start justify-between gap-3">
-        <span className="text-[13px] font-medium text-muted">{label}</span>
+        <span className="eyebrow">{label}</span>
         <CopyButton text={text} />
       </div>
       <p
@@ -272,6 +273,7 @@ function Block({
     </div>
   );
 }
+
 
 function PhotosSection({
   images,
