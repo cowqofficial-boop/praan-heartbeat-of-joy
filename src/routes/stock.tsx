@@ -251,11 +251,19 @@ function StockPage() {
         {isLoading ? (
           <p className="text-[15px] text-muted">Loading…</p>
         ) : items.length === 0 ? (
-          <div className="mt-10 rounded-[16px] bg-surface p-8 text-center" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)" }}>
-            <Package className="mx-auto h-8 w-8 text-muted" />
-            <p className="mt-3 text-[16px] font-medium text-ink">Add your first item — it's free.</p>
-            <p className="mt-1 text-[14px] text-muted">Track what's in stock, low, or sold out.</p>
-          </div>
+          <EmptyState
+            illustration={<IllustrationStock />}
+            title="Add your first item"
+            body="Your stock will show up here once you add an item. Track quantity, cost, price and profit — plus low-stock alerts."
+            action={{ label: "Add item", onClick: () => setCreating(true) }}
+            help={
+              <>
+                <p className="font-semibold text-ink">How stock helps</p>
+                <p className="mt-1 text-muted">Each item shows a live status: in stock, low, or out. Log sales in one tap; the number goes down. Your content calendar uses this to skip out-of-stock products automatically.</p>
+              </>
+            }
+          />
+
 
         ) : sorted.length === 0 ? (
           <p className="text-[15px] text-muted">Nothing matches.</p>
