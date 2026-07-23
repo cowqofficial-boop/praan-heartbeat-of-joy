@@ -142,7 +142,7 @@ function LibraryPage() {
       </Link>
 
       {items.length > 0 && (
-        <label className="mt-6 flex h-11 items-center gap-2 rounded-[12px] border border-[color:var(--color-border)] bg-white px-3">
+        <label className="mt-6 flex h-11 items-center gap-2 rounded-[12px] border border-[color:var(--color-border)] bg-raised px-3">
           <Search className="h-4 w-4 text-muted" />
           <input
             aria-label="Search products"
@@ -195,7 +195,7 @@ function ProductCard({
     month: "short",
   });
   return (
-    <li className="overflow-hidden rounded-[12px] border border-[color:var(--color-border)] bg-white">
+    <li className="overflow-hidden rounded-[12px] border border-[color:var(--color-border)] bg-raised">
       <Link
         to="/results/$id"
         params={{ id: item.id }}

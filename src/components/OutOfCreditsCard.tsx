@@ -19,7 +19,7 @@ export function OutOfCreditsCard({
     "Top up any time — credits never expire — or upgrade for monthly credits and everything unlocked.";
   return (
     <div className="mt-6 rounded-[14px] bg-surface p-5 text-center">
-      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-white">
+      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-raised">
         <Sparkles className="h-5 w-5 text-highlight" />
       </div>
       <p className="mt-3 text-[16px] font-semibold text-ink">{heading ?? defaultHeading}</p>
@@ -34,7 +34,7 @@ export function OutOfCreditsCard({
         <Link
           to="/pricing"
           hash="topups"
-          className="inline-flex h-11 items-center justify-center rounded-[14px] bg-white px-6 text-[15px] font-semibold text-ink"
+          className="inline-flex h-11 items-center justify-center rounded-[14px] bg-raised px-6 text-[15px] font-semibold text-ink"
         >
           Buy credits
         </Link>

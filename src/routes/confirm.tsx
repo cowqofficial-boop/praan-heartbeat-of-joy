@@ -65,7 +65,7 @@ function Confirm() {
         <Field htmlFor="product-name" label="Product name">
           <input
             id="product-name"
-            className="h-12 w-full rounded-[12px] border border-[color:var(--color-border)] bg-white px-4 text-[16px] text-ink"
+            className="h-12 w-full rounded-[12px] border border-[color:var(--color-border)] bg-raised px-4 text-[16px] text-ink"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Brass diya set"
@@ -75,7 +75,7 @@ function Confirm() {
           <input
             id="product-price"
             inputMode="numeric"
-            className="h-12 w-full rounded-[12px] border border-[color:var(--color-border)] bg-white px-4 text-[16px] text-ink"
+            className="h-12 w-full rounded-[12px] border border-[color:var(--color-border)] bg-raised px-4 text-[16px] text-ink"
             value={price}
             onChange={(e) => setPrice(e.target.value.replace(/[^\d]/g, ""))}
             placeholder="499"
@@ -84,7 +84,7 @@ function Confirm() {
         <Field htmlFor="product-detail" label="One detail worth knowing">
           <input
             id="product-detail"
-            className="h-12 w-full rounded-[12px] border border-[color:var(--color-border)] bg-white px-4 text-[16px] text-ink"
+            className="h-12 w-full rounded-[12px] border border-[color:var(--color-border)] bg-raised px-4 text-[16px] text-ink"
             value={detail}
             onChange={(e) => setDetail(e.target.value)}
             placeholder="Handmade, cotton, 6-inch, etc."

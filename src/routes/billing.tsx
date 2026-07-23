@@ -74,7 +74,7 @@ function BillingPage() {
       </header>
 
       {/* Current plan */}
-      <section className="mt-4 rounded-[16px] border border-[color:var(--color-border)] bg-white p-5">
+      <section className="mt-4 rounded-[16px] border border-[color:var(--color-border)] bg-raised p-5">
         <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">Current plan</p>
         <p className="mt-1 font-display text-[26px] text-ink">{credits.plan_name}</p>
         <div className="mt-4 grid grid-cols-2 gap-3">
@@ -110,7 +110,7 @@ function BillingPage() {
       </section>
 
       {/* Usage */}
-      <section className="mt-4 rounded-[16px] border border-[color:var(--color-border)] bg-white p-5">
+      <section className="mt-4 rounded-[16px] border border-[color:var(--color-border)] bg-raised p-5">
         <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">This month</p>
         <p className="mt-1 text-[14px] text-ink">
           Purchased <span className="font-semibold">{usedThisMonth}</span> credits since{" "}
@@ -128,13 +128,13 @@ function BillingPage() {
             {payments.map((p) => (
               <li
                 key={p.id}
-                className="flex items-center justify-between rounded-[12px] border border-[color:var(--color-border)] bg-white p-3"
+                className="flex items-center justify-between rounded-[12px] border border-[color:var(--color-border)] bg-raised p-3"
               >
                 <div>
                   <p className="text-[14px] font-medium text-ink">{p.plan_name}</p>
                   <p className="mt-0.5 text-[12px] text-muted">
                     {new Date(p.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })} ·{" "}
-                    <span className={p.status === "paid" ? "text-[#2f8f3d]" : p.status === "failed" ? "text-primary" : "text-muted"}>
+                    <span className={p.status === "paid" ? "text-green" : p.status === "failed" ? "text-primary" : "text-muted"}>
                       {p.status}
                     </span>
                   </p>
