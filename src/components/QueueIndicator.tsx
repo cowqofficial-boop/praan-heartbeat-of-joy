@@ -40,7 +40,7 @@ export function QueueIndicator() {
     <Link
       to="/generating"
       className={`fixed right-4 z-40 flex items-center gap-2 rounded-full bg-raised px-4 py-2.5 text-[13px] font-medium text-ink shadow-lg transition hover:brightness-110 lg:right-6 lg:bottom-6 bottom-6 ${
-        c.running || c.waiting ? "cowq-pulse" : ""
+        c.running || c.waiting ? "breathe" : ""
       }`}
       aria-label={label}
     >
