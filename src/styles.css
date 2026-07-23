@@ -88,6 +88,31 @@ body {
   font-weight: 500;
 }
 
+/* Type scale utilities */
+@utility page-headline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  font-size: 40px;
+  color: var(--text);
+}
+@utility section-heading {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-size: 24px;
+  color: var(--text);
+}
+@utility card-title {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.3;
+  color: var(--text);
+}
+
 /* Eyebrow labels: PHOTOS, MARKETPLACE LISTING, STOCK */
 @utility eyebrow {
   font-family: var(--font-sans);
@@ -101,14 +126,19 @@ body {
 /* Elevation utilities */
 @utility card-lift {
   background: var(--surface);
+  border-radius: 14px;
   box-shadow: var(--shadow-card);
 }
 @utility raised-lift {
   background: var(--raised);
+  border-radius: 16px;
   box-shadow: var(--shadow-raised);
 }
 @utility hairline {
   border: 1px solid var(--line);
+}
+@utility hairline-row {
+  border-bottom: 1px solid var(--line);
 }
 
 @utility bottom-blur {
@@ -117,17 +147,25 @@ body {
   -webkit-backdrop-filter: blur(16px);
 }
 
-/* Dark form-control defaults */
+/* Dark form-control defaults — no border, focus ring only */
 input,
 textarea,
 select {
   background-color: var(--raised);
   color: var(--text);
   caret-color: var(--sindoor);
+  border: 0;
+  transition: box-shadow 160ms var(--ease-out);
 }
 input::placeholder,
 textarea::placeholder {
   color: var(--text-dim);
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--line), 0 0 0 2px var(--sindoor);
 }
 
 .no-scrollbar::-webkit-scrollbar {
