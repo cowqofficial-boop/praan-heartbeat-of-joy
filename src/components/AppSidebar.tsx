@@ -62,10 +62,19 @@ export function AppSidebar() {
                 ? path === "/"
                 : path === item.to || path.startsWith(item.to + "/");
             const Icon = item.icon;
+            const tourId =
+              item.to === "/create"
+                ? "nav-create"
+                : item.to === "/library"
+                ? "nav-library"
+                : item.to === "/stock"
+                ? "nav-stock"
+                : undefined;
             return (
               <Link
                 key={item.to}
                 to={item.to}
+                data-tour={tourId}
                 className={`relative flex h-11 items-center gap-3 rounded-[10px] px-3 text-[14px] font-medium transition-colors ${
                   active
                     ? "text-ink"
