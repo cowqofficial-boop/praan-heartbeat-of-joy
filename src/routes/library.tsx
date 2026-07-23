@@ -66,10 +66,8 @@ function LibraryPage() {
     );
   }
 
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    navigate({ to: "/" });
-  }
+
+
 
   async function handleRename(item: LibraryItem) {
     const name = await showPrompt({
