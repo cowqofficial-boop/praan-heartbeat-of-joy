@@ -57,7 +57,7 @@ function statusChip(s: StockStatus) {
     case "out":
       return { label: "Out of stock", cls: "bg-primary/15 text-primary/90" };
     case "low":
-      return { label: "Low", cls: "bg-marigold/20 text-marigold" };
+      return { label: "Low", cls: "bg-amber/20 text-amber" };
     default:
       return { label: "In stock", cls: "bg-green/15 text-green" };
   }

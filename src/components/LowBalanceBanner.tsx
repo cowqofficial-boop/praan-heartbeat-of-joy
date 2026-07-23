@@ -30,8 +30,8 @@ export function LowBalanceBanner() {
 
   if (hidden || !data) return null;
   return (
-    <div className="mt-3 flex items-center gap-2 rounded-[14px] bg-highlight/15 px-3 py-2.5 text-[13px] text-ink">
-      <AlertCircle className="h-4 w-4 shrink-0 text-highlight" />
+    <div className="mt-3 flex items-center gap-2 rounded-[14px] bg-amber/15 px-3 py-2.5 text-[13px] text-ink">
+      <AlertCircle className="h-4 w-4 shrink-0 text-amber" />
       <span className="flex-1">
         <span className="font-mono tabular-nums font-semibold">{data.total}</span>{" "}
         credits left.{" "}

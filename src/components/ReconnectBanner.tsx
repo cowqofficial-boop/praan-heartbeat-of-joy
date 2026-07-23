@@ -35,11 +35,11 @@ export function ReconnectBanner() {
       ? "Facebook Page"
       : "WhatsApp";
   return (
-    <div className="mt-3 flex items-center justify-between gap-3 rounded-[12px] bg-highlight/10 px-3 py-2 text-[13px] text-ink">
+    <div className="mt-3 flex items-center justify-between gap-3 rounded-[12px] bg-amber/10 px-3 py-2 text-[13px] text-ink">
       <span>{label} needs reconnecting.</span>
       <Link
         to="/connect"
-        className="rounded-[10px] bg-highlight px-3 py-1.5 text-[13px] font-semibold text-ink"
+        className="rounded-[10px] bg-amber px-3 py-1.5 text-[13px] font-semibold text-background"
       >
         Reconnect
       </Link>
