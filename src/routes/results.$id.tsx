@@ -214,7 +214,7 @@ function Results() {
 
 function SignUpGate({ title, body, next }: { title: string; body: string; next: string }) {
   return (
-    <div className="rounded-[12px] border border-[color:var(--color-border)] bg-surface p-5 text-center">
+    <div className="rounded-[12px] bg-surface p-5 text-center">
       <div className="mx-auto grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary">
         <Lock className="h-4 w-4" />
       </div>
@@ -448,7 +448,7 @@ function MakeMoreButton({
           setBusy(false);
         }
       }}
-      className="mt-3 h-11 w-full rounded-[12px] border border-[color:var(--color-border)] bg-raised text-[14px] font-semibold text-ink disabled:opacity-60"
+      className="mt-3 h-11 w-full rounded-[12px] bg-raised text-[14px] font-semibold text-ink disabled:opacity-60"
     >
       {busy ? "Making more photos…" : "Make more photos"}
     </button>
@@ -525,7 +525,7 @@ function DownloadCsvButton({ url, name }: { url: string; name: string }) {
           setBusy(false);
         }
       }}
-      className="flex h-12 w-full items-center justify-center gap-2 rounded-[12px] border border-[color:var(--color-border)] bg-raised text-[15px] font-semibold text-ink disabled:opacity-60"
+      className="flex h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-raised text-[15px] font-semibold text-ink disabled:opacity-60"
     >
       <Download className="h-4 w-4" />
       {busy ? "Preparing CSV…" : "Download catalog file (CSV)"}
@@ -544,13 +544,13 @@ function Feedback({ id }: { id: string }) {
   }, [rating]); // eslint-disable-line
 
   return (
-    <div className="mt-4 rounded-[12px] border border-[color:var(--color-border)] bg-surface p-4">
+    <div className="mt-4 rounded-[12px] bg-surface p-4">
       <p className="text-[15px] font-medium text-ink">How did we do?</p>
       <div className="mt-3 flex gap-2">
         <button
           onClick={() => setRating(1)}
           className={`flex h-11 flex-1 items-center justify-center gap-2 rounded-[12px] border text-[14px] font-medium ${
-            rating === 1 ? "border-highlight bg-highlight/10 text-ink" : "border-[color:var(--color-border)] bg-raised text-ink"
+            rating === 1 ? "border-highlight bg-highlight/10 text-ink" : "bg-raised text-ink"
           }`}
         >
           <ThumbsUp className="h-4 w-4" /> Good
@@ -558,7 +558,7 @@ function Feedback({ id }: { id: string }) {
         <button
           onClick={() => setRating(-1)}
           className={`flex h-11 flex-1 items-center justify-center gap-2 rounded-[12px] border text-[14px] font-medium ${
-            rating === -1 ? "border-primary bg-primary/10 text-ink" : "border-[color:var(--color-border)] bg-raised text-ink"
+            rating === -1 ? "border-primary bg-primary/10 text-ink" : "bg-raised text-ink"
           }`}
         >
           <ThumbsDown className="h-4 w-4" /> Not great
@@ -577,7 +577,7 @@ function Feedback({ id }: { id: string }) {
         }}
         rows={2}
         placeholder="What would make this better?"
-        className="mt-3 w-full resize-none rounded-[12px] border border-[color:var(--color-border)] bg-raised p-3 text-[15px] text-ink"
+        className="mt-3 w-full resize-none rounded-[12px] bg-raised p-3 text-[15px] text-ink"
       />
       {sent && (
         <p className="mt-2 text-[13px] text-highlight">Thanks — we've got it.</p>

@@ -81,7 +81,7 @@ function ConnectPage() {
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="font-display text-[24px] leading-tight text-ink">Connect your channels</h1>
+        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">Connect your channels</h1>
       </header>
       <p className="mt-2 text-[15px] text-muted">
         Link the places you sell. CowQ Ai keeps working even if you skip this.
@@ -142,7 +142,7 @@ function ChannelCard(props: {
   const connected = props.status?.connected;
   const needsReconnect = props.status?.needs_reconnect;
   return (
-    <section className="rounded-[12px] border border-[color:var(--color-border)] bg-raised p-4">
+    <section className="rounded-[12px] bg-raised p-4">
       <div className="flex items-center gap-3">
         <div className="grid h-10 w-10 place-items-center rounded-full bg-highlight/10 text-ink">
           {props.icon}
@@ -172,7 +172,7 @@ function ChannelCard(props: {
           <button
             type="button"
             onClick={props.onDisconnect}
-            className="h-10 rounded-[10px] border border-[color:var(--color-border)] px-3 text-[13px] font-medium text-ink"
+            className="h-10 rounded-[10px] px-3 text-[13px] font-medium text-ink"
           >
             Disconnect
           </button>

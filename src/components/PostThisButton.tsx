@@ -146,7 +146,7 @@ export function PostThisButton({
       )}
 
       {chooserOpen && !askPosted && (
-        <div className="rounded-[12px] border border-[color:var(--color-border)] bg-raised p-3">
+        <div className="rounded-[12px] bg-raised p-3">
           <div className="flex items-center gap-2 text-[13px] font-medium text-ink">
             <Share2 className="h-4 w-4 text-muted" />
             Where to?
@@ -158,7 +158,7 @@ export function PostThisButton({
                 type="button"
                 onClick={() => share(d)}
                 disabled={busy !== null}
-                className="flex h-11 flex-col items-center justify-center gap-1 rounded-[10px] border border-[color:var(--color-border)] bg-raised text-[12px] font-medium text-ink disabled:opacity-50"
+                className="flex h-11 flex-col items-center justify-center gap-1 rounded-[10px] bg-raised text-[12px] font-medium text-ink disabled:opacity-50"
               >
                 <span className="flex items-center gap-1">
                   {DEST_ICON[d]}
@@ -178,7 +178,7 @@ export function PostThisButton({
       )}
 
       {askPosted && (
-        <div className="rounded-[12px] border border-[color:var(--color-border)] bg-highlight/10 p-3">
+        <div className="rounded-[12px] bg-highlight/10 p-3">
           <p className="text-[14px] font-medium text-ink">Did you post it?</p>
           <div className="mt-2 grid grid-cols-2 gap-2">
             <button
@@ -196,7 +196,7 @@ export function PostThisButton({
             <button
               type="button"
               onClick={() => setAskPosted(false)}
-              className="h-11 rounded-[10px] border border-[color:var(--color-border)] bg-raised text-[14px] font-medium text-ink"
+              className="h-11 rounded-[10px] bg-raised text-[14px] font-medium text-ink"
             >
               Not yet
             </button>

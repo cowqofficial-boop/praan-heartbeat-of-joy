@@ -69,12 +69,12 @@ function BillingPage() {
         <Link to="/library" className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink" aria-label="Back">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="font-display text-[22px] leading-tight text-ink">Billing</h1>
+        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">Billing</h1>
         <div className="h-10 w-10" />
       </header>
 
       {/* Current plan */}
-      <section className="mt-4 rounded-[16px] border border-[color:var(--color-border)] bg-raised p-5">
+      <section className="mt-4 rounded-[16px] bg-raised p-5">
         <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">Current plan</p>
         <p className="mt-1 font-display text-[26px] text-ink">{credits.plan_name}</p>
         <div className="mt-4 grid grid-cols-2 gap-3">
@@ -101,7 +101,7 @@ function BillingPage() {
               type="button"
               onClick={() => confirm("Cancel your subscription at end of cycle?") && cancel.mutate()}
               disabled={cancel.isPending}
-              className="h-11 rounded-[12px] border border-[color:var(--color-border)] px-4 text-[14px] font-medium text-ink disabled:opacity-60"
+              className="h-11 rounded-[12px] px-4 text-[14px] font-medium text-ink disabled:opacity-60"
             >
               Cancel
             </button>
@@ -110,7 +110,7 @@ function BillingPage() {
       </section>
 
       {/* Usage */}
-      <section className="mt-4 rounded-[16px] border border-[color:var(--color-border)] bg-raised p-5">
+      <section className="mt-4 rounded-[16px] bg-raised p-5">
         <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">This month</p>
         <p className="mt-1 text-[14px] text-ink">
           Purchased <span className="font-semibold">{usedThisMonth}</span> credits since{" "}
@@ -128,7 +128,7 @@ function BillingPage() {
             {payments.map((p) => (
               <li
                 key={p.id}
-                className="flex items-center justify-between rounded-[12px] border border-[color:var(--color-border)] bg-raised p-3"
+                className="flex items-center justify-between rounded-[12px] bg-raised p-3"
               >
                 <div>
                   <p className="text-[14px] font-medium text-ink">{p.plan_name}</p>

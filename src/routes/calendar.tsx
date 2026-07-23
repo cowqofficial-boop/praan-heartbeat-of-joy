@@ -157,7 +157,7 @@ function CalendarPage() {
         <Link to="/library" className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink" aria-label="Back">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="font-display text-[22px] leading-tight text-ink">Content calendar</h1>
+        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">Content calendar</h1>
         <CreditBadge />
       </header>
 
@@ -311,7 +311,7 @@ function TodayCard({ post, onOpen }: { post: Post; onOpen: () => void }) {
     <button
       type="button"
       onClick={onOpen}
-      className="mt-2 flex w-full items-center gap-3 overflow-hidden rounded-[16px] border border-[color:var(--color-border)] bg-raised p-3 text-left"
+      className="mt-2 flex w-full items-center gap-3 overflow-hidden rounded-[16px] bg-raised p-3 text-left"
     >
       <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[10px] bg-surface">
         {post.image_url ? (
@@ -351,7 +351,7 @@ function MonthGrid({ posts, onOpen }: { posts: Post[]; onOpen: (id: string) => v
           <button
             type="button"
             onClick={() => onOpen(p.id)}
-            className="relative block aspect-square w-full overflow-hidden rounded-[10px] border border-[color:var(--color-border)] bg-surface"
+            className="relative block aspect-square w-full overflow-hidden rounded-[10px] bg-surface"
           >
             {p.image_url ? (
               <img src={p.image_url} alt="" className="h-full w-full object-cover" loading="lazy" />
@@ -485,7 +485,7 @@ function PostSheet({
                   type="button"
                   onClick={handleCopy}
                   disabled={!post.caption}
-                  className="flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-raised text-[14px] font-medium text-ink disabled:opacity-50"
+                  className="flex h-11 items-center justify-center gap-2 rounded-[10px] bg-raised text-[14px] font-medium text-ink disabled:opacity-50"
                 >
                   {copied ? <Check className="h-4 w-4 text-green" /> : <Copy className="h-4 w-4" />}
                   {copied ? "Copied" : "Copy caption"}
@@ -494,7 +494,7 @@ function PostSheet({
                   type="button"
                   onClick={handleDownload}
                   disabled={!post.image_url}
-                  className="flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-raised text-[14px] font-medium text-ink disabled:opacity-50"
+                  className="flex h-11 items-center justify-center gap-2 rounded-[10px] bg-raised text-[14px] font-medium text-ink disabled:opacity-50"
                 >
                   <Download className="h-4 w-4" />
                   Download image
@@ -503,7 +503,7 @@ function PostSheet({
                   type="button"
                   onClick={() => regen.mutate()}
                   disabled={regen.isPending}
-                  className="flex h-11 items-center justify-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-raised text-[14px] font-medium text-ink disabled:opacity-50"
+                  className="flex h-11 items-center justify-center gap-2 rounded-[10px] bg-raised text-[14px] font-medium text-ink disabled:opacity-50"
                 >
                   {regen.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -518,7 +518,7 @@ function PostSheet({
                   className={`flex h-11 items-center justify-center gap-2 rounded-[10px] text-[14px] font-medium ${
                     post.posted
                       ? "bg-green/15 text-green"
-                      : "border border-[color:var(--color-border)] bg-raised text-ink"
+                      : "bg-raised text-ink"
                   }`}
                 >
                   <Check className="h-4 w-4" />

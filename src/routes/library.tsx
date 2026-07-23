@@ -79,7 +79,7 @@ function LibraryPage() {
   return (
     <main className="flex min-h-screen flex-col px-5 pb-16 pt-8">
       <header className="flex items-center justify-between">
-        <h1 className="font-display text-[28px] leading-tight text-ink">Your products</h1>
+        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">Your products</h1>
         <div className="flex items-center gap-1">
           <CreditBadge />
           <Link
@@ -142,7 +142,7 @@ function LibraryPage() {
       </Link>
 
       {items.length > 0 && (
-        <label className="mt-6 flex h-11 items-center gap-2 rounded-[12px] border border-[color:var(--color-border)] bg-raised px-3">
+        <label className="mt-6 flex h-11 items-center gap-2 rounded-[12px] bg-raised px-3">
           <Search className="h-4 w-4 text-muted" />
           <input
             aria-label="Search products"
