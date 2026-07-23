@@ -556,6 +556,134 @@ export const generateImages = createServerFn({ method: "POST" })
     }
   });
 
+export const startGenerationJob = createServerFn({ method: "POST" })
+  .inputValidator((d: { browserId: string; userId?: string | null }) => d)
+  .handler(async ({ data }) => {
+    const { COSTS } = await import("./plans");
+    const productCost = COSTS.product;
+    const sb = await admin();
+    let refundSub = 0;
+    let refundPack = 0;
+    let reserved = false;
+
+    try {
+      if (data.userId) {
+        const { data: rows, error } = await sb.rpc("spend_credits", {
+          _user_id: data.userId,
+          _amount: productCost,
+        });
+        if (error) throw new Error(`credit check failed: ${error.message}`);
+        const first = Array.isArray(rows) ? rows[0] : rows;
+        if (!first?.ok) {
+          const have = first?.balance ?? 0;
+          throw new Error(`NO_CREDITS:${productCost}:${have}`);
+        }
+        refundSub = first.took_sub ?? 0;
+        refundPack = first.took_pack ?? 0;
+      } else {
+        await checkAndIncrementLimit(data.browserId);
+      }
+      reserved = true;
+
+      const { data: row, error } = await sb
+        .from("generation_jobs")
+        .insert({
+          browser_id: data.browserId,
+          user_id: data.userId ?? null,
+          refund_sub: refundSub,
+          refund_pack: refundPack,
+          status: "reserved",
+        })
+        .select("id")
+        .single();
+      if (error || !row) throw new Error(`generation start failed: ${error?.message ?? "no job"}`);
+      console.info(`[generation] start job=${row.id} browser=${data.browserId} cost=${productCost}`);
+      return { jobId: row.id as string, cost: productCost };
+    } catch (err) {
+      if (reserved) {
+        if (data.userId) {
+          await sb.rpc("refund_credits", { _user_id: data.userId, _sub: refundSub, _pack: refundPack });
+        } else {
+          await decrementLimit(data.browserId);
+        }
+      }
+      throw err;
+    }
+  });
+
+export const refundGenerationJob = createServerFn({ method: "POST" })
+  .inputValidator((d: { jobId: string; browserId: string; reason: string }) => d)
+  .handler(async ({ data }) => {
+    const refunded = await refundGenerationReservation(data.jobId, data.browserId, data.reason);
+    return { refunded };
+  });
+
+export const generateImageForJob = createServerFn({ method: "POST" })
+  .inputValidator(
+    (d: {
+      jobId: string;
+      browserId: string;
+      userId?: string | null;
+      imageUrl?: string;
+      imageUrls?: string[];
+      productName: string;
+      category: string;
+      needsPerson?: boolean;
+      isKidswear?: boolean;
+      isDrapedGarment?: boolean;
+      styleIndex: number;
+    }) => d,
+  )
+  .handler(async ({ data }) => {
+    await ensureGenerationReserved(data.jobId, data.browserId);
+    const urls = data.imageUrls && data.imageUrls.length > 0
+      ? data.imageUrls
+      : data.imageUrl
+        ? [data.imageUrl]
+        : [];
+    if (urls.length === 0) throw new Error("No image provided");
+
+    const { modelLine, brandModelRefs, brandModelBinding, personSource } = await getBrandModelContext(data.userId);
+    const styles = getGenerationStyles(data, modelLine, brandModelBinding);
+    const style = styles[data.styleIndex];
+    if (!style) throw new Error("Photo style was not found. Try again.");
+
+    const started = Date.now();
+    try {
+      console.info(`[generation] photo start job=${data.jobId} style=${style.kind} index=${data.styleIndex}`);
+      const productRefs = await Promise.all(urls.slice(0, 5).map((u) => fetchAsBase64(u)));
+      const contextLine = `Product: ${data.productName}. Category: ${data.category}.`;
+      const refs = style.hasPerson && brandModelRefs.length > 0
+        ? [...productRefs, ...brandModelRefs]
+        : productRefs;
+      const b64 = await generateOneImage(refs, `${contextLine} ${style.prompt}`, 2048, !!style.hasPerson);
+      await ensureGenerationReserved(data.jobId, data.browserId);
+      const bytes = b64ToBytes(b64);
+      const suffix = Math.random().toString(36).slice(2, 8);
+      const path = `generated/${data.browserId}/${Date.now()}-${suffix}-${style.kind}.png`;
+      const url = await uploadBytes(path, bytes, "image/png");
+      console.info(`[generation] photo done job=${data.jobId} style=${style.kind} duration_ms=${Date.now() - started}`);
+      return {
+        kind: style.kind,
+        images: [
+          { kind: style.kind, ratio: "1:1" as const, url },
+          { kind: style.kind, ratio: "9:16" as const, url },
+        ],
+        meta: {
+          image_model: GEMINI_IMAGE_MODEL,
+          image_count: 1,
+          image_resolution: 2048,
+          input_photo_count: productRefs.length,
+          person_source: personSource,
+        },
+      };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`[generation] photo failed job=${data.jobId} style=${style.kind} duration_ms=${Date.now() - started} error=${message}`);
+      throw err;
+    }
+  });
+
 
 
 
