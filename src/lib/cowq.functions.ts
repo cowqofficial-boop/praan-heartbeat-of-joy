@@ -389,11 +389,10 @@ async function generateOneImage(
     refs.length > 1
       ? `You are given ${refs.length} reference images. Use ALL of them together. The FIRST images are photos of the same single product from different angles — use them jointly to keep the product's true shape, colour, material, branding, wear and any labels faithful from every side; if the references disagree, keep whatever appears in the majority of references. Any final reference (if present) is a PERSON portrait to keep the model's face and appearance consistent — reuse that same person.`
       : "Keep the product identical to the reference photo — same shape, colour, material, branding and label.";
-      : "Keep the product identical to the reference photo — same shape, colour, material, branding and label.";
   const peopleRule = allowPerson ? "" : NO_PEOPLE;
 
   async function runOnce(attempt: number, extraGuidance = ""): Promise<string> {
-    const full = `${prompt} ${sizeHint} ${peopleRule} ${multiHint} ${extraGuidance}`.trim();
+    const full = `${prompt} ${SAME_OBJECT} ${PRODUCT_FIDELITY} ${PHOTO_REALISM} ${BANNED_LOOK} ${sizeHint} ${peopleRule} ${multiHint} ${extraGuidance}`.trim();
     const [primary, ...extras] = refs;
     console.info(`[generation] image attempt=${attempt} allow_person=${allowPerson}`);
     const out = await geminiGenerateImage({
