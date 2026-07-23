@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Calendar as CalendarIcon, Check, Copy, Download, Loader2, RefreshCw, Sparkles, X } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
+
 import { PostThisButton } from "@/components/PostThisButton";
 import { supabase } from "@/integrations/supabase/client";
 import {
