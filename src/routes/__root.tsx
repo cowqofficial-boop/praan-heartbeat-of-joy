@@ -15,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSidebar } from "../components/AppSidebar";
 import { QueueRunner } from "../lib/queue-runner";
 import { QueueIndicator } from "../components/QueueIndicator";
+import { useAuth } from "../lib/use-auth";
 
 
 function NotFoundComponent() {
