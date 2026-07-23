@@ -310,7 +310,7 @@ function PhotosSection({
             type="button"
             onClick={() => setRatio(r)}
             className={`rounded-full px-4 py-1.5 text-[13px] font-semibold transition-colors ${
-              ratio === r ? "bg-ink text-white" : "text-muted"
+              ratio === r ? "bg-ink text-background" : "text-muted"
             }`}
           >
             {r === "1:1" ? "Square" : "Vertical"}

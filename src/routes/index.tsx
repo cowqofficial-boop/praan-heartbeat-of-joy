@@ -287,7 +287,7 @@ function Upload() {
                     type="button"
                     onClick={() => removePhoto(p.id)}
                     aria-label="Remove photo"
-                    className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-ink text-white shadow"
+                    className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-ink text-background shadow"
                   >
                     <X className="h-3 w-3" />
                   </button>
