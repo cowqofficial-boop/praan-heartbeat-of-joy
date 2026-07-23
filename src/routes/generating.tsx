@@ -103,7 +103,7 @@ function Generating() {
         180_000,
         "This is taking longer than it should. Your credits have been returned — try again.",
       );
-      const fulfilled = settled.filter((r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof makePhoto>>> => r.status === "fulfilled");
+      const fulfilled = settled.filter((r) => r.status === "fulfilled");
       if (fulfilled.length === 0) {
         const firstError = settled.find((r) => r.status === "rejected") as PromiseRejectedResult | undefined;
         const message = firstError?.reason instanceof Error ? firstError.reason.message : String(firstError?.reason ?? "No photos came through. Try again.");
