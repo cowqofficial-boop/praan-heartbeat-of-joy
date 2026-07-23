@@ -1,0 +1,581 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ArrowLeft,
+  Minus,
+  Package,
+  Plus,
+  Search,
+  Trash2,
+  X,
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  changeQuantity,
+  deleteStockItem,
+  listMovements,
+  listStock,
+  upsertStockItem,
+  type StockItem,
+  type StockStatus,
+} from "@/lib/stock.functions";
+import { listMyProducts } from "@/lib/library.functions";
+import { formatInr } from "@/lib/plans";
+
+export const Route = createFileRoute("/stock")({
+  head: () => ({
+    meta: [
+      { title: "Stock — PRAAN" },
+      { name: "description", content: "Track what's in stock, low, or sold out. Log every movement and see your inventory value." },
+      { property: "og:title", content: "Stock — PRAAN" },
+      { property: "og:description", content: "Stock management for Indian sellers — free on every plan." },
+      { property: "og:type", content: "website" },
+      { name: "robots", content: "noindex, follow" },
+    ],
+  }),
+  component: StockPage,
+});
+
+type Filter = "all" | "low" | "out";
+
+const REASON_LABEL = {
+  sold: "Sold",
+  restocked: "Restocked",
+  damaged: "Damaged",
+  returned: "Returned",
+  adjustment: "Adjusted",
+} as const;
+
+function statusChip(s: StockStatus) {
+  switch (s) {
+    case "out":
+      return { label: "Out of stock", cls: "bg-primary/10 text-primary" };
+    case "low":
+      return { label: "Low", cls: "bg-highlight/20 text-ink" };
+    default:
+      return { label: "In stock", cls: "bg-surface text-muted" };
+  }
+}
+
+function StockPage() {
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [authReady, setAuthReady] = useState(false);
+  const [q, setQ] = useState("");
+  const [filter, setFilter] = useState<Filter>("all");
+  const [editing, setEditing] = useState<StockItem | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [showLog, setShowLog] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) {
+        navigate({ to: "/auth", search: { mode: "signin", next: "/stock" }, replace: true });
+      } else {
+        setAuthReady(true);
+      }
+    });
+  }, [navigate]);
+
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ["stock"],
+    queryFn: () => listStock(),
+    enabled: authReady,
+  });
+
+  const { data: movements = [] } = useQuery({
+    queryKey: ["stock-movements"],
+    queryFn: () => listMovements({ data: { limit: 100 } }),
+    enabled: authReady && showLog,
+  });
+
+  const sorted = useMemo(() => {
+    const rank = (s: StockStatus) => (s === "out" ? 0 : s === "low" ? 1 : 2);
+    const q2 = q.trim().toLowerCase();
+    return items
+      .filter((i) => (filter === "all" ? true : i.status === filter))
+      .filter((i) => (q2 ? i.name.toLowerCase().includes(q2) || (i.sku ?? "").toLowerCase().includes(q2) : true))
+      .slice()
+      .sort((a, b) => rank(a.status) - rank(b.status));
+  }, [items, filter, q]);
+
+  const totals = useMemo(() => {
+    let costPaise = 0;
+    let sellPaise = 0;
+    let lowCount = 0;
+    let outCount = 0;
+    for (const i of items) {
+      costPaise += i.cost_price_paise * i.quantity;
+      sellPaise += i.selling_price_paise * i.quantity;
+      if (i.status === "low") lowCount++;
+      if (i.status === "out") outCount++;
+    }
+    return {
+      costInr: Math.round(costPaise / 100),
+      sellInr: Math.round(sellPaise / 100),
+      lowCount,
+      outCount,
+    };
+  }, [items]);
+
+  const changeQty = useMutation({
+    mutationFn: changeQuantity,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["stock"] });
+      qc.invalidateQueries({ queryKey: ["stock-movements"] });
+    },
+  });
+
+  const del = useMutation({
+    mutationFn: deleteStockItem,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["stock"] }),
+  });
+
+  if (!authReady) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-[15px] text-muted">Loading…</p>
+      </div>
+    );
+  }
+
+  return (
+    <main className="flex min-h-screen flex-col px-5 pb-24 pt-8">
+      <header className="flex items-center justify-between">
+        <Link
+          to="/library"
+          className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink"
+          aria-label="Back"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+        <h1 className="font-display text-[22px] leading-tight text-ink">Stock</h1>
+        <div className="h-10 w-10" />
+      </header>
+
+      {/* Totals */}
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className="rounded-[14px] bg-surface p-3">
+          <p className="text-[11px] uppercase tracking-wide text-muted">Value at cost</p>
+          <p className="mt-1 font-mono text-[20px] font-semibold text-ink tabular-nums">
+            {formatInr(totals.costInr)}
+          </p>
+        </div>
+        <div className="rounded-[14px] bg-surface p-3">
+          <p className="text-[11px] uppercase tracking-wide text-muted">Value at retail</p>
+          <p className="mt-1 font-mono text-[20px] font-semibold text-ink tabular-nums">
+            {formatInr(totals.sellInr)}
+          </p>
+        </div>
+      </div>
+      {(totals.lowCount > 0 || totals.outCount > 0) && (
+        <p className="mt-2 text-[13px] text-muted">
+          {totals.outCount > 0 && (
+            <>
+              <span className="font-semibold text-primary">{totals.outCount} out of stock</span>
+              {totals.lowCount > 0 ? " · " : ""}
+            </>
+          )}
+          {totals.lowCount > 0 && (
+            <span className="font-semibold text-ink">{totals.lowCount} running low</span>
+          )}
+        </p>
+      )}
+
+      {/* Search + filter */}
+      <label className="mt-4 flex h-11 items-center gap-2 rounded-[14px] bg-white px-3 ring-1 ring-inset ring-[color:var(--color-border)]">
+        <Search className="h-4 w-4 text-muted" />
+        <input
+          className="flex-1 bg-transparent text-[15px] text-ink outline-none"
+          placeholder="Search by name or SKU"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+      </label>
+      <div className="mt-3 inline-flex rounded-full bg-surface p-1 text-[13px] font-medium">
+        {(["all", "low", "out"] as Filter[]).map((k) => (
+          <button
+            key={k}
+            type="button"
+            onClick={() => setFilter(k)}
+            className={`h-8 rounded-full px-3 ${
+              filter === k ? "bg-white text-ink shadow-sm" : "text-muted"
+            }`}
+          >
+            {k === "all" ? "All" : k === "low" ? "Low" : "Out"}
+          </button>
+        ))}
+      </div>
+
+      {/* Add / log */}
+      <div className="mt-4 flex gap-2">
+        <button
+          type="button"
+          onClick={() => setCreating(true)}
+          className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-[14px] bg-primary text-[15px] font-semibold text-primary-foreground"
+        >
+          <Plus className="h-4 w-4" />
+          Add item
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowLog(true)}
+          className="h-12 rounded-[14px] bg-surface px-4 text-[14px] font-semibold text-ink"
+        >
+          Movement log
+        </button>
+      </div>
+
+      {/* List */}
+      <div className="mt-4">
+        {isLoading ? (
+          <p className="text-[15px] text-muted">Loading…</p>
+        ) : items.length === 0 ? (
+          <div className="mt-10 rounded-[14px] bg-surface p-8 text-center">
+            <Package className="mx-auto h-8 w-8 text-muted" />
+            <p className="mt-3 text-[16px] font-medium text-ink">No stock yet.</p>
+            <p className="mt-1 text-[14px] text-muted">Add your first item — it's free.</p>
+          </div>
+        ) : sorted.length === 0 ? (
+          <p className="text-[15px] text-muted">Nothing matches.</p>
+        ) : (
+          <ul className="space-y-2">
+            {sorted.map((it) => {
+              const chip = statusChip(it.status);
+              const profit = it.selling_price_paise - it.cost_price_paise;
+              return (
+                <li key={it.id} className="rounded-[14px] bg-white p-3 ring-1 ring-inset ring-[color:var(--color-border)]">
+                  <div className="flex items-start gap-3">
+                    {it.thumb_url ? (
+                      <img src={it.thumb_url} alt="" className="h-14 w-14 shrink-0 rounded-[10px] object-cover" loading="lazy" />
+                    ) : (
+                      <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[10px] bg-surface">
+                        <Package className="h-5 w-5 text-muted" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <button
+                        type="button"
+                        onClick={() => setEditing(it)}
+                        className="block w-full text-left"
+                      >
+                        <p className="truncate text-[15px] font-semibold text-ink">{it.name}</p>
+                        <p className="mt-0.5 truncate text-[12px] text-muted">
+                          {it.sku ? `SKU ${it.sku} · ` : ""}
+                          Cost {formatInr(Math.round(it.cost_price_paise / 100))} · Sell {formatInr(Math.round(it.selling_price_paise / 100))}
+                          {profit > 0 && (
+                            <>
+                              {" · "}
+                              <span className="text-ink">+{formatInr(Math.round(profit / 100))}</span>
+                            </>
+                          )}
+                        </p>
+                      </button>
+                    </div>
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${chip.cls}`}>
+                      {chip.label}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        aria-label="Decrease"
+                        disabled={it.quantity === 0 || changeQty.isPending}
+                        onClick={() =>
+                          changeQty.mutate({ data: { stock_item_id: it.id, delta: -1, reason: "adjustment" } })
+                        }
+                        className="grid h-9 w-9 place-items-center rounded-full bg-surface text-ink disabled:opacity-40"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <span className="min-w-[3.5rem] text-center font-mono text-[18px] font-semibold text-ink tabular-nums">
+                        {it.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        aria-label="Increase"
+                        disabled={changeQty.isPending}
+                        onClick={() =>
+                          changeQty.mutate({ data: { stock_item_id: it.id, delta: 1, reason: "restocked" } })
+                        }
+                        className="grid h-9 w-9 place-items-center rounded-full bg-surface text-ink"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        disabled={it.quantity === 0 || changeQty.isPending}
+                        onClick={() =>
+                          changeQty.mutate({ data: { stock_item_id: it.id, delta: -1, reason: "sold" } })
+                        }
+                        className="h-9 rounded-full bg-ink px-3 text-[13px] font-semibold text-white disabled:opacity-40"
+                      >
+                        Sold 1
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Delete item"
+                        onClick={() => {
+                          if (confirm(`Delete "${it.name}" from stock?`)) del.mutate({ data: { id: it.id } });
+                        }}
+                        className="grid h-9 w-9 place-items-center rounded-full text-muted hover:text-primary"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+
+      {(creating || editing) && (
+        <StockSheet
+          initial={editing}
+          onClose={() => {
+            setCreating(false);
+            setEditing(null);
+          }}
+          onSaved={() => {
+            setCreating(false);
+            setEditing(null);
+            qc.invalidateQueries({ queryKey: ["stock"] });
+          }}
+        />
+      )}
+
+      {showLog && (
+        <MovementLog
+          onClose={() => setShowLog(false)}
+          movements={movements}
+        />
+      )}
+    </main>
+  );
+}
+
+function StockSheet({
+  initial,
+  onClose,
+  onSaved,
+}: {
+  initial: StockItem | null;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [name, setName] = useState(initial?.name ?? "");
+  const [sku, setSku] = useState(initial?.sku ?? "");
+  const [qty, setQty] = useState(initial?.quantity.toString() ?? "0");
+  const [low, setLow] = useState(initial?.low_stock_alert.toString() ?? "3");
+  const [cost, setCost] = useState((initial ? initial.cost_price_paise / 100 : 0).toString());
+  const [sell, setSell] = useState((initial ? initial.selling_price_paise / 100 : 0).toString());
+  const [productId, setProductId] = useState<string | null>(initial?.product_id ?? null);
+  const [err, setErr] = useState<string | null>(null);
+
+  const { data: products = [] } = useQuery({
+    queryKey: ["library-lite"],
+    queryFn: () => listMyProducts(),
+    enabled: !initial, // only when creating a new one
+  });
+
+  const save = useMutation({
+    mutationFn: upsertStockItem,
+    onSuccess: onSaved,
+    onError: (e) => setErr(e instanceof Error ? e.message : String(e)),
+  });
+
+  function submit() {
+    setErr(null);
+    if (!name.trim()) return setErr("Name is needed.");
+    const q = parseInt(qty || "0", 10);
+    const l = parseInt(low || "0", 10);
+    const c = Math.round(parseFloat(cost || "0") * 100);
+    const s = Math.round(parseFloat(sell || "0") * 100);
+    if (Number.isNaN(q) || q < 0) return setErr("Quantity must be a positive number.");
+    if (Number.isNaN(l) || l < 0) return setErr("Low-stock alert must be a positive number.");
+    save.mutate({
+      data: {
+        id: initial?.id,
+        product_id: productId,
+        name: name.trim(),
+        sku: sku.trim() || null,
+        quantity: q,
+        low_stock_alert: l,
+        cost_price_paise: c,
+        selling_price_paise: s,
+      },
+    });
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4" onClick={onClose}>
+      <div
+        className="w-full max-w-[480px] rounded-t-[20px] bg-white p-5 sm:rounded-[20px]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-[20px] text-ink">
+            {initial ? "Edit item" : "Add item"}
+          </h2>
+          <button type="button" onClick={onClose} aria-label="Close" className="text-muted">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {!initial && products.length > 0 && (
+          <div className="mt-4">
+            <label className="text-[12px] font-semibold uppercase tracking-wide text-muted">
+              Link to a product (optional)
+            </label>
+            <select
+              value={productId ?? ""}
+              onChange={(e) => {
+                const id = e.target.value || null;
+                setProductId(id);
+                if (id) {
+                  const p = products.find((x) => x.id === id);
+                  if (p && !name) setName(p.product_name ?? "");
+                }
+              }}
+              className="mt-1 h-11 w-full rounded-[12px] bg-surface px-3 text-[15px] text-ink"
+            >
+              <option value="">— No linked product —</option>
+              {products.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.product_name ?? "Untitled"}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <Field label="Name">
+          <input value={name} onChange={(e) => setName(e.target.value)} className="input" />
+        </Field>
+        <Field label="SKU (optional)">
+          <input value={sku} onChange={(e) => setSku(e.target.value)} className="input" />
+        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Quantity">
+            <input inputMode="numeric" value={qty} onChange={(e) => setQty(e.target.value.replace(/\D/g, ""))} className="input font-mono" />
+          </Field>
+          <Field label="Low-stock alert at">
+            <input inputMode="numeric" value={low} onChange={(e) => setLow(e.target.value.replace(/\D/g, ""))} className="input font-mono" />
+          </Field>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Cost price ₹">
+            <input inputMode="decimal" value={cost} onChange={(e) => setCost(e.target.value)} className="input font-mono" />
+          </Field>
+          <Field label="Selling price ₹">
+            <input inputMode="decimal" value={sell} onChange={(e) => setSell(e.target.value)} className="input font-mono" />
+          </Field>
+        </div>
+
+        {(() => {
+          const c = parseFloat(cost || "0");
+          const s = parseFloat(sell || "0");
+          if (s > 0 && c > 0) {
+            const profit = s - c;
+            const margin = ((profit / s) * 100).toFixed(0);
+            return (
+              <p className="mt-2 text-[13px] text-muted">
+                Profit per unit:{" "}
+                <span className="font-mono font-semibold text-ink">
+                  {formatInr(Math.round(profit))}
+                </span>{" "}
+                ({margin}% margin)
+              </p>
+            );
+          }
+          return null;
+        })()}
+
+        {err && <p className="mt-3 text-[13px] text-primary">{err}</p>}
+
+        <button
+          type="button"
+          onClick={submit}
+          disabled={save.isPending}
+          className="mt-5 h-12 w-full rounded-[14px] bg-primary text-[15px] font-semibold text-primary-foreground disabled:opacity-60"
+        >
+          {save.isPending ? "Saving…" : initial ? "Save changes" : "Add to stock"}
+        </button>
+      </div>
+
+      <style>{`.input{height:44px;width:100%;border-radius:12px;background:var(--color-surface,#F4F4F2);padding:0 12px;color:#111;font-size:15px;outline:none}`}</style>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="mt-3">
+      <label className="text-[12px] font-semibold uppercase tracking-wide text-muted">{label}</label>
+      <div className="mt-1">{children}</div>
+    </div>
+  );
+}
+
+function MovementLog({
+  movements,
+  onClose,
+}: {
+  movements: Awaited<ReturnType<typeof listMovements>>;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40" onClick={onClose}>
+      <div
+        className="max-h-[80vh] w-full max-w-[480px] overflow-y-auto rounded-t-[20px] bg-white p-5"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-[20px] text-ink">Movement log</h2>
+          <button type="button" onClick={onClose} aria-label="Close" className="text-muted">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        {movements.length === 0 ? (
+          <p className="mt-6 text-center text-[14px] text-muted">Nothing logged yet.</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-[color:var(--color-border)]">
+            {movements.map((m) => {
+              const when = new Date(m.created_at).toLocaleString("en-IN", {
+                day: "numeric",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+              const sign = m.delta > 0 ? "+" : "";
+              return (
+                <li key={m.id} className="flex items-center justify-between py-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-[14px] font-semibold text-ink">{m.item_name}</p>
+                    <p className="text-[12px] text-muted">
+                      {REASON_LABEL[m.reason]} · {when}
+                    </p>
+                  </div>
+                  <span
+                    className={`font-mono text-[15px] font-semibold tabular-nums ${
+                      m.delta < 0 ? "text-primary" : "text-ink"
+                    }`}
+                  >
+                    {sign}
+                    {m.delta}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
