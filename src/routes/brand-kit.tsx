@@ -13,7 +13,7 @@ import {
  type BrandKit,
 } from "@/lib/brand-kit.functions";
 import { PrimaryButton } from "@/components/PrimaryButton";
-import { PageHeader } from "@/components/PageHeader";
+import { PageHeader, HelpButton } from "@/components/PageHeader";
 import { Palette } from "lucide-react";
 
 
@@ -205,14 +205,12 @@ function BrandKitPage() {
  <main className="flex min-h-screen flex-col px-5 pb-32 pt-10 lg:px-0 lg:pt-12">
  <PageHeader
    icon={Palette}
-   title={onboarding ? "Set up your brand" : "Your brand kit"}
-   subtitle={onboarding
-     ? "Takes 30 seconds — CowQ uses this in every future listing. You can skip and edit later."
-     : "Your business name, logo, colours and voice — used every time CowQ writes or shoots for you."}
+   title={onboarding ? "Set up your brand" : "Your brand"}
+   subtitle="Set this once. Every listing CowQ writes will sound like you."
    help={
      <>
        <p className="font-semibold text-ink">Why fill this in</p>
-       <p className="mt-1 text-muted">Every listing, caption and photo CowQ makes will match your business — your name, colours and tone of voice. Change any time; future work updates automatically.</p>
+       <p className="mt-1 text-muted">CowQ uses your business name, what you sell and who buys from you to write copy in your voice instead of generic text. It takes two minutes and improves everything you make afterwards.</p>
      </>
    }
  />

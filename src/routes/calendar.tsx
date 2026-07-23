@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Calendar as CalendarIcon, Check, Copy, Download, Loader2, RefreshCw, Sparkles, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, Check, Copy, Download, Loader2, RefreshCw, Sparkles, X } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
+import { EmptyState as UiEmptyState, IllustrationCalendar } from "@/components/EmptyState";
 
 import { PostThisButton } from "@/components/PostThisButton";
 import { supabase } from "@/integrations/supabase/client";
@@ -162,15 +163,16 @@ function CalendarPage() {
         <CreditBadge />
       </div>
       <PageHeader
-        icon={CalendarIcon}
-        title="Content calendar"
-        subtitle="A month of ready-to-post content, built from your products. Copy, download, or mark posted."
+        icon={CalendarDays}
+        title="Your posting month"
+        subtitle="Thirty days of posts, planned from the products in your library."
         help={
           <>
-            <p className="font-semibold text-ink">What the calendar is</p>
-            <p className="mt-1 text-muted">CowQ takes your library and plans 30 days of posts across 10 formats — hero, in-use, offer, festival and more. Each day gets an image and caption you can copy or share.</p>
+            <p className="font-semibold text-ink">How the calendar works</p>
+            <p className="mt-1 text-muted">CowQ picks a product for each day and writes a different kind of post — a close-up, an offer, a festival post, a question. Open any day to copy the caption and download the image.</p>
           </>
         }
+        action={!planId ? { label: "Plan my month", onClick: handleCreate, icon: Sparkles, disabled: creating } : undefined}
       />
 
 
@@ -264,20 +266,34 @@ function CalendarBody({
 
 function CalendarLocked({ planName }: { planName: string }) {
   return (
-    <div className="mt-10 flex flex-1 flex-col items-center justify-center text-center">
-      <div className="grid h-20 w-20 place-items-center rounded-full bg-surface">
-        <Lock className="h-8 w-8 text-muted" />
+    <div className="mt-8">
+      <div className="relative">
+        <div className="pointer-events-none grid grid-cols-3 gap-2 opacity-60 blur-[2px]">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="aspect-square rounded-[12px] bg-surface p-2">
+              <div className="h-2/3 w-full rounded-[8px]" style={{ background: "var(--raised)" }} />
+              <div className="mt-2 h-2 w-2/3 rounded-full" style={{ background: "var(--raised)" }} />
+              <div className="mt-1 h-2 w-1/2 rounded-full" style={{ background: "var(--raised)" }} />
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 flex flex-col items-center text-center">
+          <div className="grid h-16 w-16 place-items-center rounded-full bg-surface">
+            <Lock className="h-7 w-7 text-muted" />
+          </div>
+          <h2 className="mt-4 font-display text-[22px] leading-tight text-ink">Calendar is on Growth &amp; Pro</h2>
+          <p className="mt-1 max-w-xs text-[14px] text-muted">
+            Thirty days of posts, planned for you. You're on {planName}.
+          </p>
+          <Link
+            to="/pricing"
+            className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-[12px] px-5 text-[14px] font-semibold"
+            style={{ background: "#3B82F6", color: "#F2F7FF" }}
+          >
+            See plans
+          </Link>
+        </div>
       </div>
-      <h2 className="mt-5 font-display text-[26px] leading-tight text-ink">Calendar is on Growth &amp; Pro.</h2>
-      <p className="mt-2 max-w-xs text-[15px] text-muted">
-        A month of ready-to-post product content — image, caption, hashtags — built from your library. You're on {planName}.
-      </p>
-      <Link
-        to="/pricing"
-        className="mt-8 inline-flex h-14 w-full max-w-xs items-center justify-center gap-2 rounded-[12px] bg-primary text-[16px] font-semibold text-primary-foreground"
-      >
-        See plans
-      </Link>
     </div>
   );
 }
@@ -292,32 +308,21 @@ function EmptyState({
   error: string | null;
 }) {
   return (
-    <div className="mt-10 flex flex-1 flex-col items-center justify-center text-center">
-      <div className="grid h-20 w-20 place-items-center rounded-full bg-surface">
-        <CalendarIcon className="h-9 w-9 text-primary" />
-      </div>
-      <h2 className="mt-5 font-display text-[26px] leading-tight text-ink">A month, sorted.</h2>
-      <p className="mt-2 max-w-xs text-[15px] text-muted">
-        One post a day for 30 days — image, caption, hashtags — built from your product library.
-      </p>
-      <button
-        type="button"
-        onClick={onCreate}
-        disabled={creating}
-        className="mt-8 flex h-14 w-full max-w-xs items-center justify-center gap-2 rounded-[12px] bg-primary px-5 text-[16px] font-semibold text-primary-foreground disabled:opacity-60"
-      >
-        {creating ? (
+    <>
+      <UiEmptyState
+        illustration={<IllustrationCalendar />}
+        title="No month planned yet"
+        body="CowQ will fill thirty days with posts made from your products. One tap to start."
+        action={{ label: creating ? "Starting…" : "Plan my month", onClick: onCreate }}
+        help={
           <>
-            <Loader2 className="h-5 w-5 animate-spin" /> Starting…
+            <p className="font-semibold text-ink">How planning works</p>
+            <p className="mt-1 text-muted">CowQ picks a product for each day, writes a different kind of post — close-up, offer, festival, question — and prepares an image and caption you can copy.</p>
           </>
-        ) : (
-          <>
-            <Sparkles className="h-5 w-5" /> Plan my month
-          </>
-        )}
-      </button>
-      {error && <p className="mt-4 text-[14px] text-primary">{error}</p>}
-    </div>
+        }
+      />
+      {error && <p className="mt-4 text-center text-[14px] text-primary">{error}</p>}
+    </>
   );
 }
 
