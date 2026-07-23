@@ -357,7 +357,9 @@ function PhotosSection({
               </div>
               {isOnModel && (
                 <p className="px-0.5 text-[11px] leading-snug text-muted">
-                  AI-generated model. Check the fit and drape before you list this.
+                  {personSource === "user"
+                    ? "Your model. Check the fit before you list."
+                    : "AI-generated model. Check the fit and drape before you list this."}
                 </p>
               )}
             </div>
