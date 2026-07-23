@@ -389,7 +389,7 @@ function MobileCarousel({
               className="relative w-full overflow-hidden rounded-[16px] bg-surface"
               style={{
                 aspectRatio: ratio === "1:1" ? "1 / 1" : "9 / 16",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
+                boxShadow: "var(--shadow-raised)",
               }}
             >
               <img src={img.url} alt={img.kind} className="h-full w-full object-cover img-warm" />
