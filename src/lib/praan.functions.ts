@@ -370,6 +370,12 @@ Return a JSON object only (no prose, no markdown fences) with these exact keys:
         generated_images: data.images,
         copy,
         csv_url: csvUrl,
+        gen_metadata: {
+          text_model: GEMINI_TEXT_MODEL,
+          image_model: data.meta?.image_model ?? GEMINI_IMAGE_MODEL,
+          image_count: data.meta?.image_count ?? 0,
+          image_resolution: data.meta?.image_resolution ?? 2048,
+        },
       })
       .select("id")
       .single();
