@@ -1,8 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { useCowqStore } from "@/lib/cowq-store";
 import { getBrowserId } from "@/lib/browser-id";
-import { generateCopyAndSave, generateImages } from "@/lib/cowq.functions";
+import {
+  generateCopyAndSave,
+  generateImageForJob,
+  refundGenerationJob,
+  startGenerationJob,
+} from "@/lib/cowq.functions";
 import { ProgressSteps, type StepState } from "@/components/ProgressSteps";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { markFreeGenerationUsed, useAuth } from "@/lib/use-auth";
@@ -35,10 +41,15 @@ function Generating() {
   const { user } = useAuth();
   const { photos, originalImageUrl, identified, form } = useCowqStore();
   const [states, setStates] = useState<StepState[]>(["done", "active", "pending"]);
+  const [photoProgress, setPhotoProgress] = useState({ done: 0, total: 4 });
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const startedRef = useRef(false);
+  const startJob = useServerFn(startGenerationJob);
+  const makePhoto = useServerFn(generateImageForJob);
+  const writeAndSave = useServerFn(generateCopyAndSave);
+  const refundJob = useServerFn(refundGenerationJob);
 
   useEffect(() => {
     if (!originalImageUrl || !identified || !form) {
@@ -54,29 +65,64 @@ function Generating() {
   async function run() {
     if (!originalImageUrl || !identified || !form) return;
     setError(null);
+    setDetail(null);
+    setPhotoProgress({ done: 0, total: 4 });
     setStates(["done", "active", "pending"]);
     const browserId = getBrowserId();
     const imageUrls = (photos.length > 0 ? photos.map((p) => p.url) : [originalImageUrl]).filter(
       (u): u is string => Boolean(u),
     );
+    let jobId: string | null = null;
     try {
       const idFlags = identified as { needs_person?: boolean; is_kidswear?: boolean; is_draped_garment?: boolean };
-      const { images, meta } = await generateImages({
-        data: {
-          browserId,
-          userId: user?.id ?? null,
-          imageUrls,
-          productName: form.name,
-          category: identified.category,
-          needsPerson: idFlags.needs_person ?? false,
-          isKidswear: idFlags.is_kidswear ?? false,
-          isDrapedGarment: idFlags.is_draped_garment ?? false,
-        },
-      });
+      const job = await startJob({ data: { browserId, userId: user?.id ?? null } });
+      jobId = job.jobId;
 
+      const photoJobs = Array.from({ length: 4 }, (_, styleIndex) =>
+        makePhoto({
+          data: {
+            jobId: job.jobId,
+            browserId,
+            userId: user?.id ?? null,
+            imageUrls,
+            productName: form.name,
+            category: identified.category,
+            needsPerson: idFlags.needs_person ?? false,
+            isKidswear: idFlags.is_kidswear ?? false,
+            isDrapedGarment: idFlags.is_draped_garment ?? false,
+            styleIndex,
+          },
+        }).then((result) => {
+          setPhotoProgress((p) => ({ ...p, done: Math.min(p.done + 1, p.total) }));
+          return result;
+        }),
+      );
+
+      const settled = await withTimeout(
+        Promise.allSettled(photoJobs),
+        180_000,
+        "This is taking longer than it should. Your credits have been returned — try again.",
+      );
+      const fulfilled = settled.filter((r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof makePhoto>>> => r.status === "fulfilled");
+      if (fulfilled.length === 0) {
+        const firstError = settled.find((r) => r.status === "rejected") as PromiseRejectedResult | undefined;
+        const message = firstError?.reason instanceof Error ? firstError.reason.message : String(firstError?.reason ?? "No photos came through. Try again.");
+        throw new Error(message);
+      }
+      const images = fulfilled.flatMap((r) => r.value.images);
+      const meta = {
+        image_model: fulfilled[0]?.value.meta.image_model,
+        image_count: fulfilled.length,
+        image_resolution: fulfilled[0]?.value.meta.image_resolution,
+        input_photo_count: fulfilled[0]?.value.meta.input_photo_count,
+        person_source: fulfilled[0]?.value.meta.person_source,
+      };
+
+      setPhotoProgress((p) => ({ ...p, done: fulfilled.length }));
       setStates(["done", "done", "active"]);
-      const { id } = await generateCopyAndSave({
+      const { id } = await withTimeout(writeAndSave({
         data: {
+          jobId: job.jobId,
           browserId,
           userId: user?.id ?? null,
           originalImageUrl,
@@ -90,8 +136,9 @@ function Generating() {
           images,
           meta,
         },
-      });
+      }), 180_000, "This is taking longer than it should. Your credits have been returned — try again.");
       setStates(["done", "done", "done"]);
+      jobId = null;
       if (!user) markFreeGenerationUsed();
       navigate({ to: "/results/$id", params: { id } });
 
@@ -102,10 +149,19 @@ function Generating() {
       const msg = human || raw;
       setDetail(tech || raw);
       setShowDetail(false);
+      if (jobId) {
+        try {
+          await refundJob({ data: { jobId, browserId, reason: msg } });
+        } catch (refundError) {
+          console.error(refundError);
+        }
+      }
       if (msg.includes("NO_CREDITS")) {
         setError("You've used your products for this month. Upgrade or top up to keep going.");
       } else if (msg.includes("DAILY_LIMIT")) {
         setError("You've used today's 5 free products. Come back tomorrow.");
+      } else if (msg.includes("This is taking longer")) {
+        setError("This is taking longer than it should. Your credits have been returned — try again.");
       } else {
         setError(msg);
       }
@@ -144,7 +200,11 @@ function Generating() {
           <ProgressSteps
             steps={[
               { label: "Studying your product", state: states[0] },
-              { label: "Shooting the photos", state: states[1] },
+              {
+                label: "Shooting the photos",
+                state: states[1],
+                detail: states[1] === "active" ? `${photoProgress.done} of ${photoProgress.total} photos done` : null,
+              },
               { label: "Writing your listing", state: states[2] },
             ]}
           />
@@ -185,5 +245,15 @@ function Generating() {
       )}
     </main>
   );
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(message)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timeoutId) clearTimeout(timeoutId);
+  });
 }
 
