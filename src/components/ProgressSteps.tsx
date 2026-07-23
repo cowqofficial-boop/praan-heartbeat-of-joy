@@ -14,9 +14,9 @@ export function ProgressSteps({
           <span
             className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${
               s.state === "done"
-                ? "bg-marigold text-background"
+                ? "bg-cobalt text-cobalt-ink"
                 : s.state === "active"
-                  ? "bg-raised text-ink breathe"
+                  ? "bg-amber text-void breathe"
                   : s.state === "error"
                     ? "bg-primary text-primary-foreground"
                     : "bg-surface text-muted"
