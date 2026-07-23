@@ -68,7 +68,7 @@ function Results() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-5">
         <p className="text-[15px] text-muted">This listing isn't here.</p>
-        <Link to="/" className="text-primary underline">Start over</Link>
+        <Link to="/create" className="text-primary underline">Start over</Link>
       </div>
     );
   }

@@ -1,386 +1,422 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { Camera, LibraryBig, Plus, X } from "lucide-react";
-import { getBrowserId } from "@/lib/browser-id";
-import { useCowqStore, type CowqPhoto } from "@/lib/cowq-store";
-import { identifyProduct, uploadOriginal } from "@/lib/cowq.functions";
-import { hasUsedFreeGeneration, useAuth } from "@/lib/use-auth";
-import { PrimaryButton } from "@/components/PrimaryButton";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Camera, Sparkles, Package, Check } from "lucide-react";
+import { UploadWidget } from "@/components/UploadWidget";
+import { useAuth } from "@/lib/use-auth";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "CowQ — AI Product Photos & Listings for Indian Sellers" },
+      { title: "CowQ — One photo. A complete business, ready to sell." },
       {
         name: "description",
         content:
-          "Upload one product photo. Get studio photos, sales copy, and a Shopify catalog file — ready to sell on Amazon, Flipkart, Meesho, Instagram, and WhatsApp.",
+          "Upload one product photo. CowQ makes studio images, a full listing, social posts, and a Shopify catalog file — in under a minute. Your first product is free.",
       },
-      { property: "og:title", content: "CowQ — AI Product Photos & Listings for Indian Sellers" },
+      { property: "og:title", content: "CowQ — One photo. A complete business, ready to sell." },
       {
         property: "og:description",
         content:
-          "Turn one phone photo into studio images, marketplace copy, and a catalog CSV in under a minute.",
+          "Studio photos, listings, social posts and a catalog file from one phone photo. Free to try.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://praan-heartbeat-of-joy.lovable.app/" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: "https://praan-heartbeat-of-joy.lovable.app/" }],
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "WebSite",
-          name: "CowQ",
-          url: "https://praan-heartbeat-of-joy.lovable.app/",
-        }),
-      },
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          name: "CowQ",
-          url: "https://praan-heartbeat-of-joy.lovable.app/",
-          logo: "https://praan-heartbeat-of-joy.lovable.app/icon-512.png",
-        }),
-      },
-    ],
   }),
-  component: Upload,
+  component: Landing,
 });
 
-const MAX_PHOTOS = 5;
-
-async function fileToDataUrl(file: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result as string);
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
-}
-
-async function convertHeicIfNeeded(file: File): Promise<Blob> {
-  const isHeic =
-    /heic|heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name);
-  if (!isHeic) return file;
-  const mod = await import("heic2any");
-  const out = await mod.default({ blob: file, toType: "image/jpeg", quality: 0.9 });
-  return Array.isArray(out) ? out[0] : out;
-}
-
-async function normalizeImage(file: File): Promise<{ dataUrl: string; sizeBytes: number }> {
-  const blob = await convertHeicIfNeeded(file);
-  const raw = await fileToDataUrl(blob);
-  const { dataUrl } = await shrinkAndCompress(raw, 1600, 0.85);
-  const sizeBytes = Math.round((dataUrl.length - dataUrl.indexOf(",") - 1) * 0.75);
-  return { dataUrl, sizeBytes };
-}
-
-function shrinkAndCompress(
-  dataUrl: string,
-  maxSide: number,
-  quality: number,
-): Promise<{ dataUrl: string }> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
-      const w = Math.round(img.width * scale);
-      const h = Math.round(img.height * scale);
-      const canvas = document.createElement("canvas");
-      canvas.width = w;
-      canvas.height = h;
-      canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
-      resolve({ dataUrl: canvas.toDataURL("image/jpeg", quality) });
-    };
-    img.onerror = () => reject(new Error("Could not decode image"));
-    img.src = dataUrl;
-  });
-}
-
-type LocalPhoto = {
-  id: string;
-  dataUrl: string;
-  url: string | null; // null while uploading
-  uploading: boolean;
-  error?: string;
-};
-
-function Upload() {
-  const mainInputRef = useRef<HTMLInputElement>(null);
-  const addInputRef = useRef<HTMLInputElement>(null);
-  const [photos, setPhotos] = useState<LocalPhoto[]>([]);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [detail, setDetail] = useState<string | null>(null);
-  const [showDetail, setShowDetail] = useState(false);
-  const setUpload = useCowqStore((s) => s.setUpload);
-  const navigate = useNavigate();
-  const { user, ready } = useAuth();
-
-  useEffect(() => {
-    if (!ready) return;
-    if (!user && hasUsedFreeGeneration()) {
-      navigate({ to: "/auth", search: { mode: "signup", next: "/" }, replace: true });
-    }
-  }, [ready, user, navigate]);
-
-  async function ingestFile(file: File): Promise<LocalPhoto | null> {
-    try {
-      const { dataUrl, sizeBytes } = await normalizeImage(file);
-      if (sizeBytes > 5 * 1024 * 1024) {
-        setError("A photo is over 5MB even after compressing. Try a smaller one.");
-        return null;
-      }
-      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-      const photo: LocalPhoto = { id, dataUrl, url: null, uploading: true };
-      // Kick off upload in background.
-      const browserId = getBrowserId();
-      uploadOriginal({ data: { dataUrl, browserId } })
-        .then(({ url }) => {
-          setPhotos((cur) => cur.map((p) => (p.id === id ? { ...p, url, uploading: false } : p)));
-        })
-        .catch((e) => {
-          const raw = e instanceof Error ? e.message : String(e);
-          setPhotos((cur) =>
-            cur.map((p) => (p.id === id ? { ...p, uploading: false, error: raw } : p)),
-          );
-        });
-      return photo;
-    } catch (e) {
-      const raw = e instanceof Error ? e.message : String(e);
-      setError("We couldn't read that photo. Try another one.");
-      setDetail(raw);
-      return null;
-    }
-  }
-
-  async function handleFiles(files: FileList | File[]) {
-    setError(null);
-    setDetail(null);
-    setShowDetail(false);
-    const arr = Array.from(files);
-    const room = MAX_PHOTOS - photos.length;
-    if (room <= 0) return;
-    const take = arr.slice(0, room);
-    const added: LocalPhoto[] = [];
-    for (const f of take) {
-      const p = await ingestFile(f);
-      if (p) added.push(p);
-    }
-    if (added.length) setPhotos((cur) => [...cur, ...added]);
-  }
-
-  function removePhoto(id: string) {
-    setPhotos((cur) => cur.filter((p) => p.id !== id));
-  }
-
-  function makeMain(id: string) {
-    setPhotos((cur) => {
-      const idx = cur.findIndex((p) => p.id === id);
-      if (idx <= 0) return cur;
-      const next = cur.slice();
-      const [item] = next.splice(idx, 1);
-      next.unshift(item);
-      return next;
-    });
-  }
-
-  async function handleContinue() {
-    if (photos.length === 0) return;
-    if (photos.some((p) => p.uploading)) return;
-    const failed = photos.find((p) => !p.url);
-    if (failed) {
-      setError("One photo didn't upload. Remove it and try again.");
-      setDetail(failed.error ?? null);
-      return;
-    }
-    setBusy(true);
-    setError(null);
-    setDetail(null);
-    try {
-      const urls = photos.map((p) => p.url!) ;
-      const identified = await identifyProduct({ data: { imageUrls: urls } });
-      const storePhotos: CowqPhoto[] = photos.map((p) => ({ url: p.url!, dataUrl: p.dataUrl }));
-      setUpload({ photos: storePhotos, identified });
-      navigate({ to: "/confirm" });
-    } catch (e) {
-      const raw = e instanceof Error ? e.message : String(e);
-      const [human, tech] = raw.split("||DETAIL||").map((s) => s.trim());
-      setError(human || "We couldn't read your photos. Try again.");
-      setDetail(tech || raw);
-      setBusy(false);
-    }
-  }
-
-  const anyUploading = photos.some((p) => p.uploading);
-  const canContinue = photos.length > 0 && !anyUploading && !busy && photos.every((p) => p.url);
-
+function Landing() {
+  const { user } = useAuth();
   return (
-    <main className="flex min-h-screen flex-col items-center px-5 pb-28 pt-16 lg:min-h-[calc(100vh-4rem)] lg:justify-center lg:pb-16 lg:pt-16">
-      {user && (
-        <Link
-          to="/library"
-          className="absolute left-5 top-5 flex items-center gap-1.5 text-[14px] font-medium text-muted lg:hidden"
-        >
-          <LibraryBig className="h-4 w-4" />
-          Your library
-        </Link>
-      )}
-
-      <div className="w-full max-w-sm lg:max-w-[640px]">
-        <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px] lg:text-[72px]">
-          One photo. Everything you need to sell it.
-        </h1>
-        <p className="mt-4 text-[15px] text-muted lg:text-[17px]">
-          Studio photos, listing, and a catalog file — from your phone.
-        </p>
-
-        {photos.length === 0 ? (
-          <button
-            type="button"
-            onClick={() => mainInputRef.current?.click()}
-            className="mt-10 flex aspect-square w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[16px] bg-surface text-ink lg:aspect-[3/2]"
-            style={{
-              boxShadow:
-                "inset 0 1px 0 rgba(255,255,255,0.05), inset 0 0 80px 0 rgba(245,166,35,0.06), 0 1px 3px rgba(0,0,0,0.4)",
-            }}
-          >
-            <span className="grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground lg:h-20 lg:w-20">
-              <Camera className="h-7 w-7 lg:h-8 lg:w-8" />
-            </span>
-            <span className="text-[17px] font-semibold lg:text-[19px]">Add a product photo</span>
-            <span className="text-[13px] text-muted lg:text-[14px]">Tap to open camera or pick from your phone</span>
-          </button>
-
-        ) : (
-          <>
-            <div className="mt-8 overflow-hidden rounded-[16px] bg-surface">
-              <img
-                src={photos[0].dataUrl}
-                alt="Main photo"
-                className="aspect-square w-full object-cover img-warm"
-              />
-            </div>
-
-            <div className="mt-4 flex gap-2 overflow-x-auto no-scrollbar stagger">
-              {photos.map((p, i) => (
-                <div key={p.id} className="stagger-item relative shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => makeMain(p.id)}
-                    className={`block h-16 w-16 overflow-hidden rounded-[12px] ${
-                      i === 0 ? "ring-2 ring-primary" : ""
-                    } bg-surface`}
-                    aria-label={i === 0 ? "Main photo" : "Make this the main photo"}
-                  >
-                    <img src={p.dataUrl} alt="" className="h-full w-full object-cover" />
-                    {p.uploading && (
-                      <span className="absolute inset-0 flex items-center justify-center bg-background/50 text-[10px] font-medium text-ink">
-                        …
-                      </span>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => removePhoto(p.id)}
-                    aria-label="Remove photo"
-                    className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-ink text-background shadow"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-              {photos.length < MAX_PHOTOS && (
-                <button
-                  type="button"
-                  onClick={() => addInputRef.current?.click()}
-                  aria-label="Add another photo"
-                  className="stagger-item grid h-16 w-16 shrink-0 place-items-center rounded-[12px] bg-surface text-muted"
-                >
-                  <Plus className="h-5 w-5" />
-                </button>
-              )}
-            </div>
-
-            <p className="mt-3 text-[13px] text-muted">
-              More angles make better photos — try the back, a close-up, and the label.
-            </p>
-          </>
-        )}
-
-
-        {error && (
-          <div className="mt-4 text-center">
-            <p className="text-[14px] text-primary">{error}</p>
-            {detail && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setShowDetail((v) => !v)}
-                  className="mt-1 text-[12px] text-muted underline"
-                >
-                  {showDetail ? "Hide details" : "Details"}
-                </button>
-                {showDetail && (
-                  <p className="mt-1 break-all text-left text-[11px] leading-snug text-muted">
-                    {detail}
-                  </p>
-                )}
-              </>
-            )}
-          </div>
-        )}
-
-        {!user && photos.length === 0 && (
-          <p className="mt-6 text-center text-[13px] text-muted">
-            First product is free — no account needed.{" "}
-            <Link to="/auth" search={{ mode: "signin" }} className="font-medium text-ink underline">
+    <main className="w-full">
+      {/* Top bar */}
+      <header className="flex items-center justify-between px-5 pt-6 lg:hidden">
+        <span className="font-display text-[22px] leading-none text-ink">CowQ</span>
+        <nav className="flex items-center gap-4 text-[14px] text-muted">
+          <Link to="/pricing" className="hover:text-ink">
+            Pricing
+          </Link>
+          {user ? (
+            <Link to="/library" className="hover:text-ink">
+              Library
+            </Link>
+          ) : (
+            <Link to="/auth" search={{ mode: "signin" }} className="hover:text-ink">
               Sign in
             </Link>
+          )}
+        </nav>
+      </header>
+
+      {/* Hero */}
+      <section className="px-5 pb-16 pt-10 lg:pt-16">
+        <div className="mx-auto max-w-[680px] text-center">
+          <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[52px] lg:text-[64px]">
+            One photo. A complete business, ready to sell.
+          </h1>
+          <p className="mx-auto mt-5 max-w-[560px] text-[16px] text-muted lg:text-[18px]">
+            Studio photos, listings, social posts and a catalog file — in under a minute.
+          </p>
+        </div>
+
+        <div className="mx-auto mt-10 max-w-[560px]">
+          <UploadWidget />
+        </div>
+
+        {!user && (
+          <p className="mx-auto mt-5 max-w-[560px] text-center text-[13px] text-muted">
+            Your first product is free — no account needed.{" "}
+            <Link to="/auth" search={{ mode: "signup" }} className="font-medium text-ink underline">
+              Sign up
+            </Link>{" "}
+            and get 3 more.
           </p>
         )}
-      </div>
+      </section>
 
-      {photos.length > 0 && (
-        <PrimaryButton fixed disabled={!canContinue} onClick={handleContinue}>
-          {busy
-            ? "Reading your photos…"
-            : anyUploading
-              ? "Uploading…"
-              : user
-                ? "Make my photos — 90 credits"
-                : "Make my photos"}
-        </PrimaryButton>
-      )}
+      {/* Section 1 — Before / After */}
+      <section className="px-5 py-16 lg:py-24">
+        <div className="mx-auto max-w-[900px]">
+          <p className="eyebrow text-muted">The proof</p>
+          <h2 className="mt-2 font-display text-[32px] leading-[1.05] text-ink lg:text-[44px]">
+            Real photos, taken in real shops.
+          </h2>
+          <p className="mt-3 max-w-[560px] text-[15px] text-muted">
+            Drag the slider. Left is the phone photo the seller sent us. Right is what CowQ made
+            from it — no studio, no retouching, no waiting.
+          </p>
 
-      <input
-        ref={mainInputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-        capture="environment"
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files;
-          if (f && f.length) handleFiles(f);
-          e.currentTarget.value = "";
-        }}
-      />
-      <input
-        ref={addInputRef}
-        type="file"
-        multiple
-        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files;
-          if (f && f.length) handleFiles(f);
-          e.currentTarget.value = "";
-        }}
-      />
+          <div className="mt-10 space-y-8">
+            <BeforeAfterPair
+              beforeLabel="Phone photo, taken in a shop"
+              afterLabel="What CowQ made"
+              beforeTone="dim"
+              afterTone="bright"
+              caption="Handwoven cotton stole · Jaipur"
+            />
+            <div className="grid gap-8 md:grid-cols-2">
+              <StaticPair caption="Brass diya set · Moradabad" />
+              <StaticPair caption="Wireless speaker · Chennai" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 2 — Everything you get */}
+      <section className="bg-surface px-5 py-16 lg:py-24">
+        <div className="mx-auto max-w-[1000px]">
+          <p className="eyebrow text-muted">One upload</p>
+          <h2 className="mt-2 font-display text-[32px] leading-[1.05] text-ink lg:text-[44px]">
+            Everything you get from one photo.
+          </h2>
+
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
+            <Artefact title="4 studio photos" >
+              <div className="grid grid-cols-2 gap-2">
+                {["White background", "Soft studio", "Lifestyle scene", "Flat-lay"].map((s) => (
+                  <div
+                    key={s}
+                    className="flex aspect-square items-end rounded-[10px] bg-raised p-2 text-[11px] text-muted"
+                  >
+                    {s}
+                  </div>
+                ))}
+              </div>
+              <p className="mt-3 text-[12px] text-muted">Square and vertical, both sizes.</p>
+            </Artefact>
+
+            <Artefact title="Marketplace listing">
+              <div className="rounded-[10px] bg-raised p-3 text-left">
+                <p className="text-[13px] font-semibold text-ink">
+                  Handwoven cotton stole, natural dye, 200 × 70 cm
+                </p>
+                <p className="mt-2 text-[11px] leading-snug text-muted">
+                  Three tight paragraphs of description, five plain bullets of facts, fifteen search
+                  tags — written the way sellers actually talk.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-1">
+                  {["cotton stole", "handwoven", "natural dye", "jaipur", "gift"].map((t) => (
+                    <span
+                      key={t}
+                      className="rounded-full bg-background px-2 py-0.5 text-[10px] text-muted"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </Artefact>
+
+            <Artefact title="Social posts">
+              <div className="space-y-2">
+                <div className="rounded-[10px] bg-raised p-3 text-left">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-marigold">
+                    Instagram
+                  </p>
+                  <p className="mt-1 text-[12px] leading-snug text-ink">
+                    Woven on a wooden handloom in Sanganer. Natural indigo, soft as breath.
+                  </p>
+                  <p className="mt-1 text-[10px] text-muted">
+                    #handwoven #jaipur #cottonstole …
+                  </p>
+                </div>
+                <div className="rounded-[10px] bg-raised p-3 text-left">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-marigold">
+                    WhatsApp broadcast
+                  </p>
+                  <p className="mt-1 text-[12px] leading-snug text-ink">
+                    New handloom stoles just came in. ₹1,499 with free shipping today.
+                  </p>
+                </div>
+                <div className="rounded-[10px] bg-raised p-3 text-left">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-marigold">
+                    Festival line
+                  </p>
+                  <p className="mt-1 text-[12px] leading-snug text-ink">
+                    Diwali gifting — order by Sunday to reach in time.
+                  </p>
+                </div>
+              </div>
+            </Artefact>
+
+            <Artefact title="Shopify catalog file" wide>
+              <div className="overflow-hidden rounded-[10px] bg-raised">
+                <div className="grid grid-cols-6 gap-2 border-b border-white/5 bg-background/40 px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-muted">
+                  <span>Handle</span>
+                  <span className="col-span-2">Title</span>
+                  <span>Vendor</span>
+                  <span>Price</span>
+                  <span>Image</span>
+                </div>
+                {[
+                  ["stole-01", "Handwoven cotton stole", "Jaipur Loom", "₹1,499", "img_1.jpg"],
+                  ["diya-set", "Brass diya set of 6", "Moradabad", "₹899", "img_1.jpg"],
+                  ["speaker", "Wireless speaker", "Sound&Co", "₹2,999", "img_1.jpg"],
+                ].map((r) => (
+                  <div
+                    key={r[0]}
+                    className="grid grid-cols-6 gap-2 px-3 py-2 font-mono text-[11px] text-ink"
+                  >
+                    <span>{r[0]}</span>
+                    <span className="col-span-2 truncate">{r[1]}</span>
+                    <span className="truncate text-muted">{r[2]}</span>
+                    <span>{r[3]}</span>
+                    <span className="truncate text-muted">{r[4]}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-3 text-[12px] text-muted">
+                Imports straight into Shopify. Same file works for Amazon and Flipkart.
+              </p>
+            </Artefact>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 3 — How it works */}
+      <section className="px-5 py-16 lg:py-24">
+        <div className="mx-auto max-w-[1000px]">
+          <p className="eyebrow text-muted">How it works</p>
+          <h2 className="mt-2 font-display text-[32px] leading-[1.05] text-ink lg:text-[44px]">
+            Three steps. Under a minute.
+          </h2>
+
+          <ol className="mt-10 grid gap-6 md:grid-cols-3">
+            <Step
+              n="1"
+              icon={<Camera className="h-5 w-5" />}
+              title="Photograph your product."
+              body="Any phone, any table. No lights, no studio, no props."
+            />
+            <Step
+              n="2"
+              icon={<Sparkles className="h-5 w-5" />}
+              title="CowQ studies it."
+              body="It works out what it is, what it’s made of, and who buys it."
+            />
+            <Step
+              n="3"
+              icon={<Package className="h-5 w-5" />}
+              title="Everything arrives."
+              body="Photos, listing, posts, catalog file — under a minute."
+            />
+          </ol>
+        </div>
+      </section>
+
+      {/* Section 4 — What it replaces */}
+      <section className="bg-surface px-5 py-16 lg:py-24">
+        <div className="mx-auto max-w-[720px]">
+          <p className="eyebrow text-muted">What it replaces</p>
+          <h2 className="mt-2 font-display text-[32px] leading-[1.05] text-ink lg:text-[44px]">
+            The people you’d otherwise pay.
+          </h2>
+          <p className="mt-3 text-[15px] text-muted">
+            A single product listing, done properly, usually needs four people. Here’s what each of
+            them charges — before we get to their time.
+          </p>
+
+          <div className="mt-10 divide-y divide-white/5 rounded-[14px] bg-raised">
+            {[
+              { role: "Product photographer", note: "half-day shoot, one product", cost: 3500 },
+              { role: "Copywriter", note: "title, description, bullets, tags", cost: 1200 },
+              { role: "Social media manager", note: "Instagram + WhatsApp posts", cost: 800 },
+              { role: "Catalog assistant", note: "Shopify / Amazon CSV", cost: 500 },
+            ].map((r) => (
+              <div key={r.role} className="flex items-center justify-between px-5 py-4">
+                <div>
+                  <p className="text-[15px] font-medium text-ink">{r.role}</p>
+                  <p className="text-[12px] text-muted">{r.note}</p>
+                </div>
+                <p className="font-mono text-[15px] text-ink">
+                  ₹{r.cost.toLocaleString("en-IN")}
+                </p>
+              </div>
+            ))}
+            <div className="flex items-center justify-between px-5 py-4">
+              <p className="text-[15px] font-medium text-ink">Total, per product</p>
+              <p className="font-mono text-[18px] font-semibold text-ink">₹6,000</p>
+            </div>
+          </div>
+
+          <div className="mt-8 rounded-[14px] bg-background p-6">
+            <p className="text-[13px] uppercase tracking-wider text-muted">CowQ</p>
+            <p className="mt-1 font-display text-[32px] leading-none text-ink">
+              ₹90 <span className="text-[15px] font-normal text-muted">per product</span>
+            </p>
+            <p className="mt-2 text-[14px] text-muted">
+              Same output. One upload. Under a minute.
+            </p>
+            <Link
+              to="/create"
+              className="mt-6 inline-flex h-12 items-center rounded-[12px] bg-primary px-5 text-[15px] font-semibold text-primary-foreground"
+            >
+              Try it with your photo
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <footer className="px-5 py-10 text-center text-[12px] text-muted">
+        CowQ · Complete Operations With Quality
+      </footer>
     </main>
+  );
+}
+
+function BeforeAfterPair({
+  beforeLabel,
+  afterLabel,
+  caption,
+}: {
+  beforeLabel: string;
+  afterLabel: string;
+  beforeTone?: string;
+  afterTone?: string;
+  caption?: string;
+}) {
+  return (
+    <div>
+      <div className="grid grid-cols-2 overflow-hidden rounded-[16px] bg-surface">
+        <div className="relative aspect-[4/5]">
+          <PlaceholderShot tone="dim" />
+          <span className="absolute left-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
+            {beforeLabel}
+          </span>
+        </div>
+        <div className="relative aspect-[4/5]">
+          <PlaceholderShot tone="bright" />
+          <span className="absolute right-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
+            {afterLabel}
+          </span>
+        </div>
+      </div>
+      {caption && <p className="mt-2 text-[12px] text-muted">{caption}</p>}
+    </div>
+  );
+}
+
+function StaticPair({ caption }: { caption: string }) {
+  return (
+    <div>
+      <div className="grid grid-cols-2 overflow-hidden rounded-[16px] bg-surface">
+        <div className="relative aspect-[4/5]">
+          <PlaceholderShot tone="dim" />
+          <span className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
+            Phone
+          </span>
+        </div>
+        <div className="relative aspect-[4/5]">
+          <PlaceholderShot tone="bright" />
+          <span className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
+            CowQ
+          </span>
+        </div>
+      </div>
+      <p className="mt-2 text-[12px] text-muted">{caption}</p>
+    </div>
+  );
+}
+
+function PlaceholderShot({ tone }: { tone: "dim" | "bright" }) {
+  return (
+    <div
+      className="absolute inset-0"
+      style={{
+        background:
+          tone === "dim"
+            ? "linear-gradient(135deg, #2a2620 0%, #1a1815 100%)"
+            : "linear-gradient(135deg, #f5efe4 0%, #e8dcc4 100%)",
+      }}
+    />
+  );
+}
+
+function Artefact({
+  title,
+  children,
+  wide,
+}: {
+  title: string;
+  children: React.ReactNode;
+  wide?: boolean;
+}) {
+  return (
+    <div className={`rounded-[16px] bg-background p-5 ${wide ? "md:col-span-3" : ""}`}>
+      <div className="mb-3 flex items-center gap-2">
+        <Check className="h-4 w-4 text-marigold" />
+        <p className="text-[13px] font-semibold text-ink">{title}</p>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function Step({
+  n,
+  icon,
+  title,
+  body,
+}: {
+  n: string;
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+}) {
+  return (
+    <li className="rounded-[16px] bg-surface p-6">
+      <div className="flex items-center gap-3">
+        <span className="grid h-8 w-8 place-items-center rounded-full bg-raised font-mono text-[13px] text-ink">
+          {n}
+        </span>
+        <span className="grid h-8 w-8 place-items-center rounded-full bg-raised text-marigold">
+          {icon}
+        </span>
+      </div>
+      <p className="mt-4 text-[17px] font-semibold text-ink">{title}</p>
+      <p className="mt-2 text-[14px] text-muted">{body}</p>
+    </li>
   );
 }

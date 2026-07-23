@@ -14,6 +14,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as GeneratingRouteImport } from './routes/generating'
+import { Route as CreateRouteImport } from './routes/create'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as ConfirmRouteImport } from './routes/confirm'
 import { Route as CalendarRouteImport } from './routes/calendar'
@@ -53,6 +54,11 @@ const LibraryRoute = LibraryRouteImport.update({
 const GeneratingRoute = GeneratingRouteImport.update({
   id: '/generating',
   path: '/generating',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateRoute = CreateRouteImport.update({
+  id: '/create',
+  path: '/create',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConnectRoute = ConnectRouteImport.update({
@@ -140,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/confirm': typeof ConfirmRoute
   '/connect': typeof ConnectRouteWithChildren
+  '/create': typeof CreateRoute
   '/generating': typeof GeneratingRoute
   '/library': typeof LibraryRoute
   '/pricing': typeof PricingRoute
@@ -161,6 +168,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/confirm': typeof ConfirmRoute
   '/connect': typeof ConnectRouteWithChildren
+  '/create': typeof CreateRoute
   '/generating': typeof GeneratingRoute
   '/library': typeof LibraryRoute
   '/pricing': typeof PricingRoute
@@ -184,6 +192,7 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/confirm': typeof ConfirmRoute
   '/connect': typeof ConnectRouteWithChildren
+  '/create': typeof CreateRoute
   '/generating': typeof GeneratingRoute
   '/library': typeof LibraryRoute
   '/pricing': typeof PricingRoute
@@ -207,6 +216,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/confirm'
     | '/connect'
+    | '/create'
     | '/generating'
     | '/library'
     | '/pricing'
@@ -228,6 +238,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/confirm'
     | '/connect'
+    | '/create'
     | '/generating'
     | '/library'
     | '/pricing'
@@ -250,6 +261,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/confirm'
     | '/connect'
+    | '/create'
     | '/generating'
     | '/library'
     | '/pricing'
@@ -273,6 +285,7 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   ConfirmRoute: typeof ConfirmRoute
   ConnectRoute: typeof ConnectRouteWithChildren
+  CreateRoute: typeof CreateRoute
   GeneratingRoute: typeof GeneratingRoute
   LibraryRoute: typeof LibraryRoute
   PricingRoute: typeof PricingRoute
@@ -319,6 +332,13 @@ declare module '@tanstack/react-router' {
       path: '/generating'
       fullPath: '/generating'
       preLoaderRoute: typeof GeneratingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create': {
+      id: '/create'
+      path: '/create'
+      fullPath: '/create'
+      preLoaderRoute: typeof CreateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connect': {
@@ -470,6 +490,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   ConfirmRoute: ConfirmRoute,
   ConnectRoute: ConnectRouteWithChildren,
+  CreateRoute: CreateRoute,
   GeneratingRoute: GeneratingRoute,
   LibraryRoute: LibraryRoute,
   PricingRoute: PricingRoute,
