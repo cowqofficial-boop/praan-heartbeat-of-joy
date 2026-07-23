@@ -240,9 +240,9 @@ button:active:not(:disabled),
   transform: scale(0.97);
 }
 
-/* images: load blurred + desaturated, settle over 600ms */
+/* images: gentle opacity fade-in only. No filters — product photos render at true colour. */
 .img-warm {
-  animation: cowq-image-warm 600ms var(--ease-out) both;
+  animation: cowq-image-warm 400ms var(--ease-out) both;
 }
 
 /* cinematic light sweep across a container */
