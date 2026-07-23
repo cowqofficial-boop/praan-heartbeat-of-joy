@@ -321,9 +321,9 @@ function Landing() {
                     <span>Image</span>
                   </div>
                   {[
-                    ["stole-01", "Handwoven cotton stole", "Jaipur Loom", "₹1,499", "img_1.jpg"],
-                    ["diya-set", "Brass diya set of 6", "Moradabad", "₹899", "img_1.jpg"],
-                    ["speaker", "Wireless speaker", "Sound&Co", "₹2,999", "img_1.jpg"],
+                    ["stole-01", "Handwoven cotton stole", "Jaipur Loom", "₹1,499", "stole-01.jpg"],
+                    ["diya-set", "Brass diya set of 6", "Moradabad", "₹899", "diya-set.jpg"],
+                    ["speaker", "Wireless speaker", "Sound&Co", "₹2,999", "speaker.jpg"],
                   ].map((r) => (
                     <div
                       key={r[0]}
