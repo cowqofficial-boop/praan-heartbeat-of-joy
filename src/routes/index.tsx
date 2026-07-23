@@ -476,23 +476,27 @@ function Landing() {
           </Reveal>
 
           <Reveal delay={140}>
+            {/* Founder note — placeholder only. Do NOT invent a name, quote, or photograph.
+                Drop a real portrait into /public/founder.jpg and replace [FOUNDER_NAME]
+                and the note body with the actual founder's words. */}
             <div className="mt-10 rounded-[16px] bg-surface p-6 lg:p-8">
               <div className="flex items-start gap-4">
                 <div
-                  className="h-14 w-14 shrink-0 rounded-full bg-raised"
-                  aria-hidden
-                  style={{ background: "linear-gradient(135deg, #3a352d 0%, #1a1815 100%)" }}
-                />
+                  className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-raised text-muted"
+                  aria-label="Founder photo — replace with /public/founder.jpg"
+                >
+                  <User className="h-6 w-6" />
+                </div>
                 <div>
                   <p className="text-[13px] uppercase tracking-wider text-muted">
                     A note from the founder
                   </p>
-                  <p className="mt-2 text-[15px] leading-relaxed text-ink">
-                    I built CowQ after watching my mother spend three days on one product listing.
-                    She had the goods and the eye — she just didn’t have a photographer, a
-                    copywriter, or a spare afternoon. If that sounds like you, this is for you.
+                  <p className="mt-2 text-[15px] leading-relaxed text-muted">
+                    [Founder note goes here — first person, one short paragraph, why CowQ exists
+                    and who it&rsquo;s for. Replace this placeholder with the real note before
+                    launch.]
                   </p>
-                  <p className="mt-3 text-[13px] text-muted">— Aarav Mehta, founder</p>
+                  <p className="mt-3 text-[13px] text-muted">— [FOUNDER_NAME], founder</p>
                 </div>
               </div>
             </div>
