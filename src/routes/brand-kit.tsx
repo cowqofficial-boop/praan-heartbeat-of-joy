@@ -153,12 +153,12 @@ function BrandKitPage() {
       try { await setBrandModelEnabled({ data: { enabled: false } }); } catch { /* ignore */ }
       return;
     }
-    // Turning on: save current prefs, then generate.
+    // Turning on: default to AI-generated, save prefs, generate portrait.
     setModelBusy(true);
     try {
-      await saveMyBrandKit({ data: kit });
+      await saveMyBrandKit({ data: { ...kit, brand_model_source: "ai" } });
       const { url } = await generateBrandModelPortrait({ data: {} });
-      setKit((k) => ({ ...k, brand_model_url: url, brand_model_enabled: true }));
+      setKit((k) => ({ ...k, brand_model_url: url, brand_model_enabled: true, brand_model_source: "ai" }));
     } catch (e) {
       alert("Couldn't generate your brand model. Try again.\n\n" + (e as Error).message);
     } finally {
@@ -166,14 +166,25 @@ function BrandKitPage() {
     }
   }
 
-  async function regenerateBrandModel() {
+  async function regenerateAiBrandModel() {
     setModelBusy(true);
     try {
-      await saveMyBrandKit({ data: kit });
+      await saveMyBrandKit({ data: { ...kit, brand_model_source: "ai" } });
       const { url } = await generateBrandModelPortrait({ data: {} });
-      setKit((k) => ({ ...k, brand_model_url: url, brand_model_enabled: true }));
+      setKit((k) => ({ ...k, brand_model_url: url, brand_model_enabled: true, brand_model_source: "ai", brand_model_photos: [] }));
     } catch (e) {
       alert("Couldn't generate your brand model. Try again.\n\n" + (e as Error).message);
+    } finally {
+      setModelBusy(false);
+    }
+  }
+
+  async function removeRealModel() {
+    if (!confirm("Delete your model's photos permanently?")) return;
+    setModelBusy(true);
+    try {
+      await removeRealBrandModel();
+      setKit((k) => ({ ...k, brand_model_enabled: false, brand_model_source: "ai", brand_model_url: null, brand_model_photos: [] }));
     } finally {
       setModelBusy(false);
     }
