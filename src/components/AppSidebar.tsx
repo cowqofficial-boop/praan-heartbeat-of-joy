@@ -14,6 +14,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { getMyCredits } from "@/lib/billing.functions";
+import { NAV_ACCENT, creditColor } from "@/lib/page-accent";
 
 type Item = { to: string; label: string; icon: typeof Plus };
 
@@ -44,6 +45,9 @@ export function AppSidebar() {
     window.location.href = "/";
   }
 
+  const creditsTotal = credits?.total ?? 0;
+  const creditsFg = creditColor(creditsTotal);
+
   return (
     <aside
       className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:w-[240px] lg:flex-col"
@@ -62,6 +66,7 @@ export function AppSidebar() {
                 ? path === "/"
                 : path === item.to || path.startsWith(item.to + "/");
             const Icon = item.icon;
+            const accent = NAV_ACCENT[item.to] ?? "#3D5AFE";
             const tourId =
               item.to === "/create"
                 ? "nav-create"
@@ -76,13 +81,11 @@ export function AppSidebar() {
                 to={item.to}
                 data-tour={tourId}
                 className={`relative flex h-11 items-center gap-3 rounded-[10px] px-3 text-[14px] font-medium transition-colors ${
-                  active
-                    ? "text-ink"
-                    : "text-muted hover:text-ink"
+                  active ? "text-ink" : "text-muted hover:text-ink"
                 }`}
                 style={
                   active
-                    ? { background: "var(--raised)" }
+                    ? { background: `color-mix(in oklab, ${accent} 14%, var(--raised))` }
                     : undefined
                 }
               >
@@ -90,10 +93,13 @@ export function AppSidebar() {
                   <span
                     aria-hidden
                     className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full"
-                    style={{ background: "var(--sindoor)" }}
+                    style={{ background: accent, boxShadow: `0 0 12px ${accent}` }}
                   />
                 )}
-                <Icon className="h-[18px] w-[18px] shrink-0" />
+                <Icon
+                  className="h-[18px] w-[18px] shrink-0"
+                  style={{ color: accent, opacity: active ? 1 : 0.6 }}
+                />
                 <span>{item.label}</span>
               </Link>
             );
@@ -105,12 +111,12 @@ export function AppSidebar() {
             to="/pricing"
             data-tour="credits"
             className="flex h-11 items-center justify-between rounded-[10px] px-3 text-[13px] text-muted hover:text-ink"
-            style={{ background: "var(--raised)" }}
+            style={{ background: `color-mix(in oklab, ${creditsFg} 12%, var(--raised))` }}
             aria-label="View plans"
           >
             <span className="flex items-center gap-2">
-              <Zap className="h-3.5 w-3.5 text-marigold" fill="currentColor" />
-              <span className="font-mono tabular-nums text-ink">
+              <Zap className="h-3.5 w-3.5" style={{ color: creditsFg }} fill="currentColor" />
+              <span className="font-mono tabular-nums" style={{ color: creditsFg }}>
                 {credits ? credits.total.toLocaleString("en-IN") : "…"}
               </span>
             </span>

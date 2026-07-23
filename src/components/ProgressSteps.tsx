@@ -21,6 +21,13 @@ export function ProgressSteps({
                     ? "bg-primary text-primary-foreground"
                     : "bg-surface text-muted"
             }`}
+            style={
+              s.state === "active"
+                ? { boxShadow: "0 0 24px rgba(255, 138, 30, 0.55), 0 0 0 4px rgba(255, 138, 30, 0.15)" }
+                : s.state === "done"
+                  ? { boxShadow: "0 0 18px rgba(61, 90, 254, 0.45)" }
+                  : undefined
+            }
           >
             {s.state === "done" ? (
               <Check className="h-5 w-5 scale-in" />

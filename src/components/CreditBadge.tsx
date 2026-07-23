@@ -1,8 +1,9 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { getMyCredits } from "@/lib/billing.functions";
+import { creditColor } from "@/lib/page-accent";
 
 function useCountUp(target: number | null, duration = 400) {
   const [display, setDisplay] = useState<number | null>(target);
@@ -30,21 +31,25 @@ function useCountUp(target: number | null, duration = 400) {
 }
 
 export function CreditBadge() {
+  const path = useRouterState({ select: (s) => s.location.pathname });
   const { data } = useQuery({
     queryKey: ["my-credits"],
     queryFn: () => getMyCredits(),
     staleTime: 30_000,
+    enabled: path !== "/" && !path.startsWith("/auth"),
   });
   const total = data?.total ?? null;
   const shown = useCountUp(total);
   const label = shown == null ? "…" : shown.toLocaleString("en-IN");
+  const fg = creditColor(total ?? 0);
   return (
     <Link
       to="/pricing"
-      className="flex h-9 items-center gap-1.5 rounded-full bg-raised pl-2.5 pr-3 text-[13px] font-semibold text-ink hover:brightness-110"
+      className="flex h-9 items-center gap-1.5 rounded-full pl-2.5 pr-3 text-[13px] font-semibold hover:brightness-110"
+      style={{ background: `color-mix(in oklab, ${fg} 14%, var(--raised))`, color: fg }}
       aria-label={`Credits: ${label}. Tap to view plans.`}
     >
-      <Zap className="h-3.5 w-3.5 text-marigold" fill="currentColor" />
+      <Zap className="h-3.5 w-3.5" fill="currentColor" />
       <span className="font-mono tabular-nums">{label}</span>
     </Link>
   );

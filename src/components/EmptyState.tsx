@@ -2,8 +2,6 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { HelpButton } from "./PageHeader";
 
-const COBALT = "#3D5AFE";
-
 type Props = {
   illustration: ReactNode;
   title: string;
@@ -14,8 +12,14 @@ type Props = {
 
 export function EmptyState({ illustration, title, body, action, help }: Props) {
   return (
-    <div className="mx-auto mt-8 flex max-w-[420px] flex-col items-center rounded-[16px] p-8 text-center" style={{ background: "var(--surface)" }}>
-      <div className="empty-illustration text-muted" style={{ width: 120, height: 120 }}>
+    <div
+      className="mx-auto mt-8 flex max-w-[420px] flex-col items-center rounded-[16px] p-8 text-center"
+      style={{
+        background: "linear-gradient(180deg, color-mix(in oklab, var(--page-accent) 5%, var(--surface)) 0%, var(--surface) 100%)",
+        boxShadow: "var(--shadow-card), 0 20px 60px color-mix(in oklab, var(--page-accent) 12%, transparent)",
+      }}
+    >
+      <div className="empty-illustration" style={{ width: 120, height: 120, color: "var(--page-accent)" }}>
         {illustration}
       </div>
       <h3 className="mt-5 text-[18px] font-semibold text-ink">{title}</h3>
@@ -24,8 +28,7 @@ export function EmptyState({ illustration, title, body, action, help }: Props) {
         {action.to ? (
           <Link
             to={action.to}
-            className="inline-flex h-11 items-center justify-center rounded-[12px] px-5 text-[14px] font-semibold"
-            style={{ background: COBALT, color: "#F5F7FF" }}
+            className="btn-accent inline-flex h-11 items-center justify-center rounded-[12px] px-5 text-[14px] font-semibold"
           >
             {action.label}
           </Link>
@@ -33,8 +36,7 @@ export function EmptyState({ illustration, title, body, action, help }: Props) {
           <button
             type="button"
             onClick={action.onClick}
-            className="inline-flex h-11 items-center justify-center rounded-[12px] px-5 text-[14px] font-semibold"
-            style={{ background: COBALT, color: "#F5F7FF" }}
+            className="btn-accent inline-flex h-11 items-center justify-center rounded-[12px] px-5 text-[14px] font-semibold"
           >
             {action.label}
           </button>
@@ -95,7 +97,6 @@ export function IllustrationBoxes() {
 export function IllustrationStock() {
   return (
     <svg viewBox="0 0 120 120" width="120" height="120" {...sv} className="draw-in">
-      {/* stacked boxes */}
       <rect x="20" y="66" width="36" height="30" rx="3" />
       <path d="M20 74 L56 74" />
       <path d="M34 66 L34 74 M42 66 L42 74" />
@@ -112,7 +113,6 @@ export function IllustrationStock() {
 export function IllustrationShelf() {
   return (
     <svg viewBox="0 0 120 120" width="120" height="120" {...sv} className="draw-in">
-      {/* two shelves with a few products */}
       <path d="M18 54 L102 54" />
       <path d="M18 90 L102 90" />
       <path d="M22 54 L22 96 M98 54 L98 96" />
