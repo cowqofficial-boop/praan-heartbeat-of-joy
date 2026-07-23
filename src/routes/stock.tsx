@@ -282,7 +282,7 @@ function StockPage() {
                 const chip = statusChip(it.status);
                 const profit = it.selling_price_paise - it.cost_price_paise;
                 return (
-                  <li key={it.id} className="stagger-item rounded-[16px] bg-surface p-3" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)" }}>
+                  <li key={it.id} className="stagger-item card-lift p-3">
 
                     <div className="flex items-start gap-3">
                       {it.thumb_url ? (
