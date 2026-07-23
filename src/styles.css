@@ -273,7 +273,7 @@ button:active:not(:disabled),
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(105deg, transparent 30%, rgba(245, 166, 35, 0.18) 45%, rgba(255, 255, 255, 0.28) 50%, rgba(245, 166, 35, 0.18) 55%, transparent 70%);
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 138, 30, 0.18) 45%, rgba(255, 255, 255, 0.28) 50%, rgba(255, 138, 30, 0.18) 55%, transparent 70%);
   transform: translateX(-120%) skewX(-12deg);
   animation: cowq-sweep 3s linear infinite;
   pointer-events: none;
