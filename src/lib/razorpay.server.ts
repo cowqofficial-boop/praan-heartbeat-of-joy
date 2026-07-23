@@ -84,7 +84,7 @@ export async function createOrGetRzPlan(params: {
       period: params.period,
       interval: 1,
       item: {
-        name: `PRAAN ${params.name}`,
+        name: `CowQ Ai ${params.name}`,
         amount: params.amount_paise,
         currency: "INR",
       },

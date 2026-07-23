@@ -21,13 +21,13 @@ type Post = Awaited<ReturnType<typeof listPlanPosts>>[number];
 export const Route = createFileRoute("/calendar")({
   head: () => ({
     meta: [
-      { title: "Content calendar — PRAAN" },
+      { title: "Content calendar — CowQ Ai" },
       {
         name: "description",
         content:
-          "A month of ready-to-post product content, generated from your PRAAN library.",
+          "A month of ready-to-post product content, generated from your CowQ Ai library.",
       },
-      { property: "og:title", content: "Content calendar — PRAAN" },
+      { property: "og:title", content: "Content calendar — CowQ Ai" },
       { property: "og:description", content: "30 days of posts, images and captions, done." },
       { name: "robots", content: "noindex, follow" },
     ],
@@ -415,7 +415,7 @@ function PostSheet({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `praan-${post.post_date}-${post.post_type}.png`;
+    a.download = `cowq-${post.post_date}-${post.post_type}.png`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }

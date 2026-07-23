@@ -8,21 +8,21 @@ export type Identified = {
   features: string[];
 };
 
-export type PraanPhoto = { url: string; dataUrl: string };
+export type CowqPhoto = { url: string; dataUrl: string };
 
-type PraanState = {
-  photos: PraanPhoto[]; // index 0 is the main photo
+type CowqState = {
+  photos: CowqPhoto[]; // index 0 is the main photo
   identified: Identified | null;
   form: { name: string; price: string; detail: string } | null;
   // Legacy convenience accessors (main photo).
   originalImageUrl: string | null;
   originalDataUrl: string | null;
-  setUpload: (data: { photos: PraanPhoto[]; identified: Identified }) => void;
+  setUpload: (data: { photos: CowqPhoto[]; identified: Identified }) => void;
   setForm: (form: { name: string; price: string; detail: string }) => void;
   reset: () => void;
 };
 
-export const usePraanStore = create<PraanState>((set) => ({
+export const useCowqStore = create<CowqState>((set) => ({
   photos: [],
   identified: null,
   form: null,

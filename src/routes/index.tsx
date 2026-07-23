@@ -2,21 +2,21 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Camera, LibraryBig, Plus, X } from "lucide-react";
 import { getBrowserId } from "@/lib/browser-id";
-import { usePraanStore, type PraanPhoto } from "@/lib/praan-store";
-import { identifyProduct, uploadOriginal } from "@/lib/praan.functions";
+import { useCowqStore, type CowqPhoto } from "@/lib/cowq-store";
+import { identifyProduct, uploadOriginal } from "@/lib/cowq.functions";
 import { hasUsedFreeGeneration, useAuth } from "@/lib/use-auth";
 import { PrimaryButton } from "@/components/PrimaryButton";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PRAAN — AI Product Photos & Listings for Indian Sellers" },
+      { title: "CowQ Ai — AI Product Photos & Listings for Indian Sellers" },
       {
         name: "description",
         content:
           "Upload one product photo. Get studio photos, sales copy, and a Shopify catalog file — ready to sell on Amazon, Flipkart, Meesho, Instagram, and WhatsApp.",
       },
-      { property: "og:title", content: "PRAAN — AI Product Photos & Listings for Indian Sellers" },
+      { property: "og:title", content: "CowQ Ai — AI Product Photos & Listings for Indian Sellers" },
       {
         property: "og:description",
         content:
@@ -32,7 +32,7 @@ export const Route = createFileRoute("/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebSite",
-          name: "PRAAN",
+          name: "CowQ Ai",
           url: "https://praan-heartbeat-of-joy.lovable.app/",
         }),
       },
@@ -41,7 +41,7 @@ export const Route = createFileRoute("/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
-          name: "PRAAN",
+          name: "CowQ Ai",
           url: "https://praan-heartbeat-of-joy.lovable.app/",
           logo: "https://praan-heartbeat-of-joy.lovable.app/icon-512.png",
         }),
@@ -117,7 +117,7 @@ function Upload() {
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
   const [showDetail, setShowDetail] = useState(false);
-  const setUpload = usePraanStore((s) => s.setUpload);
+  const setUpload = useCowqStore((s) => s.setUpload);
   const navigate = useNavigate();
   const { user, ready } = useAuth();
 
@@ -204,7 +204,7 @@ function Upload() {
     try {
       const urls = photos.map((p) => p.url!) ;
       const identified = await identifyProduct({ data: { imageUrls: urls } });
-      const storePhotos: PraanPhoto[] = photos.map((p) => ({ url: p.url!, dataUrl: p.dataUrl }));
+      const storePhotos: CowqPhoto[] = photos.map((p) => ({ url: p.url!, dataUrl: p.dataUrl }));
       setUpload({ photos: storePhotos, identified });
       navigate({ to: "/confirm" });
     } catch (e) {

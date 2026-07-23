@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 const URL = "https://praan-heartbeat-of-joy.lovable.app/blog/flat-lay-guide";
 const TITLE = "Flat Lay Product Photography: How to Shoot Perfect Photos with Your Phone";
 const DESCRIPTION =
-  "A practical flat lay product photography guide for Indian sellers: phone setup, lighting, backgrounds, styling, and how to hand the result to PRAAN for AI-enhanced marketplace photos.";
+  "A practical flat lay product photography guide for Indian sellers: phone setup, lighting, backgrounds, styling, and how to hand the result to CowQ Ai for AI-enhanced marketplace photos.";
 
 export const Route = createFileRoute("/blog/flat-lay-guide")({
   head: () => ({
@@ -25,10 +25,10 @@ export const Route = createFileRoute("/blog/flat-lay-guide")({
           headline: TITLE,
           description: DESCRIPTION,
           mainEntityOfPage: URL,
-          author: { "@type": "Organization", name: "PRAAN" },
+          author: { "@type": "Organization", name: "CowQ Ai" },
           publisher: {
             "@type": "Organization",
-            name: "PRAAN",
+            name: "CowQ Ai",
             logo: {
               "@type": "ImageObject",
               url: "https://praan-heartbeat-of-joy.lovable.app/icon-512.png",
@@ -52,7 +52,7 @@ function Guide() {
       </h1>
       <p className="text-[15px] text-muted">
         A phone, a window, and a clean surface is enough. Here is exactly how to
-        shoot a flat lay product photo you can hand to PRAAN for studio-quality
+        shoot a flat lay product photo you can hand to CowQ Ai for studio-quality
         marketplace images.
       </p>
 
@@ -109,19 +109,19 @@ function Guide() {
         </ul>
       </Section>
 
-      <Section title="From flat lay to marketplace-ready with PRAAN">
+      <Section title="From flat lay to marketplace-ready with CowQ Ai">
         <p>
-          Once you have one clean phone photo, upload it to PRAAN. The app
+          Once you have one clean phone photo, upload it to CowQ Ai. The app
           generates four studio variants (white background, soft studio,
           lifestyle scene, and enhanced flat-lay) in both square (1:1) and
           vertical (9:16) sizes, plus the full listing text and a Shopify
-          catalog CSV. You do the shooting; PRAAN does the polish.
+          catalog CSV. You do the shooting; CowQ Ai does the polish.
         </p>
         <Link
           to="/"
           className="mt-4 inline-flex h-12 items-center justify-center rounded-[12px] bg-primary px-5 text-[15px] font-semibold text-primary-foreground"
         >
-          Try PRAAN with your photo
+          Try CowQ Ai with your photo
         </Link>
       </Section>
     </main>
