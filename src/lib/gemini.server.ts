@@ -50,7 +50,7 @@ async function postJSON(model: string, payload: unknown): Promise<unknown> {
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       console.error(`[gemini] network error attempt=${attempt} model=${model}: ${msg}`);
-      lastErr = new GeminiError(0, msg, "network", `Network error calling Gemini: ${msg}`);
+      lastErr = new GeminiError(0, msg, "network", `Network error calling Gemini. ||DETAIL|| ${msg}`);
       await sleep(400 * (attempt + 1));
       continue;
     }
