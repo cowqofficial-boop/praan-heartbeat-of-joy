@@ -243,46 +243,46 @@ function Upload() {
           <button
             type="button"
             onClick={() => mainInputRef.current?.click()}
-            className="card-lift mt-10 flex aspect-square w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[16px] text-ink"
+            className="mt-10 flex aspect-square w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[16px] bg-surface text-ink"
+            style={{
+              boxShadow:
+                "inset 0 1px 0 rgba(255,255,255,0.05), inset 0 0 80px 0 rgba(245,166,35,0.06), 0 1px 3px rgba(0,0,0,0.4)",
+            }}
           >
             <span className="grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground">
               <Camera className="h-7 w-7" />
             </span>
             <span className="text-[17px] font-semibold">Add a product photo</span>
+            <span className="text-[13px] text-muted">Tap to open camera or pick from your phone</span>
           </button>
         ) : (
           <>
-            <div className="mt-8 overflow-hidden rounded-[12px] bg-surface">
+            <div className="mt-8 overflow-hidden rounded-[16px] bg-surface">
               <img
                 src={photos[0].dataUrl}
-                alt="Main product"
-                className="aspect-square w-full object-cover"
+                alt="Main photo"
+                className="aspect-square w-full object-cover img-warm"
               />
             </div>
 
-            <div className="mt-4 grid grid-cols-5 gap-2">
+            <div className="mt-4 flex gap-2 overflow-x-auto no-scrollbar stagger">
               {photos.map((p, i) => (
-                <div key={p.id} className="relative">
+                <div key={p.id} className="stagger-item relative shrink-0">
                   <button
                     type="button"
                     onClick={() => makeMain(p.id)}
-                    className={`block aspect-square w-full overflow-hidden rounded-[10px] border-2 ${
-                      i === 0 ? "border-primary" : "border-transparent"
+                    className={`block h-16 w-16 overflow-hidden rounded-[12px] ${
+                      i === 0 ? "ring-2 ring-primary" : ""
                     } bg-surface`}
-                    aria-label={i === 0 ? "Main photo" : "Set as main photo"}
+                    aria-label={i === 0 ? "Main photo" : "Make this the main photo"}
                   >
                     <img src={p.dataUrl} alt="" className="h-full w-full object-cover" />
                     {p.uploading && (
-                      <span className="absolute inset-0 flex items-center justify-center bg-black/30 text-[10px] font-medium text-white">
+                      <span className="absolute inset-0 flex items-center justify-center bg-background/50 text-[10px] font-medium text-ink">
                         …
                       </span>
                     )}
                   </button>
-                  {i === 0 && (
-                    <span className="absolute bottom-0 left-0 right-0 bg-primary py-0.5 text-center text-[9px] font-semibold uppercase tracking-wide text-primary-foreground">
-                      Main
-                    </span>
-                  )}
                   <button
                     type="button"
                     onClick={() => removePhoto(p.id)}
@@ -298,7 +298,7 @@ function Upload() {
                   type="button"
                   onClick={() => addInputRef.current?.click()}
                   aria-label="Add another photo"
-                  className="grid aspect-square w-full place-items-center rounded-[10px] border-2 border-dashed border-[color:var(--color-border)] bg-surface text-muted"
+                  className="stagger-item grid h-16 w-16 shrink-0 place-items-center rounded-[12px] bg-surface text-muted"
                 >
                   <Plus className="h-5 w-5" />
                 </button>
@@ -310,6 +310,7 @@ function Upload() {
             </p>
           </>
         )}
+
 
         {error && (
           <div className="mt-4 text-center">
