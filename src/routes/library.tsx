@@ -1,12 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Boxes, CalendarDays, LogOut, Plus, Receipt, Search, Settings2, Trash2, Pencil, Link2 } from "lucide-react";
+import { Boxes, CalendarDays, LibraryBig, LogOut, Plus, Receipt, Search, Settings2, Trash2, Pencil, Link2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteMyProduct, listMyProducts, renameMyProduct, type LibraryItem } from "@/lib/library.functions";
 import { CreditBadge } from "@/components/CreditBadge";
 import { LowBalanceBanner } from "@/components/LowBalanceBanner";
 import { ReconnectBanner } from "@/components/ReconnectBanner";
+import { PageHeader } from "@/components/PageHeader";
+import { EmptyState, IllustrationProduct } from "@/components/EmptyState";
+import { NudgeCard } from "@/components/NudgeCard";
+
 
 export const Route = createFileRoute("/library")({
   head: () => ({
