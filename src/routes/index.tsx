@@ -614,6 +614,29 @@ function Landing() {
 
 /* ---------------- Small pieces ---------------- */
 
+function ShowcasePairCard({ pair }: { pair: { before: string; after: string; productName: string; location: string } }) {
+  return (
+    <div>
+      <div className="grid grid-cols-2 overflow-hidden rounded-[16px] bg-surface">
+        <div className="relative aspect-[4/5]">
+          <img src={pair.before} alt={`${pair.productName} — phone photo`} className="absolute inset-0 h-full w-full object-cover" />
+          <span className="absolute left-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white">
+            Phone photo
+          </span>
+        </div>
+        <div className="relative aspect-[4/5]">
+          <img src={pair.after} alt={`${pair.productName} — made by CowQ`} className="absolute inset-0 h-full w-full object-cover" />
+          <span className="absolute right-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white">
+            What CowQ made
+          </span>
+        </div>
+      </div>
+      <p className="mt-3 text-[13px] text-muted">{pair.productName} · {pair.location}</p>
+    </div>
+  );
+}
+
+
 function Artefact({
   title,
   children,
