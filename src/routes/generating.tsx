@@ -73,6 +73,8 @@ function Generating() {
       (u): u is string => Boolean(u),
     );
     let jobId: string | null = null;
+    const deadline = Date.now() + 180_000;
+    const timeoutMessage = "This is taking longer than it should. Your credits have been returned — try again.";
     try {
       const idFlags = identified as { needs_person?: boolean; is_kidswear?: boolean; is_draped_garment?: boolean };
       const job = await startJob({ data: { browserId, userId: user?.id ?? null } });
@@ -100,8 +102,8 @@ function Generating() {
 
       const settled = await withTimeout(
         Promise.allSettled(photoJobs),
-        180_000,
-        "This is taking longer than it should. Your credits have been returned — try again.",
+        timeLeft(deadline),
+        timeoutMessage,
       );
       const photoResults = settled.flatMap((result) =>
         result.status === "fulfilled" ? [result.value] : [],
@@ -138,7 +140,7 @@ function Generating() {
           images,
           meta,
         },
-      }), 180_000, "This is taking longer than it should. Your credits have been returned — try again.");
+      }), timeLeft(deadline), timeoutMessage);
       setStates(["done", "done", "done"]);
       jobId = null;
       if (!user) markFreeGenerationUsed();
@@ -250,6 +252,7 @@ function Generating() {
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  if (ms <= 0) return Promise.reject(new Error(message));
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<never>((_, reject) => {
     timeoutId = setTimeout(() => reject(new Error(message)), ms);
@@ -257,5 +260,9 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promi
   return Promise.race([promise, timeout]).finally(() => {
     if (timeoutId) clearTimeout(timeoutId);
   });
+}
+
+function timeLeft(deadline: number) {
+  return Math.max(deadline - Date.now(), 0);
 }
 
