@@ -152,14 +152,15 @@ function CalendarPage() {
   const openPost = posts.find((p) => p.id === openPostId) ?? null;
 
   return (
-    <main className="flex min-h-screen flex-col px-6 pb-16 pt-8 lg:px-10">
+    <main className="flex min-h-screen flex-col px-6 pb-16 pt-8 lg:px-0 lg:pt-12">
       <header className="flex items-center justify-between">
-        <Link to="/library" className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink" aria-label="Back">
+        <Link to="/library" className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink lg:hidden" aria-label="Back">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <h1 className="page-headline sm:text-[56px]">Content calendar</h1>
-        <CreditBadge />
+        <div className="lg:hidden"><CreditBadge /></div>
       </header>
+
 
       <CalendarBody
         planId={planId}
@@ -345,7 +346,7 @@ function TodayCard({ post, onOpen }: { post: Post; onOpen: () => void }) {
 function MonthGrid({ posts, onOpen }: { posts: Post[]; onOpen: (id: string) => void }) {
   // 6 rows x 5-day rows keeps thumbs bigger and one-handed friendly
   return (
-    <ul className="mt-2 grid grid-cols-5 gap-2 lg:grid-cols-7 xl:grid-cols-10">
+    <ul className="mt-2 grid grid-cols-5 gap-2 sm:grid-cols-6 lg:grid-cols-7">
       {posts.map((p) => (
         <li key={p.id}>
           <button

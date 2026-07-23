@@ -118,18 +118,19 @@ function PricingPage() {
   const packs = creditPacks();
 
   return (
-    <main className="flex min-h-screen flex-col px-5 pb-16 pt-8">
+    <main className="flex min-h-screen flex-col px-5 pb-16 pt-8 lg:px-0 lg:pt-12">
       <header className="flex items-center justify-between">
         <Link
           to={signedIn ? "/library" : "/"}
-          className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink"
+          className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink lg:hidden"
           aria-label="Back"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">Pricing</h1>
-        <div className="h-10 w-10" />
+        <div className="h-10 w-10 lg:hidden" />
       </header>
+
 
       {credits && (
         <p className="mt-2 text-center text-[13px] text-muted">
@@ -169,7 +170,7 @@ function PricingPage() {
       </div>
 
       {/* Subscriptions */}
-      <section className="mt-6 space-y-4 stagger">
+      <section className="mt-6 grid grid-cols-1 gap-4 stagger lg:grid-cols-3 lg:items-start lg:gap-6">
         {subs.map(({ name, monthly, yearly }) => {
           const plan = cycle === "yearly" ? yearly : monthly;
           const busy = buying === plan.id;
@@ -194,12 +195,13 @@ function PricingPage() {
       <section id="topups" className="mt-10 scroll-mt-6">
         <h2 className="font-display text-[20px] leading-tight text-ink">Top up any time</h2>
         <p className="mt-1 text-[13px] text-muted">Works on any plan. Credits never expire.</p>
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-4">
           {packs.map((p) => (
             <PackCard key={p.id} plan={p} busy={buying === p.id} onBuy={() => buy(p)} />
           ))}
         </div>
       </section>
+
 
       {err && <p className="mt-6 text-center text-[14px] text-primary">{err}</p>}
 

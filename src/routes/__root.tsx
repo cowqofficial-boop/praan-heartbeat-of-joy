@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { AppSidebar } from "../components/AppSidebar";
+
 
 function NotFoundComponent() {
   return (
@@ -124,9 +126,13 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="mx-auto min-h-screen w-full max-w-[520px] bg-transparent lg:max-w-[1200px]">
-        <Outlet />
+      <AppSidebar />
+      <div className="mx-auto min-h-screen w-full max-w-[520px] bg-transparent lg:ml-[240px] lg:max-w-none lg:pl-0">
+        <div className="lg:mx-auto lg:max-w-[1200px] lg:px-12">
+          <Outlet />
+        </div>
       </div>
     </QueryClientProvider>
   );
 }
+

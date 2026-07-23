@@ -72,17 +72,18 @@ function ConnectPage() {
   const get = (c: ChannelStatus["channel"]) => channels.find((x) => x.channel === c);
 
   return (
-    <main className="flex min-h-screen flex-col px-5 pb-16 pt-8">
+    <main className="mx-auto flex min-h-screen w-full max-w-[720px] flex-col px-5 pb-16 pt-8">
       <header className="flex items-center gap-3">
         <Link
           to={onboarding ? "/library" : "/library"}
-          className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
+          className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink lg:hidden"
           aria-label="Back"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px]">Connect your channels</h1>
       </header>
+
       <p className="mt-2 text-[15px] text-muted">
         Link the places you sell. CowQ keeps working even if you skip this.
       </p>
