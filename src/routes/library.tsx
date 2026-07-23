@@ -34,6 +34,7 @@ function LibraryPage() {
   const qc = useQueryClient();
   const [authReady, setAuthReady] = useState(false);
   const [query, setQuery] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
