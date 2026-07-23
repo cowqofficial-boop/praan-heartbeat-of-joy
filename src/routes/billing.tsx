@@ -178,6 +178,10 @@ function BillingPage() {
       </section>
 
       <p className="mt-8 text-center text-[12px] text-muted">
+        <a href="/library?tour=1" className="underline">
+          Take the tour again
+        </a>
+        <span className="mx-2">·</span>
         Need a receipt or GST invoice?{" "}
         <a href="mailto:hello@cowq.app" className="underline">
           Email us <ExternalLink className="inline h-3 w-3" />
