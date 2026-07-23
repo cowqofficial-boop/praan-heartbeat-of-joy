@@ -1,14 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { buildShopifyCsv, slugify } from "./csv";
-
-const GATEWAY = "https://ai.gateway.lovable.dev/v1";
-
-function apiKey(): string {
-  const k = process.env.LOVABLE_API_KEY;
-  if (!k) throw new Error("Missing LOVABLE_API_KEY");
-  return k;
-}
+import {
+  GEMINI_IMAGE_MODEL,
+  GEMINI_TEXT_MODEL,
+  geminiGenerateImage,
+  geminiGenerateText,
+  parseJsonLoose,
+} from "./gemini.server";
 
 async function admin() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
