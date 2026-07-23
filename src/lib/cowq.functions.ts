@@ -819,6 +819,7 @@ Return a JSON object only (no prose, no markdown fences) with these exact keys:
     const csvBytes = new TextEncoder().encode(csv);
     const csvPath = `csv/${data.browserId}/${Date.now()}-${handle}.csv`;
     const csvUrl = await uploadBytes(csvPath, csvBytes, "text/csv");
+    if (data.jobId) await ensureGenerationReserved(data.jobId, data.browserId);
 
     const sb = await admin();
     const { data: row, error } = await sb
@@ -845,7 +846,13 @@ Return a JSON object only (no prose, no markdown fences) with these exact keys:
       .select("id")
       .single();
     if (error || !row) throw new Error(`save failed: ${error?.message}`);
-    if (data.jobId) await markGenerationSucceeded(data.jobId, data.browserId);
+    if (data.jobId) {
+      try {
+        await markGenerationSucceeded(data.jobId, data.browserId);
+      } catch (err) {
+        console.error(`[generation] mark succeeded failed job=${data.jobId} error=${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
     return { id: row.id as string, copy, csvUrl };
   });
 

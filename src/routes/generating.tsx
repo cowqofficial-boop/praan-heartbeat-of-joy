@@ -103,22 +103,24 @@ function Generating() {
         180_000,
         "This is taking longer than it should. Your credits have been returned — try again.",
       );
-      const fulfilled = settled.filter((r) => r.status === "fulfilled");
-      if (fulfilled.length === 0) {
+      const photoResults = settled.flatMap((result) =>
+        result.status === "fulfilled" ? [result.value] : [],
+      );
+      if (photoResults.length === 0) {
         const firstError = settled.find((r) => r.status === "rejected") as PromiseRejectedResult | undefined;
         const message = firstError?.reason instanceof Error ? firstError.reason.message : String(firstError?.reason ?? "No photos came through. Try again.");
         throw new Error(message);
       }
-      const images = fulfilled.flatMap((r) => r.value.images);
+      const images = photoResults.flatMap((result) => result.images);
       const meta = {
-        image_model: fulfilled[0]?.value.meta.image_model,
-        image_count: fulfilled.length,
-        image_resolution: fulfilled[0]?.value.meta.image_resolution,
-        input_photo_count: fulfilled[0]?.value.meta.input_photo_count,
-        person_source: fulfilled[0]?.value.meta.person_source,
+        image_model: photoResults[0]?.meta.image_model,
+        image_count: photoResults.length,
+        image_resolution: photoResults[0]?.meta.image_resolution,
+        input_photo_count: photoResults[0]?.meta.input_photo_count,
+        person_source: photoResults[0]?.meta.person_source,
       };
 
-      setPhotoProgress((p) => ({ ...p, done: fulfilled.length }));
+      setPhotoProgress((p) => ({ ...p, done: photoResults.length }));
       setStates(["done", "done", "active"]);
       const { id } = await withTimeout(writeAndSave({
         data: {
