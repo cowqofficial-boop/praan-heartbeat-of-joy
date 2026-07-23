@@ -623,7 +623,7 @@ function UndoToast({ name, onUndo, onClose }: { name: string; onUndo: () => void
            style={{ boxShadow: "var(--shadow-raised)" }}>
 
         <span>Sold 1 · {name}</span>
-        <button type="button" onClick={onUndo} className="text-marigold font-semibold hover:brightness-110">Undo</button>
+        <button type="button" onClick={onUndo} className="text-[color:var(--page-accent)] font-semibold hover:brightness-110">Undo</button>
       </div>
     </div>
   );

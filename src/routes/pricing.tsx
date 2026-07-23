@@ -12,9 +12,9 @@ export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
       { title: "Pricing — CowQ" },
-      { name: "description", content: "Simple pricing for Indian sellers: pay per product or subscribe monthly. Two months free on annual plans." },
+      { name: "description", content: "Simple pricing for Indian sellers: pay per product or subscribe monthly. Two months free on yearly plans." },
       { property: "og:title", content: "Pricing — CowQ" },
-      { property: "og:description", content: "Pay per product or subscribe. 2 months free on annual." },
+      { property: "og:description", content: "Pay per product or subscribe. 2 months free on yearly." },
       { property: "og:type", content: "website" },
     ],
   }),
@@ -57,7 +57,7 @@ function loadRazorpayScript(): Promise<boolean> {
 
 function PricingPage() {
   const navigate = useNavigate();
-  const [cycle, setCycle] = useState<Cycle>("yearly");
+  const [cycle, setCycle] = useState<Cycle>("monthly");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [buying, setBuying] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -97,7 +97,7 @@ function PricingPage() {
         subscription_id: params.subscription_id,
         prefill: { email: params.prefill_email ?? undefined },
         notes: params.notes,
-        theme: { color: "#E0402F" },
+        theme: { color: "#3D5AFE" },
         handler: () => {
           // Payment captured — webhook grants credits. Send to billing.
           navigate({ to: "/billing" });
@@ -151,10 +151,12 @@ function PricingPage() {
         </p>
       )}
 
-      {/* Cycle toggle — sliding pill */}
-      <div className="mt-6 flex items-center justify-center">
-        <div className="relative inline-flex rounded-full bg-raised p-1"
-             style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)" }}>
+      {/* Cycle toggle — sliding pill (equal-width buttons so the pill aligns) */}
+      <div className="mt-6 flex flex-col items-center">
+        <div
+          className="relative inline-flex w-[280px] rounded-full bg-raised p-1"
+          style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)" }}
+        >
           <span
             aria-hidden
             className="absolute top-1 bottom-1 rounded-full bg-primary transition-transform duration-300"
@@ -168,19 +170,27 @@ function PricingPage() {
           <button
             type="button"
             onClick={() => setCycle("monthly")}
-            className={`relative z-10 h-9 rounded-full px-4 text-[13px] font-semibold ${cycle === "monthly" ? "text-primary-foreground" : "text-muted"}`}
+            className={`relative z-10 flex-1 h-9 rounded-full text-[13px] font-semibold ${cycle === "monthly" ? "text-primary-foreground" : "text-muted"}`}
           >
             Monthly
           </button>
           <button
             type="button"
             onClick={() => setCycle("yearly")}
-            className={`relative z-10 h-9 rounded-full px-4 text-[13px] font-semibold ${cycle === "yearly" ? "text-primary-foreground" : "text-muted"}`}
+            className={`relative z-10 flex-1 h-9 rounded-full text-[13px] font-semibold ${cycle === "yearly" ? "text-primary-foreground" : "text-muted"}`}
           >
-            Annual · 2 months free
+            Yearly
           </button>
         </div>
+        <p
+          className={`mt-2 text-[11px] font-semibold uppercase tracking-[0.14em] ${cycle === "yearly" ? "text-ink" : "invisible"}`}
+          style={cycle === "yearly" ? { color: "var(--page-accent)" } : undefined}
+          aria-hidden={cycle !== "yearly"}
+        >
+          2 months free
+        </p>
       </div>
+
 
       {/* Subscriptions */}
       <section className="mt-6 grid grid-cols-1 gap-4 stagger lg:grid-cols-3 lg:items-start lg:gap-6">
@@ -286,13 +296,15 @@ function PlanCard({
         <span className="font-mono text-[28px] font-semibold leading-none text-ink tabular-nums">{formatInr(plan.priceInr)}</span>
         <span className="text-[13px] text-muted">/{plan.interval === "year" ? "year" : "month"}</span>
       </div>
-      {monthlyEquivalent != null && (
+      {monthlyEquivalent != null ? (
         <p className="mt-1 text-[12px] text-muted">≈ {formatInr(monthlyEquivalent)}/mo, billed yearly</p>
+      ) : (
+        <p className="mt-1 text-[12px] text-muted invisible" aria-hidden>&nbsp;</p>
       )}
       <ul className="mt-4 space-y-3">
         {features.map((f) => (
           <li key={f.label} className="flex items-start gap-2 text-[14px]">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-marigold" />
+            <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "var(--page-accent)" }} />
             <div>
               <p className="text-ink">{f.label}</p>
               <p className="mt-0.5 text-[12px] text-muted">{f.plain}</p>
@@ -307,9 +319,7 @@ function PlanCard({
         className={`mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-[12px] text-[15px] font-semibold ${
           current
             ? "bg-raised text-muted"
-            : highlight
-              ? "bg-primary text-primary-foreground disabled:opacity-60"
-              : "bg-raised text-ink hover:brightness-110 disabled:opacity-60"
+            : "btn-accent disabled:opacity-60"
         }`}
       >
         {current ? "Current plan" : busy ? <><Loader2 className="h-4 w-4 animate-spin" /> Opening…</> : "Choose " + plan.name}
@@ -333,7 +343,7 @@ function PackCard({ plan, busy, onBuy }: { plan: Plan; busy: boolean; onBuy: () 
           type="button"
           onClick={onBuy}
           disabled={busy}
-          className="mt-2 inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-[13px] font-semibold text-primary-foreground hover:brightness-110 disabled:opacity-60"
+          className="mt-2 inline-flex h-9 items-center justify-center gap-1.5 rounded-full btn-accent px-4 text-[13px] font-semibold disabled:opacity-60"
         >
           {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
           Buy
