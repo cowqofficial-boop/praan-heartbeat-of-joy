@@ -319,3 +319,42 @@ button:active:not(:disabled),
   button:active:not(:disabled),
   [role="button"]:active { transform: none !important; }
 }
+
+/* Help popover — scale + fade in */
+@keyframes cowq-popover-in {
+  from { opacity: 0; transform: scale(0.96) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.popover-in {
+  animation: cowq-popover-in 200ms var(--ease-out) both;
+  transform-origin: top left;
+}
+
+/* Nudge card slide up */
+@keyframes cowq-nudge-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.nudge-in {
+  animation: cowq-nudge-in 500ms var(--ease-out) both;
+  animation-delay: 200ms;
+}
+
+/* Empty-state illustration: stroke draw-in */
+@keyframes cowq-stroke-draw {
+  from { stroke-dashoffset: 400; opacity: 0.35; }
+  to   { stroke-dashoffset: 0; opacity: 1; }
+}
+.empty-illustration .draw-in path,
+.empty-illustration .draw-in rect,
+.empty-illustration .draw-in circle {
+  stroke-dasharray: 400;
+  animation: cowq-stroke-draw 900ms var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popover-in, .nudge-in { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .empty-illustration .draw-in path,
+  .empty-illustration .draw-in rect,
+  .empty-illustration .draw-in circle { animation: none !important; stroke-dasharray: 0 !important; opacity: 1 !important; }
+}
