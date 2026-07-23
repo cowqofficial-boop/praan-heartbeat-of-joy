@@ -155,13 +155,25 @@ function CalendarPage() {
 
   return (
     <main className="flex min-h-screen flex-col px-6 pb-16 pt-8 lg:px-0 lg:pt-12">
-      <header className="flex items-center justify-between">
-        <Link to="/library" className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink lg:hidden" aria-label="Back">
+      <div className="flex items-center justify-between lg:hidden">
+        <Link to="/library" className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink" aria-label="Back">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="page-headline sm:text-[56px]">Content calendar</h1>
-        <div className="lg:hidden"><CreditBadge /></div>
-      </header>
+        <CreditBadge />
+      </div>
+      <PageHeader
+        icon={CalendarIcon}
+        title="Content calendar"
+        subtitle="A month of ready-to-post content, built from your products. Copy, download, or mark posted."
+        help={
+          <>
+            <p className="font-semibold text-ink">What the calendar is</p>
+            <p className="mt-1 text-muted">CowQ takes your library and plans 30 days of posts across 10 formats — hero, in-use, offer, festival and more. Each day gets an image and caption you can copy or share.</p>
+          </>
+        }
+      />
+
+
 
 
       <CalendarBody
