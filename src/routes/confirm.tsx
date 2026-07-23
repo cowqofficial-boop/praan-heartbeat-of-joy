@@ -94,10 +94,11 @@ function Confirm() {
 
   return (
     <main className="flex min-h-screen flex-col px-5 pb-28 pt-8">
-      <h1 className="font-display text-[28px] leading-tight text-ink">
+      <p className="text-[13px] font-medium uppercase tracking-wide text-muted">Check what CowQ found</p>
+      <h1 className="mt-1 font-display text-[28px] leading-tight text-ink">
         Confirm your product details
       </h1>
-      <p className="mt-1 text-[15px] text-muted">Change anything that's off.</p>
+      <p className="mt-1 text-[15px] text-muted">Fix anything wrong, then we'll make your photos.</p>
 
       <div className="mt-6 overflow-hidden rounded-[12px] bg-surface">
         <img
