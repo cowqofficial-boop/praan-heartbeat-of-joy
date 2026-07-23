@@ -36,6 +36,8 @@ function Generating() {
   const { originalImageUrl, identified, form } = usePraanStore();
   const [states, setStates] = useState<StepState[]>(["done", "active", "pending"]);
   const [error, setError] = useState<string | null>(null);
+  const [detail, setDetail] = useState<string | null>(null);
+  const [showDetail, setShowDetail] = useState(false);
   const startedRef = useRef(false);
 
   useEffect(() => {
