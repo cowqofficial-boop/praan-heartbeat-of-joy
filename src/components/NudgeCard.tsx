@@ -14,16 +14,19 @@ export function NudgeCard({ icon: Icon, text, linkLabel, to }: Props) {
     <Link
       to={to}
       className="nudge-in mt-8 flex items-center gap-3 rounded-[14px] p-4 text-[14px] transition-[filter] hover:brightness-110"
-      style={{ background: "var(--raised)" }}
+      style={{
+        background: "color-mix(in oklab, var(--page-accent) 10%, var(--raised))",
+        borderLeft: "3px solid var(--page-accent)",
+      }}
     >
       <div
         className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px]"
-        style={{ background: "color-mix(in oklab, #3D5AFE 18%, transparent)", color: "#3D5AFE" }}
+        style={{ background: "color-mix(in oklab, var(--page-accent) 22%, transparent)", color: "var(--page-accent)" }}
       >
         <Icon className="h-5 w-5" strokeWidth={1.75} />
       </div>
       <p className="flex-1 text-ink">{text}</p>
-      <span className="inline-flex items-center gap-1 text-[13px] font-semibold" style={{ color: "#3D5AFE" }}>
+      <span className="inline-flex items-center gap-1 text-[13px] font-semibold" style={{ color: "var(--page-accent)" }}>
         {linkLabel} <ArrowRight className="h-4 w-4" />
       </span>
     </Link>
