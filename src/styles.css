@@ -44,8 +44,11 @@
   --text-dim: #7c858c;
   --accent: #d4ff3f;
   --accent-ink: #1a2000;
+  --cobalt: #3b82f6;
+  --cobalt-ink: #f2f7ff;
   --coral: #ff5c38;
   --success: #34d399;
+
   /* Legacy aliases — kept so older components keep compiling. --sindoor now
      resolves to the lime accent; --marigold collapses to muted grey. Coral is
      only applied via --coral. */
