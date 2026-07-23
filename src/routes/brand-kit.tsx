@@ -629,7 +629,7 @@ function RealModelUploader({
  });
  onUploaded(urls);
  } catch (e) {
- alert("Couldn't save your model photos.\n\n" + (e as Error).message);
+ await showAlert({ title: "Couldn't save your model photos", body: (e as Error).message });
  } finally {
  setModelBusy(false);
  }
