@@ -345,7 +345,13 @@ function Upload() {
 
       {photos.length > 0 && (
         <PrimaryButton fixed disabled={!canContinue} onClick={handleContinue}>
-          {busy ? "Reading your photos…" : anyUploading ? "Uploading…" : "Make my photos"}
+          {busy
+            ? "Reading your photos…"
+            : anyUploading
+              ? "Uploading…"
+              : user
+                ? "Make my photos — 90 credits"
+                : "Make my photos"}
         </PrimaryButton>
       )}
 

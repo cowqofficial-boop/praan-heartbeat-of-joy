@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, LogOut, Plus, Receipt, Search, Settings2, Trash2, Pencil, Link2 } from "lucide-react";
+import { Boxes, CalendarDays, LogOut, Plus, Receipt, Search, Settings2, Trash2, Pencil, Link2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteMyProduct, listMyProducts, renameMyProduct, type LibraryItem } from "@/lib/library.functions";
 import { CreditBadge } from "@/components/CreditBadge";
+import { LowBalanceBanner } from "@/components/LowBalanceBanner";
 import { ReconnectBanner } from "@/components/ReconnectBanner";
 
 export const Route = createFileRoute("/library")({
@@ -82,6 +83,13 @@ function LibraryPage() {
         <div className="flex items-center gap-1">
           <CreditBadge />
           <Link
+            to="/stock"
+            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
+            aria-label="Stock"
+          >
+            <Boxes className="h-5 w-5" />
+          </Link>
+          <Link
             to="/calendar"
             className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
             aria-label="Content calendar"
@@ -121,6 +129,8 @@ function LibraryPage() {
       </header>
 
       <ReconnectBanner />
+      <LowBalanceBanner />
+
 
 
       <Link
