@@ -3,35 +3,53 @@
 @import "tw-animate-css";
 
 @theme inline {
-  --color-background: #ffffff;
-  --color-surface: #f4f4f2;
-  --color-ink: #111111;
-  --color-muted: #767676;
-  --color-primary: #dc3b28;
-  --color-primary-foreground: #ffffff;
-  --color-highlight: #f2a73b;
-  --color-border: #ececea;
+  --color-background: #0a0a0b;
+  --color-surface: #141418;
+  --color-raised: #1c1c22;
+  --color-line: #2a2a32;
+  --color-border: #2a2a32;
+  --color-ink: #fafafa;
+  --color-muted: #8e8e99;
+  --color-primary: #e8412e;
+  --color-primary-foreground: #fafafa;
+  --color-highlight: #f5a623;
+  --color-marigold: #f5a623;
+  --color-green: #3fb984;
+  --color-success: #3fb984;
 
   --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --radius-sm: 14px;
-  --radius-md: 14px;
-  --radius-lg: 14px;
-  --radius-xl: 14px;
+  --radius-sm: 12px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 16px;
 }
 
 :root {
-  color-scheme: light;
-  --background: #ffffff;
-  --foreground: #111111;
+  color-scheme: dark;
+  --background: #0a0a0b;
+  --foreground: #fafafa;
+  --void: #0a0a0b;
+  --surface: #141418;
+  --raised: #1c1c22;
+  --line: #2a2a32;
+  --text: #fafafa;
+  --text-dim: #8e8e99;
+  --sindoor: #e8412e;
+  --marigold: #f5a623;
+  --success: #3fb984;
+
+  /* depth */
+  --shadow-card: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-raised: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 40px rgba(0, 0, 0, 0.55);
 }
 
 html,
 body {
-  background: #ffffff;
-  color: #111111;
+  background: var(--void);
+  color: var(--text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -40,24 +58,31 @@ body {
 body {
   font-size: 16px;
   line-height: 1.5;
+  min-height: 100vh;
+  /* subtle grain — SVG fractal noise, ~2.5% opacity, fixed so it doesn't scroll */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-repeat: repeat;
+  background-attachment: fixed;
 }
 
 button,
 [role="button"],
 a {
-  outline-color: var(--color-primary);
+  outline-color: var(--sindoor);
 }
 
 *:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--sindoor);
   outline-offset: 2px;
   border-radius: 6px;
 }
 
+/* Display type — big, tight, confident */
 .font-display {
   font-family: var(--font-display);
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
+  line-height: 1.02;
 }
 
 .font-mono,
@@ -65,6 +90,49 @@ a {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-weight: 500;
+}
+
+/* Eyebrow labels: PHOTOS, MARKETPLACE LISTING, STOCK */
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* Elevation utilities — depth without borders */
+@utility card-lift {
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+@utility raised-lift {
+  background: var(--raised);
+  box-shadow: var(--shadow-raised);
+}
+@utility hairline {
+  border: 1px solid var(--line);
+}
+
+/* Bottom-fixed primary button gets a blurred backdrop behind it on mobile */
+@utility bottom-blur {
+  background: linear-gradient(180deg, rgba(10, 10, 11, 0) 0%, rgba(10, 10, 11, 0.9) 45%, rgba(10, 10, 11, 0.98) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Dark form-control defaults so native inputs don't render white */
+input,
+textarea,
+select {
+  background-color: var(--raised);
+  color: var(--text);
+  caret-color: var(--sindoor);
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-dim);
 }
 
 @media (prefers-reduced-motion: reduce) {
