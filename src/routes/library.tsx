@@ -136,7 +136,7 @@ function LibraryPage() {
 
 
       <Link
-        to="/"
+        to="/create"
         className="mt-6 flex h-14 items-center justify-center gap-2 rounded-[12px] bg-primary text-[16px] font-semibold text-primary-foreground"
       >
         <Plus className="h-5 w-5" />

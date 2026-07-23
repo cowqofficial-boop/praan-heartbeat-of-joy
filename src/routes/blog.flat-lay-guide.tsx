@@ -118,7 +118,7 @@ function Guide() {
           catalog CSV. You do the shooting; CowQ does the polish.
         </p>
         <Link
-          to="/"
+          to="/create"
           className="mt-4 inline-flex h-12 items-center justify-center rounded-[12px] bg-primary px-5 text-[15px] font-semibold text-primary-foreground"
         >
           Try CowQ with your photo

@@ -18,7 +18,7 @@ import { getMyCredits } from "@/lib/billing.functions";
 type Item = { to: string; label: string; icon: typeof Plus };
 
 const ITEMS: Item[] = [
-  { to: "/", label: "Add product", icon: Plus },
+  { to: "/create", label: "Add product", icon: Plus },
   { to: "/library", label: "Library", icon: LibraryBig },
   { to: "/calendar", label: "Calendar", icon: CalendarDays },
   { to: "/stock", label: "Stock", icon: Boxes },
