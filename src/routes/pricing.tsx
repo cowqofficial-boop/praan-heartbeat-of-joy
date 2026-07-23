@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckout, getMyCredits } from "@/lib/billing.functions";
-import { creditPacks, formatInr, subscriptionPairs, type Plan } from "@/lib/plans";
+import { creditPacks, estimateProducts, formatInr, subscriptionPairs, type Plan } from "@/lib/plans";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -178,9 +178,9 @@ function PricingPage() {
       </section>
 
       {/* Packs */}
-      <section className="mt-10">
-        <h2 className="font-display text-[20px] leading-tight text-ink">Or pay per product</h2>
-        <p className="mt-1 text-[13px] text-muted">Credits never expire. No watermark. No subscription.</p>
+      <section id="topups" className="mt-10 scroll-mt-6">
+        <h2 className="font-display text-[20px] leading-tight text-ink">Top up any time</h2>
+        <p className="mt-1 text-[13px] text-muted">Works on any plan. Credits never expire.</p>
         <div className="mt-4 space-y-3">
           {packs.map((p) => (
             <PackCard key={p.id} plan={p} busy={buying === p.id} onBuy={() => buy(p)} />
@@ -212,11 +212,13 @@ function PlanCard({
   onBuy: () => void;
   highlight?: boolean;
 }) {
+  const perPeriod = plan.interval === "year" ? "year" : "month";
   const features = [
-    `${plan.credits} products / ${plan.interval === "year" ? "year" : "month"}`,
+    `${plan.credits.toLocaleString("en-IN")} credits / ${perPeriod} · about ${estimateProducts(plan.credits)} products`,
     "Library of all your products",
-    plan.features.calendar ? "Full 30-day content calendar" : "No content calendar",
-    "Brand kit",
+    "Stock management",
+    plan.features.calendar ? "Full 30-day content calendar" : "Content calendar — Growth or Pro",
+    plan.features.auto_post ? "Automatic posting" : "Manual posting",
     plan.features.priority ? "Priority generation" : "Standard generation",
     "No watermark",
   ];
