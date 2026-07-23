@@ -72,14 +72,25 @@ function LibraryPage() {
   }
 
   async function handleRename(item: LibraryItem) {
-    const name = prompt("Rename product", item.product_name ?? "");
-    if (!name || !name.trim()) return;
-    await renameMyProduct({ data: { id: item.id, name: name.trim() } });
+    const name = await showPrompt({
+      title: "Rename product",
+      label: "Product name",
+      defaultValue: item.product_name ?? "",
+      placeholder: "e.g. Terracotta serving bowl",
+    });
+    if (!name) return;
+    await renameMyProduct({ data: { id: item.id, name } });
     qc.invalidateQueries({ queryKey: ["library"] });
   }
 
   async function handleDelete(item: LibraryItem) {
-    if (!confirm(`Delete "${item.product_name ?? "this product"}"? This can't be undone.`)) return;
+    const ok = await showConfirm({
+      title: `Delete "${item.product_name ?? "this product"}"?`,
+      body: "This can't be undone.",
+      destructive: true,
+      confirmLabel: "Delete",
+    });
+    if (!ok) return;
     await deleteMyProduct({ data: { id: item.id } });
     qc.invalidateQueries({ queryKey: ["library"] });
   }
@@ -104,16 +115,21 @@ function LibraryPage() {
             action={{ label: "Add a product", to: "/create", icon: Plus }}
           />
         </div>
-        <div className="flex items-center gap-1 lg:hidden">
+        <div className="flex items-center gap-2 lg:hidden">
           <CreditBadge />
-          <Link to="/stock" className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Stock"><Boxes className="h-5 w-5" /></Link>
-          <Link to="/calendar" className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Content calendar"><CalendarDays className="h-5 w-5" /></Link>
-          <Link to="/connect" className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Connect channels"><Link2 className="h-5 w-5" /></Link>
-          <Link to="/billing" className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Billing"><Receipt className="h-5 w-5" /></Link>
-          <Link to="/brand-kit" className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Brand kit"><Settings2 className="h-5 w-5" /></Link>
-          <button type="button" onClick={handleSignOut} className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink" aria-label="Sign out"><LogOut className="h-5 w-5" /></button>
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Open menu"
+            className="grid h-10 w-10 place-items-center rounded-full text-muted hover:text-ink"
+            style={{ background: "var(--raised)" }}
+          >
+            <MoreHorizontal className="h-5 w-5" />
+          </button>
         </div>
       </div>
+      <MobileNavSheet open={menuOpen} onClose={() => setMenuOpen(false)} />
+
 
       <ReconnectBanner />
       <LowBalanceBanner />
