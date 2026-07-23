@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Camera, Sparkles, Package, Check, Shield, Lock, RefreshCw, ImageIcon } from "lucide-react";
+import { Camera, Sparkles, Package, Check, Shield, Lock, RefreshCw, ImageIcon, User } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { UploadWidget } from "@/components/UploadWidget";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import { useAuth } from "@/lib/use-auth";
 import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/site";
+import { showcasePairs } from "@/data/showcase";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -172,19 +173,7 @@ function Landing() {
           <UploadWidget />
         </div>
 
-        {!user && (
-          <p className="mx-auto mt-5 max-w-[560px] text-center text-[13px] text-muted">
-            Your first product is free — no account needed.{" "}
-            <Link
-              to="/auth"
-              search={{ mode: "signup" }}
-              className="font-medium text-ink underline underline-offset-2"
-            >
-              Sign up
-            </Link>{" "}
-            and get 3 more.
-          </p>
-        )}
+        {/* Free-offer line is rendered by UploadWidget itself when signed out — no need to repeat it here. */}
       </section>
 
       {/* ================ 1. Before / After ================ */}
@@ -202,20 +191,42 @@ function Landing() {
           </Reveal>
 
           <Reveal delay={80}>
-            <div className="mt-10 grid gap-8 lg:grid-cols-2">
-              <div>
-                <div className="mx-auto max-w-[560px] lg:max-w-none">
-                  <BeforeAfterSlider before={SLIDER_BEFORE} after={SLIDER_AFTER} />
+            {showcasePairs.length === 0 ? (
+              <div className="mt-10 rounded-[16px] bg-surface p-8 text-center">
+                <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-raised">
+                  <ImageIcon className="h-5 w-5 text-muted" />
                 </div>
-                <p className="mt-3 text-[13px] text-muted">
-                  Handwoven cotton stole · Jaipur
+                <p className="mt-4 text-[15px] font-medium text-ink">
+                  Real before/after pairs will live here.
+                </p>
+                <p className="mx-auto mt-2 max-w-[520px] text-[13px] leading-relaxed text-muted">
+                  We&rsquo;re only showing this section once we have real seller photos to put in
+                  it — no invented examples, no stock imagery. In the meantime, the strongest
+                  proof is upstairs: upload your own product and see what comes out.
                 </p>
               </div>
-              <div className="grid gap-6">
-                <StaticPair caption="Brass diya set · Moradabad" />
-                <StaticPair caption="Wireless speaker · Chennai" />
+            ) : (
+              <div className="mt-10 grid gap-8 lg:grid-cols-2">
+                <div>
+                  <div className="mx-auto max-w-[560px] lg:max-w-none">
+                    <BeforeAfterSlider
+                      before={showcasePairs[0].before}
+                      after={showcasePairs[0].after}
+                    />
+                  </div>
+                  <p className="mt-3 text-[13px] text-muted">
+                    {showcasePairs[0].productName} · {showcasePairs[0].location}
+                  </p>
+                </div>
+                {showcasePairs.length > 1 && (
+                  <div className="grid gap-6">
+                    {showcasePairs.slice(1, 3).map((p) => (
+                      <ShowcasePairCard key={p.after} pair={p} />
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </Reveal>
         </div>
       </section>
@@ -310,9 +321,9 @@ function Landing() {
                     <span>Image</span>
                   </div>
                   {[
-                    ["stole-01", "Handwoven cotton stole", "Jaipur Loom", "₹1,499", "img_1.jpg"],
-                    ["diya-set", "Brass diya set of 6", "Moradabad", "₹899", "img_1.jpg"],
-                    ["speaker", "Wireless speaker", "Sound&Co", "₹2,999", "img_1.jpg"],
+                    ["stole-01", "Handwoven cotton stole", "Jaipur Loom", "₹1,499", "stole-01.jpg"],
+                    ["diya-set", "Brass diya set of 6", "Moradabad", "₹899", "diya-set.jpg"],
+                    ["speaker", "Wireless speaker", "Sound&Co", "₹2,999", "speaker.jpg"],
                   ].map((r) => (
                     <div
                       key={r[0]}
@@ -378,7 +389,7 @@ function Landing() {
               The team you’d otherwise pay.
             </h2>
             <p className="mt-3 text-[15px] text-muted">
-              A proper listing usually needs four people. Here’s what each of them costs, per
+              A proper listing usually needs five people. Here’s what each of them costs, per
               month, at reasonable Indian rates.
             </p>
           </Reveal>
@@ -465,23 +476,27 @@ function Landing() {
           </Reveal>
 
           <Reveal delay={140}>
+            {/* Founder note — placeholder only. Do NOT invent a name, quote, or photograph.
+                Drop a real portrait into /public/founder.jpg and replace [FOUNDER_NAME]
+                and the note body with the actual founder's words. */}
             <div className="mt-10 rounded-[16px] bg-surface p-6 lg:p-8">
               <div className="flex items-start gap-4">
                 <div
-                  className="h-14 w-14 shrink-0 rounded-full bg-raised"
-                  aria-hidden
-                  style={{ background: "linear-gradient(135deg, #3a352d 0%, #1a1815 100%)" }}
-                />
+                  className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-raised text-muted"
+                  aria-label="Founder photo — replace with /public/founder.jpg"
+                >
+                  <User className="h-6 w-6" />
+                </div>
                 <div>
                   <p className="text-[13px] uppercase tracking-wider text-muted">
                     A note from the founder
                   </p>
-                  <p className="mt-2 text-[15px] leading-relaxed text-ink">
-                    I built CowQ after watching my mother spend three days on one product listing.
-                    She had the goods and the eye — she just didn’t have a photographer, a
-                    copywriter, or a spare afternoon. If that sounds like you, this is for you.
+                  <p className="mt-2 text-[15px] leading-relaxed text-muted">
+                    [Founder note goes here — first person, one short paragraph, why CowQ exists
+                    and who it&rsquo;s for. Replace this placeholder with the real note before
+                    launch.]
                   </p>
-                  <p className="mt-3 text-[13px] text-muted">— Aarav Mehta, founder</p>
+                  <p className="mt-3 text-[13px] text-muted">— [FOUNDER_NAME], founder</p>
                 </div>
               </div>
             </div>
@@ -598,6 +613,29 @@ function Landing() {
 }
 
 /* ---------------- Small pieces ---------------- */
+
+function ShowcasePairCard({ pair }: { pair: { before: string; after: string; productName: string; location: string } }) {
+  return (
+    <div>
+      <div className="grid grid-cols-2 overflow-hidden rounded-[16px] bg-surface">
+        <div className="relative aspect-[4/5]">
+          <img src={pair.before} alt={`${pair.productName} — phone photo`} className="absolute inset-0 h-full w-full object-cover" />
+          <span className="absolute left-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white">
+            Phone photo
+          </span>
+        </div>
+        <div className="relative aspect-[4/5]">
+          <img src={pair.after} alt={`${pair.productName} — made by CowQ`} className="absolute inset-0 h-full w-full object-cover" />
+          <span className="absolute right-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white">
+            What CowQ made
+          </span>
+        </div>
+      </div>
+      <p className="mt-3 text-[13px] text-muted">{pair.productName} · {pair.location}</p>
+    </div>
+  );
+}
+
 
 function Artefact({
   title,

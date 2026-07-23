@@ -80,14 +80,14 @@ export function BeforeAfterSlider({
 
       <div
         className="pointer-events-none absolute inset-y-0"
-        style={{ left: `calc(${pos}% - 1.5px)`, width: "3px", background: "var(--marigold)" }}
+        style={{ left: `calc(${pos}% - 1.5px)`, width: "3px", background: "var(--coral)" }}
       />
       <div
-        className="pointer-events-none absolute top-1/2 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-background"
+        className="pointer-events-none absolute top-1/2 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-white"
         style={{
           left: `${pos}%`,
-          background: "var(--marigold)",
-          boxShadow: "0 6px 18px rgba(245, 166, 35, 0.35), inset 0 1px 0 rgba(255,255,255,0.4)",
+          background: "var(--coral)",
+          boxShadow: "0 6px 18px rgba(255, 92, 56, 0.35), inset 0 1px 0 rgba(255,255,255,0.4)",
         }}
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
