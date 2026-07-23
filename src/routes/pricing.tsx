@@ -296,13 +296,15 @@ function PlanCard({
         <span className="font-mono text-[28px] font-semibold leading-none text-ink tabular-nums">{formatInr(plan.priceInr)}</span>
         <span className="text-[13px] text-muted">/{plan.interval === "year" ? "year" : "month"}</span>
       </div>
-      {monthlyEquivalent != null && (
+      {monthlyEquivalent != null ? (
         <p className="mt-1 text-[12px] text-muted">≈ {formatInr(monthlyEquivalent)}/mo, billed yearly</p>
+      ) : (
+        <p className="mt-1 text-[12px] text-muted invisible" aria-hidden>&nbsp;</p>
       )}
       <ul className="mt-4 space-y-3">
         {features.map((f) => (
           <li key={f.label} className="flex items-start gap-2 text-[14px]">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-marigold" />
+            <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "var(--page-accent)" }} />
             <div>
               <p className="text-ink">{f.label}</p>
               <p className="mt-0.5 text-[12px] text-muted">{f.plain}</p>
@@ -317,9 +319,7 @@ function PlanCard({
         className={`mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-[12px] text-[15px] font-semibold ${
           current
             ? "bg-raised text-muted"
-            : highlight
-              ? "bg-primary text-primary-foreground disabled:opacity-60"
-              : "bg-raised text-ink hover:brightness-110 disabled:opacity-60"
+            : "btn-accent disabled:opacity-60"
         }`}
       >
         {current ? "Current plan" : busy ? <><Loader2 className="h-4 w-4 animate-spin" /> Opening…</> : "Choose " + plan.name}
