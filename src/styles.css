@@ -51,6 +51,12 @@
   --coral: #FF2FA3;
   --success: #3D5AFE;
 
+  /* Per-page accent — set on the page shell in __root.tsx. Defaults to
+     Electric Cobalt so any surface rendered outside a routed page still has a
+     sensible accent. --page-accent-2 only drives the headline gradient. */
+  --page-accent: #3D5AFE;
+  --page-accent-2: #F5F7FF;
+
   /* Legacy aliases — collapsed to system tokens so any lingering usage stays on-palette. */
   --sindoor: #3D5AFE;
   --marigold: #AEB6C2;
@@ -62,6 +68,38 @@
   --shadow-card: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 1px 3px rgba(0, 0, 0, 0.5);
   --shadow-raised: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 40px rgba(0, 0, 0, 0.6);
 }
+
+/* ============================================================
+   AMBIENT BACKGROUND GLOW
+   Two fixed soft radial gradients over Void Black — the single biggest
+   thing that makes a dark UI feel expensive rather than empty. Sits above
+   the body noise texture and below all content.
+   ============================================================ */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(80px);
+  will-change: opacity;
+}
+body::before {
+  top: -240px;
+  left: -240px;
+  width: 900px;
+  height: 900px;
+  background: radial-gradient(circle at center, rgba(61, 90, 254, 0.28) 0%, rgba(61, 90, 254, 0.14) 40%, transparent 70%);
+}
+body::after {
+  bottom: -220px;
+  right: -220px;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle at center, rgba(255, 47, 163, 0.22) 0%, rgba(255, 47, 163, 0.10) 45%, transparent 72%);
+}
+/* Keep app chrome above the glow. */
+body > * { position: relative; z-index: 1; }
 
 html,
 body {
