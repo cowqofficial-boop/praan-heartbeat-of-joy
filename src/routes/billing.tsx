@@ -49,9 +49,9 @@ function BillingPage() {
     mutationFn: () => cancelMySubscription(),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["my-credits"] });
-      alert("Your subscription will end at the end of the current cycle.");
+      showAlert({ title: "Subscription cancelled", body: "Your subscription will end at the end of the current cycle." });
     },
-    onError: (e) => alert(e instanceof Error ? e.message : String(e)),
+    onError: (e) => showAlert({ title: "Couldn't cancel subscription", body: e instanceof Error ? e.message : String(e) }),
   });
 
   if (!ready || !credits) {
