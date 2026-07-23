@@ -158,7 +158,7 @@ export const changeQuantity = createServerFn({ method: "POST" })
     stock_item_id: string;
     delta: number;
     reason: "sold" | "restocked" | "damaged" | "returned" | "adjustment";
-    note?: string | null;
+    note?: string;
   }) => d)
   .handler(async ({ context, data }): Promise<{ quantity: number }> => {
     const { data: qty, error } = await context.supabase.rpc("apply_stock_movement", {
