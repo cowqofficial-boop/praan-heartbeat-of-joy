@@ -124,7 +124,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="mx-auto min-h-screen w-full max-w-[520px] bg-transparent">
+      <div className="mx-auto min-h-screen w-full max-w-[520px] bg-transparent lg:max-w-[1200px]">
         <Outlet />
       </div>
     </QueryClientProvider>
