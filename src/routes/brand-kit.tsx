@@ -283,7 +283,7 @@ function BrandKitPage() {
  />
  </Field>
 
- <Field label="Voice">
+ <Field label="Voice" help={<p className="text-muted">How your listings should sound to a customer.</p>}>
  <div className="grid grid-cols-2 gap-2">
  {TONES.map((t) => (
  <button
@@ -303,7 +303,10 @@ function BrandKitPage() {
  </Field>
 
  <div className="mt-2 border-t pt-6">
- <h2 className="font-display text-[20px] leading-tight text-ink">Model preferences</h2>
+ <div className="flex items-center gap-2">
+   <h2 className="font-display text-[20px] leading-tight text-ink">Model preferences</h2>
+   <HelpButton content={<p className="text-muted">Only used when a product needs a person in the photo, like clothing or jewellery. All optional — leave blank to let CowQ decide.</p>} />
+ </div>
  <p className="mt-1 text-[13px] text-muted">
  Only used when CowQ needs a person in the shot — clothing, jewellery, footwear, bags, cosmetics. All optional.
  </p>
@@ -320,7 +323,10 @@ function BrandKitPage() {
  <div className="border-t pt-6">
  <div className="flex items-start justify-between gap-4">
  <div className="flex-1">
- <h2 className="font-display text-[20px] leading-tight text-ink">Brand model</h2>
+ <div className="flex items-center gap-2">
+   <h2 className="font-display text-[20px] leading-tight text-ink">Brand model</h2>
+   <HelpButton content={<p className="text-muted">Use the same person across every photo so your shop looks like one brand — CowQ can generate a consistent AI model, or you can upload real photos.</p>} />
+ </div>
  <p className="mt-1 text-[13px] text-muted">
  Use the same person in every photo, so your shop looks like one brand.
  </p>
@@ -376,10 +382,13 @@ function BrandKitPage() {
  );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children, help }: { label: string; children: React.ReactNode; help?: React.ReactNode }) {
  return (
  <div className="flex flex-col gap-2">
- <span className="text-[15px] font-medium text-ink">{label}</span>
+ <span className="flex items-center gap-1.5 text-[15px] font-medium text-ink">
+   {label}
+   {help && <HelpButton content={help} />}
+ </span>
  {children}
  </div>
  );
