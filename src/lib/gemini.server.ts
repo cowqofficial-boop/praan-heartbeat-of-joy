@@ -1,0 +1,170 @@
+// Direct Google Gemini API client (no gateway). Runs server-only.
+
+const BASE = "https://generativelanguage.googleapis.com/v1beta";
+
+export const GEMINI_TEXT_MODEL = "gemini-3-pro-preview";
+export const GEMINI_IMAGE_MODEL = "gemini-3-pro-image-preview";
+
+export function geminiKey(): string {
+  const k = process.env.GEMINI_API_KEY;
+  if (!k) throw new Error("Missing GEMINI_API_KEY");
+  return k;
+}
+
+export type InlineImage = { mimeType: string; b64: string };
+
+export class GeminiError extends Error {
+  status: number;
+  body: string;
+  code: "rate_limited" | "quota" | "bad_request" | "server" | "network" | "unknown";
+  constructor(status: number, body: string, code: GeminiError["code"], message: string) {
+    super(message);
+    this.status = status;
+    this.body = body;
+    this.code = code;
+  }
+}
+
+function classify(status: number, body: string): GeminiError["code"] {
+  if (status === 429) return "rate_limited";
+  if (status === 402 || /quota|billing|credit/i.test(body)) return "quota";
+  if (status >= 500) return "server";
+  if (status >= 400) return "bad_request";
+  return "unknown";
+}
+
+async function postJSON(model: string, payload: unknown): Promise<unknown> {
+  const url = `${BASE}/models/${model}:generateContent`;
+  let lastErr: GeminiError | null = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": geminiKey(),
+        },
+        body: JSON.stringify(payload),
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error(`[gemini] network error attempt=${attempt} model=${model}: ${msg}`);
+      lastErr = new GeminiError(0, msg, "network", `Network error calling Gemini: ${msg}`);
+      await sleep(400 * (attempt + 1));
+      continue;
+    }
+    if (res.ok) return res.json();
+    const body = await res.text();
+    const code = classify(res.status, body);
+    console.error(
+      `[gemini] fail attempt=${attempt} model=${model} status=${res.status} code=${code} body=${body.slice(0, 600)}`,
+    );
+    lastErr = new GeminiError(res.status, body, code, humanMessage(code, res.status, body));
+    // Only retry timeouts / rate limits / 5xx
+    if (code === "rate_limited" || code === "server" || code === "network") {
+      await sleep(600 * (attempt + 1));
+      continue;
+    }
+    throw lastErr;
+  }
+  throw lastErr ?? new GeminiError(0, "", "unknown", "Gemini call failed");
+}
+
+function humanMessage(code: GeminiError["code"], status: number, body: string): string {
+  if (code === "quota") return "Out of Gemini API credit. Add billing to your Google AI key.";
+  if (code === "rate_limited") return "Gemini is rate-limiting us right now. Try again in a moment.";
+  if (code === "server") return "Google's servers had a temporary problem. Try again.";
+  if (code === "bad_request") {
+    if (/too large|payload|size/i.test(body)) return "Image is too large. Try a smaller photo.";
+    if (/unsupported|mime|format/i.test(body)) return "That image format isn't supported. Use JPG or PNG.";
+    return "Gemini rejected the request.";
+  }
+  return `Gemini call failed (${status || "network"}).`;
+}
+
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+// ---------- Text (with optional inline image) ----------
+
+export async function geminiGenerateText(opts: {
+  systemInstruction?: string;
+  parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }>;
+  responseMimeType?: "application/json" | "text/plain";
+  temperature?: number;
+  maxOutputTokens?: number;
+  model?: string;
+}): Promise<string> {
+  const payload: Record<string, unknown> = {
+    contents: [{ role: "user", parts: opts.parts }],
+    generationConfig: {
+      temperature: opts.temperature ?? 0.7,
+      maxOutputTokens: opts.maxOutputTokens ?? 2048,
+      ...(opts.responseMimeType ? { responseMimeType: opts.responseMimeType } : {}),
+    },
+  };
+  if (opts.systemInstruction) {
+    payload.systemInstruction = { role: "system", parts: [{ text: opts.systemInstruction }] };
+  }
+  const json = (await postJSON(opts.model ?? GEMINI_TEXT_MODEL, payload)) as {
+    candidates?: { content?: { parts?: { text?: string }[] } }[];
+  };
+  const parts = json.candidates?.[0]?.content?.parts ?? [];
+  return parts
+    .map((p) => (typeof p.text === "string" ? p.text : ""))
+    .join("")
+    .trim();
+}
+
+export function parseJsonLoose<T = unknown>(text: string): T | null {
+  let t = text.trim();
+  t = t.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+  try {
+    return JSON.parse(t) as T;
+  } catch {
+    const m = t.match(/\{[\s\S]*\}/);
+    if (!m) return null;
+    try {
+      return JSON.parse(m[0]) as T;
+    } catch {
+      return null;
+    }
+  }
+}
+
+// ---------- Image generation (edit-from-reference) ----------
+
+export async function geminiGenerateImage(opts: {
+  prompt: string;
+  reference: InlineImage;
+  model?: string;
+}): Promise<{ mimeType: string; b64: string }> {
+  const payload = {
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { inlineData: { mimeType: opts.reference.mimeType, data: opts.reference.b64 } },
+          { text: opts.prompt },
+        ],
+      },
+    ],
+    generationConfig: {
+      responseModalities: ["IMAGE"],
+    },
+  };
+  const json = (await postJSON(opts.model ?? GEMINI_IMAGE_MODEL, payload)) as {
+    candidates?: {
+      content?: { parts?: Array<{ inlineData?: { mimeType: string; data: string } }> };
+    }[];
+  };
+  const parts = json.candidates?.[0]?.content?.parts ?? [];
+  for (const p of parts) {
+    if (p.inlineData?.data) {
+      return { mimeType: p.inlineData.mimeType || "image/png", b64: p.inlineData.data };
+    }
+  }
+  throw new GeminiError(200, JSON.stringify(json).slice(0, 400), "unknown", "Gemini returned no image data.");
+}
