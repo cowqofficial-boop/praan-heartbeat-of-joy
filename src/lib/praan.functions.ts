@@ -323,31 +323,14 @@ Return a JSON object only (no prose, no markdown fences) with these exact keys:
   "festival": "one festival or offer line, single sentence"
 }`;
 
-    const res = await fetch(`${GATEWAY}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey()}`,
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: sys },
-          { role: "user", content: userPrompt },
-        ],
-      }),
+    const raw = await geminiGenerateText({
+      systemInstruction: sys,
+      parts: [{ text: userPrompt }],
+      responseMimeType: "application/json",
+      temperature: 0.8,
+      maxOutputTokens: 3072,
     });
-    if (!res.ok) throw new Error(`copy failed: ${res.status} ${await res.text()}`);
-    const json = (await res.json()) as { choices: { message: { content: string } }[] };
-    let text = json.choices?.[0]?.message?.content?.trim() ?? "";
-    text = text.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(text);
-    } catch {
-      const m = text.match(/\{[\s\S]*\}/);
-      parsed = m ? JSON.parse(m[0]) : {};
-    }
+    const parsed = parseJsonLoose<unknown>(raw) ?? {};
     const r = CopySchema.safeParse(parsed);
     if (!r.success) throw new Error("Listing text didn't come through cleanly. Try again.");
     const copy = r.data;
