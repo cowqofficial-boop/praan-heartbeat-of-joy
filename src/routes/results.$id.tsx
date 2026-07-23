@@ -168,14 +168,10 @@ function Results() {
               name={(data.product_name as string) || "cowq"}
               watermark={watermark}
             />
-            <a
-              href={data.csv_url as string}
-              download
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-[12px] border border-[color:var(--color-border)] bg-white text-[15px] font-semibold text-ink"
-            >
-              <Download className="h-4 w-4" />
-              Download catalog file (CSV)
-            </a>
+            <DownloadCsvButton
+              url={data.csv_url as string}
+              name={(data.product_name as string) || "cowq"}
+            />
           </div>
         ) : (
           <SignUpGate
