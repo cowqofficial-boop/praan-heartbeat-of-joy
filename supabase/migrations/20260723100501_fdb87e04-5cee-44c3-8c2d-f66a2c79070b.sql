@@ -1,0 +1,8 @@
+ALTER TABLE public.brand_kits
+  ADD COLUMN IF NOT EXISTS model_gender TEXT,
+  ADD COLUMN IF NOT EXISTS model_age TEXT,
+  ADD COLUMN IF NOT EXISTS model_skin TEXT,
+  ADD COLUMN IF NOT EXISTS model_body TEXT,
+  ADD COLUMN IF NOT EXISTS model_region TEXT,
+  ADD COLUMN IF NOT EXISTS brand_model_enabled BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS brand_model_url TEXT;
