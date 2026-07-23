@@ -734,7 +734,7 @@ function MakeMoreButton({
         } catch (e) {
           const msg = String((e as Error).message);
           if (msg.includes("DAILY_LIMIT")) onLimit();
-          else alert("Photos didn't come through. Try again.");
+          else showAlert({ title: "Photos didn't come through", body: "Try again in a moment." });
         } finally {
           setBusy(false);
         }
