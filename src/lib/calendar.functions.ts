@@ -1,14 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import {
+  GEMINI_IMAGE_MODEL,
+  geminiGenerateImage,
+  geminiGenerateText,
+  parseJsonLoose,
+} from "./gemini.server";
 
-const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 const BUCKET = "praan";
 
-function apiKey(): string {
-  const k = process.env.LOVABLE_API_KEY;
-  if (!k) throw new Error("Missing LOVABLE_API_KEY");
-  return k;
-}
 
 // ---------- Post types ----------
 
