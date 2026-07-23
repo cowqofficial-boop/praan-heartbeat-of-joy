@@ -124,6 +124,20 @@ function Generating() {
       {error && (
         <>
           <p className="mt-8 text-[15px] text-primary">{error}</p>
+          {detail && (
+            <>
+              <button
+                type="button"
+                onClick={() => setShowDetail((v) => !v)}
+                className="mt-1 text-[12px] text-muted underline"
+              >
+                {showDetail ? "Hide details" : "Details"}
+              </button>
+              {showDetail && (
+                <p className="mt-1 break-all text-[11px] leading-snug text-muted">{detail}</p>
+              )}
+            </>
+          )}
           {error.includes("Upgrade") ? (
             <PrimaryButton fixed onClick={() => navigate({ to: "/pricing" })}>
               See plans
