@@ -204,9 +204,8 @@ function ProductCard({
     month: "short",
   });
   return (
-    <li className="stagger-item group relative overflow-hidden rounded-[16px] bg-surface transition-transform duration-200 hover:-translate-y-0.5"
-        style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.4)" }}
-    >
+    <li className="stagger-item card-lift group relative overflow-hidden transition-transform duration-200 hover:-translate-y-0.5">
+
       <Link
         to="/results/$id"
         params={{ id: item.id }}
