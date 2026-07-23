@@ -148,6 +148,7 @@ function RootComponent() {
       <QueueRunner />
       <QueueIndicator />
       <Tour />
+      <Dialogs />
     </QueryClientProvider>
   );
 }
