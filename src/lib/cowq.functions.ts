@@ -152,6 +152,72 @@ async function checkAndIncrementLimit(browserId: string): Promise<void> {
   }
 }
 
+async function decrementLimit(browserId: string): Promise<void> {
+  const sb = await admin();
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: existing } = await sb
+    .from("daily_usage")
+    .select("count")
+    .eq("browser_id", browserId)
+    .eq("date", today)
+    .maybeSingle();
+  if (!existing) return;
+  await sb
+    .from("daily_usage")
+    .update({ count: Math.max((existing.count ?? 1) - 1, 0) })
+    .eq("browser_id", browserId)
+    .eq("date", today);
+}
+
+async function refundGenerationReservation(jobId: string, browserId: string, reason: string): Promise<boolean> {
+  const sb = await admin();
+  const { data: job, error } = await sb
+    .from("generation_jobs")
+    .select("id, user_id, refund_sub, refund_pack, status")
+    .eq("id", jobId)
+    .eq("browser_id", browserId)
+    .maybeSingle();
+  if (error || !job || job.status !== "reserved") return false;
+  if (job.user_id) {
+    await sb.rpc("refund_credits", {
+      _user_id: job.user_id,
+      _sub: job.refund_sub ?? 0,
+      _pack: job.refund_pack ?? 0,
+    });
+  } else {
+    await decrementLimit(browserId);
+  }
+  await sb
+    .from("generation_jobs")
+    .update({ status: "refunded", error: reason.slice(0, 1000) })
+    .eq("id", jobId)
+    .eq("status", "reserved");
+  console.info(`[generation] refunded job=${jobId} browser=${browserId} reason=${reason.slice(0, 240)}`);
+  return true;
+}
+
+async function ensureGenerationReserved(jobId: string, browserId: string): Promise<void> {
+  const sb = await admin();
+  const { data: job, error } = await sb
+    .from("generation_jobs")
+    .select("status")
+    .eq("id", jobId)
+    .eq("browser_id", browserId)
+    .maybeSingle();
+  if (error || !job) throw new Error("Generation job was not found. Try again.");
+  if (job.status !== "reserved") throw new Error("GENERATION_JOB_CLOSED");
+}
+
+async function markGenerationSucceeded(jobId: string, browserId: string): Promise<void> {
+  const sb = await admin();
+  await sb
+    .from("generation_jobs")
+    .update({ status: "succeeded", error: null })
+    .eq("id", jobId)
+    .eq("browser_id", browserId)
+    .eq("status", "reserved");
+}
+
 // ---------- Image generation ----------
 
 const NO_PEOPLE =
