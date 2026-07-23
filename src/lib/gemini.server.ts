@@ -75,7 +75,17 @@ async function postJSON(model: string, payload: unknown): Promise<unknown> {
       console.info(
         `[gemini] ok model=${model} attempt=${attempt + 1}/${GEMINI_MAX_ATTEMPTS} duration_ms=${duration} status=${res.status}`,
       );
-      return res.json();
+      const body = await res.text();
+      try {
+        return JSON.parse(body) as unknown;
+      } catch {
+        console.error(
+          `[gemini] malformed json model=${model} attempt=${attempt + 1}/${GEMINI_MAX_ATTEMPTS} duration_ms=${duration} status=${res.status} body=${body}`,
+        );
+        lastErr = new GeminiError(res.status, body, "unknown", "Gemini returned a malformed response.");
+        await sleep(600 * (attempt + 1));
+        continue;
+      }
     }
     const body = await res.text();
     const code = classify(res.status, body);
