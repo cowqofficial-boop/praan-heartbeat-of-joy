@@ -248,7 +248,7 @@ function PhotosSection({
           style={{
             aspectRatio: ratio === "1:1" ? "1 / 1" : "9 / 16",
             maxHeight: "72vh",
-            boxShadow: "0 24px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04)",
+            boxShadow: "var(--shadow-raised)",
           }}
         >
           {current && (
