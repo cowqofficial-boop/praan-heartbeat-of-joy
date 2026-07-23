@@ -367,39 +367,16 @@ Post type: ${POST_TYPE_LABELS[post.post_type]}.
 Brief: ${typeBrief[post.post_type]}
 Return JSON: {"caption": string (2-4 short paragraphs, 400-700 chars, line breaks between paragraphs), "hashtags": string (10-15 relevant Indian-market hashtags space-separated starting with #)}`;
 
-  const capRes = await fetch(`${GATEWAY}/chat/completions`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey()}` },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: sys },
-        { role: "user", content: user },
-      ],
-    }),
+  const txt = await geminiGenerateText({
+    systemInstruction: sys,
+    parts: [{ text: user }],
+    responseMimeType: "application/json",
+    temperature: 0.8,
+    maxOutputTokens: 1024,
   });
-  if (!capRes.ok) throw new Error(`caption: ${capRes.status} ${await capRes.text()}`);
-  const capJson = (await capRes.json()) as { choices: { message: { content: string } }[] };
-  let txt = capJson.choices?.[0]?.message?.content?.trim() ?? "";
-  txt = txt.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
-  let caption = "";
-  let hashtags = "";
-  try {
-    const j = JSON.parse(txt);
-    caption = String(j.caption ?? "").trim();
-    hashtags = String(j.hashtags ?? "").trim();
-  } catch {
-    const m = txt.match(/\{[\s\S]*\}/);
-    if (m) {
-      try {
-        const j = JSON.parse(m[0]);
-        caption = String(j.caption ?? "").trim();
-        hashtags = String(j.hashtags ?? "").trim();
-      } catch {
-        /* ignore */
-      }
-    }
-  }
+  const parsed = parseJsonLoose<{ caption?: unknown; hashtags?: unknown }>(txt) ?? {};
+  let caption = String(parsed.caption ?? "").trim();
+  let hashtags = String(parsed.hashtags ?? "").trim();
   if (!caption) caption = txt.slice(0, 700);
 
   return { image_url: imageUrl, caption, hashtags };
