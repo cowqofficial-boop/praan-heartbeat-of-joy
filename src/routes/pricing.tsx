@@ -9,9 +9,9 @@ import { creditPacks, estimateProducts, formatInr, subscriptionPairs, type Plan 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing — PRAAN" },
+      { title: "Pricing — CowQ Ai" },
       { name: "description", content: "Simple pricing for Indian sellers: pay per product or subscribe monthly. Two months free on annual plans." },
-      { property: "og:title", content: "Pricing — PRAAN" },
+      { property: "og:title", content: "Pricing — CowQ Ai" },
       { property: "og:description", content: "Pay per product or subscribe. 2 months free on annual." },
       { property: "og:type", content: "website" },
     ],

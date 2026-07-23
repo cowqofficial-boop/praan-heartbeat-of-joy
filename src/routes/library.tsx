@@ -11,10 +11,10 @@ import { ReconnectBanner } from "@/components/ReconnectBanner";
 export const Route = createFileRoute("/library")({
   head: () => ({
     meta: [
-      { title: "Your products — PRAAN" },
-      { name: "description", content: "Every product you've generated with PRAAN — reopen, rename, delete, or add a new one." },
-      { property: "og:title", content: "Your products — PRAAN" },
-      { property: "og:description", content: "Your PRAAN product library." },
+      { title: "Your products — CowQ Ai" },
+      { name: "description", content: "Every product you've generated with CowQ Ai — reopen, rename, delete, or add a new one." },
+      { property: "og:title", content: "Your products — CowQ Ai" },
+      { property: "og:description", content: "Your CowQ Ai product library." },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex, follow" },
     ],

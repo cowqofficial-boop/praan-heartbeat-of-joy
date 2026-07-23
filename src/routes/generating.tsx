@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { usePraanStore } from "@/lib/praan-store";
+import { useCowqStore } from "@/lib/cowq-store";
 import { getBrowserId } from "@/lib/browser-id";
-import { generateCopyAndSave, generateImages } from "@/lib/praan.functions";
+import { generateCopyAndSave, generateImages } from "@/lib/cowq.functions";
 import { ProgressSteps, type StepState } from "@/components/ProgressSteps";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { markFreeGenerationUsed, useAuth } from "@/lib/use-auth";
@@ -10,13 +10,13 @@ import { markFreeGenerationUsed, useAuth } from "@/lib/use-auth";
 export const Route = createFileRoute("/generating")({
   head: () => ({
     meta: [
-      { title: "Making your listing — PRAAN" },
+      { title: "Making your listing — CowQ Ai" },
       {
         name: "description",
         content:
-          "PRAAN is studying your product, shooting studio photos, and writing your marketplace listing. This usually takes under a minute.",
+          "CowQ Ai is studying your product, shooting studio photos, and writing your marketplace listing. This usually takes under a minute.",
       },
-      { property: "og:title", content: "Making your listing — PRAAN" },
+      { property: "og:title", content: "Making your listing — CowQ Ai" },
       {
         property: "og:description",
         content: "Studio photos, marketplace copy, and a catalog file are being prepared.",
@@ -33,7 +33,7 @@ export const Route = createFileRoute("/generating")({
 function Generating() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { photos, originalImageUrl, identified, form } = usePraanStore();
+  const { photos, originalImageUrl, identified, form } = useCowqStore();
   const [states, setStates] = useState<StepState[]>(["done", "active", "pending"]);
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<string | null>(null);

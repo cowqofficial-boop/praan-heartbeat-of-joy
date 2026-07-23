@@ -1,5 +1,5 @@
 // Client-side watermark for free-tier downloads.
-// Draws "Made with PRAAN" pill in the bottom-right corner.
+// Draws "Made with CowQ" pill in the bottom-right corner.
 
 export async function watermarkImageUrl(url: string): Promise<Blob> {
   const res = await fetch(url);
@@ -41,7 +41,7 @@ function drawWatermark(ctx: CanvasRenderingContext2D, w: number, h: number) {
   const padY = 8 * scale;
   const fontSize = 16 * scale;
   const margin = 20 * scale;
-  const text = "Made with PRAAN";
+  const text = "Made with CowQ";
   ctx.font = `600 ${fontSize}px Inter, system-ui, -apple-system, sans-serif`;
   const metrics = ctx.measureText(text);
   const boxW = metrics.width + padX * 2;

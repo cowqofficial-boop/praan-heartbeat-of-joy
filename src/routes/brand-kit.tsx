@@ -20,9 +20,9 @@ export const Route = createFileRoute("/brand-kit")({
   validateSearch: (s) => searchSchema.parse(s),
   head: () => ({
     meta: [
-      { title: "Your brand kit — PRAAN" },
-      { name: "description", content: "Set your business name, logo, brand colours, voice, and AI model preferences so every listing PRAAN writes and shoots sounds and looks like you." },
-      { property: "og:title", content: "Your brand kit — PRAAN" },
+      { title: "Your brand kit — CowQ Ai" },
+      { name: "description", content: "Set your business name, logo, brand colours, voice, and AI model preferences so every listing CowQ Ai writes and shoots sounds and looks like you." },
+      { property: "og:title", content: "Your brand kit — CowQ Ai" },
       { property: "og:description", content: "Business name, logo, colours, voice, and model preferences — used in every future listing." },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex, follow" },
@@ -39,34 +39,34 @@ const TONES = [
 ];
 
 const GENDER = [
-  { value: "", label: "Let PRAAN decide" },
+  { value: "", label: "Let CowQ Ai decide" },
   { value: "woman", label: "Woman" },
   { value: "man", label: "Man" },
   { value: "non-binary", label: "Non-binary" },
 ];
 const AGE = [
-  { value: "", label: "Let PRAAN decide" },
+  { value: "", label: "Let CowQ Ai decide" },
   { value: "18-25", label: "18–25" },
   { value: "25-35", label: "25–35" },
   { value: "35-50", label: "35–50" },
   { value: "50+", label: "50+" },
 ];
 const SKIN = [
-  { value: "", label: "Let PRAAN decide" },
+  { value: "", label: "Let CowQ Ai decide" },
   { value: "fair", label: "Fair" },
   { value: "wheatish", label: "Wheatish" },
   { value: "medium", label: "Medium" },
   { value: "deep", label: "Deep" },
 ];
 const BODY = [
-  { value: "", label: "Let PRAAN decide" },
+  { value: "", label: "Let CowQ Ai decide" },
   { value: "slim", label: "Slim" },
   { value: "average", label: "Average" },
   { value: "curvy", label: "Curvy" },
   { value: "plus", label: "Plus" },
 ];
 const REGION = [
-  { value: "", label: "Let PRAAN decide" },
+  { value: "", label: "Let CowQ Ai decide" },
   { value: "North Indian", label: "North Indian" },
   { value: "South Indian", label: "South Indian" },
   { value: "East Indian / North-east", label: "East / North-east" },
@@ -206,7 +206,7 @@ function BrandKitPage() {
       <p className="mt-2 text-[15px] text-muted">
         {onboarding
           ? "Takes 30 seconds. You can skip and edit later."
-          : "Used in every listing PRAAN writes for you."}
+          : "Used in every listing CowQ Ai writes for you."}
       </p>
 
       <div className="mt-8 flex flex-col gap-6">
@@ -297,7 +297,7 @@ function BrandKitPage() {
         <div className="mt-2 border-t border-[color:var(--color-border)] pt-6">
           <h2 className="font-display text-[20px] leading-tight text-ink">Model preferences</h2>
           <p className="mt-1 text-[13px] text-muted">
-            Only used when PRAAN needs a person in the shot — clothing, jewellery, footwear, bags, cosmetics. All optional.
+            Only used when CowQ Ai needs a person in the shot — clothing, jewellery, footwear, bags, cosmetics. All optional.
           </p>
 
           <div className="mt-5 flex flex-col gap-4">

@@ -17,9 +17,9 @@ export const Route = createFileRoute("/auth")({
   validateSearch: (s) => searchSchema.parse(s),
   head: () => ({
     meta: [
-      { title: "Sign in — PRAAN" },
-      { name: "description", content: "Sign in or create a free PRAAN account to save your products, download files, and generate more listings." },
-      { property: "og:title", content: "Sign in — PRAAN" },
+      { title: "Sign in — CowQ Ai" },
+      { name: "description", content: "Sign in or create a free CowQ Ai account to save your products, download files, and generate more listings." },
+      { property: "og:title", content: "Sign in — CowQ Ai" },
       { property: "og:description", content: "Save your products, download files, and generate more listings." },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex, follow" },
@@ -107,7 +107,7 @@ function Auth() {
       <p className="mt-2 text-[15px] text-muted">
         {mode === "signup"
           ? "Create a free account to keep your products and download files."
-          : "Sign in to your PRAAN account."}
+          : "Sign in to your CowQ Ai account."}
       </p>
 
       <button

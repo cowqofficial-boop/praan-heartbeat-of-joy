@@ -5,7 +5,7 @@ import { AlertCircle, X } from "lucide-react";
 import { getMyCredits } from "@/lib/billing.functions";
 import { getPlan } from "@/lib/plans";
 
-const KEY = "praan.lowBalanceShown";
+const KEY = "cowq.lowBalanceShown";
 
 export function LowBalanceBanner() {
   const [hidden, setHidden] = useState(true);

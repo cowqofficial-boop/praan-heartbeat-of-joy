@@ -8,8 +8,8 @@ import { getSocialConfig, startInstagramConnect } from "@/lib/social.functions";
 export const Route = createFileRoute("/connect/instagram")({
   head: () => ({
     meta: [
-      { title: "Connect Instagram — PRAAN" },
-      { name: "description", content: "Three quick steps to connect your Instagram to PRAAN." },
+      { title: "Connect Instagram — CowQ Ai" },
+      { name: "description", content: "Three quick steps to connect your Instagram to CowQ Ai." },
       { name: "robots", content: "noindex, follow" },
     ],
   }),
@@ -103,16 +103,16 @@ function InstagramWizard() {
       {step === 2 && (
         <div className="mt-8 flex flex-1 flex-col">
           <div className="grid h-32 place-items-center rounded-[16px] bg-[#FFF6EC] text-4xl">🎉</div>
-          <h2 className="mt-6 font-display text-[24px] leading-tight text-ink">Now link it to PRAAN</h2>
+          <h2 className="mt-6 font-display text-[24px] leading-tight text-ink">Now link it to CowQ Ai</h2>
           <p className="mt-2 text-[15px] text-muted">
             We'll open Facebook so you can approve access. You'll come right back here.
           </p>
           {notConfigured && (
             <div className="mt-4 rounded-[12px] border border-[color:var(--color-border)] bg-[#FDECEC] p-3 text-[13px] text-ink">
-              Instagram connect isn't switched on yet on this app. Ask the PRAAN team to finish setup — you'll be able to connect right after.
+              Instagram connect isn't switched on yet on this app. Ask the CowQ Ai team to finish setup — you'll be able to connect right after.
             </div>
           )}
-          <WhyLink text="Why do you need this? So PRAAN can publish posts on your behalf when you tap 'Post from PRAAN'." />
+          <WhyLink text="Why do you need this? So CowQ Ai can publish posts on your behalf when you tap 'Post from CowQ Ai'." />
         </div>
       )}
 

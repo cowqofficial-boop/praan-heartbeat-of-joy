@@ -1,21 +1,21 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { usePraanStore } from "@/lib/praan-store";
+import { useCowqStore } from "@/lib/cowq-store";
 import { PrimaryButton } from "@/components/PrimaryButton";
 
 export const Route = createFileRoute("/confirm")({
   head: () => ({
     meta: [
-      { title: "Confirm your product details — PRAAN" },
+      { title: "Confirm your product details — CowQ Ai" },
       {
         name: "description",
         content:
-          "Review the product name, price, and detail PRAAN picked up from your photo before generating your marketplace listing.",
+          "Review the product name, price, and detail CowQ Ai picked up from your photo before generating your marketplace listing.",
       },
-      { property: "og:title", content: "Confirm your product details — PRAAN" },
+      { property: "og:title", content: "Confirm your product details — CowQ Ai" },
       {
         property: "og:description",
-        content: "Review the product details PRAAN detected before generating your listing.",
+        content: "Review the product details CowQ Ai detected before generating your listing.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://praan-heartbeat-of-joy.lovable.app/confirm" },
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/confirm")({
 
 function Confirm() {
   const navigate = useNavigate();
-  const { originalDataUrl, identified, setForm } = usePraanStore();
+  const { originalDataUrl, identified, setForm } = useCowqStore();
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [detail, setDetail] = useState("");

@@ -1,4 +1,4 @@
-const KEY = "praan:browser_id";
+const KEY = "cowq:browser_id";
 
 export function getBrowserId(): string {
   if (typeof window === "undefined") return "";

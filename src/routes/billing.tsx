@@ -9,7 +9,7 @@ import { formatInr } from "@/lib/plans";
 export const Route = createFileRoute("/billing")({
   head: () => ({
     meta: [
-      { title: "Billing — PRAAN" },
+      { title: "Billing — CowQ Ai" },
       { name: "robots", content: "noindex, follow" },
     ],
   }),
@@ -161,7 +161,7 @@ function BillingPage() {
 
       <p className="mt-8 text-center text-[12px] text-muted">
         Need a receipt or GST invoice?{" "}
-        <a href="mailto:hello@praan.app" className="underline">
+        <a href="mailto:hello@cowq.app" className="underline">
           Email us <ExternalLink className="inline h-3 w-3" />
         </a>
       </p>

@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Download, Lock, Share2, ThumbsDown, ThumbsUp } from "lucide-react";
 import { PostThisButton } from "@/components/PostThisButton";
 import JSZip from "jszip";
-import { generateImages, getGeneration, submitFeedback } from "@/lib/praan.functions";
+import { generateImages, getGeneration, submitFeedback } from "@/lib/cowq.functions";
 import { getBrowserId } from "@/lib/browser-id";
 import { CopyButton } from "@/components/CopyButton";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
@@ -15,13 +15,13 @@ import { watermarkImageUrl } from "@/lib/watermark";
 export const Route = createFileRoute("/results/$id")({
   head: ({ params }) => ({
     meta: [
-      { title: "Your listing is ready — PRAAN" },
+      { title: "Your listing is ready — CowQ Ai" },
       {
         name: "description",
         content:
           "Studio product photos, marketplace copy, and a Shopify catalog CSV — ready to download and post.",
       },
-      { property: "og:title", content: "Your listing is ready — PRAAN" },
+      { property: "og:title", content: "Your listing is ready — CowQ Ai" },
       {
         property: "og:description",
         content: "Download studio photos, copy marketplace text, and export a Shopify CSV.",
@@ -124,7 +124,7 @@ function Results() {
           imageUrl={whiteAfter}
           caption={copy ? `${copy.instagram}\n\n${copy.instagramHashtags.join(" ")}` : ""}
           productName={(data.product_name as string) || undefined}
-          filenameHint={(data.product_name as string) || "praan"}
+          filenameHint={(data.product_name as string) || "cowq"}
           watermark={watermark}
         />
       </Section>
@@ -165,7 +165,7 @@ function Results() {
           <div className="flex flex-col gap-3">
             <DownloadAllButton
               images={images}
-              name={(data.product_name as string) || "praan"}
+              name={(data.product_name as string) || "cowq"}
               watermark={watermark}
             />
             <a
@@ -297,7 +297,7 @@ function PhotosSection({
       }
       const a = document.createElement("a");
       a.href = href;
-      a.download = `praan-${img.kind}-${img.ratio.replace(":", "x")}.png`;
+      a.download = `cowq-${img.kind}-${img.ratio.replace(":", "x")}.png`;
       a.click();
       if (revoke) URL.revokeObjectURL(href);
     } catch {
@@ -341,7 +341,7 @@ function PhotosSection({
                 />
                 {watermark && (
                   <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
-                    Made with PRAAN
+                    Made with CowQ
                   </span>
                 )}
                 {hasAccount && (
