@@ -97,7 +97,7 @@ function PricingPage() {
         subscription_id: params.subscription_id,
         prefill: { email: params.prefill_email ?? undefined },
         notes: params.notes,
-        theme: { color: "#E0402F" },
+        theme: { color: "#3D5AFE" },
         handler: () => {
           // Payment captured — webhook grants credits. Send to billing.
           navigate({ to: "/billing" });
