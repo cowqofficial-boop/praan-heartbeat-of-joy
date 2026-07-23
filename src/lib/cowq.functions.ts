@@ -183,31 +183,33 @@ const PRODUCT_STYLES: StyleDef[] = [
 ];
 
 function personStyles(modelLine: string, brandModelBinding: string, isDraped: boolean): StyleDef[] {
-  const drapeRules = `If it is a draped Indian garment, the drape must be correct: sarees pleated at the waist with the pallu over the LEFT shoulder; dupattas placed properly. If the correct drape cannot be produced with confidence, prefer a well-lit product-only shot to a badly draped model shot.`;
-  const bodyRules = `Natural pose, natural light, hands and fingers correct (five fingers, no distortion), face calm and pleasant, nothing exaggerated, no fashion-editorial posing, no text, no logo, no watermark. The person is a clearly adult model — 25 to 40 years old, unmistakably an adult. Never depict a child, teenager, or minor.`;
+  const drapeRules = `If it is a draped Indian garment (saree, dupatta, lehenga, stole), the COMPLETE drape must be visible and correctly formed in the frame: pleats neat at the waist, pallu over the LEFT shoulder falling to the back, border continuous and unbroken along the whole length, full length of the garment from shoulder to hem visible. If the correct drape cannot be produced with confidence, prefer a well-lit product-only shot to a badly draped or badly cropped model shot.`;
+  const bodyRules = `Natural pose, natural light, hands and fingers correct (five fingers, no distortion), arms held slightly away from the body so the garment is not hidden, face calm and pleasant, nothing exaggerated, no fashion-editorial posing, no text, no logo, no watermark. The person is a clearly adult model — 25 to 40 years old, unmistakably an adult. Never depict a child, teenager, or minor.`;
   const fidelity = `The garment/item must match the uploaded photos exactly — same colour, same pattern, same border, same length, same fittings. Do not restyle, do not recolour, do not shorten, do not embellish.`;
+  const FRAMING_HARD_RULE = `HARD FRAMING RULE — the entire product must be ENTIRELY WITHIN THE FRAME, fully visible from every side, with clear margin on all four sides, NEVER cut off by any edge of the image. Do not crop into the product. If framing forces a choice between showing the model's face and showing the whole garment, ALWAYS show the whole garment — crop the face, never the product.`;
   const whitePrompt = isDraped
-    ? "Reproduce the exact same draped garment from the input photo — same colour, weave, border, and pattern. Present it presented for e-commerce WITHOUT a person: neatly folded on a clean white surface OR partially draped over a plain wooden hanger/stand so the fabric, border and pallu/pattern read clearly. Pure clean white studio background suitable for Amazon/Flipkart marketplace main image, soft even lighting, subtle contact shadow, centred, no props, no text, high detail, photorealistic. Never a flat rectangle of cloth. No person, no hands, no mannequin face."
-    : "Reproduce the exact same product from the input photo — same shape, colour, material, branding, and label. Place it on a pure clean white studio background suitable for Amazon/Flipkart marketplace main image, soft even lighting, subtle contact shadow, centred, no props, no text, high detail, photorealistic. No person.";
+    ? "Reproduce the exact same draped garment from the input photo — same colour, weave, border, and pattern. Present it for e-commerce WITHOUT a person: neatly folded on a clean white surface OR partially draped over a plain wooden hanger/stand so the fabric, border and pallu/pattern read clearly. Pure clean white studio background suitable for Amazon/Flipkart marketplace main image, soft even lighting, subtle contact shadow, centred, generous margin on all four sides so nothing touches the frame edge, no props, no text, high detail, photorealistic. Never a flat rectangle of cloth. No person, no hands, no mannequin face."
+    : "Reproduce the exact same product from the input photo — same shape, colour, material, branding, and label. Place it on a pure clean white studio background suitable for Amazon/Flipkart marketplace main image, soft even lighting, subtle contact shadow, centred, generous even margin on all four sides so nothing touches the frame edge, no props, no text, high detail, photorealistic. No person.";
   return [
     { kind: "white", prompt: whitePrompt },
     {
       kind: "studio",
       prompt:
-        "Same product from the input photo, kept faithful in every detail. Place it on or against a neutral warm studio backdrop with soft lighting, gentle side shadow, minimal styling, premium e-commerce look, photorealistic. No people.",
+        "Same product from the input photo, kept faithful in every detail. Place it on or against a neutral warm studio backdrop with soft lighting, gentle side shadow, minimal styling, premium e-commerce look. Product centred with clear even margin on all four sides — nothing touching the frame edge. Photorealistic. No people.",
     },
     {
       kind: "onmodel_full",
       hasPerson: true,
-      prompt: `On-model FULL view: one adult person wearing/using the product so that the WHOLE product is clearly visible from head to toe (or the equivalent full view for the item). ${modelLine} ${brandModelBinding} ${fidelity} ${drapeRules} ${bodyRules} Soft natural daylight, plain neutral background, photorealistic, catalogue-quality.`,
+      prompt: `On-model FULL-BODY shot: one adult person wearing the product, framed from ABOVE THE HEAD down to BELOW THE FEET (or at minimum to mid-calf for full-length garments). The ENTIRE garment must be visible top to bottom with clear margin — for a saree, that means the complete drape: pleats at the waist, pallu over the left shoulder falling to the back, and the border continuous along the whole length; for a kurta, dress or lehenga, shoulder to hem fully in frame. Straight-on view, model standing naturally with arms held slightly away from the body so no part of the garment is hidden. ${FRAMING_HARD_RULE} ${modelLine} ${brandModelBinding} ${fidelity} ${drapeRules} ${bodyRules} Soft natural daylight, plain neutral background, photorealistic, catalogue-quality.`,
     },
     {
       kind: "onmodel_detail",
       hasPerson: true,
-      prompt: `On-model CLOSE view of the same adult person: closer framing on the product to show fabric, detail, fit or how it sits — e.g. jewellery near the neckline, saree pallu detail, shoe on foot, watch on wrist, bag held at the side. ${modelLine} ${brandModelBinding} ${fidelity} ${drapeRules} ${bodyRules} Soft natural daylight, plain neutral background, photorealistic.`,
+      prompt: `On-model THREE-QUARTER / WAIST-UP detail shot of the same adult person: closer framing to show fabric, weave, border, neckline and how the garment falls — but NEVER a tight crop into the product. Frame from head to waist at minimum so the viewer still understands what they are looking at; the section of the product shown must be entirely within the frame with clear margin, never becoming an abstract patch of colour. ${FRAMING_HARD_RULE} ${modelLine} ${brandModelBinding} ${fidelity} ${drapeRules} ${bodyRules} Soft natural daylight, plain neutral background, photorealistic.`,
     },
   ];
 }
+
 
 // Kidswear: never a person. Product-focused shots — folded, on a hanger, plain surface, or ghost-mannequin.
 const KIDSWEAR_STYLES: StyleDef[] = [
