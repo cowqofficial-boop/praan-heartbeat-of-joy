@@ -5,9 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   generateBrandModelPortrait,
   getMyBrandKit,
+  removeRealBrandModel,
   saveMyBrandKit,
   setBrandModelEnabled,
   uploadBrandLogo,
+  uploadBrandModelPhotos,
   type BrandKit,
 } from "@/lib/brand-kit.functions";
 import { PrimaryButton } from "@/components/PrimaryButton";
