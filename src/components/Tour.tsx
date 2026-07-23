@@ -308,10 +308,11 @@ export function Tour() {
   });
 
   // Explicit "restart tour" via ?tour=1
+  const search = useRouterState({ select: (s) => s.location.search });
   const forced = useMemo(() => {
-    if (typeof window === "undefined") return false;
-    return new URLSearchParams(window.location.search).get("tour") === "1";
-  }, [path]);
+    const s = search as Record<string, unknown> | undefined;
+    return s?.tour === 1 || s?.tour === "1";
+  }, [search]);
 
   const [open, setOpen] = useState(false);
 
