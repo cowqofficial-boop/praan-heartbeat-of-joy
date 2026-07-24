@@ -68,35 +68,10 @@ function Confirm() {
     [items],
   );
 
-  if (!identified || !originalDataUrl) return null;
-
   const cost = COSTS.product;
-  const canSubmit = name.trim().length > 0 && price.trim().length > 0;
-
-  function preflight(): { block?: string; needsAuth?: boolean } {
-    if (activeCount >= MAX_QUEUE) {
-      return { block: "3 is the most we'll do at once. One more slot opens as each finishes." };
-    }
-    if (!user) {
-      if (activeCount > 0 || hasUsedFreeGeneration()) {
-        return { needsAuth: true };
-      }
-      return {};
-    }
-    const have = credits?.total ?? null;
-    if (have == null) return {};
-    const needed = cost * (activeCount + 1);
-    if (have < needed) {
-      if (activeCount === 0) {
-        return { block: `You have ${have} credits — you need ${cost} to make one product. Top up to keep going.` };
-      }
-      const canQueue = Math.floor(have / cost);
-      return { block: `You have ${have} credits — enough for ${canQueue} more product${canQueue === 1 ? "" : "s"}. Top up to queue more.` };
-    }
-    return {};
-  }
 
   const startGeneration = useCallback(() => {
+    if (!identified) return;
     const imageUrls = (photos.length > 0 ? photos.map((p) => p.url) : []).filter(
       (u): u is string => Boolean(u),
     );
@@ -123,6 +98,34 @@ function Confirm() {
       startGeneration();
     }
   }, [user, startGeneration]);
+
+  if (!identified || !originalDataUrl) return null;
+
+  const canSubmit = name.trim().length > 0 && price.trim().length > 0;
+
+  function preflight(): { block?: string; needsAuth?: boolean } {
+    if (activeCount >= MAX_QUEUE) {
+      return { block: "3 is the most we'll do at once. One more slot opens as each finishes." };
+    }
+    if (!user) {
+      if (activeCount > 0 || hasUsedFreeGeneration()) {
+        return { needsAuth: true };
+      }
+      return {};
+    }
+    const have = credits?.total ?? null;
+    if (have == null) return {};
+    const needed = cost * (activeCount + 1);
+    if (have < needed) {
+      if (activeCount === 0) {
+        return { block: `You have ${have} credits — you need ${cost} to make one product. Top up to keep going.` };
+      }
+      const canQueue = Math.floor(have / cost);
+      return { block: `You have ${have} credits — enough for ${canQueue} more product${canQueue === 1 ? "" : "s"}. Top up to queue more.` };
+    }
+    return {};
+  }
+
 
   const usedFree = !user && (activeCount > 0 || hasUsedFreeGeneration());
   const buttonLabel = activeCount > 0
