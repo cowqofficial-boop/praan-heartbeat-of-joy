@@ -7,6 +7,7 @@ import { useCowqStore } from "@/lib/cowq-store";
 import { useQueueStore, MAX_QUEUE, queueCounts } from "@/lib/queue-store";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { AuthModal } from "@/components/AuthModal";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { COSTS } from "@/lib/plans";
 import { useAuth, hasUsedFreeGeneration } from "@/lib/use-auth";
 import { getMyCredits } from "@/lib/billing.functions";
@@ -203,7 +204,10 @@ function Confirm() {
           You've used your free product.{" "}
           <button
             type="button"
-            onClick={() => setAuthOpen(true)}
+            onClick={() => {
+              console.log("[confirm] inline 'Sign up to make more' clicked");
+              setAuthOpen(true);
+            }}
             className="font-medium underline"
             style={{ color: "var(--color-primary)" }}
           >
@@ -218,9 +222,11 @@ function Confirm() {
         fixed
         disabled={!canSubmit}
         onClick={() => {
+          console.log("[confirm] primary button clicked; usedFree=", usedFree);
           setError(null);
           const pf = preflight();
           if (pf.needsAuth) {
+            console.log("[confirm] preflight needsAuth -> opening AuthModal");
             shouldResumeRef.current = true;
             setAuthOpen(true);
             return;
@@ -235,6 +241,7 @@ function Confirm() {
         {buttonLabel}
       </PrimaryButton>
 
+      <ErrorBoundary label="AuthModal">
       <AuthModal
         open={authOpen}
         onClose={() => {
@@ -245,6 +252,7 @@ function Confirm() {
           setAuthOpen(false);
         }}
       />
+      </ErrorBoundary>
     </main>
   );
 }

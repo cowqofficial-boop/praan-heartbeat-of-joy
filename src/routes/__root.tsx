@@ -19,6 +19,7 @@ import { QueueRunner } from "../lib/queue-runner";
 import { QueueIndicator } from "../components/QueueIndicator";
 import { Tour } from "../components/Tour";
 import { Dialogs } from "../components/Dialogs";
+import { GlobalErrorToast } from "../components/GlobalErrorToast";
 import { useAuth } from "../lib/use-auth";
 
 
@@ -156,6 +157,7 @@ function RootComponent() {
         <QueueIndicator />
         <Tour />
         <Dialogs />
+        <GlobalErrorToast />
       </div>
     </QueryClientProvider>
   );
