@@ -263,7 +263,7 @@ function PlanCard({
       ? { label: "Full 30-day content calendar", plain: "A month of posts, planned for you." }
       : { label: "Content calendar — Growth or Pro", plain: "Upgrade to unlock the posting calendar." },
     plan.features.auto_post
-      ? { label: "Automatic posting", plain: "CowQ posts to Instagram for you." }
+      ? { label: "Automatic posting — Instagram & Facebook", plain: "More platforms from September." }
       : { label: "Manual posting", plain: "One tap to share — you approve every post." },
     plan.features.priority
       ? { label: "Priority generation", plain: "Your photos jump the queue." }

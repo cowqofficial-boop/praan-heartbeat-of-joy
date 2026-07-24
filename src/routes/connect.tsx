@@ -125,6 +125,16 @@ function ConnectPage() {
         />
       </div>
 
+      <section className="mt-8 rounded-[12px] bg-raised p-4">
+        <p className="text-[14px] font-semibold text-ink">More platforms coming in September</p>
+        <p className="mt-2 text-[13px] text-muted">
+          YouTube · Threads · X · LinkedIn · Pinterest · TikTok
+        </p>
+        <p className="mt-2 text-[13px] text-muted">
+          You'll connect them here the same way. Nothing else changes.
+        </p>
+      </section>
+
       {onboarding && (
         <button
           type="button"
