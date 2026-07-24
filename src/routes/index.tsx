@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Camera, Sparkles, Package, Check, Shield, Lock, RefreshCw, ImageIcon, User } from "lucide-react";
+import { Camera, Sparkles, Package, Check, Shield, Lock, RefreshCw, ImageIcon, User, Share2, Video, UserRound, type LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { UploadWidget } from "@/components/UploadWidget";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
@@ -603,6 +603,46 @@ function Landing() {
         </div>
       </section>
 
+      {/* ================ 7b. What's coming ================ */}
+      <section className="px-6 py-16 lg:py-24">
+        <div className="mx-auto max-w-[1200px]">
+          <Reveal>
+            <p className="eyebrow text-muted">What's coming</p>
+            <h2 className="mt-2 font-display text-[32px] leading-[1.05] tracking-[-0.03em] text-ink lg:text-[48px]">
+              Built next.
+            </h2>
+            <p className="mt-3 max-w-[620px] text-[15px] text-muted">
+              CowQ ships every month. Here's what's already being worked on.
+            </p>
+          </Reveal>
+          <Reveal delay={80}>
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              <RoadmapCard
+                icon={Share2}
+                date="September 2026"
+                title="Posting everywhere"
+                body="One tap posts to Instagram, Facebook, YouTube, Threads, X, LinkedIn, Pinterest and more. Connect once, then never open another app to publish."
+              />
+              <RoadmapCard
+                icon={Video}
+                date="October 2026"
+                title="Product videos"
+                body="Short videos made from the same photos — the product turning, the detail up close, ready for Reels and Shorts."
+              />
+              <RoadmapCard
+                icon={UserRound}
+                date="December 2026"
+                title="Presenter videos"
+                body="A presenter introducing your product on camera, in your brand's voice."
+              />
+            </div>
+            <p className="mt-8 text-center text-[13px] text-muted">
+              Dates are our honest best estimate. We'd rather ship late than promise something that isn't ready.
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ================ 8. Close ================ */}
       <section className="bg-surface px-6 py-20 lg:py-28">
         <div className="mx-auto max-w-[820px] text-center">
@@ -746,5 +786,42 @@ function Faq({ q, a }: { q: string; a: ReactNode }) {
       </div>
       {open && <p className="mt-2 text-[14px] leading-relaxed text-muted">{a}</p>}
     </button>
+  );
+}
+
+function RoadmapCard({
+  icon: Icon,
+  date,
+  title,
+  body,
+}: {
+  icon: LucideIcon;
+  date: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="card-lift p-6">
+      <span
+        className="grid h-10 w-10 place-items-center rounded-[10px]"
+        style={{
+          background: "color-mix(in oklab, var(--page-accent) 18%, transparent)",
+          color: "var(--page-accent)",
+        }}
+      >
+        <Icon className="h-5 w-5" strokeWidth={1.75} />
+      </span>
+      <span
+        className="mt-5 inline-block rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]"
+        style={{
+          background: "color-mix(in oklab, #FF8A1E 14%, transparent)",
+          color: "#FF8A1E",
+        }}
+      >
+        {date}
+      </span>
+      <p className="mt-3 text-[17px] font-semibold text-ink">{title}</p>
+      <p className="mt-2 text-[14px] leading-relaxed text-muted">{body}</p>
+    </div>
   );
 }
