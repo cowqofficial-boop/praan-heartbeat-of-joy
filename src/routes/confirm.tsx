@@ -51,6 +51,8 @@ function Confirm() {
   const [price, setPrice] = useState("");
   const [detail, setDetail] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
+  const shouldResumeRef = useRef(false);
 
   useEffect(() => {
     if (!identified || !originalDataUrl) {
@@ -71,28 +73,56 @@ function Confirm() {
   const cost = COSTS.product;
   const canSubmit = name.trim().length > 0 && price.trim().length > 0;
 
-  function preflight(): string | null {
+  function preflight(): { block?: string; needsAuth?: boolean } {
     if (activeCount >= MAX_QUEUE) {
-      return "3 is the most we'll do at once. One more slot opens as each finishes.";
+      return { block: "3 is the most we'll do at once. One more slot opens as each finishes." };
     }
     if (!user) {
       if (activeCount > 0 || hasUsedFreeGeneration()) {
-        return "Sign up to make more than one product.";
+        return { needsAuth: true };
       }
-      return null;
+      return {};
     }
     const have = credits?.total ?? null;
-    if (have == null) return null; // don't block on unknown; server will refund on shortfall
+    if (have == null) return {};
     const needed = cost * (activeCount + 1);
     if (have < needed) {
       if (activeCount === 0) {
-        return `You have ${have} credits — you need ${cost} to make one product. Top up to keep going.`;
+        return { block: `You have ${have} credits — you need ${cost} to make one product. Top up to keep going.` };
       }
       const canQueue = Math.floor(have / cost);
-      return `You have ${have} credits — enough for ${canQueue} more product${canQueue === 1 ? "" : "s"}. Top up to queue more.`;
+      return { block: `You have ${have} credits — enough for ${canQueue} more product${canQueue === 1 ? "" : "s"}. Top up to queue more.` };
     }
-    return null;
+    return {};
   }
+
+  const startGeneration = useCallback(() => {
+    const imageUrls = (photos.length > 0 ? photos.map((p) => p.url) : []).filter(
+      (u): u is string => Boolean(u),
+    );
+    if (imageUrls.length === 0) {
+      setError("We lost your uploaded photo. Please upload again.");
+      return;
+    }
+    enqueue({
+      productName: name.trim(),
+      price: price.trim(),
+      detail: detail.trim(),
+      imageUrls,
+      identified,
+      cost,
+    });
+    resetUpload();
+    navigate({ to: "/generating" });
+  }, [photos, name, price, detail, identified, cost, enqueue, resetUpload, navigate]);
+
+  // After successful auth, resume the pending generation.
+  useEffect(() => {
+    if (user && shouldResumeRef.current) {
+      shouldResumeRef.current = false;
+      startGeneration();
+    }
+  }, [user, startGeneration]);
 
   return (
     <main className="flex min-h-screen flex-col px-5 pb-28 pt-8">
