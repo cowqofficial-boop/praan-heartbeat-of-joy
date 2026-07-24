@@ -142,6 +142,7 @@ export function QueueRunner() {
       const raw = String((e as Error).message || e);
       const [human] = raw.split("||DETAIL||").map((s) => s.trim());
       const msg = human || raw;
+      console.error("[queue-runner] failed:", e, "stack:", (e as Error)?.stack);
       if (jobId) {
         try {
           await refundJob({ data: { jobId, browserId, reason: msg } });
