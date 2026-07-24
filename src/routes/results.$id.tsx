@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/use-auth";
 import { getMyCredits } from "@/lib/billing.functions";
 import { watermarkImageUrl } from "@/lib/watermark";
 import { showAlert } from "@/components/Dialogs";
+import { AuthModal } from "@/components/AuthModal";
 
 export const Route = createFileRoute("/results/$id")({
   head: ({ params }) => ({
