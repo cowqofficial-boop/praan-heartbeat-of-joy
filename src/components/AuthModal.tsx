@@ -78,6 +78,7 @@ export function AuthModal({
     };
   }, [open, onClose]);
 
+  console.log("[AuthModal] render, open=", open);
   if (!open || typeof document === "undefined") return null;
 
   const strength = scorePassword(password);
