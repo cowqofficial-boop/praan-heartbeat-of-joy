@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { SITE_URL } from "@/lib/site";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useCowqStore } from "@/lib/cowq-store";
 import { useQueueStore, MAX_QUEUE, queueCounts } from "@/lib/queue-store";
 import { PrimaryButton } from "@/components/PrimaryButton";
+import { AuthModal } from "@/components/AuthModal";
 import { COSTS } from "@/lib/plans";
 import { useAuth, hasUsedFreeGeneration } from "@/lib/use-auth";
 import { getMyCredits } from "@/lib/billing.functions";
@@ -49,6 +51,8 @@ function Confirm() {
   const [price, setPrice] = useState("");
   const [detail, setDetail] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
+  const shouldResumeRef = useRef(false);
 
   useEffect(() => {
     if (!identified || !originalDataUrl) {
@@ -69,31 +73,78 @@ function Confirm() {
   const cost = COSTS.product;
   const canSubmit = name.trim().length > 0 && price.trim().length > 0;
 
-  function preflight(): string | null {
+  function preflight(): { block?: string; needsAuth?: boolean } {
     if (activeCount >= MAX_QUEUE) {
-      return "3 is the most we'll do at once. One more slot opens as each finishes.";
+      return { block: "3 is the most we'll do at once. One more slot opens as each finishes." };
     }
     if (!user) {
       if (activeCount > 0 || hasUsedFreeGeneration()) {
-        return "Sign up to make more than one product.";
+        return { needsAuth: true };
       }
-      return null;
+      return {};
     }
     const have = credits?.total ?? null;
-    if (have == null) return null; // don't block on unknown; server will refund on shortfall
+    if (have == null) return {};
     const needed = cost * (activeCount + 1);
     if (have < needed) {
       if (activeCount === 0) {
-        return `You have ${have} credits — you need ${cost} to make one product. Top up to keep going.`;
+        return { block: `You have ${have} credits — you need ${cost} to make one product. Top up to keep going.` };
       }
       const canQueue = Math.floor(have / cost);
-      return `You have ${have} credits — enough for ${canQueue} more product${canQueue === 1 ? "" : "s"}. Top up to queue more.`;
+      return { block: `You have ${have} credits — enough for ${canQueue} more product${canQueue === 1 ? "" : "s"}. Top up to queue more.` };
     }
-    return null;
+    return {};
   }
+
+  const startGeneration = useCallback(() => {
+    const imageUrls = (photos.length > 0 ? photos.map((p) => p.url) : []).filter(
+      (u): u is string => Boolean(u),
+    );
+    if (imageUrls.length === 0) {
+      setError("We lost your uploaded photo. Please upload again.");
+      return;
+    }
+    enqueue({
+      productName: name.trim(),
+      price: price.trim(),
+      detail: detail.trim(),
+      imageUrls,
+      identified,
+      cost,
+    });
+    resetUpload();
+    navigate({ to: "/generating" });
+  }, [photos, name, price, detail, identified, cost, enqueue, resetUpload, navigate]);
+
+  // After successful auth, resume the pending generation.
+  useEffect(() => {
+    if (user && shouldResumeRef.current) {
+      shouldResumeRef.current = false;
+      startGeneration();
+    }
+  }, [user, startGeneration]);
+
+  const usedFree = !user && (activeCount > 0 || hasUsedFreeGeneration());
+  const buttonLabel = activeCount > 0
+    ? `Add to queue — ${cost} credits`
+    : user
+      ? `Make my photos — ${cost} credits`
+      : usedFree
+        ? "Sign up to make my photos"
+        : "Make my photos — free";
 
   return (
     <main className="flex min-h-screen flex-col px-5 pb-28 pt-8">
+      <button
+        type="button"
+        onClick={() => navigate({ to: "/create" })}
+        className="mb-4 -ml-1 inline-flex h-9 items-center gap-1.5 rounded-full pl-1 pr-3 text-[14px] font-medium text-muted hover:text-ink"
+        aria-label="Back to upload"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back
+      </button>
+
       <p className="text-[13px] font-medium uppercase tracking-wide text-muted">Check what CowQ found</p>
       <h1 className="mt-1 font-display text-[28px] leading-tight text-ink">
         Confirm your product details
@@ -144,39 +195,53 @@ function Confirm() {
           {activeCount} product{activeCount === 1 ? "" : "s"} already in your queue. This one will start when they finish.
         </p>
       )}
+      {usedFree && (
+        <p className="mt-3 text-[13px] text-muted">
+          You've used your free product.{" "}
+          <button
+            type="button"
+            onClick={() => setAuthOpen(true)}
+            className="font-medium underline"
+            style={{ color: "var(--color-primary)" }}
+          >
+            Sign up to make more
+          </button>
+          {" "}— your details are saved.
+        </p>
+      )}
       {error && <p className="mt-3 text-[14px] text-primary">{error}</p>}
 
       <PrimaryButton
         fixed
         disabled={!canSubmit}
         onClick={() => {
-          const block = preflight();
-          if (block) {
-            setError(block);
+          setError(null);
+          const pf = preflight();
+          if (pf.needsAuth) {
+            shouldResumeRef.current = true;
+            setAuthOpen(true);
             return;
           }
-          const imageUrls = (photos.length > 0
-            ? photos.map((p) => p.url)
-            : []
-          ).filter((u): u is string => Boolean(u));
-          if (imageUrls.length === 0) {
-            setError("We lost your uploaded photo. Please upload again.");
+          if (pf.block) {
+            setError(pf.block);
             return;
           }
-          enqueue({
-            productName: name.trim(),
-            price: price.trim(),
-            detail: detail.trim(),
-            imageUrls,
-            identified,
-            cost,
-          });
-          resetUpload();
-          navigate({ to: "/generating" });
+          startGeneration();
         }}
       >
-        {activeCount > 0 ? "Add to queue" : "Make my photos"}
+        {buttonLabel}
       </PrimaryButton>
+
+      <AuthModal
+        open={authOpen}
+        onClose={() => {
+          setAuthOpen(false);
+          shouldResumeRef.current = false;
+        }}
+        onSuccess={() => {
+          setAuthOpen(false);
+        }}
+      />
     </main>
   );
 }

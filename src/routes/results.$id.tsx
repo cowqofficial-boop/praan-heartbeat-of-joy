@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/use-auth";
 import { getMyCredits } from "@/lib/billing.functions";
 import { watermarkImageUrl } from "@/lib/watermark";
 import { showAlert } from "@/components/Dialogs";
+import { AuthModal } from "@/components/AuthModal";
 
 export const Route = createFileRoute("/results/$id")({
   head: ({ params }) => ({
@@ -678,7 +679,9 @@ function ListingRow({
    SIGN-UP GATE, FEEDBACK
    ============================================================ */
 
-function SignUpGate({ title, body, next }: { title: string; body: string; next: string }) {
+function SignUpGate({ title, body, next: _next }: { title: string; body: string; next: string }) {
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<"signup" | "signin">("signup");
   return (
     <div className="card-lift p-5 text-center">
       <div className="mx-auto grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary">
@@ -686,20 +689,26 @@ function SignUpGate({ title, body, next }: { title: string; body: string; next: 
       </div>
       <p className="mt-3 text-[16px] font-semibold text-ink">{title}</p>
       <p className="mt-1 text-[14px] text-muted">{body}</p>
-      <Link
-        to="/auth"
-        search={{ mode: "signup", next }}
-        className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-[14px] bg-primary px-5 text-[15px] font-semibold text-primary-foreground"
+      <button
+        type="button"
+        onClick={() => { setMode("signup"); setOpen(true); }}
+        className="btn-accent mt-4 flex h-12 w-full items-center justify-center rounded-[14px] px-5 text-[15px] font-semibold"
       >
         Create free account
-      </Link>
-      <Link
-        to="/auth"
-        search={{ mode: "signin", next }}
+      </button>
+      <button
+        type="button"
+        onClick={() => { setMode("signin"); setOpen(true); }}
         className="mt-2 inline-block text-[13px] font-medium text-muted underline"
       >
         Already have one? Sign in
-      </Link>
+      </button>
+      <AuthModal
+        open={open}
+        onClose={() => setOpen(false)}
+        onSuccess={() => setOpen(false)}
+        initialMode={mode}
+      />
     </div>
   );
 }
