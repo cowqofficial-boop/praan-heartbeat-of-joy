@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { SITE_URL } from "@/lib/site";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useCowqStore } from "@/lib/cowq-store";
 import { useQueueStore, MAX_QUEUE, queueCounts } from "@/lib/queue-store";
 import { PrimaryButton } from "@/components/PrimaryButton";
+import { AuthModal } from "@/components/AuthModal";
 import { COSTS } from "@/lib/plans";
 import { useAuth, hasUsedFreeGeneration } from "@/lib/use-auth";
 import { getMyCredits } from "@/lib/billing.functions";
