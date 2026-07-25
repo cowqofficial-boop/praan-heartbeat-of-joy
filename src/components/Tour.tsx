@@ -106,12 +106,12 @@ function TourOverlay({ onDone }: TourOverlayProps) {
       if (e.key === "Escape") onDone();
     };
     window.addEventListener("keydown", onKey);
-    // Lock body scroll while the tour is up.
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    // NOTE: the tour must never lock body scroll — that trapped long pages.
+    // Defensively clear any stale lock left behind by an earlier build.
+    if (document.body.style.overflow === "hidden") document.body.style.overflow = "";
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
+      document.body.style.overflow = "";
     };
   }, [onDone]);
 
@@ -162,16 +162,15 @@ function TourOverlay({ onDone }: TourOverlayProps) {
 
   return createPortal(
     <div
-      data-scroll-lock
-      className="fixed inset-0 z-[100]"
-
+      className="pointer-events-none fixed inset-0 z-[100]"
       role="dialog"
-      aria-modal="true"
+      aria-modal="false"
       aria-label={`Tour step ${i + 1} of ${STEPS.length}`}
     >
-      {/* Dim overlay with a cut-out around the highlight */}
+      {/* Dim overlay with a cut-out around the highlight. Never captures wheel/touch
+          events, so the page underneath stays fully scrollable. */}
       <svg
-        className="absolute inset-0 h-full w-full"
+        className="pointer-events-none absolute inset-0 h-full w-full"
         width={svgW}
         height={svgH}
         aria-hidden
@@ -199,8 +198,6 @@ function TourOverlay({ onDone }: TourOverlayProps) {
           height="100%"
           fill="rgba(6,7,10,0.72)"
           mask="url(#cowq-tour-mask)"
-          onClick={onDone}
-          style={{ cursor: "pointer" }}
         />
         {highlight && (
           <rect
@@ -222,7 +219,7 @@ function TourOverlay({ onDone }: TourOverlayProps) {
       <button
         type="button"
         onClick={onDone}
-        className="absolute right-4 top-4 z-[110] flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium text-white/80 hover:text-white"
+        className="pointer-events-auto absolute right-4 top-4 z-[110] flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium text-white/80 hover:text-white"
         style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(6px)" }}
       >
         <span>Skip tour</span>
@@ -231,7 +228,7 @@ function TourOverlay({ onDone }: TourOverlayProps) {
 
       {/* Step counter */}
       <div
-        className="absolute left-4 top-4 z-[110] rounded-full px-3 py-1.5 text-[12px] font-mono text-white/70"
+        className="pointer-events-auto absolute left-4 top-4 z-[110] rounded-full px-3 py-1.5 text-[12px] font-mono text-white/70"
         style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(6px)" }}
       >
         {i + 1} / {STEPS.length}
@@ -240,7 +237,7 @@ function TourOverlay({ onDone }: TourOverlayProps) {
       {/* Card */}
       <div
         key={i}
-        className="absolute z-[110] rounded-[16px] p-5 shadow-2xl"
+        className="pointer-events-auto absolute z-[110] rounded-[16px] p-5 shadow-2xl"
         style={{
           ...cardStyle,
           background: "var(--raised, #1C1C22)",
@@ -319,20 +316,10 @@ export function Tour() {
 
   const [open, setOpen] = useState(false);
 
-  // Routes where we don't run the tour (auth flow, marketing pages, onboarding wizard).
-  // Marketing/long-form pages must never be covered: the overlay locks body scroll,
-  // which made /how-it-works look completely unscrollable for signed-in visitors.
-  const suppressed =
-    path === "/" ||
-    path.startsWith("/auth") ||
-    path.startsWith("/how-it-works") ||
-    path.startsWith("/blog") ||
-    path.startsWith("/pricing") ||
-    path.startsWith("/create") ||
-    path.startsWith("/confirm") ||
-    path.startsWith("/generating") ||
-    path.startsWith("/results") ||
-    path.startsWith("/api");
+  // Allowlist: the tour only ever runs on /library, the natural post-signup landing.
+  // It never appears on Calendar, Stock, Brand kit, Connect, Billing, Pricing,
+  // marketing pages, or the generation flow.
+  const suppressed = !(path === "/library" || path.startsWith("/library/"));
 
   useEffect(() => {
     if (suppressed) {
