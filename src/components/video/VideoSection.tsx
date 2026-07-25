@@ -13,6 +13,8 @@ import {
 } from "@/lib/video";
 import { useVideoQueue } from "@/lib/video-queue-store";
 import { VideoSetupDialog } from "./VideoSetupDialog";
+import { VideoErrorBoundary } from "./VideoErrorBoundary";
+
 
 const TINTS = ["card-cobalt", "card-magenta", "card-amber"] as const;
 
