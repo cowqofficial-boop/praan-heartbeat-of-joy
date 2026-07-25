@@ -92,7 +92,9 @@ Rules:
 - This is an advertisement. Never pretend to be an independent customer or a review.
 
 Return only the script text.`,
-      );
+          },
+        ],
+      });
       const cleaned = String(out || "")
         .replace(/^["'\s]+|["'\s]+$/g, "")
         .replace(/\s+/g, " ")
