@@ -589,32 +589,34 @@ function ListingPanel({ copy }: { copy: Copy }) {
 
   const [open, setOpen] = useState<string | null>(null);
 
+  // Each copy block is its own tinted box; colours cycle by position so
+  // adjacent blocks are always different.
+  const TONES = ["card-cobalt", "card-magenta", "card-amber"] as const;
+
   return (
-    <section className="card-list overflow-hidden">
-      <ul className="flex flex-col">
-        {rows.map((r, i) => (
-          <ListingRow
-            key={r.key}
-            row={r}
-            isOpen={open === r.key}
-            isLast={i === rows.length - 1}
-            onToggle={() => setOpen((cur) => (cur === r.key ? null : r.key))}
-          />
-        ))}
-      </ul>
+    <section className="flex flex-col gap-3">
+      {rows.map((r, i) => (
+        <ListingRow
+          key={r.key}
+          row={r}
+          tone={TONES[i % TONES.length]}
+          isOpen={open === r.key}
+          onToggle={() => setOpen((cur) => (cur === r.key ? null : r.key))}
+        />
+      ))}
     </section>
   );
 }
 
 function ListingRow({
   row,
+  tone,
   isOpen,
-  isLast,
   onToggle,
 }: {
   row: Row;
+  tone: string;
   isOpen: boolean;
-  isLast: boolean;
   onToggle: () => void;
 }) {
   const [copied, setCopied] = useState(false);
@@ -637,13 +639,13 @@ function ListingRow({
   }
 
   return (
-    <li className={isLast ? "" : "border-b border-[color:var(--line)]"}>
+    <div className={`${tone} overflow-hidden`}>
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center gap-3 px-4 py-3.5 text-left hover:bg-white/[0.02]"
+        className="flex w-full items-center gap-3 px-4 py-3.5 text-left hover:bg-white/[0.03]"
       >
-        <span className="eyebrow w-24 shrink-0">{row.label}</span>
+        <span className="eyebrow w-24 shrink-0 text-[color:var(--card-accent)]">{row.label}</span>
         <span className="min-w-0 flex-1 truncate text-[14px] text-muted">
           {firstLine}
         </span>
@@ -654,7 +656,7 @@ function ListingRow({
           aria-label={copied ? "Copied" : `Copy ${row.label}`}
           className="grid h-8 w-8 shrink-0 place-items-center text-muted hover:text-ink"
         >
-          {copied ? <Check className="h-4 w-4 text-[color:var(--page-accent)] scale-in" /> : <Copy className="h-4 w-4" />}
+          {copied ? <Check className="h-4 w-4 text-[color:var(--card-accent)] scale-in" /> : <Copy className="h-4 w-4" />}
         </span>
         <ChevronDown
           className={`h-4 w-4 shrink-0 text-muted transition-transform ${isOpen ? "rotate-180" : ""}`}
@@ -672,7 +674,7 @@ function ListingRow({
           </p>
         </div>
       </div>
-    </li>
+    </div>
   );
 }
 

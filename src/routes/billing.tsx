@@ -88,10 +88,10 @@ function BillingPage() {
       />
 
       {/* Current plan */}
-      <section className="card-feature mt-4 p-5">
+      <section className="card-cobalt mt-4 p-5">
         <div className="flex items-baseline justify-between gap-4">
           <div>
-            <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">Current plan</p>
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-[color:var(--card-accent)]">Current plan</p>
             <p className="mt-1 font-display text-[26px] text-ink">{credits.plan_name}</p>
           </div>
           <div className="text-right">
@@ -129,8 +129,8 @@ function BillingPage() {
       </section>
 
       {/* Usage */}
-      <section className="card-feature mt-4 p-5">
-        <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">This month</p>
+      <section className="card-magenta mt-4 p-5">
+        <p className="text-[12px] font-semibold uppercase tracking-wide text-[color:var(--card-accent)]">This month</p>
         <p className="mt-1 text-[14px] text-ink">
           Purchased <span className="font-semibold">{usedThisMonth}</span> credits since{" "}
           {new Date(new Date().getFullYear(), new Date().getMonth(), 1).toLocaleDateString("en-IN", { day: "numeric", month: "long" })}.

@@ -98,6 +98,7 @@ function ConnectPage() {
 
       <div className="mt-6 flex flex-col gap-3">
         <ChannelCard
+          tone="card-cobalt"
           icon={<Instagram className="h-5 w-5" />}
           title="Instagram"
           status={get("instagram")}
@@ -106,6 +107,7 @@ function ConnectPage() {
           onDisconnect={() => handleDisconnect("instagram")}
         />
         <ChannelCard
+          tone="card-magenta"
           icon={<Facebook className="h-5 w-5" />}
           title="Facebook Page"
           status={get("facebook_page")}
@@ -115,6 +117,7 @@ function ConnectPage() {
           onDisconnect={() => handleDisconnect("facebook_page")}
         />
         <ChannelCard
+          tone="card-amber"
           icon={<MessageCircle className="h-5 w-5" />}
           title="WhatsApp"
           status={get("whatsapp")}
@@ -125,7 +128,7 @@ function ConnectPage() {
         />
       </div>
 
-      <section className="card-feature mt-8 p-4">
+      <section className="card-amber mt-8 p-4">
         <p className="text-[14px] font-semibold text-ink">More platforms coming in September</p>
         <p className="mt-2 text-[13px] text-muted">
           YouTube · Threads · X · LinkedIn · Pinterest · TikTok
@@ -156,14 +159,15 @@ function ChannelCard(props: {
   ctaLabel: string;
   hint?: string;
   disabled?: boolean;
+  tone?: string;
   onDisconnect?: () => void;
 }) {
   const connected = props.status?.connected;
   const needsReconnect = props.status?.needs_reconnect;
   return (
-    <section className="card-feature p-4">
+    <section className={`${props.tone ?? "card-cobalt"} p-4`}>
       <div className="flex items-center gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-full" style={{ background: "color-mix(in oklab, #3D5AFE 18%, transparent)", color: "#3D5AFE" }}>
+        <div className="grid h-10 w-10 place-items-center rounded-full" style={{ background: "color-mix(in oklab, var(--card-accent) 18%, transparent)", color: "var(--card-accent)" }}>
           {props.icon}
         </div>
         <div className="flex-1">

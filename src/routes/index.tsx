@@ -266,7 +266,7 @@ function Landing() {
 
           <Reveal delay={80}>
             <div className="mt-10 grid gap-4 md:grid-cols-3">
-              <Artefact title="4 studio photos">
+              <Artefact title="4 studio photos" tone="card-cobalt">
                 <div className="grid grid-cols-2 gap-2">
                   {["White background", "Soft studio", "Lifestyle scene", "Flat-lay"].map((s) => (
                     <div
@@ -280,7 +280,7 @@ function Landing() {
                 <p className="mt-3 text-[12px] text-muted">Square and vertical, both sizes.</p>
               </Artefact>
 
-              <Artefact title="Marketplace listing">
+              <Artefact title="Marketplace listing" tone="card-magenta">
                 <div className="rounded-[10px] bg-raised p-3 text-left">
                   <p className="text-[13px] font-semibold text-ink">
                     Handwoven cotton stole, natural dye, 200 × 70 cm
@@ -302,10 +302,10 @@ function Landing() {
                 </div>
               </Artefact>
 
-              <Artefact title="Social posts">
+              <Artefact title="Social posts" tone="card-amber">
                 <div className="space-y-2">
                   <div className="rounded-[10px] bg-raised p-3 text-left">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--page-accent)]">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--card-accent)]">
                       Instagram
                     </p>
                     <p className="mt-1 text-[12px] leading-snug text-ink">
@@ -316,7 +316,7 @@ function Landing() {
                     </p>
                   </div>
                   <div className="rounded-[10px] bg-raised p-3 text-left">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--page-accent)]">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--card-accent)]">
                       WhatsApp broadcast
                     </p>
                     <p className="mt-1 text-[12px] leading-snug text-ink">
@@ -324,7 +324,7 @@ function Landing() {
                     </p>
                   </div>
                   <div className="rounded-[10px] bg-raised p-3 text-left">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--page-accent)]">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--card-accent)]">
                       Festival line
                     </p>
                     <p className="mt-1 text-[12px] leading-snug text-ink">
@@ -334,7 +334,7 @@ function Landing() {
                 </div>
               </Artefact>
 
-              <Artefact title="Shopify catalog file" wide>
+              <Artefact title="Shopify catalog file" wide tone="card-cobalt">
                 <div className="overflow-hidden rounded-[10px] bg-raised">
                   <div className="grid grid-cols-6 gap-2 bg-background/40 px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-muted">
                     <span>Handle</span>
@@ -485,21 +485,25 @@ function Landing() {
               <TrustCard
                 icon={<Sparkles className="h-5 w-5" />}
                 title="Try it before you sign up."
+                tone="card-cobalt"
                 body="One product free, no account, no card. Nothing else on this page proves as much."
               />
               <TrustCard
                 icon={<Lock className="h-5 w-5" />}
                 title="Your photos stay yours."
+                tone="card-magenta"
                 body="We don’t sell them, share them, or use them to train anything."
               />
               <TrustCard
                 icon={<Shield className="h-5 w-5" />}
                 title="The product stays exactly as it is."
+                tone="card-amber"
                 body="CowQ changes the background and the light — never the product."
               />
               <TrustCard
                 icon={<RefreshCw className="h-5 w-5" />}
                 title="No lock-in."
+                tone="card-cobalt"
                 body="Cancel any time. Download everything you’ve made."
               />
             </div>
@@ -509,7 +513,7 @@ function Landing() {
             {/* Founder note — placeholder only. Do NOT invent a name, quote, or photograph.
                 Drop a real portrait into /public/founder.jpg and replace [FOUNDER_NAME]
                 and the note body with the actual founder's words. */}
-            <div className="card-list mt-10 p-6 lg:p-8">
+            <div className="card-magenta mt-10 p-6 lg:p-8">
               <div className="flex items-start gap-4">
                 <div
                   className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-raised text-muted"
@@ -550,8 +554,11 @@ function Landing() {
                 { t: "Instagram & WhatsApp shops", b: "Post daily without a designer.", src: who2.url, alt: "Phone showing an Instagram shop grid" },
                 { t: "Physical shops going online", b: "Your first proper catalog.", src: who3.url, alt: "Small retail shop counter" },
                 { t: "Anyone with a product", b: "And no team behind them.", src: who4.url, alt: "Artisan workbench with tools" },
-              ].map((c) => (
-                <div key={c.t} className="card-feature overflow-hidden">
+              ].map((c, ci) => (
+                <div
+                  key={c.t}
+                  className={`${["card-cobalt", "card-magenta", "card-amber", "card-cobalt"][ci]} overflow-hidden`}
+                >
                   <div className="relative aspect-[4/3]">
                     <img src={c.src} alt={c.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
                   </div>
@@ -630,18 +637,21 @@ function Landing() {
             <div className="mt-10 grid gap-4 md:grid-cols-3">
               <RoadmapCard
                 icon={Share2}
+                tone="card-cobalt"
                 date="September 2026"
                 title="Posting everywhere"
                 body="One tap posts to Instagram, Facebook, YouTube, Threads, X, LinkedIn, Pinterest and more. Connect once, then never open another app to publish."
               />
               <RoadmapCard
                 icon={Video}
+                tone="card-magenta"
                 date="October 2026"
                 title="Product videos"
                 body="Short videos made from the same photos — the product turning, the detail up close, ready for Reels and Shorts."
               />
               <RoadmapCard
                 icon={UserRound}
+                tone="card-amber"
                 date="December 2026"
                 title="Presenter videos"
                 body="A presenter introducing your product on camera, in your brand's voice."
@@ -720,15 +730,17 @@ function Artefact({
   title,
   children,
   wide,
+  tone = "card-cobalt",
 }: {
   title: string;
   children: ReactNode;
   wide?: boolean;
+  tone?: string;
 }) {
   return (
-    <div className={`card-feature p-5 ${wide ? "md:col-span-3" : ""}`}>
+    <div className={`${tone} p-5 ${wide ? "md:col-span-3" : ""}`}>
       <div className="mb-3 flex items-center gap-2">
-        <Check className="h-4 w-4 text-[color:var(--page-accent)]" />
+        <Check className="h-4 w-4 text-[color:var(--card-accent)]" />
         <p className="text-[13px] font-semibold text-ink">{title}</p>
       </div>
       {children}
@@ -775,10 +787,20 @@ function Step({
 }
 
 
-function TrustCard({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
+function TrustCard({
+  icon,
+  title,
+  body,
+  tone = "card-cobalt",
+}: {
+  icon: ReactNode;
+  title: string;
+  body: string;
+  tone?: string;
+}) {
   return (
-    <div className="card-feature p-5">
-      <span className="grid h-9 w-9 place-items-center rounded-full bg-raised text-[color:var(--page-accent)]">
+    <div className={`${tone} p-5`}>
+      <span className="grid h-9 w-9 place-items-center rounded-full bg-raised text-[color:var(--card-accent)]">
         {icon}
       </span>
       <p className="mt-4 text-[15px] font-semibold text-ink">{title}</p>
@@ -809,19 +831,21 @@ function RoadmapCard({
   date,
   title,
   body,
+  tone = "card-cobalt",
 }: {
   icon: LucideIcon;
   date: string;
   title: string;
   body: string;
+  tone?: string;
 }) {
   return (
-    <div className="card-feature p-6">
+    <div className={`${tone} p-6`}>
       <span
         className="grid h-10 w-10 place-items-center rounded-[10px]"
         style={{
-          background: "color-mix(in oklab, var(--page-accent) 18%, transparent)",
-          color: "var(--page-accent)",
+          background: "color-mix(in oklab, var(--card-accent) 18%, transparent)",
+          color: "var(--card-accent)",
         }}
       >
         <Icon className="h-5 w-5" strokeWidth={1.75} />
