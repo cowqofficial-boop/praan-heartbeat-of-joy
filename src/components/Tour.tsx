@@ -162,7 +162,9 @@ function TourOverlay({ onDone }: TourOverlayProps) {
 
   return createPortal(
     <div
+      data-scroll-lock
       className="fixed inset-0 z-[100]"
+
       role="dialog"
       aria-modal="true"
       aria-label={`Tour step ${i + 1} of ${STEPS.length}`}
