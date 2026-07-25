@@ -15,7 +15,7 @@ import {
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { PageHeader, HelpButton } from "@/components/PageHeader";
 import { showAlert, showConfirm } from "@/components/Dialogs";
-import { Palette } from "lucide-react";
+import { MessageCircle, Palette, Store, UserRound } from "lucide-react";
 
 
 const searchSchema = z.object({ onboarding: z.boolean().optional() });
@@ -41,6 +41,14 @@ const TONES = [
  { value: "value", label: "Value-for-money" },
  { value: "traditional", label: "Traditional" },
 ];
+
+const TONE_SAMPLES: Record<string, string> = {
+ friendly: "This one's a little beauty — you'll love it.",
+ premium: "An exceptional piece, crafted with care.",
+ value: "Great quality, honest price.",
+ traditional: "A timeless classic for every home.",
+};
+
 
 const GENDER = [
  { value: "", label: "Let CowQ decide" },
@@ -217,8 +225,11 @@ function BrandKitPage() {
  />
 
 
- <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-x-10">
+ <div className="mt-8 flex flex-col gap-8">
 
+ {/* ── Section 1 — Your business ───────────────────────── */}
+ <Section icon={Store} title="Your business" subtitle="Who you are, in your customers' words.">
+ <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-x-10">
  <Field label="Business name">
  <input
  className="h-12 w-full rounded-[12px] bg-raised px-4 text-[16px] text-ink"
@@ -226,6 +237,12 @@ function BrandKitPage() {
  onChange={(e) => setKit({ ...kit, business_name: e.target.value })}
  placeholder="e.g. Rani Handicrafts"
  />
+ <div className="mt-1 rounded-[12px] px-3 py-3" style={{ background: "var(--surface)" }}>
+ <p className="text-[11px] uppercase tracking-wide text-muted">Preview</p>
+ <p className="mt-1 truncate font-display text-[24px] leading-tight text-ink">
+ {kit.business_name.trim() || "Your business name"}
+ </p>
+ </div>
  </Field>
 
  <Field label="Logo">
@@ -257,13 +274,6 @@ function BrandKitPage() {
  </div>
  </Field>
 
- <Field label="Brand colours">
- <div className="flex gap-4">
- <ColorInput label="Primary" value={kit.primary_color} onChange={(v) => setKit({ ...kit, primary_color: v })} />
- <ColorInput label="Highlight" value={kit.accent_color} onChange={(v) => setKit({ ...kit, accent_color: v })} />
- </div>
- </Field>
-
  <Field label="What you sell">
  <input
  className="h-12 w-full rounded-[12px] bg-raised px-4 text-[16px] text-ink"
@@ -283,7 +293,12 @@ function BrandKitPage() {
  maxLength={140}
  />
  </Field>
+ </div>
+ </Section>
 
+ {/* ── Section 2 — Your voice ──────────────────────────── */}
+ <Section icon={MessageCircle} title="Your voice" subtitle="How your listings sound, and the colours behind them.">
+ <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-x-10">
  <Field label="Voice" help={<p className="text-muted">How your listings should sound to a customer.</p>}>
  <div className="grid grid-cols-2 gap-2">
  {TONES.map((t) => (
@@ -301,32 +316,48 @@ function BrandKitPage() {
  </button>
  ))}
  </div>
+ <div className="mt-1 rounded-[12px] px-3 py-3" style={{ background: "var(--surface)" }}>
+ <p className="text-[11px] uppercase tracking-wide text-muted">Sounds like</p>
+ <p className="mt-1 text-[15px] leading-relaxed text-ink">
+ “{TONE_SAMPLES[kit.tone] ?? TONE_SAMPLES.friendly}”
+ </p>
+ </div>
  </Field>
 
- <div className="mt-2 border-t pt-6">
- <div className="flex items-center gap-2">
-   <h2 className="font-display text-[20px] leading-tight text-ink">Model preferences</h2>
-   <HelpButton content={<p className="text-muted">Only used when a product needs a person in the photo, like clothing or jewellery. All optional — leave blank to let CowQ decide.</p>} />
+ <Field label="Brand colours">
+ <div className="flex gap-4">
+ <ColorInput label="Primary" value={kit.primary_color} onChange={(v) => setKit({ ...kit, primary_color: v })} />
+ <ColorInput label="Highlight" value={kit.accent_color} onChange={(v) => setKit({ ...kit, accent_color: v })} />
  </div>
- <p className="mt-1 text-[13px] text-muted">
- Only used when CowQ needs a person in the shot — clothing, jewellery, footwear, bags, cosmetics. All optional.
- </p>
+ <div className="mt-1 flex gap-2">
+ <span className="h-12 flex-1 rounded-[12px]" style={{ background: kit.primary_color }} />
+ <span className="h-12 flex-1 rounded-[12px]" style={{ background: kit.accent_color }} />
+ </div>
+ </Field>
+ </div>
+ </Section>
 
- <div className="mt-5 flex flex-col gap-4">
+ {/* ── Section 3 — Your model ──────────────────────────── */}
+ <Section icon={UserRound} title="Your model" subtitle="Only used when a product needs a person — clothing, jewellery, footwear, bags, cosmetics.">
+ <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-x-10">
+ <div className="flex flex-col gap-4">
+ <div className="flex items-center gap-2">
+ <h3 className="text-[15px] font-medium text-ink">Model preferences</h3>
+ <HelpButton content={<p className="text-muted">All optional — leave blank to let CowQ decide.</p>} />
+ </div>
  <SelectField label="Gender" options={GENDER} value={kit.model_gender ?? ""} onChange={(v) => setKit({ ...kit, model_gender: v || null })} />
  <SelectField label="Age range" options={AGE} value={kit.model_age ?? ""} onChange={(v) => setKit({ ...kit, model_age: v || null })} />
  <SelectField label="Skin tone" options={SKIN} value={kit.model_skin ?? ""} onChange={(v) => setKit({ ...kit, model_skin: v || null })} />
  <SelectField label="Body type" options={BODY} value={kit.model_body ?? ""} onChange={(v) => setKit({ ...kit, model_body: v || null })} />
  <SelectField label="Regional look" options={REGION} value={kit.model_region ?? ""} onChange={(v) => setKit({ ...kit, model_region: v || null })} />
  </div>
- </div>
 
- <div className="border-t pt-6">
+ <div className="flex flex-col gap-4">
  <div className="flex items-start justify-between gap-4">
  <div className="flex-1">
  <div className="flex items-center gap-2">
-   <h2 className="font-display text-[20px] leading-tight text-ink">Brand model</h2>
-   <HelpButton content={<p className="text-muted">Use the same person across every photo so your shop looks like one brand — CowQ can generate a consistent AI model, or you can upload real photos.</p>} />
+ <h3 className="text-[15px] font-medium text-ink">Brand model</h3>
+ <HelpButton content={<p className="text-muted">Use the same person across every photo so your shop looks like one brand — CowQ can generate a consistent AI model, or you can upload real photos.</p>} />
  </div>
  <p className="mt-1 text-[13px] text-muted">
  Use the same person in every photo, so your shop looks like one brand.
@@ -344,6 +375,16 @@ function BrandKitPage() {
  <span className="absolute left-0.5 h-6 w-6 rounded-full bg-raised shadow transition-transform peer-checked:translate-x-5" />
  </label>
  </div>
+
+ {kit.brand_model_enabled && kit.brand_model_url && (
+ <div className="overflow-hidden rounded-[12px] bg-surface">
+ <img
+ src={kit.brand_model_url}
+ alt="Your brand model"
+ className="aspect-[4/5] w-full object-cover"
+ />
+ </div>
+ )}
 
  {kit.brand_model_enabled && (
  <BrandModelPanel
@@ -364,8 +405,10 @@ function BrandKitPage() {
  )}
  </div>
  </div>
+ </Section>
+ </div>
 
- <div className="mt-8 flex flex-col gap-3">
+ <div className="mt-10 flex flex-col gap-3">
  <PrimaryButton onClick={save} disabled={busy}>
  {busy ? "Saving…" : onboarding ? "Save brand kit" : "Save changes"}
  </PrimaryButton>
@@ -379,11 +422,43 @@ function BrandKitPage() {
  </button>
  )}
  </div>
+
  </main>
  );
 }
 
+function Section({
+ icon: Icon,
+ title,
+ subtitle,
+ children,
+}: {
+ icon: React.ComponentType<{ className?: string }>;
+ title: string;
+ subtitle: string;
+ children: React.ReactNode;
+}) {
+ return (
+ <section className="card-feature p-5 lg:p-6">
+ <div className="flex items-start gap-3">
+ <span
+ className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px]"
+ style={{ background: "color-mix(in oklab, var(--page-accent) 16%, transparent)", color: "var(--page-accent)" }}
+ >
+ <Icon className="h-6 w-6" />
+ </span>
+ <div>
+ <h2 className="font-display text-[20px] leading-tight text-ink">{title}</h2>
+ <p className="mt-1 text-[13px] text-muted">{subtitle}</p>
+ </div>
+ </div>
+ <div className="mt-6">{children}</div>
+ </section>
+ );
+}
+
 function Field({ label, children, help }: { label: string; children: React.ReactNode; help?: React.ReactNode }) {
+
  return (
  <div className="flex flex-col gap-2">
  <span className="flex items-center gap-1.5 text-[15px] font-medium text-ink">

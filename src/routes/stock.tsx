@@ -176,7 +176,7 @@ function StockPage() {
 
       {/* Totals */}
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <div className="card-list p-3">
+        <div className="card-feature p-3">
           <div className="flex items-center gap-1">
             <p className="text-[11px] uppercase tracking-wide text-muted">Value at cost</p>
             <HelpButton label="What this means" content={<p className="text-muted">What your stock cost you to buy or make — quantity × cost price, added up.</p>} />
@@ -185,7 +185,8 @@ function StockPage() {
             {formatInr(totals.costInr)}
           </p>
         </div>
-        <div className="card-list p-3">
+        <div className="card-feature p-3">
+
           <div className="flex items-center gap-1">
             <p className="text-[11px] uppercase tracking-wide text-muted">Value at retail</p>
             <HelpButton label="What this means" content={<p className="text-muted">What your stock is worth if you sell it all at your listed prices.</p>} />
