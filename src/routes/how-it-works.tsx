@@ -478,13 +478,8 @@ function HowItWorks() {
               </ul>
             </div>
 
-            <div
-              className="rounded-[12px] p-6"
-              style={{
-                background: "color-mix(in oklab, var(--page-accent) 10%, var(--raised))",
-                border: "1px solid color-mix(in oklab, var(--page-accent) 30%, transparent)",
-              }}
-            >
+            <div className="card-feature rounded-[12px] p-6">
+
               <p className="text-[15px] font-semibold text-ink">CowQ gives you:</p>
               <p className="mt-2 text-[14px] text-muted">Everything, from the same one photo.</p>
               <ul className="mt-5 space-y-3">
