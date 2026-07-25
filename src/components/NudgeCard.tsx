@@ -13,11 +13,9 @@ export function NudgeCard({ icon: Icon, text, linkLabel, to }: Props) {
   return (
     <Link
       to={to}
-      className="nudge-in mt-8 flex items-center gap-3 rounded-[14px] p-4 text-[14px] transition-[filter] hover:brightness-110"
-      style={{
-        background: "color-mix(in oklab, var(--page-accent) 10%, var(--raised))",
-        borderLeft: "3px solid var(--page-accent)",
-      }}
+      className="card-feature nudge-in mt-8 flex items-center gap-3 rounded-[14px] p-4 text-[14px] transition-[filter] hover:brightness-110"
+      style={{ borderLeft: "3px solid var(--page-accent)" }}
+
     >
       <div
         className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px]"
