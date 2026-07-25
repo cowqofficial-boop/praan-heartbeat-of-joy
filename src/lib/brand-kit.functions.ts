@@ -27,8 +27,10 @@ export type BrandKit = {
 
   // How CowQ writes for you. Edited from Profile → AI preferences and
   // patched independently, so they are read-only here.
-  ai_personality?: string | null;
+  // Personality lives in `tone`. These shape how CowQ writes for you and
+  // are edited from Profile → AI preferences, patched independently.
   ai_reply_style?: string | null;
+
   ai_emoji_usage?: string | null;
   ai_length?: string | null;
   ai_creativity?: number | null;
