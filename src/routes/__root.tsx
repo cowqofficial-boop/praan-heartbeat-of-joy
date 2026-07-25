@@ -135,6 +135,15 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const { user } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  // Safety net: if any overlay (tour, sheet, modal) left the body scroll-locked,
+  // clear it whenever the route changes so pages can never be trapped.
+  useEffect(() => {
+    if (!document.querySelector("[data-scroll-lock]")) {
+      document.body.style.overflow = "";
+    }
+  }, [pathname]);
+
   const accent = pageAccent(pathname);
   const accentStyle = {
     ["--page-accent" as string]: accent.color,
@@ -143,6 +152,7 @@ function RootComponent() {
   const shellClass = user
     ? "mx-auto min-h-screen w-full max-w-[520px] bg-transparent lg:ml-[240px] lg:max-w-none lg:pl-0"
     : "mx-auto min-h-screen w-full bg-transparent";
+
   const innerClass = user ? "lg:mx-auto lg:max-w-[1200px] lg:px-12" : "";
   return (
     <QueryClientProvider client={queryClient}>
