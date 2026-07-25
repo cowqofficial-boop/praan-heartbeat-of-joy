@@ -257,7 +257,7 @@ function HowItWorks() {
                       >
                         <Sparkles
                           className="h-3 w-3"
-                          style={{ color: "var(--page-accent)" }}
+                          style={{ color: "var(--card-accent)" }}
                         />
                         {t}
                       </span>
@@ -319,13 +319,13 @@ function HowItWorks() {
 
         <Reveal delay={80}>
           <div className="mt-10 grid gap-4 lg:grid-cols-2">
-            <CopyCard label="Marketplace title">
+            <CopyCard label="Marketplace title" tone="card-cobalt">
               <p className="text-[15px] font-semibold leading-snug text-ink">
                 Handcrafted Brass Diya Set of 6 — Traditional Oil Lamps for Diwali &amp; Pooja
               </p>
             </CopyCard>
 
-            <CopyCard label="Description">
+            <CopyCard label="Description" tone="card-magenta">
               <p className="text-[14px] leading-relaxed text-muted">
                 Six solid brass diyas, turned and hand-finished in Moradabad. Each lamp is 5 cm
                 across with a raised stem, so it sits steady on a shelf or a rangoli. Takes standard
@@ -333,7 +333,7 @@ function HowItWorks() {
               </p>
             </CopyCard>
 
-            <CopyCard label="Bullet points">
+            <CopyCard label="Bullet points" tone="card-amber">
               <ul className="space-y-2">
                 {[
                   "Set of 6 solid brass diyas, 5 cm across, 4 cm tall",
@@ -343,7 +343,7 @@ function HowItWorks() {
                   <li key={b} className="flex gap-2 text-[14px] leading-snug text-muted">
                     <Check
                       className="mt-[3px] h-3.5 w-3.5 shrink-0"
-                      style={{ color: "var(--page-accent)" }}
+                      style={{ color: "var(--card-accent)" }}
                     />
                     {b}
                   </li>
@@ -351,7 +351,7 @@ function HowItWorks() {
               </ul>
             </CopyCard>
 
-            <CopyCard label="Instagram caption">
+            <CopyCard label="Instagram caption" tone="card-cobalt">
               <p className="text-[14px] leading-relaxed text-ink">
                 Six little brass lamps, turned by hand in Moradabad. Fill them with ghee, light them
                 at dusk, and the whole doorway changes.
@@ -361,13 +361,13 @@ function HowItWorks() {
               </p>
             </CopyCard>
 
-            <CopyCard label="WhatsApp broadcast">
+            <CopyCard label="WhatsApp broadcast" tone="card-magenta">
               <p className="text-[14px] leading-relaxed text-ink">
                 New brass diya sets just in — ₹899, free delivery before Diwali.
               </p>
             </CopyCard>
 
-            <CopyCard label="Festival line">
+            <CopyCard label="Festival line" tone="card-amber">
               <p className="text-[14px] leading-relaxed text-ink">
                 Diwali is on the 8th — order by Sunday and the set reaches you in time to light it.
               </p>
@@ -460,7 +460,7 @@ function HowItWorks() {
 
         <Reveal delay={80}>
           <div className="mt-10 grid gap-4 md:grid-cols-2">
-            <div className="card-list rounded-[12px] p-6">
+            <div className="card-neutral rounded-[12px] p-6">
               <p className="text-[15px] font-semibold text-ink">A photo app gives you:</p>
               <p className="mt-2 text-[14px] text-muted">Nicer pictures.</p>
               <ul className="mt-5 space-y-3">
@@ -478,7 +478,7 @@ function HowItWorks() {
               </ul>
             </div>
 
-            <div className="card-feature rounded-[12px] p-6">
+            <div className="card-cobalt rounded-[12px] p-6">
 
               <p className="text-[15px] font-semibold text-ink">CowQ gives you:</p>
               <p className="mt-2 text-[14px] text-muted">Everything, from the same one photo.</p>
@@ -494,7 +494,7 @@ function HowItWorks() {
                   <li key={t} className="flex gap-2.5 text-[14px] text-ink">
                     <Check
                       className="mt-[3px] h-4 w-4 shrink-0"
-                      style={{ color: "var(--page-accent)" }}
+                      style={{ color: "var(--card-accent)" }}
                     />
                     {t}
                   </li>
@@ -527,13 +527,21 @@ function HowItWorks() {
   );
 }
 
-function CopyCard({ label, children }: { label: string; children: ReactNode }) {
+function CopyCard({
+  label,
+  children,
+  tone = "card-cobalt",
+}: {
+  label: string;
+  children: ReactNode;
+  tone?: string;
+}) {
   return (
-    <div className="card-list rounded-[12px] p-4">
+    <div className={`${tone} rounded-[12px] p-4`}>
       <div className="flex items-center justify-between gap-3">
         <p
           className="text-[10px] font-semibold uppercase tracking-[0.14em]"
-          style={{ color: "var(--page-accent)" }}
+          style={{ color: "var(--card-accent)" }}
         >
           {label}
         </p>
@@ -553,15 +561,25 @@ function extractText(node: ReactNode): string {
   return "";
 }
 
-function SmallCard({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
+function SmallCard({
+  icon,
+  title,
+  body,
+  tone = "card-cobalt",
+}: {
+  icon: ReactNode;
+  title: string;
+  body: string;
+  tone?: string;
+}) {
   return (
-    <div className="card-feature rounded-[12px] p-5">
+    <div className={`${tone} rounded-[12px] p-5`}>
 
       <span
         className="grid h-10 w-10 place-items-center rounded-[10px]"
         style={{
-          background: "color-mix(in oklab, var(--page-accent) 16%, transparent)",
-          color: "var(--page-accent)",
+          background: "color-mix(in oklab, var(--card-accent) 16%, transparent)",
+          color: "var(--card-accent)",
         }}
       >
         {icon}
