@@ -219,7 +219,7 @@ function TourOverlay({ onDone }: TourOverlayProps) {
       <button
         type="button"
         onClick={onDone}
-        className="absolute right-4 top-4 z-[110] flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium text-white/80 hover:text-white"
+        className="pointer-events-auto absolute right-4 top-4 z-[110] flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium text-white/80 hover:text-white"
         style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(6px)" }}
       >
         <span>Skip tour</span>
@@ -228,7 +228,7 @@ function TourOverlay({ onDone }: TourOverlayProps) {
 
       {/* Step counter */}
       <div
-        className="absolute left-4 top-4 z-[110] rounded-full px-3 py-1.5 text-[12px] font-mono text-white/70"
+        className="pointer-events-auto absolute left-4 top-4 z-[110] rounded-full px-3 py-1.5 text-[12px] font-mono text-white/70"
         style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(6px)" }}
       >
         {i + 1} / {STEPS.length}
@@ -237,7 +237,7 @@ function TourOverlay({ onDone }: TourOverlayProps) {
       {/* Card */}
       <div
         key={i}
-        className="absolute z-[110] rounded-[16px] p-5 shadow-2xl"
+        className="pointer-events-auto absolute z-[110] rounded-[16px] p-5 shadow-2xl"
         style={{
           ...cardStyle,
           background: "var(--raised, #1C1C22)",
