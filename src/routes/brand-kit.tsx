@@ -228,7 +228,7 @@ function BrandKitPage() {
  <div className="mt-8 flex flex-col gap-8">
 
  {/* ── Section 1 — Your business ───────────────────────── */}
- <Section icon={Store} title="Your business" subtitle="Who you are, in your customers' words.">
+ <Section tone="card-cobalt" icon={Store} title="Your business" subtitle="Who you are, in your customers' words.">
  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-x-10">
  <Field label="Business name">
  <input
@@ -297,7 +297,7 @@ function BrandKitPage() {
  </Section>
 
  {/* ── Section 2 — Your voice ──────────────────────────── */}
- <Section icon={MessageCircle} title="Your voice" subtitle="How your listings sound, and the colours behind them.">
+ <Section tone="card-magenta" icon={MessageCircle} title="Your voice" subtitle="How your listings sound, and the colours behind them.">
  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-x-10">
  <Field label="Voice" help={<p className="text-muted">How your listings should sound to a customer.</p>}>
  <div className="grid grid-cols-2 gap-2">
@@ -338,7 +338,7 @@ function BrandKitPage() {
  </Section>
 
  {/* ── Section 3 — Your model ──────────────────────────── */}
- <Section icon={UserRound} title="Your model" subtitle="Only used when a product needs a person — clothing, jewellery, footwear, bags, cosmetics.">
+ <Section tone="card-amber" icon={UserRound} title="Your model" subtitle="Only used when a product needs a person — clothing, jewellery, footwear, bags, cosmetics.">
  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-x-10">
  <div className="flex flex-col gap-4">
  <div className="flex items-center gap-2">
@@ -432,18 +432,20 @@ function Section({
  title,
  subtitle,
  children,
+ tone = "card-cobalt",
 }: {
  icon: React.ComponentType<{ className?: string }>;
  title: string;
  subtitle: string;
  children: React.ReactNode;
+ tone?: string;
 }) {
  return (
- <section className="card-feature p-5 lg:p-6">
+ <section className={`${tone} p-5 lg:p-6`}>
  <div className="flex items-start gap-3">
  <span
  className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px]"
- style={{ background: "color-mix(in oklab, var(--page-accent) 16%, transparent)", color: "var(--page-accent)" }}
+ style={{ background: "color-mix(in oklab, var(--card-accent) 16%, transparent)", color: "var(--card-accent)" }}
  >
  <Icon className="h-6 w-6" />
  </span>
