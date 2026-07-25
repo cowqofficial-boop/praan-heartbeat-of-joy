@@ -227,6 +227,72 @@ body {
   box-shadow: var(--shadow-card);
 }
 
+/* ============================================================
+   FIXED-COLOUR TINTED CARDS
+   Used to mix multiple palette colours within one page. Cycle
+   cobalt -> magenta -> amber by position so adjacent boxes differ.
+   Each sets --card-accent so eyebrow labels / number badges inside
+   can pick up their card's colour via var(--card-accent).
+   Never apply to a product photograph or its frame.
+   ============================================================ */
+@utility card-tint-base {
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--card-accent) 10%, var(--surface)) 0%,
+      color-mix(in oklab, var(--card-accent) 6%, var(--surface)) 100%);
+  border: 1px solid color-mix(in oklab, var(--card-accent) 20%, transparent);
+  box-shadow:
+    0 6px 28px color-mix(in oklab, var(--card-accent) 14%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+@utility card-cobalt {
+  --card-accent: #3d5afe;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--card-accent) 10%, var(--surface)) 0%,
+      color-mix(in oklab, var(--card-accent) 6%, var(--surface)) 100%);
+  border: 1px solid color-mix(in oklab, var(--card-accent) 20%, transparent);
+  box-shadow:
+    0 6px 28px color-mix(in oklab, var(--card-accent) 14%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+@utility card-magenta {
+  --card-accent: #ff2fa3;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--card-accent) 10%, var(--surface)) 0%,
+      color-mix(in oklab, var(--card-accent) 6%, var(--surface)) 100%);
+  border: 1px solid color-mix(in oklab, var(--card-accent) 20%, transparent);
+  box-shadow:
+    0 6px 28px color-mix(in oklab, var(--card-accent) 14%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+@utility card-amber {
+  --card-accent: #ff8a1e;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--card-accent) 10%, var(--surface)) 0%,
+      color-mix(in oklab, var(--card-accent) 6%, var(--surface)) 100%);
+  border: 1px solid color-mix(in oklab, var(--card-accent) 20%, transparent);
+  box-shadow:
+    0 6px 28px color-mix(in oklab, var(--card-accent) 14%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+/* The "lesser option" card in a comparison: deliberately colourless. */
+@utility card-neutral {
+  --card-accent: var(--muted);
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+
+
 
 /* Elevation utilities */
 @utility card-lift {
