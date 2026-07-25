@@ -542,7 +542,7 @@ function CopyCard({ label, children }: { label: string; children: ReactNode }) {
         >
           {label}
         </p>
-        <CopyButton value={extractText(children)} />
+        <CopyButton text={extractText(children)} />
       </div>
       <div className="mt-3">{children}</div>
     </div>
