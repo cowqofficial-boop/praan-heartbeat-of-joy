@@ -50,7 +50,7 @@ function Results() {
   const { user } = useAuth();
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["gen", id],
-    queryFn: () => getGeneration({ data: { id } }),
+    queryFn: () => getGeneration({ data: { id, browserId: getBrowserId() } }),
   });
   const { data: credits } = useQuery({
     queryKey: ["my-credits"],
