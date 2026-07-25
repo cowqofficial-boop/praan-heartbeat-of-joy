@@ -560,10 +560,8 @@ function extractText(node: ReactNode): string {
 
 function SmallCard({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
   return (
-    <div
-      className="rounded-[12px] p-5"
-      style={{ background: "color-mix(in oklab, var(--page-accent) 7%, var(--surface))" }}
-    >
+    <div className="card-feature rounded-[12px] p-5">
+
       <span
         className="grid h-10 w-10 place-items-center rounded-[10px]"
         style={{
