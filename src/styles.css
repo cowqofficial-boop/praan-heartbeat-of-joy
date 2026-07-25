@@ -235,6 +235,7 @@ body {
    can pick up their card's colour via var(--card-accent).
    Never apply to a product photograph or its frame.
    ============================================================ */
+/* Fallback so var(--card-accent) outside a tinted card still resolves. */
 @utility card-tint-base {
   border-radius: 14px;
   background:

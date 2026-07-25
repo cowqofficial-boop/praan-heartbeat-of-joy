@@ -433,16 +433,19 @@ function HowItWorks() {
         <Reveal delay={80}>
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             <SmallCard
+              tone="card-cobalt"
               icon={<LibraryBig className="h-5 w-5" />}
               title="Your library"
               body="Every product saved forever. Come back and download any time."
             />
             <SmallCard
+              tone="card-magenta"
               icon={<Package className="h-5 w-5" />}
               title="Stock"
               body="Track what you have. CowQ won’t advertise what you’ve sold out of."
             />
             <SmallCard
+              tone="card-amber"
               icon={<Share2 className="h-5 w-5" />}
               title="Coming September"
               body="One tap posts everywhere — Instagram, Facebook, YouTube and more."
