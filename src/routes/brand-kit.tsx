@@ -478,7 +478,7 @@ function BrandModelPanel({
  </div>
 
  {source === "ai" ? (
- <div className="flex items-center gap-4 rounded-[12px] bg-surface p-3">
+ <div className="card-list flex items-center gap-4 p-3">
  <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-[10px] bg-raised">
  {modelBusy ? (
  <span className="text-[11px] text-muted">Making…</span>
@@ -552,7 +552,7 @@ function RealModelSaved({
  );
  }
  return (
- <div className="flex flex-col gap-3 rounded-[12px] bg-surface p-3">
+ <div className="card-list flex flex-col gap-3 p-3">
  <div className="flex gap-2">
  {photos.map((p, i) => (
  <img
@@ -636,7 +636,7 @@ function RealModelUploader({
  }
 
  return (
- <div className="flex flex-col gap-4 rounded-[12px] bg-surface p-3">
+ <div className="card-list flex flex-col gap-4 p-3">
  <p className="text-[13px] text-muted">
  Upload 1–3 clear photos of your model. One good face shot, and if possible a full-length shot.
  </p>

@@ -294,18 +294,19 @@ function PlanCard({
 
   return (
     <div
-      className={`relative flex h-full min-h-[620px] flex-col rounded-[16px] p-5 ${
-        highlight ? "bg-raised sm:scale-[1.02]" : "bg-surface"
+      className={`card-feature relative flex h-full min-h-[620px] flex-col p-5 ${
+        highlight ? "sm:scale-[1.02]" : ""
       }`}
       style={
         highlight
           ? {
               boxShadow:
-                "inset 0 0 0 1px var(--cobalt), var(--shadow-raised)",
+                "inset 0 0 0 1px var(--cobalt), 0 4px 24px color-mix(in oklab, var(--page-accent) 18%, transparent), var(--shadow-raised)",
             }
-          : { boxShadow: "var(--shadow-card)" }
+          : undefined
       }
     >
+
       {highlight && (
         <span className="absolute -top-2.5 left-5 rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-primary-foreground">
           Most popular
@@ -389,7 +390,7 @@ function FeatureLine({
 
 function PackCard({ plan, busy, onBuy }: { plan: Plan; busy: boolean; onBuy: () => void }) {
   return (
-    <div className="flex items-center justify-between card-lift p-4">
+    <div className="card-list flex items-center justify-between p-4">
 
       <div>
         <p className="text-[15px] font-semibold text-ink">{plan.name}</p>

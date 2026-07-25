@@ -126,7 +126,7 @@ function Body({ children }: { children: ReactNode }) {
 
 function Note({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-4 rounded-[12px] bg-raised px-4 py-3 text-[13px] leading-relaxed text-muted">
+    <p className="card-list mt-4 rounded-[12px] px-4 py-3 text-[13px] leading-relaxed text-muted">
       {children}
     </p>
   );
@@ -388,7 +388,7 @@ function HowItWorks() {
         </Reveal>
 
         <Reveal delay={80}>
-          <div className="mt-8 overflow-x-auto rounded-[12px] bg-raised">
+          <div className="card-list mt-8 overflow-x-auto rounded-[12px]">
             <table className="w-full min-w-[720px] text-left">
               <thead>
                 <tr className="bg-background/40 text-[10px] uppercase tracking-wider text-muted">
@@ -460,7 +460,7 @@ function HowItWorks() {
 
         <Reveal delay={80}>
           <div className="mt-10 grid gap-4 md:grid-cols-2">
-            <div className="rounded-[12px] bg-raised p-6">
+            <div className="card-list rounded-[12px] p-6">
               <p className="text-[15px] font-semibold text-ink">A photo app gives you:</p>
               <p className="mt-2 text-[14px] text-muted">Nicer pictures.</p>
               <ul className="mt-5 space-y-3">
@@ -478,13 +478,8 @@ function HowItWorks() {
               </ul>
             </div>
 
-            <div
-              className="rounded-[12px] p-6"
-              style={{
-                background: "color-mix(in oklab, var(--page-accent) 10%, var(--raised))",
-                border: "1px solid color-mix(in oklab, var(--page-accent) 30%, transparent)",
-              }}
-            >
+            <div className="card-feature rounded-[12px] p-6">
+
               <p className="text-[15px] font-semibold text-ink">CowQ gives you:</p>
               <p className="mt-2 text-[14px] text-muted">Everything, from the same one photo.</p>
               <ul className="mt-5 space-y-3">
@@ -534,7 +529,7 @@ function HowItWorks() {
 
 function CopyCard({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="rounded-[12px] bg-surface p-4">
+    <div className="card-list rounded-[12px] p-4">
       <div className="flex items-center justify-between gap-3">
         <p
           className="text-[10px] font-semibold uppercase tracking-[0.14em]"
@@ -560,10 +555,8 @@ function extractText(node: ReactNode): string {
 
 function SmallCard({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
   return (
-    <div
-      className="rounded-[12px] p-5"
-      style={{ background: "color-mix(in oklab, var(--page-accent) 7%, var(--surface))" }}
-    >
+    <div className="card-feature rounded-[12px] p-5">
+
       <span
         className="grid h-10 w-10 place-items-center rounded-[10px]"
         style={{

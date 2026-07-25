@@ -12,13 +12,8 @@ type Props = {
 
 export function EmptyState({ illustration, title, body, action, help }: Props) {
   return (
-    <div
-      className="mx-auto mt-8 flex max-w-[420px] flex-col items-center rounded-[16px] p-8 text-center"
-      style={{
-        background: "linear-gradient(180deg, color-mix(in oklab, var(--page-accent) 5%, var(--surface)) 0%, var(--surface) 100%)",
-        boxShadow: "var(--shadow-card), 0 20px 60px color-mix(in oklab, var(--page-accent) 12%, transparent)",
-      }}
-    >
+    <div className="card-feature mx-auto mt-8 flex max-w-[420px] flex-col items-center rounded-[16px] p-8 text-center">
+
       <div className="empty-illustration" style={{ width: 120, height: 120, color: "var(--page-accent)" }}>
         {illustration}
       </div>

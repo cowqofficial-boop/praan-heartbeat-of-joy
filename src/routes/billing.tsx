@@ -88,7 +88,7 @@ function BillingPage() {
       />
 
       {/* Current plan */}
-      <section className="mt-4 rounded-[16px] bg-raised p-5">
+      <section className="card-feature mt-4 p-5">
         <div className="flex items-baseline justify-between gap-4">
           <div>
             <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">Current plan</p>
@@ -129,7 +129,7 @@ function BillingPage() {
       </section>
 
       {/* Usage */}
-      <section className="mt-4 rounded-[16px] bg-raised p-5">
+      <section className="card-feature mt-4 p-5">
         <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">This month</p>
         <p className="mt-1 text-[14px] text-ink">
           Purchased <span className="font-semibold">{usedThisMonth}</span> credits since{" "}
@@ -147,7 +147,7 @@ function BillingPage() {
             {payments.map((p) => (
               <li
                 key={p.id}
-                className="flex items-center justify-between rounded-[12px] bg-raised p-3"
+                className="card-list flex items-center justify-between p-3"
               >
                 <div>
                   <p className="text-[14px] font-medium text-ink">{p.plan_name}</p>
@@ -194,7 +194,7 @@ function BillingPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[12px] bg-surface p-3">
+    <div className="card-list p-3">
       <p className="text-[11px] uppercase tracking-wide text-muted">{label}</p>
       <p className="mt-0.5 font-display text-[20px] text-ink">{value}</p>
     </div>

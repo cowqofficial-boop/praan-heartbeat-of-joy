@@ -176,7 +176,7 @@ function StockPage() {
 
       {/* Totals */}
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <div className="rounded-[14px] bg-surface p-3">
+        <div className="card-list p-3">
           <div className="flex items-center gap-1">
             <p className="text-[11px] uppercase tracking-wide text-muted">Value at cost</p>
             <HelpButton label="What this means" content={<p className="text-muted">What your stock cost you to buy or make — quantity × cost price, added up.</p>} />
@@ -185,7 +185,7 @@ function StockPage() {
             {formatInr(totals.costInr)}
           </p>
         </div>
-        <div className="rounded-[14px] bg-surface p-3">
+        <div className="card-list p-3">
           <div className="flex items-center gap-1">
             <p className="text-[11px] uppercase tracking-wide text-muted">Value at retail</p>
             <HelpButton label="What this means" content={<p className="text-muted">What your stock is worth if you sell it all at your listed prices.</p>} />
@@ -282,7 +282,7 @@ function StockPage() {
                 const chip = statusChip(it.status);
                 const profit = it.selling_price_paise - it.cost_price_paise;
                 return (
-                  <li key={it.id} className="stagger-item card-lift p-3">
+                  <li key={it.id} className="stagger-item card-list p-3">
 
                     <div className="flex items-start gap-3">
                       {it.thumb_url ? (
@@ -343,7 +343,7 @@ function StockPage() {
             </ul>
 
             {/* Desktop: table */}
-            <div className="hidden lg:block overflow-hidden card-lift">
+            <div className="hidden lg:block overflow-hidden card-list">
               <table className="w-full text-left text-[14px] text-ink">
                 <thead>
                   <tr className="text-[11px] uppercase tracking-wider text-muted">

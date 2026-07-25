@@ -202,6 +202,32 @@ body {
   box-shadow: var(--shadow-card);
 }
 
+/* ============================================================
+   TINTED CARD SURFACES
+   Both levels read --page-accent so cards recolour per page.
+   LEVEL A — card-feature: few cards, meant to draw the eye.
+   LEVEL B — card-list: many stacked cards, calm + readable.
+   Never apply either to a product photograph or its frame.
+   ============================================================ */
+@utility card-feature {
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--page-accent) 10%, var(--surface)) 0%,
+      color-mix(in oklab, var(--page-accent) 6%, var(--surface)) 100%);
+  border: 1px solid color-mix(in oklab, var(--page-accent) 18%, transparent);
+  border-radius: 14px;
+  box-shadow:
+    0 4px 24px color-mix(in oklab, var(--page-accent) 12%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+@utility card-list {
+  background: color-mix(in oklab, var(--page-accent) 4%, var(--surface));
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-card);
+}
+
+
 /* Elevation utilities */
 @utility card-lift {
   background: var(--surface);

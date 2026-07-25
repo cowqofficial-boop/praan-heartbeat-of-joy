@@ -18,7 +18,7 @@ export function OutOfCreditsCard({
   const defaultBody =
     "Top up any time — credits never expire — or upgrade for monthly credits and everything unlocked.";
   return (
-    <div className="mt-6 rounded-[14px] bg-surface p-5 text-center">
+    <div className="card-feature mt-6 p-5 text-center">
       <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-raised">
         <Sparkles className="h-5 w-5 text-highlight" />
       </div>
