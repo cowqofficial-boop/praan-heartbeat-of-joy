@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type {} from "@tanstack/react-start";
 import { getPlan } from "@/lib/plans";
 
 // Razorpay webhook: grants credits after payments / subscription charges.
@@ -12,7 +13,7 @@ import { getPlan } from "@/lib/plans";
 export const Route = createFileRoute("/api/public/razorpay-webhook")({
   server: {
     handlers: {
-      POST: async ({ request }: { request: Request }) => {
+      POST: async ({ request }) => {
         const raw = await request.text();
         const signature = request.headers.get("x-razorpay-signature") ?? "";
         const { verifyWebhookSignature } = await import("@/lib/razorpay.server");

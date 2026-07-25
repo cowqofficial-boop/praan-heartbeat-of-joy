@@ -4,6 +4,7 @@
 // user's Facebook Page and linked Instagram Business Account, then upsert
 // encrypted rows into social_connections.
 import { createFileRoute } from "@tanstack/react-router";
+import type {} from "@tanstack/react-start";
 
 function html(body: string, status = 200): Response {
   return new Response(
@@ -27,7 +28,7 @@ function fail(msg: string) {
 export const Route = createFileRoute("/api/public/meta-oauth-callback")({
   server: {
     handlers: {
-      GET: async ({ request }: { request: Request }) => {
+      GET: async ({ request }) => {
         const url = new URL(request.url);
         const code = url.searchParams.get("code");
         const state = url.searchParams.get("state");
