@@ -18,6 +18,7 @@ const MAP: Array<{ match: (p: string) => boolean; accent: Accent }> = [
   { match: (p) => p.startsWith("/billing"), accent: { color: AMBER, color2: PEARL } },
   { match: (p) => p.startsWith("/pricing"), accent: { color: AMBER, color2: PEARL } },
   { match: (p) => p.startsWith("/generating"), accent: { color: AMBER, color2: PEARL } },
+  { match: (p) => p.startsWith("/profile"), accent: { color: COBALT, color2: MAGENTA } },
   { match: (p) => p.startsWith("/brand-kit"), accent: { color: COBALT, color2: MAGENTA } },
   { match: (p) => p.startsWith("/library"), accent: { color: COBALT, color2: PEARL } },
   { match: (p) => p.startsWith("/create"), accent: { color: COBALT, color2: PEARL } },
@@ -41,6 +42,7 @@ export const NAV_ACCENT: Record<string, string> = {
   "/connect": COBALT,
   "/brand-kit": COBALT,
   "/billing": AMBER,
+  "/profile": COBALT,
 };
 
 // Credit balance colour: cobalt normally, amber below 20% or absolute low

@@ -35,6 +35,7 @@ import { Route as ApiPublicMetaOauthCallbackRouteImport } from './routes/api/pub
 import { Route as AuthenticatedProfileTeamRouteImport } from './routes/_authenticated/profile/team'
 import { Route as AuthenticatedProfileSubscriptionRouteImport } from './routes/_authenticated/profile/subscription'
 import { Route as AuthenticatedProfileSecurityRouteImport } from './routes/_authenticated/profile/security'
+import { Route as AuthenticatedProfilePrivacyRouteImport } from './routes/_authenticated/profile/privacy'
 import { Route as AuthenticatedProfileNotificationsRouteImport } from './routes/_authenticated/profile/notifications'
 import { Route as AuthenticatedProfileAppsRouteImport } from './routes/_authenticated/profile/apps'
 import { Route as AuthenticatedProfileAiRouteImport } from './routes/_authenticated/profile/ai'
@@ -177,6 +178,12 @@ const AuthenticatedProfileSecurityRoute =
     path: '/security',
     getParentRoute: () => AuthenticatedProfileRouteRoute,
   } as any)
+const AuthenticatedProfilePrivacyRoute =
+  AuthenticatedProfilePrivacyRouteImport.update({
+    id: '/privacy',
+    path: '/privacy',
+    getParentRoute: () => AuthenticatedProfileRouteRoute,
+  } as any)
 const AuthenticatedProfileNotificationsRoute =
   AuthenticatedProfileNotificationsRouteImport.update({
     id: '/notifications',
@@ -231,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/profile/ai': typeof AuthenticatedProfileAiRoute
   '/profile/apps': typeof AuthenticatedProfileAppsRoute
   '/profile/notifications': typeof AuthenticatedProfileNotificationsRoute
+  '/profile/privacy': typeof AuthenticatedProfilePrivacyRoute
   '/profile/security': typeof AuthenticatedProfileSecurityRoute
   '/profile/subscription': typeof AuthenticatedProfileSubscriptionRoute
   '/profile/team': typeof AuthenticatedProfileTeamRoute
@@ -262,6 +270,7 @@ export interface FileRoutesByTo {
   '/profile/ai': typeof AuthenticatedProfileAiRoute
   '/profile/apps': typeof AuthenticatedProfileAppsRoute
   '/profile/notifications': typeof AuthenticatedProfileNotificationsRoute
+  '/profile/privacy': typeof AuthenticatedProfilePrivacyRoute
   '/profile/security': typeof AuthenticatedProfileSecurityRoute
   '/profile/subscription': typeof AuthenticatedProfileSubscriptionRoute
   '/profile/team': typeof AuthenticatedProfileTeamRoute
@@ -296,6 +305,7 @@ export interface FileRoutesById {
   '/_authenticated/profile/ai': typeof AuthenticatedProfileAiRoute
   '/_authenticated/profile/apps': typeof AuthenticatedProfileAppsRoute
   '/_authenticated/profile/notifications': typeof AuthenticatedProfileNotificationsRoute
+  '/_authenticated/profile/privacy': typeof AuthenticatedProfilePrivacyRoute
   '/_authenticated/profile/security': typeof AuthenticatedProfileSecurityRoute
   '/_authenticated/profile/subscription': typeof AuthenticatedProfileSubscriptionRoute
   '/_authenticated/profile/team': typeof AuthenticatedProfileTeamRoute
@@ -330,6 +340,7 @@ export interface FileRouteTypes {
     | '/profile/ai'
     | '/profile/apps'
     | '/profile/notifications'
+    | '/profile/privacy'
     | '/profile/security'
     | '/profile/subscription'
     | '/profile/team'
@@ -361,6 +372,7 @@ export interface FileRouteTypes {
     | '/profile/ai'
     | '/profile/apps'
     | '/profile/notifications'
+    | '/profile/privacy'
     | '/profile/security'
     | '/profile/subscription'
     | '/profile/team'
@@ -394,6 +406,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile/ai'
     | '/_authenticated/profile/apps'
     | '/_authenticated/profile/notifications'
+    | '/_authenticated/profile/privacy'
     | '/_authenticated/profile/security'
     | '/_authenticated/profile/subscription'
     | '/_authenticated/profile/team'
@@ -608,6 +621,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileSecurityRouteImport
       parentRoute: typeof AuthenticatedProfileRouteRoute
     }
+    '/_authenticated/profile/privacy': {
+      id: '/_authenticated/profile/privacy'
+      path: '/privacy'
+      fullPath: '/profile/privacy'
+      preLoaderRoute: typeof AuthenticatedProfilePrivacyRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
     '/_authenticated/profile/notifications': {
       id: '/_authenticated/profile/notifications'
       path: '/notifications'
@@ -651,6 +671,7 @@ interface AuthenticatedProfileRouteRouteChildren {
   AuthenticatedProfileAiRoute: typeof AuthenticatedProfileAiRoute
   AuthenticatedProfileAppsRoute: typeof AuthenticatedProfileAppsRoute
   AuthenticatedProfileNotificationsRoute: typeof AuthenticatedProfileNotificationsRoute
+  AuthenticatedProfilePrivacyRoute: typeof AuthenticatedProfilePrivacyRoute
   AuthenticatedProfileSecurityRoute: typeof AuthenticatedProfileSecurityRoute
   AuthenticatedProfileSubscriptionRoute: typeof AuthenticatedProfileSubscriptionRoute
   AuthenticatedProfileTeamRoute: typeof AuthenticatedProfileTeamRoute
@@ -664,6 +685,7 @@ const AuthenticatedProfileRouteRouteChildren: AuthenticatedProfileRouteRouteChil
     AuthenticatedProfileAppsRoute: AuthenticatedProfileAppsRoute,
     AuthenticatedProfileNotificationsRoute:
       AuthenticatedProfileNotificationsRoute,
+    AuthenticatedProfilePrivacyRoute: AuthenticatedProfilePrivacyRoute,
     AuthenticatedProfileSecurityRoute: AuthenticatedProfileSecurityRoute,
     AuthenticatedProfileSubscriptionRoute:
       AuthenticatedProfileSubscriptionRoute,
