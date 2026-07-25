@@ -103,6 +103,10 @@ body::after {
 /* Keep app chrome above the glow. */
 body > * { position: relative; z-index: 1; }
 
+/* Seller preference (Profile header): turn the ambient glows right down. */
+html.dim-ambience body::before,
+html.dim-ambience body::after { opacity: 0.25; }
+
 html,
 body {
   background: var(--void);
