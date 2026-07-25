@@ -5,6 +5,7 @@ import { ArrowUpRight, CreditCard, Gauge, Receipt, Sparkles } from "lucide-react
 import { getMyCredits, getMyPayments } from "@/lib/billing.functions";
 import { getMyInsights } from "@/lib/profile.functions";
 import { getPlan, formatInr, COSTS } from "@/lib/plans";
+import { VIDEO_ENABLED } from "@/lib/video";
 import { COBALT, MAGENTA, AMBER, creditColor } from "@/lib/page-accent";
 import {
   GlassCard,
