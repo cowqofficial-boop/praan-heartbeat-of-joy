@@ -27,6 +27,7 @@ export type Database = {
           model_age: string | null
           model_body: string | null
           model_cultural_style: string | null
+          model_custom_look: string | null
           model_expression: string | null
           model_gender: string | null
           model_hair: string | null
@@ -54,6 +55,7 @@ export type Database = {
           model_age?: string | null
           model_body?: string | null
           model_cultural_style?: string | null
+          model_custom_look?: string | null
           model_expression?: string | null
           model_gender?: string | null
           model_hair?: string | null
@@ -81,6 +83,7 @@ export type Database = {
           model_age?: string | null
           model_body?: string | null
           model_cultural_style?: string | null
+          model_custom_look?: string | null
           model_expression?: string | null
           model_gender?: string | null
           model_hair?: string | null
