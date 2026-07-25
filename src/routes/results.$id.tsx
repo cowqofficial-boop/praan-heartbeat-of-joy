@@ -13,6 +13,7 @@ import { getMyCredits } from "@/lib/billing.functions";
 import { watermarkImageUrl } from "@/lib/watermark";
 import { showAlert } from "@/components/Dialogs";
 import { AuthModal } from "@/components/AuthModal";
+import { VideoSection } from "@/components/video/VideoSection";
 
 export const Route = createFileRoute("/results/$id")({
   head: ({ params }) => ({
