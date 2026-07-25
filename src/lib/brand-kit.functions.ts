@@ -250,11 +250,16 @@ export function describeModelStyling(k: {
   model_cultural_style?: string | null;
   model_occasion?: string | null;
   model_pose?: string | null;
+  model_custom_look?: string | null;
 }): string {
+  const custom = sanitizeCustomLook(k.model_custom_look);
   const parts = [
     k.model_cultural_style ? CULTURAL_PROMPT[k.model_cultural_style] ?? "" : "",
     k.model_occasion ? OCCASION_ATTIRE[k.model_occasion] ?? "" : "",
     k.model_pose ? POSE_PROMPT[k.model_pose] ?? "" : "",
+    custom
+      ? `IMPORTANT — the seller specifically requires: ${custom}. Make sure these details are clearly visible on the model.`
+      : "",
   ].filter(Boolean);
   return parts.join(" ");
 }
