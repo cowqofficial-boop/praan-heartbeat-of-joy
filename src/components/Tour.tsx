@@ -162,7 +162,9 @@ function TourOverlay({ onDone }: TourOverlayProps) {
 
   return createPortal(
     <div
+      data-scroll-lock
       className="fixed inset-0 z-[100]"
+
       role="dialog"
       aria-modal="true"
       aria-label={`Tour step ${i + 1} of ${STEPS.length}`}
@@ -317,10 +319,15 @@ export function Tour() {
 
   const [open, setOpen] = useState(false);
 
-  // Routes where we don't run the tour (auth flow, landing, onboarding wizard).
+  // Routes where we don't run the tour (auth flow, marketing pages, onboarding wizard).
+  // Marketing/long-form pages must never be covered: the overlay locks body scroll,
+  // which made /how-it-works look completely unscrollable for signed-in visitors.
   const suppressed =
     path === "/" ||
     path.startsWith("/auth") ||
+    path.startsWith("/how-it-works") ||
+    path.startsWith("/blog") ||
+    path.startsWith("/pricing") ||
     path.startsWith("/create") ||
     path.startsWith("/confirm") ||
     path.startsWith("/generating") ||
@@ -328,8 +335,11 @@ export function Tour() {
     path.startsWith("/api");
 
   useEffect(() => {
+    if (suppressed) {
+      setOpen(false);
+      return;
+    }
     if (!ready || !user || !status) return;
-    if (suppressed) return;
     if (forced) {
       setOpen(true);
       return;
@@ -340,7 +350,8 @@ export function Tour() {
   // If the user is signed in and hasn't taken the tour, but is sitting on a
   // suppressed surface (e.g. brand-kit onboarding wizard exit → /library), we
   // let them arrive naturally. Landing/upload aren't the right context.
-  if (!open) return null;
+  if (!open || suppressed) return null;
+
 
   return (
     <TourOverlay
