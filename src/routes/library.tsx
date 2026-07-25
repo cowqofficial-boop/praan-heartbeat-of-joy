@@ -204,7 +204,7 @@ function ProductCard({
     month: "short",
   });
   return (
-    <li className="stagger-item card-lift group relative overflow-hidden transition-transform duration-200 hover:-translate-y-0.5">
+    <li className="stagger-item card-list group relative overflow-hidden transition-transform duration-200 hover:-translate-y-0.5">
 
       <Link
         to="/results/$id"

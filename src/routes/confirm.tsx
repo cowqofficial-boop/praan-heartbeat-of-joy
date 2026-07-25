@@ -162,7 +162,7 @@ function Confirm() {
       </h1>
       <p className="mt-1 text-[15px] text-muted">Fix anything wrong, then we'll make your photos.</p>
 
-      <div className="mt-6 overflow-hidden rounded-[12px] bg-surface">
+      <div className="card-list mt-6 overflow-hidden">
         <img
           src={originalDataUrl}
           alt="Your product"

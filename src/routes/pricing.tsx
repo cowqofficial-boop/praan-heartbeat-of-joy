@@ -390,7 +390,7 @@ function FeatureLine({
 
 function PackCard({ plan, busy, onBuy }: { plan: Plan; busy: boolean; onBuy: () => void }) {
   return (
-    <div className="flex items-center justify-between card-lift p-4">
+    <div className="card-list flex items-center justify-between p-4">
 
       <div>
         <p className="text-[15px] font-semibold text-ink">{plan.name}</p>

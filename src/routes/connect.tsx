@@ -125,7 +125,7 @@ function ConnectPage() {
         />
       </div>
 
-      <section className="mt-8 rounded-[12px] bg-raised p-4">
+      <section className="card-feature mt-8 p-4">
         <p className="text-[14px] font-semibold text-ink">More platforms coming in September</p>
         <p className="mt-2 text-[13px] text-muted">
           YouTube · Threads · X · LinkedIn · Pinterest · TikTok
@@ -161,7 +161,7 @@ function ChannelCard(props: {
   const connected = props.status?.connected;
   const needsReconnect = props.status?.needs_reconnect;
   return (
-    <section className="rounded-[12px] bg-raised p-4">
+    <section className="card-feature p-4">
       <div className="flex items-center gap-3">
         <div className="grid h-10 w-10 place-items-center rounded-full" style={{ background: "color-mix(in oklab, #3D5AFE 18%, transparent)", color: "#3D5AFE" }}>
           {props.icon}

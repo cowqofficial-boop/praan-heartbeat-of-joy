@@ -241,7 +241,7 @@ function CalendarBody({
   return (
     <>
       {totalCount > 0 && readyCount < totalCount && (
-        <div className="mt-4 flex items-center gap-3 rounded-[12px] bg-surface px-4 py-3">
+        <div className="card-list mt-4 flex items-center gap-3 px-4 py-3">
           <Loader2 className="h-4 w-4 animate-spin text-primary" />
           <p className="flex-1 text-[13px] text-ink">
             Building your month… <span className="text-muted">{readyCount}/{totalCount} ready</span>
@@ -270,7 +270,7 @@ function CalendarLocked({ planName }: { planName: string }) {
       <div className="relative">
         <div className="pointer-events-none grid grid-cols-3 gap-2 opacity-60 blur-[2px]">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="aspect-square rounded-[12px] bg-surface p-2">
+            <div key={i} className="card-list aspect-square p-2">
               <div className="h-2/3 w-full rounded-[8px]" style={{ background: "var(--raised)" }} />
               <div className="mt-2 h-2 w-2/3 rounded-full" style={{ background: "var(--raised)" }} />
               <div className="mt-1 h-2 w-1/2 rounded-full" style={{ background: "var(--raised)" }} />
@@ -331,7 +331,7 @@ function TodayCard({ post, onOpen }: { post: Post; onOpen: () => void }) {
     <button
       type="button"
       onClick={onOpen}
-      className="mt-2 flex w-full items-center gap-3 overflow-hidden rounded-[16px] bg-raised p-3 text-left"
+      className="card-list mt-2 flex w-full items-center gap-3 overflow-hidden p-3 text-left"
     >
       <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[10px] bg-surface">
         {post.image_url ? (
