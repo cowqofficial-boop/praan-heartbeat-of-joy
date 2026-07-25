@@ -32,6 +32,7 @@ import { Route as AuthenticatedProfileRouteRouteImport } from './routes/_authent
 import { Route as AuthenticatedProfileIndexRouteImport } from './routes/_authenticated/profile/index'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 import { Route as ApiPublicMetaOauthCallbackRouteImport } from './routes/api/public/meta-oauth-callback'
+import { Route as AuthenticatedProfileSecurityRouteImport } from './routes/_authenticated/profile/security'
 import { Route as AuthenticatedProfileAppsRouteImport } from './routes/_authenticated/profile/apps'
 import { Route as AuthenticatedProfileAiRouteImport } from './routes/_authenticated/profile/ai'
 import { Route as AuthenticatedProfileAccountRouteImport } from './routes/_authenticated/profile/account'
@@ -155,6 +156,12 @@ const ApiPublicMetaOauthCallbackRoute =
     path: '/api/public/meta-oauth-callback',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedProfileSecurityRoute =
+  AuthenticatedProfileSecurityRouteImport.update({
+    id: '/security',
+    path: '/security',
+    getParentRoute: () => AuthenticatedProfileRouteRoute,
+  } as any)
 const AuthenticatedProfileAppsRoute =
   AuthenticatedProfileAppsRouteImport.update({
     id: '/apps',
@@ -202,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/profile/account': typeof AuthenticatedProfileAccountRoute
   '/profile/ai': typeof AuthenticatedProfileAiRoute
   '/profile/apps': typeof AuthenticatedProfileAppsRoute
+  '/profile/security': typeof AuthenticatedProfileSecurityRoute
   '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/profile/': typeof AuthenticatedProfileIndexRoute
@@ -229,6 +237,7 @@ export interface FileRoutesByTo {
   '/profile/account': typeof AuthenticatedProfileAccountRoute
   '/profile/ai': typeof AuthenticatedProfileAiRoute
   '/profile/apps': typeof AuthenticatedProfileAppsRoute
+  '/profile/security': typeof AuthenticatedProfileSecurityRoute
   '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/profile': typeof AuthenticatedProfileIndexRoute
@@ -259,6 +268,7 @@ export interface FileRoutesById {
   '/_authenticated/profile/account': typeof AuthenticatedProfileAccountRoute
   '/_authenticated/profile/ai': typeof AuthenticatedProfileAiRoute
   '/_authenticated/profile/apps': typeof AuthenticatedProfileAppsRoute
+  '/_authenticated/profile/security': typeof AuthenticatedProfileSecurityRoute
   '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/_authenticated/profile/': typeof AuthenticatedProfileIndexRoute
@@ -289,6 +299,7 @@ export interface FileRouteTypes {
     | '/profile/account'
     | '/profile/ai'
     | '/profile/apps'
+    | '/profile/security'
     | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
     | '/profile/'
@@ -316,6 +327,7 @@ export interface FileRouteTypes {
     | '/profile/account'
     | '/profile/ai'
     | '/profile/apps'
+    | '/profile/security'
     | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
     | '/profile'
@@ -345,6 +357,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile/account'
     | '/_authenticated/profile/ai'
     | '/_authenticated/profile/apps'
+    | '/_authenticated/profile/security'
     | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
     | '/_authenticated/profile/'
@@ -535,6 +548,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMetaOauthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/profile/security': {
+      id: '/_authenticated/profile/security'
+      path: '/security'
+      fullPath: '/profile/security'
+      preLoaderRoute: typeof AuthenticatedProfileSecurityRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
     '/_authenticated/profile/apps': {
       id: '/_authenticated/profile/apps'
       path: '/apps'
@@ -570,6 +590,7 @@ interface AuthenticatedProfileRouteRouteChildren {
   AuthenticatedProfileAccountRoute: typeof AuthenticatedProfileAccountRoute
   AuthenticatedProfileAiRoute: typeof AuthenticatedProfileAiRoute
   AuthenticatedProfileAppsRoute: typeof AuthenticatedProfileAppsRoute
+  AuthenticatedProfileSecurityRoute: typeof AuthenticatedProfileSecurityRoute
   AuthenticatedProfileIndexRoute: typeof AuthenticatedProfileIndexRoute
 }
 
@@ -578,6 +599,7 @@ const AuthenticatedProfileRouteRouteChildren: AuthenticatedProfileRouteRouteChil
     AuthenticatedProfileAccountRoute: AuthenticatedProfileAccountRoute,
     AuthenticatedProfileAiRoute: AuthenticatedProfileAiRoute,
     AuthenticatedProfileAppsRoute: AuthenticatedProfileAppsRoute,
+    AuthenticatedProfileSecurityRoute: AuthenticatedProfileSecurityRoute,
     AuthenticatedProfileIndexRoute: AuthenticatedProfileIndexRoute,
   }
 
