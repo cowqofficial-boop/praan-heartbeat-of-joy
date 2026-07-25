@@ -508,6 +508,83 @@ export type Database = {
         }
         Relationships: []
       }
+      product_videos: {
+        Row: {
+          attempts: number
+          batch_id: string
+          created_at: string
+          credits_spent: number
+          duration_sec: number
+          error: string | null
+          generation_id: string
+          id: string
+          provider_request_id: string | null
+          ratio: string
+          refund_pack: number
+          refund_sub: number
+          refunded: boolean
+          script: string
+          status: string
+          thumb_url: string | null
+          updated_at: string
+          user_id: string
+          video_type: string
+          video_url: string | null
+        }
+        Insert: {
+          attempts?: number
+          batch_id: string
+          created_at?: string
+          credits_spent?: number
+          duration_sec: number
+          error?: string | null
+          generation_id: string
+          id?: string
+          provider_request_id?: string | null
+          ratio: string
+          refund_pack?: number
+          refund_sub?: number
+          refunded?: boolean
+          script?: string
+          status?: string
+          thumb_url?: string | null
+          updated_at?: string
+          user_id: string
+          video_type: string
+          video_url?: string | null
+        }
+        Update: {
+          attempts?: number
+          batch_id?: string
+          created_at?: string
+          credits_spent?: number
+          duration_sec?: number
+          error?: string | null
+          generation_id?: string
+          id?: string
+          provider_request_id?: string | null
+          ratio?: string
+          refund_pack?: number
+          refund_sub?: number
+          refunded?: boolean
+          script?: string
+          status?: string
+          thumb_url?: string | null
+          updated_at?: string
+          user_id?: string
+          video_type?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_videos_generation_id_fkey"
+            columns: ["generation_id"]
+            isOneToOne: false
+            referencedRelation: "generations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
