@@ -47,7 +47,7 @@ export function VideoSetupDialog({
     queryFn: () => getMyCredits(),
     staleTime: 30_000,
   });
-  const balance = credits?.balance ?? 0;
+  const balance = credits?.total ?? 0;
 
   const cap = SCRIPT_CAP[durationSec];
   const perRatio = videoCostPerRatio(durationSec);
