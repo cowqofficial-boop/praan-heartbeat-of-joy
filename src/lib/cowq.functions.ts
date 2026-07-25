@@ -367,7 +367,7 @@ async function getBrandModelContext(userId?: string | null): Promise<{
     ? ((kit.brand_model_photos as string[] | null) ?? []).filter(Boolean)
     : (kit.brand_model_url ? [kit.brand_model_url] : []);
   const loaded: { b64: string; mime: string }[] = [];
-  for (const p of photos.slice(0, 3)) {
+  for (const p of photos.slice(0, 5)) {
     try { loaded.push(await fetchAsBase64(p)); } catch { /* skip */ }
   }
   if (loaded.length === 0) return { modelLine, brandModelRefs, brandModelBinding, personSource };
@@ -510,7 +510,7 @@ export const generateImages = createServerFn({ method: "POST" })
               ? ((kit.brand_model_photos as string[] | null) ?? []).filter(Boolean)
               : (kit.brand_model_url ? [kit.brand_model_url] : []);
             const loaded: { b64: string; mime: string }[] = [];
-            for (const p of photos.slice(0, 3)) {
+            for (const p of photos.slice(0, 5)) {
               try { loaded.push(await fetchAsBase64(p)); } catch { /* skip */ }
             }
             if (loaded.length > 0) {
