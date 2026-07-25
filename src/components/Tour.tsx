@@ -316,20 +316,10 @@ export function Tour() {
 
   const [open, setOpen] = useState(false);
 
-  // Routes where we don't run the tour (auth flow, marketing pages, onboarding wizard).
-  // Marketing/long-form pages must never be covered: the overlay locks body scroll,
-  // which made /how-it-works look completely unscrollable for signed-in visitors.
-  const suppressed =
-    path === "/" ||
-    path.startsWith("/auth") ||
-    path.startsWith("/how-it-works") ||
-    path.startsWith("/blog") ||
-    path.startsWith("/pricing") ||
-    path.startsWith("/create") ||
-    path.startsWith("/confirm") ||
-    path.startsWith("/generating") ||
-    path.startsWith("/results") ||
-    path.startsWith("/api");
+  // Allowlist: the tour only ever runs on /library, the natural post-signup landing.
+  // It never appears on Calendar, Stock, Brand kit, Connect, Billing, Pricing,
+  // marketing pages, or the generation flow.
+  const suppressed = !(path === "/library" || path.startsWith("/library/"));
 
   useEffect(() => {
     if (suppressed) {
