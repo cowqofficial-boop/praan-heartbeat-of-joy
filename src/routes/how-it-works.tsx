@@ -460,7 +460,7 @@ function HowItWorks() {
 
         <Reveal delay={80}>
           <div className="mt-10 grid gap-4 md:grid-cols-2">
-            <div className="rounded-[12px] bg-raised p-6">
+            <div className="card-list rounded-[12px] p-6">
               <p className="text-[15px] font-semibold text-ink">A photo app gives you:</p>
               <p className="mt-2 text-[14px] text-muted">Nicer pictures.</p>
               <ul className="mt-5 space-y-3">
