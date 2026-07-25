@@ -26,11 +26,17 @@ export function VideoSection({
   hasAccount: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const queued = useVideoQueue((s) =>
-    s.jobs.filter(
-      (j) => j.generationId === generationId && (j.status === "waiting" || j.status === "running"),
-    ),
+  // Select the raw array — a selector that builds a NEW array on every call
+  // makes zustand v5's useSyncExternalStore snapshot unstable and loops forever.
+  const jobs = useVideoQueue((s) => s.jobs);
+  const queued = useMemo(
+    () =>
+      jobs.filter(
+        (j) => j.generationId === generationId && (j.status === "waiting" || j.status === "running"),
+      ),
+    [jobs, generationId],
   );
+
   const remove = useServerFn(deleteProductVideo);
   const { data: videos = [], refetch } = useQuery({
     queryKey: ["product-videos", generationId],
