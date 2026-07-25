@@ -131,6 +131,20 @@ const POSE = [
  { value: "closeup", label: "Close-up detail" },
  { value: "holding", label: "Showing the product in hand" },
 ];
+const NATIONALITY = [
+ { value: "", label: "Let CowQ decide" },
+ { value: "indian", label: "Indian" },
+ { value: "pakistani", label: "Pakistani" },
+ { value: "bangladeshi", label: "Bangladeshi" },
+ { value: "sri_lankan", label: "Sri Lankan" },
+ { value: "nepali", label: "Nepali" },
+ { value: "middle_eastern", label: "Middle Eastern / Arab" },
+ { value: "southeast_asian", label: "Southeast Asian" },
+ { value: "east_asian", label: "East Asian" },
+ { value: "african", label: "African" },
+ { value: "european", label: "European / Western" },
+ { value: "latin_american", label: "Latin American" },
+];
 
 const EMPTY_KIT: BrandKit = {
  business_name: "",
@@ -145,6 +159,7 @@ const EMPTY_KIT: BrandKit = {
  model_skin: null,
  model_body: null,
  model_region: null,
+ model_nationality: null,
  model_cultural_style: null,
  model_occasion: null,
  model_hair: null,
@@ -402,6 +417,11 @@ function BrandKitPage() {
  <SelectField label="Skin tone" options={SKIN} value={kit.model_skin ?? ""} onChange={(v) => setKit({ ...kit, model_skin: v || null })} />
  <SelectField label="Body type" options={BODY} value={kit.model_body ?? ""} onChange={(v) => setKit({ ...kit, model_body: v || null })} />
  <SelectField label="Regional look" options={REGION} value={kit.model_region ?? ""} onChange={(v) => setKit({ ...kit, model_region: v || null })} />
+ <div className="flex items-center gap-2 pt-1">
+ <span className="text-[14px] font-medium text-ink">Nationality</span>
+ <HelpButton content={<p className="text-muted">Shapes the model's overall appearance for that nationality. Optional.</p>} />
+ </div>
+ <SelectField label="Nationality" options={NATIONALITY} value={kit.model_nationality ?? ""} onChange={(v) => setKit({ ...kit, model_nationality: v || null })} />
  <div className="flex items-center gap-2 pt-1">
  <span className="text-[14px] font-medium text-ink">Cultural style</span>
  <HelpButton content={<p className="text-muted">Dresses and styles the model to suit your customers. About visible attire and presentation, not a person's faith.</p>} />
