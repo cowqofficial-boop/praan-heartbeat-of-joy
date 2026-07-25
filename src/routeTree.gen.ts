@@ -28,6 +28,7 @@ import { Route as ResultsIdRouteImport } from './routes/results.$id'
 import { Route as ConnectInstagramRouteImport } from './routes/connect.instagram'
 import { Route as BlogFlatLayGuideRouteImport } from './routes/blog.flat-lay-guide'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as AuthenticatedProfileRouteRouteImport } from './routes/_authenticated/profile/route'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 import { Route as ApiPublicMetaOauthCallbackRouteImport } from './routes/api/public/meta-oauth-callback'
 import { Route as AuthenticatedAdminCostsRouteImport } from './routes/_authenticated.admin.costs'
@@ -126,6 +127,12 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/callback',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthenticatedProfileRouteRoute =
+  AuthenticatedProfileRouteRouteImport.update({
+    id: '/profile',
+    path: '/profile',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicRazorpayWebhookRoute =
   ApiPublicRazorpayWebhookRouteImport.update({
     id: '/api/public/razorpay-webhook',
@@ -159,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stock': typeof StockRoute
+  '/profile': typeof AuthenticatedProfileRouteRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/connect/instagram': typeof ConnectInstagramRoute
@@ -182,6 +190,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stock': typeof StockRoute
+  '/profile': typeof AuthenticatedProfileRouteRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/connect/instagram': typeof ConnectInstagramRoute
@@ -207,6 +216,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stock': typeof StockRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRouteRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/connect/instagram': typeof ConnectInstagramRoute
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/sitemap.xml'
     | '/stock'
+    | '/profile'
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/connect/instagram'
@@ -255,6 +266,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/sitemap.xml'
     | '/stock'
+    | '/profile'
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/connect/instagram'
@@ -279,6 +291,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/sitemap.xml'
     | '/stock'
+    | '/_authenticated/profile'
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/connect/instagram'
@@ -445,6 +458,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/razorpay-webhook': {
       id: '/api/public/razorpay-webhook'
       path: '/api/public/razorpay-webhook'
@@ -470,10 +490,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedProfileRouteRoute: typeof AuthenticatedProfileRouteRoute
   AuthenticatedAdminCostsRoute: typeof AuthenticatedAdminCostsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedProfileRouteRoute: AuthenticatedProfileRouteRoute,
   AuthenticatedAdminCostsRoute: AuthenticatedAdminCostsRoute,
 }
 

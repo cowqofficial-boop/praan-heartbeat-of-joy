@@ -7,7 +7,6 @@ import {
   HelpCircle,
   Search,
   Sparkles,
-  SparklesIcon,
   UserRoundCog,
   X,
 } from "lucide-react";
@@ -24,7 +23,9 @@ export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfileLayout,
 });
 
-const TABS = [
+type Tab = { to: string; label: string; keywords: string; exact?: boolean };
+
+const TABS: Tab[] = [
   { to: "/profile", label: "Overview", exact: true, keywords: "summary snapshot activity" },
   { to: "/profile/account", label: "Account", keywords: "name email phone password language timezone currency country" },
   { to: "/profile/ai", label: "AI preferences", keywords: "personality tone voice emoji creativity temperature writing" },
@@ -34,7 +35,7 @@ const TABS = [
   { to: "/profile/team", label: "Team", keywords: "members roles permissions invite staff" },
   { to: "/profile/notifications", label: "Notifications", keywords: "email sms whatsapp push reports alerts" },
   { to: "/profile/privacy", label: "Data & privacy", keywords: "export delete account memory consent cookies" },
-] as const;
+];
 
 function ProfileLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -176,7 +177,8 @@ function ProfileLayout() {
 
       {/* ---------------- tabs ---------------- */}
       <nav
-        className="scrollbar-none mt-6 flex gap-1 overflow-x-auto pb-1"
+        className="mt-6 flex gap-1 overflow-x-auto pb-1"
+        style={{ scrollbarWidth: "none" }}
         aria-label="Profile sections"
       >
         {visibleTabs.map((t) => {
@@ -242,7 +244,7 @@ function AmbienceToggle() {
         color: dim ? "var(--text-dim)" : COBALT,
       }}
     >
-      {dim ? <SparklesIcon className="h-[18px] w-[18px]" /> : <Sparkles className="h-[18px] w-[18px]" />}
+      <Sparkles className="h-[18px] w-[18px]" strokeWidth={dim ? 1.4 : 2} />
     </button>
   );
 }
