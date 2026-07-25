@@ -16,6 +16,8 @@ import {
   type PostType,
 } from "@/lib/calendar.functions";
 import { getMyCredits } from "@/lib/billing.functions";
+import { listMyProducts } from "@/lib/library.functions";
+
 import { CreditBadge } from "@/components/CreditBadge";
 import { Lock } from "lucide-react";
 
