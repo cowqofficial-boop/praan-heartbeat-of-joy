@@ -388,7 +388,7 @@ function HowItWorks() {
         </Reveal>
 
         <Reveal delay={80}>
-          <div className="mt-8 overflow-x-auto rounded-[12px] bg-raised">
+          <div className="card-list mt-8 overflow-x-auto rounded-[12px]">
             <table className="w-full min-w-[720px] text-left">
               <thead>
                 <tr className="bg-background/40 text-[10px] uppercase tracking-wider text-muted">
