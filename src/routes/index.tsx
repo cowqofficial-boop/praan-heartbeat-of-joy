@@ -215,7 +215,7 @@ function Landing() {
 
           <Reveal delay={80}>
             {showcasePairs.length === 0 ? (
-              <div className="mt-10 rounded-[16px] bg-surface p-8 text-center">
+              <div className="card-feature mt-10 p-8 text-center">
                 <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-raised">
                   <ImageIcon className="h-5 w-5 text-muted" />
                 </div>
@@ -425,7 +425,7 @@ function Landing() {
           </Reveal>
 
           <Reveal delay={80}>
-            <div className="mt-10 divide-y divide-white/5 rounded-[14px] bg-raised">
+            <div className="card-list mt-10 divide-y divide-white/5">
               {[
                 { role: "Product photographer", note: "10–20 products a month", cost: "₹40,000 – ₹70,000" },
                 { role: "Copywriter", note: "titles, descriptions, tags", cost: "₹30,000 – ₹60,000" },
@@ -451,7 +451,7 @@ function Landing() {
           </Reveal>
 
           <Reveal delay={120}>
-            <div className="mt-8 rounded-[14px] bg-background p-6">
+            <div className="card-feature mt-8 p-6">
               <p className="text-[13px] uppercase tracking-wider text-muted">CowQ starts at</p>
               <p className="mt-1 font-display text-[40px] leading-none text-ink">
                 ₹999 <span className="text-[15px] font-normal text-muted">/ month</span>
@@ -509,7 +509,7 @@ function Landing() {
             {/* Founder note — placeholder only. Do NOT invent a name, quote, or photograph.
                 Drop a real portrait into /public/founder.jpg and replace [FOUNDER_NAME]
                 and the note body with the actual founder's words. */}
-            <div className="mt-10 rounded-[16px] bg-surface p-6 lg:p-8">
+            <div className="card-list mt-10 p-6 lg:p-8">
               <div className="flex items-start gap-4">
                 <div
                   className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-raised text-muted"
@@ -551,7 +551,7 @@ function Landing() {
                 { t: "Physical shops going online", b: "Your first proper catalog.", src: who3.url, alt: "Small retail shop counter" },
                 { t: "Anyone with a product", b: "And no team behind them.", src: who4.url, alt: "Artisan workbench with tools" },
               ].map((c) => (
-                <div key={c.t} className="overflow-hidden rounded-[16px] bg-background">
+                <div key={c.t} className="card-feature overflow-hidden">
                   <div className="relative aspect-[4/3]">
                     <img src={c.src} alt={c.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
                   </div>
@@ -576,7 +576,7 @@ function Landing() {
             </h2>
           </Reveal>
           <Reveal delay={80}>
-            <div className="mt-10 divide-y divide-white/5 rounded-[16px] bg-surface">
+            <div className="card-list mt-10 divide-y divide-white/5">
               <Faq
                 q="Will my product look different from the real thing?"
                 a="No. Only the background and lighting change. Colour, texture, pattern and shape stay exactly as they are."
@@ -726,7 +726,7 @@ function Artefact({
   wide?: boolean;
 }) {
   return (
-    <div className={`rounded-[16px] bg-background p-5 ${wide ? "md:col-span-3" : ""}`}>
+    <div className={`card-feature p-5 ${wide ? "md:col-span-3" : ""}`}>
       <div className="mb-3 flex items-center gap-2">
         <Check className="h-4 w-4 text-[color:var(--page-accent)]" />
         <p className="text-[13px] font-semibold text-ink">{title}</p>
@@ -752,7 +752,7 @@ function Step({
   alt?: string;
 }) {
   return (
-    <li className="overflow-hidden rounded-[16px] bg-surface">
+    <li className="card-feature overflow-hidden">
       {photo && (
         <div className="relative aspect-[4/3]">
           <img src={photo} alt={alt ?? ""} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
@@ -777,7 +777,7 @@ function Step({
 
 function TrustCard({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
   return (
-    <div className="rounded-[16px] bg-surface p-5">
+    <div className="card-feature p-5">
       <span className="grid h-9 w-9 place-items-center rounded-full bg-raised text-[color:var(--page-accent)]">
         {icon}
       </span>
@@ -816,7 +816,7 @@ function RoadmapCard({
   body: string;
 }) {
   return (
-    <div className="card-lift p-6">
+    <div className="card-feature p-6">
       <span
         className="grid h-10 w-10 place-items-center rounded-[10px]"
         style={{
