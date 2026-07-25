@@ -17,6 +17,7 @@ export type BrandKit = {
   model_skin: string | null;
   model_body: string | null;
   model_region: string | null;
+  model_nationality: string | null;
   model_cultural_style: string | null;
   model_occasion: string | null;
   model_hair: string | null;
@@ -59,6 +60,7 @@ export const saveMyBrandKit = createServerFn({ method: "POST" })
       model_skin: data.model_skin ?? null,
       model_body: data.model_body ?? null,
       model_region: data.model_region ?? null,
+      model_nationality: data.model_nationality ?? null,
       model_cultural_style: data.model_cultural_style ?? null,
       model_occasion: data.model_occasion ?? null,
       model_hair: data.model_hair ?? null,
@@ -116,6 +118,7 @@ export function describeModelPrefs(k: {
   model_skin?: string | null;
   model_body?: string | null;
   model_region?: string | null;
+  model_nationality?: string | null;
   model_hair?: string | null;
   model_expression?: string | null;
   model_pose?: string | null;
@@ -123,6 +126,8 @@ export function describeModelPrefs(k: {
   const parts: string[] = [];
   if (k.model_gender) parts.push(k.model_gender);
   if (k.model_age) parts.push(`aged ${k.model_age}`);
+  if (k.model_nationality)
+    parts.push(`overall appearance is ${NATIONALITY_PROMPT[k.model_nationality] ?? k.model_nationality}`);
   if (k.model_skin) parts.push(`${k.model_skin} skin`);
   if (k.model_body) parts.push(`${k.model_body} build`);
   if (k.model_region) parts.push(`${k.model_region} regional look`);
@@ -130,6 +135,20 @@ export function describeModelPrefs(k: {
   if (k.model_expression) parts.push(`${EXPRESSION_PROMPT[k.model_expression] ?? k.model_expression} expression`);
   return parts.length > 0 ? parts.join(", ") : "";
 }
+
+const NATIONALITY_PROMPT: Record<string, string> = {
+  indian: "Indian",
+  pakistani: "Pakistani",
+  bangladeshi: "Bangladeshi",
+  sri_lankan: "Sri Lankan",
+  nepali: "Nepali",
+  middle_eastern: "Middle Eastern / Arab",
+  southeast_asian: "Southeast Asian",
+  east_asian: "East Asian",
+  african: "African",
+  european: "European / Western",
+  latin_american: "Latin American",
+};
 
 const HAIR_PROMPT: Record<string, string> = {
   short: "short",
