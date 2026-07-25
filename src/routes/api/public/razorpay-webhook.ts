@@ -12,7 +12,7 @@ import { getPlan } from "@/lib/plans";
 export const Route = createFileRoute("/api/public/razorpay-webhook")({
   server: {
     handlers: {
-      POST: async ({ request }) => {
+      POST: async ({ request }: { request: Request }) => {
         const raw = await request.text();
         const signature = request.headers.get("x-razorpay-signature") ?? "";
         const { verifyWebhookSignature } = await import("@/lib/razorpay.server");
