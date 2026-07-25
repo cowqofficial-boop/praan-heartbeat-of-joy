@@ -106,12 +106,12 @@ function TourOverlay({ onDone }: TourOverlayProps) {
       if (e.key === "Escape") onDone();
     };
     window.addEventListener("keydown", onKey);
-    // Lock body scroll while the tour is up.
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    // NOTE: the tour must never lock body scroll — that trapped long pages.
+    // Defensively clear any stale lock left behind by an earlier build.
+    if (document.body.style.overflow === "hidden") document.body.style.overflow = "";
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
+      document.body.style.overflow = "";
     };
   }, [onDone]);
 
