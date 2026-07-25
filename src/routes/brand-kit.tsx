@@ -427,7 +427,38 @@ function BrandKitPage() {
  );
 }
 
+function Section({
+ icon: Icon,
+ title,
+ subtitle,
+ children,
+}: {
+ icon: React.ComponentType<{ className?: string }>;
+ title: string;
+ subtitle: string;
+ children: React.ReactNode;
+}) {
+ return (
+ <section className="card-feature p-5 lg:p-6">
+ <div className="flex items-start gap-3">
+ <span
+ className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px]"
+ style={{ background: "color-mix(in oklab, var(--page-accent) 16%, transparent)", color: "var(--page-accent)" }}
+ >
+ <Icon className="h-6 w-6" />
+ </span>
+ <div>
+ <h2 className="font-display text-[20px] leading-tight text-ink">{title}</h2>
+ <p className="mt-1 text-[13px] text-muted">{subtitle}</p>
+ </div>
+ </div>
+ <div className="mt-6">{children}</div>
+ </section>
+ );
+}
+
 function Field({ label, children, help }: { label: string; children: React.ReactNode; help?: React.ReactNode }) {
+
  return (
  <div className="flex flex-col gap-2">
  <span className="flex items-center gap-1.5 text-[15px] font-medium text-ink">
