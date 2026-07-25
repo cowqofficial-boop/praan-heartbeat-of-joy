@@ -479,7 +479,7 @@ function ActionRow({
         </button>
       </div>
       {showShare && whiteAfter && (
-        <div className="rounded-[14px] bg-surface p-3">
+        <div className="card-list p-3">
           <PostThisButton
             imageUrl={whiteAfter}
             caption={caption}
@@ -590,7 +590,7 @@ function ListingPanel({ copy }: { copy: Copy }) {
   const [open, setOpen] = useState<string | null>(null);
 
   return (
-    <section className="card-lift overflow-hidden">
+    <section className="card-list overflow-hidden">
       <ul className="flex flex-col">
         {rows.map((r, i) => (
           <ListingRow
@@ -684,7 +684,7 @@ function SignUpGate({ title, body, next: _next }: { title: string; body: string;
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"signup" | "signin">("signup");
   return (
-    <div className="card-lift p-5 text-center">
+    <div className="card-feature p-5 text-center">
       <div className="mx-auto grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary">
         <Lock className="h-4 w-4" />
       </div>
