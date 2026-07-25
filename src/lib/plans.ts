@@ -98,6 +98,8 @@ export const COSTS = {
   calendar_post: 10,           // One calendar post
   calendar_month: 300,         // Full 30-day calendar
   auto_publish: 2,             // Publish one post automatically
+  video_5s: 200,               // 5-second video with voiceover — per shape
+  video_8s: 320,               // 8-second video with voiceover — per shape
 } as const;
 
 export type ActionKey = keyof typeof COSTS;
