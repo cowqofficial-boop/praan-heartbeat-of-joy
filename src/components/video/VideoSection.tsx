@@ -141,15 +141,18 @@ export function VideoSection({
       ))}
 
       {open && (
-        <VideoSetupDialog
-          generationId={generationId}
-          productName={productName}
-          onClose={() => {
-            setOpen(false);
-            void refetch();
-          }}
-        />
+        <VideoErrorBoundary onClose={() => setOpen(false)}>
+          <VideoSetupDialog
+            generationId={generationId}
+            productName={productName}
+            onClose={() => {
+              setOpen(false);
+              void refetch();
+            }}
+          />
+        </VideoErrorBoundary>
       )}
+
     </section>
   );
 }
