@@ -32,6 +32,7 @@ import { Route as AuthenticatedProfileRouteRouteImport } from './routes/_authent
 import { Route as AuthenticatedProfileIndexRouteImport } from './routes/_authenticated/profile/index'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 import { Route as ApiPublicMetaOauthCallbackRouteImport } from './routes/api/public/meta-oauth-callback'
+import { Route as AuthenticatedProfileAccountRouteImport } from './routes/_authenticated/profile/account'
 import { Route as AuthenticatedAdminCostsRouteImport } from './routes/_authenticated.admin.costs'
 
 const StockRoute = StockRouteImport.update({
@@ -152,6 +153,12 @@ const ApiPublicMetaOauthCallbackRoute =
     path: '/api/public/meta-oauth-callback',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedProfileAccountRoute =
+  AuthenticatedProfileAccountRouteImport.update({
+    id: '/account',
+    path: '/account',
+    getParentRoute: () => AuthenticatedProfileRouteRoute,
+  } as any)
 const AuthenticatedAdminCostsRoute = AuthenticatedAdminCostsRouteImport.update({
   id: '/admin/costs',
   path: '/admin/costs',
@@ -179,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/connect/instagram': typeof ConnectInstagramRoute
   '/results/$id': typeof ResultsIdRoute
   '/admin/costs': typeof AuthenticatedAdminCostsRoute
+  '/profile/account': typeof AuthenticatedProfileAccountRoute
   '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/profile/': typeof AuthenticatedProfileIndexRoute
@@ -203,6 +211,7 @@ export interface FileRoutesByTo {
   '/connect/instagram': typeof ConnectInstagramRoute
   '/results/$id': typeof ResultsIdRoute
   '/admin/costs': typeof AuthenticatedAdminCostsRoute
+  '/profile/account': typeof AuthenticatedProfileAccountRoute
   '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/profile': typeof AuthenticatedProfileIndexRoute
@@ -230,6 +239,7 @@ export interface FileRoutesById {
   '/connect/instagram': typeof ConnectInstagramRoute
   '/results/$id': typeof ResultsIdRoute
   '/_authenticated/admin/costs': typeof AuthenticatedAdminCostsRoute
+  '/_authenticated/profile/account': typeof AuthenticatedProfileAccountRoute
   '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/_authenticated/profile/': typeof AuthenticatedProfileIndexRoute
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/connect/instagram'
     | '/results/$id'
     | '/admin/costs'
+    | '/profile/account'
     | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
     | '/profile/'
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '/connect/instagram'
     | '/results/$id'
     | '/admin/costs'
+    | '/profile/account'
     | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
     | '/profile'
@@ -307,6 +319,7 @@ export interface FileRouteTypes {
     | '/connect/instagram'
     | '/results/$id'
     | '/_authenticated/admin/costs'
+    | '/_authenticated/profile/account'
     | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
     | '/_authenticated/profile/'
@@ -497,6 +510,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMetaOauthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/profile/account': {
+      id: '/_authenticated/profile/account'
+      path: '/account'
+      fullPath: '/profile/account'
+      preLoaderRoute: typeof AuthenticatedProfileAccountRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
     '/_authenticated/admin/costs': {
       id: '/_authenticated/admin/costs'
       path: '/admin/costs'
@@ -508,11 +528,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedProfileRouteRouteChildren {
+  AuthenticatedProfileAccountRoute: typeof AuthenticatedProfileAccountRoute
   AuthenticatedProfileIndexRoute: typeof AuthenticatedProfileIndexRoute
 }
 
 const AuthenticatedProfileRouteRouteChildren: AuthenticatedProfileRouteRouteChildren =
   {
+    AuthenticatedProfileAccountRoute: AuthenticatedProfileAccountRoute,
     AuthenticatedProfileIndexRoute: AuthenticatedProfileIndexRoute,
   }
 
