@@ -55,6 +55,8 @@
      Electric Cobalt so any surface rendered outside a routed page still has a
      sensible accent. --page-accent-2 only drives the headline gradient. */
   --page-accent: #3D5AFE;
+  /* Default so var(--card-accent) resolves outside a tinted card. */
+  --card-accent: var(--page-accent);
   --page-accent-2: #F5F7FF;
 
   /* Legacy aliases — collapsed to system tokens so any lingering usage stays on-palette. */
