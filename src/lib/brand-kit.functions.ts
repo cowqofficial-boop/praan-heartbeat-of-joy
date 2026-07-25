@@ -59,6 +59,12 @@ export const saveMyBrandKit = createServerFn({ method: "POST" })
       model_skin: data.model_skin ?? null,
       model_body: data.model_body ?? null,
       model_region: data.model_region ?? null,
+      model_cultural_style: data.model_cultural_style ?? null,
+      model_occasion: data.model_occasion ?? null,
+      model_hair: data.model_hair ?? null,
+      model_expression: data.model_expression ?? null,
+      model_pose: data.model_pose ?? null,
+
       brand_model_enabled: data.brand_model_enabled ?? false,
       brand_model_url: data.brand_model_url ?? null,
       brand_model_source: data.brand_model_source ?? "ai",
