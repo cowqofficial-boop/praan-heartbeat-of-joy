@@ -23,6 +23,8 @@ export type BrandKit = {
   model_hair: string | null;
   model_expression: string | null;
   model_pose: string | null;
+  model_custom_look: string | null;
+
 
   brand_model_enabled: boolean;
   brand_model_url: string | null;
@@ -66,6 +68,8 @@ export const saveMyBrandKit = createServerFn({ method: "POST" })
       model_hair: data.model_hair ?? null,
       model_expression: data.model_expression ?? null,
       model_pose: data.model_pose ?? null,
+      model_custom_look: sanitizeCustomLook(data.model_custom_look),
+
 
       brand_model_enabled: data.brand_model_enabled ?? false,
       brand_model_url: data.brand_model_url ?? null,
@@ -184,10 +188,40 @@ const CULTURAL_PROMPT: Record<string, string> = {
     "Style the model in South Indian traditional attire, all details clearly visible: a silk saree with a contrasting gold border, jasmine flowers (gajra) in the hair, temple-style gold jewellery — jhumkas, a gold necklace, bangles, and a bindi.",
   north_indian:
     "Style the model in North Indian traditional attire, all details clearly visible: a salwar kameez with dupatta or a kurta with churidar, a bindi, jhumkas or studs, bangles, and a light necklace.",
+  bengali_traditional:
+    "Style the model in Bengali traditional attire, all details clearly visible: a red-and-white bordered saree (laal-paar), a red bindi, conch-shell (shakha) and red (pola) bangles on the wrists, and a line of sindoor in the hair parting.",
+  maharashtrian:
+    "Style the model in Maharashtrian traditional attire, all details clearly visible: a nauvari (nine-yard) saree, a crescent-moon (chandrakor) bindi, a nath (nose ring), green bangles, and traditional gold jewellery.",
+  gujarati_rajasthani:
+    "Style the model in Gujarati / Rajasthani traditional attire, all details clearly visible: a ghagra choli or bandhani saree with an odhani draped over, a borla or maang tikka on the forehead, a bindi, and layered jewellery with stacked bangles.",
+  bridal_hindu:
+    "Style the model in a full Hindu bridal look, all details clearly visible: a heavy red or maroon saree or lehenga, a maang tikka, a nath (nose ring), an elaborate necklace, a red bindi, mehndi on the hands, and stacked bangles.",
+  buddhist:
+    "Style the model in simple modest robes or traditional attire in maroon and saffron tones, with minimal jewellery.",
+  jain:
+    "Style the model in simple, modest traditional Indian attire with minimal, understated jewellery.",
   modern_western:
     "Style the model in clean, modern Western everyday clothing. Minimal, contemporary jewellery.",
   none: "",
 };
+
+/** Strip unsafe requests and cap length for the seller's free-text look override. */
+const UNSAFE_CUSTOM_LOOK =
+  /\b(nude|nudity|naked|topless|undress|lingerie only|nsfw|porn|erotic|sexual|child|children|kid|kids|minor|underage|teen|teenage|baby|toddler|schoolgirl|schoolboy)\b/i;
+const NAMED_PERSON =
+  /\b(look like|looks like|resembl\w*|face of|lookalike|celebrity|celebrities|actress|actor|bollywood star|film star|famous)\b/i;
+
+export function sanitizeCustomLook(input?: string | null): string | null {
+  if (!input) return null;
+  let s = String(input).replace(/\s+/g, " ").trim().slice(0, 200);
+  if (!s) return null;
+  const clean = s
+    .split(/[,.;]/)
+    .map((p) => p.trim())
+    .filter((p) => p && !UNSAFE_CUSTOM_LOOK.test(p) && !NAMED_PERSON.test(p));
+  s = clean.join(", ").trim();
+  return s ? s.slice(0, 200) : null;
+}
 
 const OCCASION_SCENE: Record<string, string> = {
   diwali: "Occasion styling: Diwali. Warm evening lamp light, subtle diyas, marigold and rangoli hints in the setting — kept simple and never covering the product.",
