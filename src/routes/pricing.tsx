@@ -259,32 +259,39 @@ function PlanCard({
   const creditLine = isYearly
     ? `${yearlyCredits.toLocaleString("en-IN")} credits a year · ${plan.credits.toLocaleString("en-IN")} a month`
     : `${plan.credits.toLocaleString("en-IN")} credits a month`;
-  const baseFeatures: Array<{ label: string; plain: string }> = [
-    { label: creditLine, plain: `About ${estimateProducts(plan.credits)} full products a month.` },
-    { label: "Library of all your products", plain: "Every product you make, saved forever." },
-    { label: "Stock management", plain: "Track what you have and what it's worth." },
-  ];
-  const plusFeatures: Array<{ label: string; plain: string }> = plan.name === "Starter"
-    ? [
+  const creditFeature = {
+    label: creditLine,
+    plain: `About ${estimateProducts(plan.credits)} full products a month.`,
+  };
+  // Starter lists everything; higher plans only list what they add.
+  const baseFeatures: Array<{ label: string; plain: string }> = includedFrom
+    ? [creditFeature]
+    : [
+        creditFeature,
+        { label: "Library of all your products", plain: "Every product you make, saved forever." },
+        { label: "Stock management", plain: "Track what you have and what it's worth." },
         { label: "Brand kit memory", plain: "Business name, tone, colours, and model settings saved." },
         { label: "Manual posting", plain: "One tap to share — you approve every post." },
         { label: "No watermark", plain: "Photos are clean, ready to sell." },
-      ]
-    : plan.name === "Growth"
-      ? [
-    plan.features.calendar
-      ? { label: "Full 30-day content calendar", plain: "A month of posts, planned for you." }
-      : { label: "Content calendar — Growth or Pro", plain: "Upgrade to unlock the posting calendar." },
-    plan.features.auto_post
-      ? { label: "Automatic posting — Instagram & Facebook", plain: "More platforms from September." }
-      : { label: "Manual posting", plain: "One tap to share — you approve every post." },
+      ];
+  const plusFeatures: Array<{ label: string; plain: string }> = plan.name === "Growth"
+    ? [
+        plan.features.calendar
+          ? { label: "Full 30-day content calendar", plain: "A month of posts, planned for you." }
+          : { label: "Content calendar — Growth or Pro", plain: "Upgrade to unlock the posting calendar." },
+        plan.features.auto_post
+          ? { label: "Automatic posting — Instagram & Facebook", plain: "More platforms from September." }
+          : { label: "Manual posting", plain: "One tap to share — you approve every post." },
         { label: "More monthly product capacity", plain: "Built for sellers posting several products every week." },
       ]
-      : [
-        { label: "Priority generation", plain: "Your photos jump the queue." },
-        { label: "Bulk upload", plain: "Make batches faster when you have a catalogue to clear." },
-        { label: "Multiple brand workflows", plain: "Keep different shop lines organised." },
-      ];
+    : plan.name === "Pro"
+      ? [
+          { label: "Priority generation", plain: "Your photos jump the queue." },
+          { label: "Bulk upload", plain: "Make batches faster when you have a catalogue to clear." },
+          { label: "Multiple brand workflows", plain: "Keep different shop lines organised." },
+        ]
+      : [];
+
   return (
     <div
       className={`relative flex h-full min-h-[620px] flex-col rounded-[16px] p-5 ${
@@ -321,22 +328,29 @@ function PlanCard({
           <FeatureLine key={f.label} feature={f} icon="check" />
         ))}
       </ul>
-      <div className="my-4 h-px bg-[color:var(--line)]" />
-      {includedFrom ? (
-        <div className="rounded-[12px] bg-primary/10 p-3">
-          <p className="flex items-center gap-2 text-[13px] font-semibold text-ink">
-            <ArrowRight className="h-4 w-4 text-[color:var(--page-accent)]" />
-            Everything in {includedFrom}, plus:
-          </p>
-        </div>
-      ) : (
-        <p className="text-[13px] font-semibold text-muted">Included with Starter:</p>
+      {includedFrom && (
+        <>
+          <div className="my-4 h-px bg-[color:var(--line)]" />
+          <div
+            className="rounded-[12px] p-3"
+            style={{
+              background: "color-mix(in srgb, var(--page-accent) 12%, transparent)",
+              boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--page-accent) 30%, transparent)",
+            }}
+          >
+            <p className="flex items-center gap-2 text-[15px] font-semibold leading-snug text-ink">
+              <ArrowRight className="h-[18px] w-[18px] shrink-0" style={{ color: "var(--page-accent)" }} />
+              Everything in {includedFrom}, plus:
+            </p>
+          </div>
+          <ul className="mt-4 space-y-3">
+            {plusFeatures.map((f) => (
+              <FeatureLine key={f.label} feature={f} icon="arrow" />
+            ))}
+          </ul>
+        </>
       )}
-      <ul className="mt-4 space-y-3">
-        {plusFeatures.map((f) => (
-          <FeatureLine key={f.label} feature={f} icon={includedFrom ? "arrow" : "check"} />
-        ))}
-      </ul>
+
       <button
         type="button"
         onClick={onBuy}
