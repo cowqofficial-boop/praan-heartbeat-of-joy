@@ -534,7 +534,7 @@ function HowItWorks() {
 
 function CopyCard({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="rounded-[12px] bg-surface p-4">
+    <div className="card-list rounded-[12px] p-4">
       <div className="flex items-center justify-between gap-3">
         <p
           className="text-[10px] font-semibold uppercase tracking-[0.14em]"
