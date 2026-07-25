@@ -13,6 +13,7 @@ import { Route as StockRouteImport } from './routes/stock'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LibraryRouteImport } from './routes/library'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as GeneratingRouteImport } from './routes/generating'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as ConnectRouteImport } from './routes/connect'
@@ -49,6 +50,11 @@ const PricingRoute = PricingRouteImport.update({
 const LibraryRoute = LibraryRouteImport.update({
   id: '/library',
   path: '/library',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GeneratingRoute = GeneratingRouteImport.update({
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/connect': typeof ConnectRouteWithChildren
   '/create': typeof CreateRoute
   '/generating': typeof GeneratingRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/library': typeof LibraryRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/connect': typeof ConnectRouteWithChildren
   '/create': typeof CreateRoute
   '/generating': typeof GeneratingRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/library': typeof LibraryRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   '/connect': typeof ConnectRouteWithChildren
   '/create': typeof CreateRoute
   '/generating': typeof GeneratingRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/library': typeof LibraryRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -218,6 +227,7 @@ export interface FileRouteTypes {
     | '/connect'
     | '/create'
     | '/generating'
+    | '/how-it-works'
     | '/library'
     | '/pricing'
     | '/sitemap.xml'
@@ -240,6 +250,7 @@ export interface FileRouteTypes {
     | '/connect'
     | '/create'
     | '/generating'
+    | '/how-it-works'
     | '/library'
     | '/pricing'
     | '/sitemap.xml'
@@ -263,6 +274,7 @@ export interface FileRouteTypes {
     | '/connect'
     | '/create'
     | '/generating'
+    | '/how-it-works'
     | '/library'
     | '/pricing'
     | '/sitemap.xml'
@@ -287,6 +299,7 @@ export interface RootRouteChildren {
   ConnectRoute: typeof ConnectRouteWithChildren
   CreateRoute: typeof CreateRoute
   GeneratingRoute: typeof GeneratingRoute
+  HowItWorksRoute: typeof HowItWorksRoute
   LibraryRoute: typeof LibraryRoute
   PricingRoute: typeof PricingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -325,6 +338,13 @@ declare module '@tanstack/react-router' {
       path: '/library'
       fullPath: '/library'
       preLoaderRoute: typeof LibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/generating': {
@@ -492,6 +512,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConnectRoute: ConnectRouteWithChildren,
   CreateRoute: CreateRoute,
   GeneratingRoute: GeneratingRoute,
+  HowItWorksRoute: HowItWorksRoute,
   LibraryRoute: LibraryRoute,
   PricingRoute: PricingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

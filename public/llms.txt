@@ -7,4 +7,6 @@ CowQ is a mobile-first web app built for small businesses selling on Amazon, Fli
 ## Pages
 
 - [Home](/): Upload a product photo to start.
+- [How it works](/how-it-works): One brass diya set followed from phone photo to studio images, listing copy, social posts and catalog file.
 - [Flat lay photography guide](/blog/flat-lay-guide): How to take great product photos with your phone before enhancing them with CowQ.
+

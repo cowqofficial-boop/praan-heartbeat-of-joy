@@ -150,9 +150,13 @@ function Landing() {
       <header className="flex items-center justify-between px-6 pt-6 lg:hidden">
         <span className="font-display text-[22px] leading-none text-ink">CowQ</span>
         <nav className="flex items-center gap-5 text-[14px] text-muted">
+          <Link to="/how-it-works" className="hover:text-ink">
+            How it works
+          </Link>
           <Link to="/pricing" className="hover:text-ink">
             Pricing
           </Link>
+
           {user ? (
             <Link to="/library" className="hover:text-ink">
               Library
@@ -180,10 +184,17 @@ function Landing() {
           <p className="mx-auto mt-6 max-w-[620px] text-[16px] leading-relaxed text-muted lg:text-[18px]">
             Studio photos, listings, social posts and a catalog file — in under a minute.
           </p>
+          <p className="mt-5 text-[14px] text-muted">
+            <Link to="/how-it-works" className="underline underline-offset-4 hover:text-ink">
+              See exactly how it works
+            </Link>{" "}
+            — one real product, start to finish.
+          </p>
         </div>
 
         <div className="relative mx-auto mt-10 max-w-[560px]">
           <UploadWidget />
+
         </div>
       </section>
 
@@ -664,6 +675,10 @@ function Landing() {
 
       <footer className="px-6 py-10 text-center text-[12px] text-muted">
         CowQ · Complete Operations With Quality ·{" "}
+        <Link to="/how-it-works" className="hover:text-ink">
+          How it works
+        </Link>{" "}
+        ·{" "}
         <Link to="/pricing" className="hover:text-ink">
           Pricing
         </Link>{" "}
