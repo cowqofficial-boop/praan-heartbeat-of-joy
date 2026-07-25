@@ -440,3 +440,82 @@ export const getMyInsights = createServerFn({ method: "GET" })
       rupees_saved: products * RUPEES_PER_PRODUCT,
     };
   });
+
+// ---------- AI preferences ----------
+// These live on brand_kits alongside the rest of the brand voice, but are
+// patched on their own so saving here never clears the model preferences.
+
+export type AiPrefs = {
+  tone: string;
+  ai_reply_style: string;
+  ai_emoji_usage: string;
+  ai_length: string;
+  ai_creativity: number;
+  ai_temperature: number;
+};
+
+const DEFAULT_AI: AiPrefs = {
+  tone: "friendly",
+  ai_reply_style: "helpful",
+  ai_emoji_usage: "some",
+  ai_length: "medium",
+  ai_creativity: 50,
+  ai_temperature: 40,
+};
+
+export const getAiPrefs = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<AiPrefs> => {
+    const { data, error } = await context.supabase
+      .from("brand_kits")
+      .select("tone, ai_reply_style, ai_emoji_usage, ai_length, ai_creativity, ai_temperature")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    const row = (data ?? {}) as Partial<AiPrefs>;
+    return {
+      tone: row.tone || DEFAULT_AI.tone,
+      ai_reply_style: row.ai_reply_style || DEFAULT_AI.ai_reply_style,
+      ai_emoji_usage: row.ai_emoji_usage || DEFAULT_AI.ai_emoji_usage,
+      ai_length: row.ai_length || DEFAULT_AI.ai_length,
+      ai_creativity: row.ai_creativity ?? DEFAULT_AI.ai_creativity,
+      ai_temperature: row.ai_temperature ?? DEFAULT_AI.ai_temperature,
+    };
+  });
+
+export const saveAiPrefs = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: Partial<AiPrefs>) =>
+    z
+      .object({
+        tone: z.string().max(40).optional(),
+        ai_reply_style: z.string().max(40).optional(),
+        ai_emoji_usage: z.string().max(40).optional(),
+        ai_length: z.string().max(40).optional(),
+        ai_creativity: z.number().int().min(0).max(100).optional(),
+        ai_temperature: z.number().int().min(0).max(100).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    // brand_kits requires business_name; upsert would null it on a fresh row,
+    // so update in place and only insert a seed row when none exists yet.
+    const { data: existing } = await context.supabase
+      .from("brand_kits")
+      .select("user_id")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (existing) {
+      const { error } = await context.supabase
+        .from("brand_kits")
+        .update(data)
+        .eq("user_id", context.userId);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await context.supabase
+        .from("brand_kits")
+        .insert({ user_id: context.userId, ...DEFAULT_AI, ...data });
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
