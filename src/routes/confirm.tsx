@@ -53,7 +53,15 @@ function Confirm() {
   const [detail, setDetail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [freeUsed, setFreeUsed] = useState(false);
   const shouldResumeRef = useRef(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setFreeUsed(hasUsedFreeGeneration());
+  }, []);
+
 
   useEffect(() => {
     if (!identified || !originalDataUrl) {
@@ -127,7 +135,7 @@ function Confirm() {
   }
 
 
-  const usedFree = !user && (activeCount > 0 || hasUsedFreeGeneration());
+  const usedFree = mounted && !user && (activeCount > 0 || freeUsed);
   const buttonLabel = activeCount > 0
     ? `Add to queue — ${cost} credits`
     : user

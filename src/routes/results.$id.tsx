@@ -462,13 +462,11 @@ function ActionRow({
         <QuietAction
           label="Photos"
           icon={<ImageIcon className="h-4 w-4" />}
-          disabled={!hasAccount}
           onClick={() => downloadAllPhotos(images, productName, watermark)}
         />
         <QuietAction
           label="CSV"
           icon={<FileText className="h-4 w-4" />}
-          disabled={!hasAccount}
           onClick={() => downloadCsv(csvUrl, productName)}
         />
         <button
@@ -492,8 +490,11 @@ function ActionRow({
         </div>
       )}
       {!hasAccount && (
-        <p className="text-[12px] text-muted">Sign in to download the photos and CSV.</p>
+        <p className="text-[12px] text-muted">
+          Downloads of your free product carry a small CowQ mark. Sign up to keep it in your library, watermark-free.
+        </p>
       )}
+
     </section>
   );
 }
