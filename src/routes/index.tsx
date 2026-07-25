@@ -675,9 +675,14 @@ function Landing() {
 
       <footer className="px-6 py-10 text-center text-[12px] text-muted">
         CowQ · Complete Operations With Quality ·{" "}
+        <Link to="/how-it-works" className="hover:text-ink">
+          How it works
+        </Link>{" "}
+        ·{" "}
         <Link to="/pricing" className="hover:text-ink">
           Pricing
         </Link>{" "}
+
         ·{" "}
         <Link to="/auth" search={{ mode: "signin" }} className="hover:text-ink">
           Sign in
