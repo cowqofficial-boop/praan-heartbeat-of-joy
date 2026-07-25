@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { geminiGenerateImage } from "./gemini.server";
+import { COSTS, planModelSlots } from "./plans";
+
 
 export type BrandKit = {
   business_name: string;
@@ -287,3 +289,233 @@ export const removeRealBrandModel = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ---------- Saved real models (slots by plan) ----------
+
+export type SavedModel = {
+  id: string;
+  name: string;
+  photos: string[];
+  is_active: boolean;
+  created_at: string;
+};
+
+const SAVE_MODEL_COST = COSTS.brand_model;
+
+async function loadPlanState(userId: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: credits } = await supabaseAdmin
+    .from("user_credits")
+    .select("plan_id, subscription_credits, pack_credits")
+    .eq("user_id", userId)
+    .maybeSingle();
+  const planId = credits?.plan_id ?? "free";
+  return {
+    supabaseAdmin,
+    planId,
+    slots: planModelSlots(planId),
+    balance: (credits?.subscription_credits ?? 0) + (credits?.pack_credits ?? 0),
+  };
+}
+
+export const listMyBrandModels = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin, planId, slots, balance } = await loadPlanState(context.userId);
+    const { data, error } = await supabaseAdmin
+      .from("brand_models")
+      .select("id, name, photos, is_active, created_at")
+      .eq("user_id", context.userId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return {
+      models: (data ?? []) as SavedModel[],
+      plan_id: planId,
+      slots,
+      balance,
+      save_cost: SAVE_MODEL_COST,
+    };
+  });
+
+export const saveBrandModel = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (d: {
+      name: string;
+      dataUrls: string[];
+      consentAgreed: boolean;
+      consentAdult: boolean;
+      consentNotPublicFigure: boolean;
+    }) => d,
+  )
+  .handler(async ({ context, data }) => {
+    if (!data.consentAgreed || !data.consentAdult || !data.consentNotPublicFigure) {
+      throw new Error("You must confirm all three statements before uploading.");
+    }
+    if (!Array.isArray(data.dataUrls) || data.dataUrls.length === 0) {
+      throw new Error("Add at least one photo.");
+    }
+    const { supabaseAdmin, slots } = await loadPlanState(context.userId);
+    if (slots === 0) {
+      throw new Error("Saved models are on Growth & Pro. Upgrade your plan to save a model.");
+    }
+    const { count } = await supabaseAdmin
+      .from("brand_models")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", context.userId);
+    if ((count ?? 0) >= slots) {
+      throw new Error(`Your plan saves ${slots} model${slots === 1 ? "" : "s"}. Remove one first.`);
+    }
+
+    // Charge before storing — a saved model is a stored asset.
+    const { data: rows, error: spendErr } = await supabaseAdmin.rpc("spend_credits", {
+      _user_id: context.userId,
+      _amount: SAVE_MODEL_COST,
+    });
+    if (spendErr) throw new Error(spendErr.message);
+    const spend = Array.isArray(rows) ? rows[0] : rows;
+    if (!spend?.ok) {
+      throw new Error(`NO_CREDITS:${SAVE_MODEL_COST}:${spend?.balance ?? 0}`);
+    }
+
+    try {
+      const urls: string[] = [];
+      for (let i = 0; i < data.dataUrls.slice(0, 5).length; i++) {
+        const m = /^data:([^;]+);base64,(.+)$/.exec(data.dataUrls[i]);
+        if (!m) throw new Error("Invalid image");
+        const mime = m[1];
+        const ext = mime.split("/")[1] || "png";
+        const path = `brand-models/${context.userId}/saved-${Date.now()}-${i}.${ext}`;
+        const { error } = await supabaseAdmin.storage
+          .from("praan")
+          .upload(path, b64ToBytes(m[2]), { contentType: mime, upsert: true });
+        if (error) throw new Error(error.message);
+        const { data: signed, error: sErr } = await supabaseAdmin.storage
+          .from("praan")
+          .createSignedUrl(path, 60 * 60 * 24 * 365);
+        if (sErr || !signed) throw new Error(sErr?.message ?? "sign failed");
+        urls.push(signed.signedUrl);
+      }
+
+      const name = (data.name || "My model").trim().slice(0, 40) || "My model";
+      const { data: inserted, error: insErr } = await supabaseAdmin
+        .from("brand_models")
+        .insert({ user_id: context.userId, name, photos: urls, is_active: true })
+        .select("id, name, photos, is_active, created_at")
+        .single();
+      if (insErr) throw new Error(insErr.message);
+
+      await supabaseAdmin
+        .from("brand_models")
+        .update({ is_active: false })
+        .eq("user_id", context.userId)
+        .neq("id", inserted.id);
+      await applyActiveModelToKit(supabaseAdmin, context.userId, urls);
+
+      return { model: inserted as SavedModel };
+    } catch (e) {
+      await supabaseAdmin.rpc("refund_credits", {
+        _user_id: context.userId,
+        _sub: spend.took_sub ?? 0,
+        _pack: spend.took_pack ?? 0,
+      });
+      throw e;
+    }
+  });
+
+type Admin = Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"];
+
+async function applyActiveModelToKit(sb: Admin, userId: string, photos: string[]) {
+  await sb
+    .from("brand_kits")
+    .upsert(
+      {
+        user_id: userId,
+        brand_model_photos: photos,
+        brand_model_source: photos.length > 0 ? "user" : "ai",
+        brand_model_enabled: photos.length > 0,
+        brand_model_url: photos[0] ?? null,
+      },
+      { onConflict: "user_id" },
+    );
+}
+
+export const setActiveBrandModel = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ context, data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await supabaseAdmin
+      .from("brand_models")
+      .select("id, photos")
+      .eq("user_id", context.userId)
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("That model no longer exists.");
+    await supabaseAdmin
+      .from("brand_models")
+      .update({ is_active: false })
+      .eq("user_id", context.userId);
+    await supabaseAdmin
+      .from("brand_models")
+      .update({ is_active: true })
+      .eq("user_id", context.userId)
+      .eq("id", data.id);
+    await applyActiveModelToKit(supabaseAdmin, context.userId, (row.photos ?? []) as string[]);
+    return { ok: true };
+  });
+
+export const renameBrandModel = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; name: string }) => d)
+  .handler(async ({ context, data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const name = (data.name || "").trim().slice(0, 40) || "My model";
+    const { error } = await supabaseAdmin
+      .from("brand_models")
+      .update({ name })
+      .eq("user_id", context.userId)
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true, name };
+  });
+
+export const deleteBrandModel = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ context, data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
+      .from("brand_models")
+      .select("id, photos, is_active")
+      .eq("user_id", context.userId)
+      .eq("id", data.id)
+      .maybeSingle();
+    if (!row) return { ok: true };
+    const paths = ((row.photos ?? []) as string[]).map(extractStoragePath).filter((p): p is string => !!p);
+    if (paths.length > 0) await supabaseAdmin.storage.from("praan").remove(paths);
+    const { error } = await supabaseAdmin
+      .from("brand_models")
+      .delete()
+      .eq("user_id", context.userId)
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    if (row.is_active) {
+      const { data: next } = await supabaseAdmin
+        .from("brand_models")
+        .select("id, photos")
+        .eq("user_id", context.userId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (next) {
+        await supabaseAdmin.from("brand_models").update({ is_active: true }).eq("id", next.id);
+        await applyActiveModelToKit(supabaseAdmin, context.userId, (next.photos ?? []) as string[]);
+      } else {
+        await applyActiveModelToKit(supabaseAdmin, context.userId, []);
+      }
+    }
+    return { ok: true };
+  });
+

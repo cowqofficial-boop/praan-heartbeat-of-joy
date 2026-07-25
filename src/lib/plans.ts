@@ -77,6 +77,16 @@ export function planUnlocksCalendar(planId: string): boolean {
   return getPlan(planId).features.calendar;
 }
 
+// ---------- Saved real-model slots by plan ----------
+// Free & Starter: locked. Growth: 3 saved models. Pro: 10.
+export function planModelSlots(planId: string): number {
+  const p = getPlan(planId);
+  if (p.name === "Pro") return 10;
+  if (p.name === "Growth") return 3;
+  return 0;
+}
+
+
 // ---------- Credit cost table ----------
 // A single source of truth for what every action costs.
 export const COSTS = {

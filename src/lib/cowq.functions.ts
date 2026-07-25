@@ -367,7 +367,7 @@ async function getBrandModelContext(userId?: string | null): Promise<{
     ? ((kit.brand_model_photos as string[] | null) ?? []).filter(Boolean)
     : (kit.brand_model_url ? [kit.brand_model_url] : []);
   const loaded: { b64: string; mime: string }[] = [];
-  for (const p of photos.slice(0, 3)) {
+  for (const p of photos.slice(0, 5)) {
     try { loaded.push(await fetchAsBase64(p)); } catch { /* skip */ }
   }
   if (loaded.length === 0) return { modelLine, brandModelRefs, brandModelBinding, personSource };
@@ -388,7 +388,7 @@ async function generateOneImage(
   const sizeHint = `Render at ${targetSize} by ${targetSize} pixels, square 1:1, high detail. The subject must be entirely within the frame with generous even margin on all four sides — nothing important may touch or exceed any edge of the image, so it stays uncropped when reframed to vertical.`;
   const multiHint =
     refs.length > 1
-      ? `You are given ${refs.length} reference images. Use ALL of them together. The FIRST images are photos of the same single product from different angles — use them jointly to keep the product's true shape, colour, material, branding, wear and any labels faithful from every side; if the references disagree, keep whatever appears in the majority of references. Any final reference (if present) is a PERSON portrait to keep the model's face and appearance consistent — reuse that same person.`
+      ? `You are given ${refs.length} reference images. Use ALL of them together. The FIRST images are photos of the same single product from different angles — use them jointly to keep the product's true shape, colour, material, branding, wear and any labels faithful from every side; if the references disagree, keep whatever appears in the majority of references. Any final references (if present) are photos of one real PERSON from different angles — use them together to keep that same person's face, skin tone, hair and build consistent; reuse that exact person.`
       : "Keep the product identical to the reference photo — same shape, colour, material, branding and label.";
   const peopleRule = allowPerson ? "" : NO_PEOPLE;
 
@@ -510,7 +510,7 @@ export const generateImages = createServerFn({ method: "POST" })
               ? ((kit.brand_model_photos as string[] | null) ?? []).filter(Boolean)
               : (kit.brand_model_url ? [kit.brand_model_url] : []);
             const loaded: { b64: string; mime: string }[] = [];
-            for (const p of photos.slice(0, 3)) {
+            for (const p of photos.slice(0, 5)) {
               try { loaded.push(await fetchAsBase64(p)); } catch { /* skip */ }
             }
             if (loaded.length > 0) {
