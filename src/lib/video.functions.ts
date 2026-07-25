@@ -69,8 +69,15 @@ export const draftVideoScript = createServerFn({ method: "POST" })
 
     try {
       const { geminiGenerateText } = await import("./gemini.server");
-      const out = await geminiGenerateText(
-        `You write voiceover scripts for a small Indian shop's product videos. Write ONE English voiceover script for a ${data.durationSec}-second video.
+      const out = await geminiGenerateText({
+        temperature: 0.6,
+        maxOutputTokens: 400,
+        responseMimeType: "text/plain",
+        systemInstruction:
+          "You write short spoken voiceover scripts for a small Indian shop's product advertisements. Plain words, concrete facts, no hype. You never write pretend customer reviews.",
+        parts: [
+          {
+            text: `Write ONE English voiceover script for a ${data.durationSec}-second video.
 
 ${TYPE_BRIEF[data.videoType]}
 
