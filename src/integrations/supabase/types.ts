@@ -17,6 +17,11 @@ export type Database = {
       brand_kits: {
         Row: {
           accent_color: string
+          ai_creativity: number
+          ai_emoji_usage: string | null
+          ai_length: string | null
+          ai_reply_style: string | null
+          ai_temperature: number
           brand_model_enabled: boolean
           brand_model_photos: Json
           brand_model_source: string
@@ -45,6 +50,11 @@ export type Database = {
         }
         Insert: {
           accent_color?: string
+          ai_creativity?: number
+          ai_emoji_usage?: string | null
+          ai_length?: string | null
+          ai_reply_style?: string | null
+          ai_temperature?: number
           brand_model_enabled?: boolean
           brand_model_photos?: Json
           brand_model_source?: string
@@ -73,6 +83,11 @@ export type Database = {
         }
         Update: {
           accent_color?: string
+          ai_creativity?: number
+          ai_emoji_usage?: string | null
+          ai_length?: string | null
+          ai_reply_style?: string | null
+          ai_temperature?: number
           brand_model_enabled?: boolean
           brand_model_photos?: Json
           brand_model_source?: string
@@ -341,6 +356,48 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_prefs: {
+        Row: {
+          ai_alerts: boolean
+          created_at: string
+          email_enabled: boolean
+          marketing_enabled: boolean
+          push_enabled: boolean
+          reports_enabled: boolean
+          sms_enabled: boolean
+          updated_at: string
+          user_id: string
+          whatsapp_enabled: boolean
+          workflow_alerts: boolean
+        }
+        Insert: {
+          ai_alerts?: boolean
+          created_at?: string
+          email_enabled?: boolean
+          marketing_enabled?: boolean
+          push_enabled?: boolean
+          reports_enabled?: boolean
+          sms_enabled?: boolean
+          updated_at?: string
+          user_id: string
+          whatsapp_enabled?: boolean
+          workflow_alerts?: boolean
+        }
+        Update: {
+          ai_alerts?: boolean
+          created_at?: string
+          email_enabled?: boolean
+          marketing_enabled?: boolean
+          push_enabled?: boolean
+          reports_enabled?: boolean
+          sms_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+          whatsapp_enabled?: boolean
+          workflow_alerts?: boolean
+        }
+        Relationships: []
+      }
       oauth_states: {
         Row: {
           channel: string
@@ -448,6 +505,81 @@ export type Database = {
           name?: string
           price_inr?: number
           sort_order?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          country: string | null
+          created_at: string
+          currency: string | null
+          date_format: string | null
+          display_name: string | null
+          language: string | null
+          location: string | null
+          mission: string | null
+          phone: string | null
+          role_title: string | null
+          social_instagram: string | null
+          social_linkedin: string | null
+          social_twitter: string | null
+          social_youtube: string | null
+          team_size: string | null
+          timezone: string | null
+          updated_at: string
+          user_id: string
+          website: string | null
+          years_in_business: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          country?: string | null
+          created_at?: string
+          currency?: string | null
+          date_format?: string | null
+          display_name?: string | null
+          language?: string | null
+          location?: string | null
+          mission?: string | null
+          phone?: string | null
+          role_title?: string | null
+          social_instagram?: string | null
+          social_linkedin?: string | null
+          social_twitter?: string | null
+          social_youtube?: string | null
+          team_size?: string | null
+          timezone?: string | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+          years_in_business?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          country?: string | null
+          created_at?: string
+          currency?: string | null
+          date_format?: string | null
+          display_name?: string | null
+          language?: string | null
+          location?: string | null
+          mission?: string | null
+          phone?: string | null
+          role_title?: string | null
+          social_instagram?: string | null
+          social_linkedin?: string | null
+          social_twitter?: string | null
+          social_youtube?: string | null
+          team_size?: string | null
+          timezone?: string | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+          years_in_business?: string | null
         }
         Relationships: []
       }
