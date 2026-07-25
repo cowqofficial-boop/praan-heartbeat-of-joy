@@ -682,7 +682,6 @@ function Landing() {
         <Link to="/pricing" className="hover:text-ink">
           Pricing
         </Link>{" "}
-
         ·{" "}
         <Link to="/auth" search={{ mode: "signin" }} className="hover:text-ink">
           Sign in
