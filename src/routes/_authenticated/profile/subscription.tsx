@@ -5,6 +5,7 @@ import { ArrowUpRight, CreditCard, Gauge, Receipt, Sparkles } from "lucide-react
 import { getMyCredits, getMyPayments } from "@/lib/billing.functions";
 import { getMyInsights } from "@/lib/profile.functions";
 import { getPlan, formatInr, COSTS } from "@/lib/plans";
+import { VIDEO_ENABLED } from "@/lib/video";
 import { COBALT, MAGENTA, AMBER, creditColor } from "@/lib/page-accent";
 import {
   GlassCard,
@@ -101,6 +102,16 @@ function SubscriptionTab() {
             <span className="font-mono" style={{ color: COBALT }}>{COSTS.product}</span> credits. A saved model costs{" "}
             <span className="font-mono" style={{ color: MAGENTA }}>{COSTS.brand_model}</span>.
           </p>
+          {VIDEO_ENABLED && (
+            <p className="mt-2 text-[12px] text-muted">
+              A video costs{" "}
+              <span className="font-mono" style={{ color: AMBER }}>{COSTS.video_5s}</span> credits for 5 seconds or{" "}
+              <span className="font-mono" style={{ color: AMBER }}>{COSTS.video_8s}</span> for 8 — per shape. Three
+              shapes of a 5-second video is{" "}
+              <span className="font-mono" style={{ color: AMBER }}>{COSTS.video_5s * 3}</span> credits. If one fails,
+              those credits come back.
+            </p>
+          )}
         </div>
       </SectionCard>
 
