@@ -15,7 +15,7 @@ import {
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { PageHeader, HelpButton } from "@/components/PageHeader";
 import { showAlert, showConfirm } from "@/components/Dialogs";
-import { Palette } from "lucide-react";
+import { MessageCircle, Palette, Store, UserRound } from "lucide-react";
 
 
 const searchSchema = z.object({ onboarding: z.boolean().optional() });
