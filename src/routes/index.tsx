@@ -184,10 +184,17 @@ function Landing() {
           <p className="mx-auto mt-6 max-w-[620px] text-[16px] leading-relaxed text-muted lg:text-[18px]">
             Studio photos, listings, social posts and a catalog file — in under a minute.
           </p>
+          <p className="mt-5 text-[14px] text-muted">
+            <Link to="/how-it-works" className="underline underline-offset-4 hover:text-ink">
+              See exactly how it works
+            </Link>{" "}
+            — one real product, start to finish.
+          </p>
         </div>
 
         <div className="relative mx-auto mt-10 max-w-[560px]">
           <UploadWidget />
+
         </div>
       </section>
 
