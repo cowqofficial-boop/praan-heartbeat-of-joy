@@ -42,6 +42,14 @@ const TONES = [
  { value: "traditional", label: "Traditional" },
 ];
 
+const TONE_SAMPLES: Record<string, string> = {
+ friendly: "This one's a little beauty — you'll love it.",
+ premium: "An exceptional piece, crafted with care.",
+ value: "Great quality, honest price.",
+ traditional: "A timeless classic for every home.",
+};
+
+
 const GENDER = [
  { value: "", label: "Let CowQ decide" },
  { value: "woman", label: "Woman" },
