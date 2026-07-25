@@ -12,6 +12,7 @@ import {
   Plus,
   Receipt,
   Settings2,
+  UserRoundCog,
   X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,11 +27,12 @@ const NAV: NavItem[] = [
   { to: "/connect", label: "Connect channels", icon: Link2 },
   { to: "/brand-kit", label: "Brand kit", icon: Settings2 },
   { to: "/billing", label: "Billing", icon: Receipt },
+  { to: "/profile", label: "Profile & settings", icon: UserRoundCog },
   { to: "/library", label: "Your products", icon: LibraryBig },
 ];
 
-// De-duplicate — the sidebar model has one library item; keep the first seven.
-const ITEMS = NAV.slice(0, 7);
+// De-duplicate — the sidebar model has one library item; keep the first eight.
+const ITEMS = NAV.slice(0, 8);
 
 export function MobileNavSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   useEffect(() => {

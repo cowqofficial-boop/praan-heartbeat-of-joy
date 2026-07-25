@@ -25,12 +25,23 @@ export type BrandKit = {
   model_pose: string | null;
   model_custom_look: string | null;
 
+  // How CowQ writes for you. Edited from Profile → AI preferences and
+  // patched independently, so they are read-only here.
+  // Personality lives in `tone`. These shape how CowQ writes for you and
+  // are edited from Profile → AI preferences, patched independently.
+  ai_reply_style?: string | null;
+
+  ai_emoji_usage?: string | null;
+  ai_length?: string | null;
+  ai_creativity?: number | null;
+  ai_temperature?: number | null;
 
   brand_model_enabled: boolean;
   brand_model_url: string | null;
   brand_model_source: "ai" | "user";
   brand_model_photos: string[];
 };
+
 
 export const getMyBrandKit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

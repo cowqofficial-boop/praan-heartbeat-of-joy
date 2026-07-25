@@ -28,8 +28,18 @@ import { Route as ResultsIdRouteImport } from './routes/results.$id'
 import { Route as ConnectInstagramRouteImport } from './routes/connect.instagram'
 import { Route as BlogFlatLayGuideRouteImport } from './routes/blog.flat-lay-guide'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as AuthenticatedProfileRouteRouteImport } from './routes/_authenticated/profile/route'
+import { Route as AuthenticatedProfileIndexRouteImport } from './routes/_authenticated/profile/index'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 import { Route as ApiPublicMetaOauthCallbackRouteImport } from './routes/api/public/meta-oauth-callback'
+import { Route as AuthenticatedProfileTeamRouteImport } from './routes/_authenticated/profile/team'
+import { Route as AuthenticatedProfileSubscriptionRouteImport } from './routes/_authenticated/profile/subscription'
+import { Route as AuthenticatedProfileSecurityRouteImport } from './routes/_authenticated/profile/security'
+import { Route as AuthenticatedProfilePrivacyRouteImport } from './routes/_authenticated/profile/privacy'
+import { Route as AuthenticatedProfileNotificationsRouteImport } from './routes/_authenticated/profile/notifications'
+import { Route as AuthenticatedProfileAppsRouteImport } from './routes/_authenticated/profile/apps'
+import { Route as AuthenticatedProfileAiRouteImport } from './routes/_authenticated/profile/ai'
+import { Route as AuthenticatedProfileAccountRouteImport } from './routes/_authenticated/profile/account'
 import { Route as AuthenticatedAdminCostsRouteImport } from './routes/_authenticated.admin.costs'
 
 const StockRoute = StockRouteImport.update({
@@ -126,6 +136,18 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/callback',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthenticatedProfileRouteRoute =
+  AuthenticatedProfileRouteRouteImport.update({
+    id: '/profile',
+    path: '/profile',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedProfileIndexRoute =
+  AuthenticatedProfileIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedProfileRouteRoute,
+  } as any)
 const ApiPublicRazorpayWebhookRoute =
   ApiPublicRazorpayWebhookRouteImport.update({
     id: '/api/public/razorpay-webhook',
@@ -137,6 +159,53 @@ const ApiPublicMetaOauthCallbackRoute =
     id: '/api/public/meta-oauth-callback',
     path: '/api/public/meta-oauth-callback',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedProfileTeamRoute =
+  AuthenticatedProfileTeamRouteImport.update({
+    id: '/team',
+    path: '/team',
+    getParentRoute: () => AuthenticatedProfileRouteRoute,
+  } as any)
+const AuthenticatedProfileSubscriptionRoute =
+  AuthenticatedProfileSubscriptionRouteImport.update({
+    id: '/subscription',
+    path: '/subscription',
+    getParentRoute: () => AuthenticatedProfileRouteRoute,
+  } as any)
+const AuthenticatedProfileSecurityRoute =
+  AuthenticatedProfileSecurityRouteImport.update({
+    id: '/security',
+    path: '/security',
+    getParentRoute: () => AuthenticatedProfileRouteRoute,
+  } as any)
+const AuthenticatedProfilePrivacyRoute =
+  AuthenticatedProfilePrivacyRouteImport.update({
+    id: '/privacy',
+    path: '/privacy',
+    getParentRoute: () => AuthenticatedProfileRouteRoute,
+  } as any)
+const AuthenticatedProfileNotificationsRoute =
+  AuthenticatedProfileNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedProfileRouteRoute,
+  } as any)
+const AuthenticatedProfileAppsRoute =
+  AuthenticatedProfileAppsRouteImport.update({
+    id: '/apps',
+    path: '/apps',
+    getParentRoute: () => AuthenticatedProfileRouteRoute,
+  } as any)
+const AuthenticatedProfileAiRoute = AuthenticatedProfileAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
+  getParentRoute: () => AuthenticatedProfileRouteRoute,
+} as any)
+const AuthenticatedProfileAccountRoute =
+  AuthenticatedProfileAccountRouteImport.update({
+    id: '/account',
+    path: '/account',
+    getParentRoute: () => AuthenticatedProfileRouteRoute,
   } as any)
 const AuthenticatedAdminCostsRoute = AuthenticatedAdminCostsRouteImport.update({
   id: '/admin/costs',
@@ -159,13 +228,23 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stock': typeof StockRoute
+  '/profile': typeof AuthenticatedProfileRouteRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/connect/instagram': typeof ConnectInstagramRoute
   '/results/$id': typeof ResultsIdRoute
   '/admin/costs': typeof AuthenticatedAdminCostsRoute
+  '/profile/account': typeof AuthenticatedProfileAccountRoute
+  '/profile/ai': typeof AuthenticatedProfileAiRoute
+  '/profile/apps': typeof AuthenticatedProfileAppsRoute
+  '/profile/notifications': typeof AuthenticatedProfileNotificationsRoute
+  '/profile/privacy': typeof AuthenticatedProfilePrivacyRoute
+  '/profile/security': typeof AuthenticatedProfileSecurityRoute
+  '/profile/subscription': typeof AuthenticatedProfileSubscriptionRoute
+  '/profile/team': typeof AuthenticatedProfileTeamRoute
   '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
+  '/profile/': typeof AuthenticatedProfileIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -187,8 +266,17 @@ export interface FileRoutesByTo {
   '/connect/instagram': typeof ConnectInstagramRoute
   '/results/$id': typeof ResultsIdRoute
   '/admin/costs': typeof AuthenticatedAdminCostsRoute
+  '/profile/account': typeof AuthenticatedProfileAccountRoute
+  '/profile/ai': typeof AuthenticatedProfileAiRoute
+  '/profile/apps': typeof AuthenticatedProfileAppsRoute
+  '/profile/notifications': typeof AuthenticatedProfileNotificationsRoute
+  '/profile/privacy': typeof AuthenticatedProfilePrivacyRoute
+  '/profile/security': typeof AuthenticatedProfileSecurityRoute
+  '/profile/subscription': typeof AuthenticatedProfileSubscriptionRoute
+  '/profile/team': typeof AuthenticatedProfileTeamRoute
   '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
+  '/profile': typeof AuthenticatedProfileIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -207,13 +295,23 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stock': typeof StockRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRouteRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/connect/instagram': typeof ConnectInstagramRoute
   '/results/$id': typeof ResultsIdRoute
   '/_authenticated/admin/costs': typeof AuthenticatedAdminCostsRoute
+  '/_authenticated/profile/account': typeof AuthenticatedProfileAccountRoute
+  '/_authenticated/profile/ai': typeof AuthenticatedProfileAiRoute
+  '/_authenticated/profile/apps': typeof AuthenticatedProfileAppsRoute
+  '/_authenticated/profile/notifications': typeof AuthenticatedProfileNotificationsRoute
+  '/_authenticated/profile/privacy': typeof AuthenticatedProfilePrivacyRoute
+  '/_authenticated/profile/security': typeof AuthenticatedProfileSecurityRoute
+  '/_authenticated/profile/subscription': typeof AuthenticatedProfileSubscriptionRoute
+  '/_authenticated/profile/team': typeof AuthenticatedProfileTeamRoute
   '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
+  '/_authenticated/profile/': typeof AuthenticatedProfileIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -232,13 +330,23 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/sitemap.xml'
     | '/stock'
+    | '/profile'
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/connect/instagram'
     | '/results/$id'
     | '/admin/costs'
+    | '/profile/account'
+    | '/profile/ai'
+    | '/profile/apps'
+    | '/profile/notifications'
+    | '/profile/privacy'
+    | '/profile/security'
+    | '/profile/subscription'
+    | '/profile/team'
     | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
+    | '/profile/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -260,8 +368,17 @@ export interface FileRouteTypes {
     | '/connect/instagram'
     | '/results/$id'
     | '/admin/costs'
+    | '/profile/account'
+    | '/profile/ai'
+    | '/profile/apps'
+    | '/profile/notifications'
+    | '/profile/privacy'
+    | '/profile/security'
+    | '/profile/subscription'
+    | '/profile/team'
     | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
+    | '/profile'
   id:
     | '__root__'
     | '/'
@@ -279,13 +396,23 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/sitemap.xml'
     | '/stock'
+    | '/_authenticated/profile'
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/connect/instagram'
     | '/results/$id'
     | '/_authenticated/admin/costs'
+    | '/_authenticated/profile/account'
+    | '/_authenticated/profile/ai'
+    | '/_authenticated/profile/apps'
+    | '/_authenticated/profile/notifications'
+    | '/_authenticated/profile/privacy'
+    | '/_authenticated/profile/security'
+    | '/_authenticated/profile/subscription'
+    | '/_authenticated/profile/team'
     | '/api/public/meta-oauth-callback'
     | '/api/public/razorpay-webhook'
+    | '/_authenticated/profile/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -445,6 +572,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/profile/': {
+      id: '/_authenticated/profile/'
+      path: '/'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof AuthenticatedProfileIndexRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
     '/api/public/razorpay-webhook': {
       id: '/api/public/razorpay-webhook'
       path: '/api/public/razorpay-webhook'
@@ -459,6 +600,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMetaOauthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/profile/team': {
+      id: '/_authenticated/profile/team'
+      path: '/team'
+      fullPath: '/profile/team'
+      preLoaderRoute: typeof AuthenticatedProfileTeamRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
+    '/_authenticated/profile/subscription': {
+      id: '/_authenticated/profile/subscription'
+      path: '/subscription'
+      fullPath: '/profile/subscription'
+      preLoaderRoute: typeof AuthenticatedProfileSubscriptionRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
+    '/_authenticated/profile/security': {
+      id: '/_authenticated/profile/security'
+      path: '/security'
+      fullPath: '/profile/security'
+      preLoaderRoute: typeof AuthenticatedProfileSecurityRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
+    '/_authenticated/profile/privacy': {
+      id: '/_authenticated/profile/privacy'
+      path: '/privacy'
+      fullPath: '/profile/privacy'
+      preLoaderRoute: typeof AuthenticatedProfilePrivacyRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
+    '/_authenticated/profile/notifications': {
+      id: '/_authenticated/profile/notifications'
+      path: '/notifications'
+      fullPath: '/profile/notifications'
+      preLoaderRoute: typeof AuthenticatedProfileNotificationsRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
+    '/_authenticated/profile/apps': {
+      id: '/_authenticated/profile/apps'
+      path: '/apps'
+      fullPath: '/profile/apps'
+      preLoaderRoute: typeof AuthenticatedProfileAppsRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
+    '/_authenticated/profile/ai': {
+      id: '/_authenticated/profile/ai'
+      path: '/ai'
+      fullPath: '/profile/ai'
+      preLoaderRoute: typeof AuthenticatedProfileAiRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
+    '/_authenticated/profile/account': {
+      id: '/_authenticated/profile/account'
+      path: '/account'
+      fullPath: '/profile/account'
+      preLoaderRoute: typeof AuthenticatedProfileAccountRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
     '/_authenticated/admin/costs': {
       id: '/_authenticated/admin/costs'
       path: '/admin/costs'
@@ -469,11 +666,45 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedProfileRouteRouteChildren {
+  AuthenticatedProfileAccountRoute: typeof AuthenticatedProfileAccountRoute
+  AuthenticatedProfileAiRoute: typeof AuthenticatedProfileAiRoute
+  AuthenticatedProfileAppsRoute: typeof AuthenticatedProfileAppsRoute
+  AuthenticatedProfileNotificationsRoute: typeof AuthenticatedProfileNotificationsRoute
+  AuthenticatedProfilePrivacyRoute: typeof AuthenticatedProfilePrivacyRoute
+  AuthenticatedProfileSecurityRoute: typeof AuthenticatedProfileSecurityRoute
+  AuthenticatedProfileSubscriptionRoute: typeof AuthenticatedProfileSubscriptionRoute
+  AuthenticatedProfileTeamRoute: typeof AuthenticatedProfileTeamRoute
+  AuthenticatedProfileIndexRoute: typeof AuthenticatedProfileIndexRoute
+}
+
+const AuthenticatedProfileRouteRouteChildren: AuthenticatedProfileRouteRouteChildren =
+  {
+    AuthenticatedProfileAccountRoute: AuthenticatedProfileAccountRoute,
+    AuthenticatedProfileAiRoute: AuthenticatedProfileAiRoute,
+    AuthenticatedProfileAppsRoute: AuthenticatedProfileAppsRoute,
+    AuthenticatedProfileNotificationsRoute:
+      AuthenticatedProfileNotificationsRoute,
+    AuthenticatedProfilePrivacyRoute: AuthenticatedProfilePrivacyRoute,
+    AuthenticatedProfileSecurityRoute: AuthenticatedProfileSecurityRoute,
+    AuthenticatedProfileSubscriptionRoute:
+      AuthenticatedProfileSubscriptionRoute,
+    AuthenticatedProfileTeamRoute: AuthenticatedProfileTeamRoute,
+    AuthenticatedProfileIndexRoute: AuthenticatedProfileIndexRoute,
+  }
+
+const AuthenticatedProfileRouteRouteWithChildren =
+  AuthenticatedProfileRouteRoute._addFileChildren(
+    AuthenticatedProfileRouteRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedProfileRouteRoute: typeof AuthenticatedProfileRouteRouteWithChildren
   AuthenticatedAdminCostsRoute: typeof AuthenticatedAdminCostsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedProfileRouteRoute: AuthenticatedProfileRouteRouteWithChildren,
   AuthenticatedAdminCostsRoute: AuthenticatedAdminCostsRoute,
 }
 

@@ -103,6 +103,10 @@ body::after {
 /* Keep app chrome above the glow. */
 body > * { position: relative; z-index: 1; }
 
+/* Seller preference (Profile header): turn the ambient glows right down. */
+html.dim-ambience body::before,
+html.dim-ambience body::after { opacity: 0.25; }
+
 html,
 body {
   background: var(--void);
@@ -320,6 +324,114 @@ body {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
+
+/* ============================================================
+   PROFILE / SETTINGS SURFACES
+   Glassmorphic cards with a gradient rim and a hover glow. Built on
+   the same tokens as the rest of the app so the page still reads as
+   CowQ, just with more depth. Never apply to a product photograph.
+   ============================================================ */
+@utility glass-card {
+  position: relative;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--card-accent) 9%, rgba(17, 19, 24, 0.72)) 0%,
+      rgba(17, 19, 24, 0.6) 100%);
+  border: 1px solid color-mix(in oklab, var(--card-accent) 20%, transparent);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.45),
+    0 2px 24px color-mix(in oklab, var(--card-accent) 10%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px) saturate(130%);
+  transition: box-shadow 320ms var(--ease-out), transform 320ms var(--ease-out), border-color 320ms var(--ease-out);
+}
+
+/* Glass reflection — a soft sheen across the top edge of a glass card. */
+@utility glass-sheen {
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(150deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 42%);
+  }
+}
+
+@utility glass-hover {
+  &:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--card-accent) 38%, transparent);
+    box-shadow:
+      0 16px 56px rgba(0, 0, 0, 0.5),
+      0 4px 36px color-mix(in oklab, var(--card-accent) 24%, transparent),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+}
+
+/* Settings tab pill. */
+@utility tab-pill {
+  border-radius: 12px;
+  color: var(--text-dim);
+  transition: background 200ms var(--ease-out), color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+  &:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  &[data-active="true"] {
+    color: var(--text);
+    background: color-mix(in oklab, var(--page-accent) 16%, var(--raised));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 4px 18px color-mix(in oklab, var(--page-accent) 22%, transparent);
+  }
+}
+
+/* Inline-editable value: shows its affordance only on hover/focus. */
+@utility inline-edit {
+  border-radius: 10px;
+  transition: background 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* Loading skeleton shimmer. */
+@utility skeleton {
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.09) 37%, rgba(255, 255, 255, 0.04) 63%);
+  background-size: 400% 100%;
+  animation: cowq-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes cowq-shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+/* Section entry — fade and rise, matching the app's 400ms motion register. */
+@utility rise-in {
+  animation: cowq-rise 400ms var(--ease-out) both;
+}
+
+@keyframes cowq-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise-in,
+  .skeleton {
+    animation: none;
+  }
+  .glass-card,
+  .glass-hover:hover {
+    transform: none;
+  }
+}
+
+
 
 /* Dark form-control defaults — no border, focus ring only */
 input,

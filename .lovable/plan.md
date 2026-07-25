@@ -1,99 +1,82 @@
+# Profile & Settings
 
-# Product queue
+A new `/profile` area for CowQ, built to the premium dark spec: glass cards, soft gradients, 16–20px corners, large spacing, smooth motion. It reuses the palette and card utilities already in `src/styles.css` (Void Black, Cobalt, Magenta, Amber, Titanium Fog) rather than introducing a second design system.
 
-Today: seller uploads one product, waits on `/generating`, then can start the next. This plan replaces that with a background queue of up to 3, a redesigned queue screen, a persistent indicator, and a combined download when the batch finishes.
+Language stays in CowQ's current product terms — photos, brand kit, model, credits, shops — with the structure and polish from the brief.
 
-## Behaviour
+## Shape
 
-**Queue rules**
-- Max 3 products at once (currently generating + waiting).
-- Strictly sequential — one runs at a time to respect Gemini rate limits.
-- Next item auto-starts the moment the previous finishes.
-- Generation continues in the background; seller can be anywhere in the app.
+```text
+┌──────────┬───────────────────────────────┬──────────────┐
+│ App      │ Header: Profile · search ·    │ Insights     │
+│ sidebar  │ notifications · help · avatar │ widgets      │
+│ (exists) ├───────────────────────────────┤              │
+│          │ Profile header card           │ Usage        │
+│          │ Completion ring               │ Photos made  │
+│          │ ─ tab bar ─                   │ Credits      │
+│          │ [active tab content]          │ Time saved   │
+└──────────┴───────────────────────────────┴──────────────┘
+```
 
-**Credits**
-- Check balance at *queue time* using cost × (already-queued items + 1). Refuse with the exact copy from the brief.
-- Deduct credits at *start time* (inside the existing `generateCopyAndSave` / job flow). Removing a waiting item before it starts costs nothing.
+Desktop three-column; tablet drops the insights panel to the bottom; mobile stacks everything and the tab bar becomes a horizontal scroller.
 
-**Removing**
-- Waiting rows have a small × to remove. The active one cannot be cancelled.
+Always visible above the tabs: profile header card (avatar with online dot, name, role, business, location, contact, member since, plan badge, Edit / Upload photo / Share buttons) and the completion ring with its checklist.
 
-## Screens & UI
+## Tabs
 
-**Queue screen (replaces `/generating`, kept at same URL)**
-- Top: active product — hero photo, three `ProgressSteps`, live "N of 4 photos done" line (as today).
-- Middle: waiting rows — thumbnail, product name, quiet "Waiting" pill; finished rows become "Ready" with Sindoor tick, tappable to `/results/$id`.
-- Below: **Add another product** button on `--raised` with supporting line. Greys out when queue is full with the exact copy.
-- When everything is done: summary "N products ready" listing each, plus **Download everything** (zip of all photos + one combined Shopify CSV).
+Nine sub-routes under `/profile`, each a route file rendering its own component:
 
-**Persistent indicator (`QueueIndicator`)**
-- Fixed pill: bottom-right on desktop, above bottom bar on mobile.
-- Hidden on `/generating` itself.
-- Shows "⚡ N generating · M ready" with a subtle pulse while running.
-- On completion: "N products ready", stays 10s then fades.
-- Tap → `/generating`.
+| Tab | Content | Data |
+|---|---|---|
+| Overview | About & business, social links, activity timeline | Real (brand kit + generations) |
+| Account | Name, email, phone, language, timezone, date format, currency, country, password | Real (new profile table) |
+| AI preferences | Personality, brand voice, reply style, emoji usage, creativity & temperature sliders, memory, context | Real — maps onto `brand_kits` tone/voice plus a few new columns |
+| Your model | Active brand model: avatar, name, source, photos count, last saved; Edit / Replace | Real (`brand_models`) |
+| Connected apps | Instagram/Facebook live; Google, WhatsApp, Shopify, Stripe, Zapier and others shown as "Coming soon" cards | Mixed |
+| Security | Password change, sign out everywhere, security score, recent sign-ins | Partly real; 2FA / API keys / devices marked coming soon |
+| Subscription | Plan, credit usage bars, upgrade CTA, payment history | Real (`user_credits`, `payments`, `plans`) |
+| Notifications | Email, WhatsApp, push, reports, alerts toggles | Real (new prefs columns) |
+| Data & privacy | Export data, download AI memory, privacy settings, delete account | Export/download real; delete account with confirmation |
 
-**Add-another flow**
-- "Add another product" navigates back to `/` (Upload) with a query flag so it knows to enqueue instead of replacing the current job. After Confirm, it pushes onto the queue and returns to `/generating`.
+Team is included as a locked "Coming soon" panel inside Account rather than a fake tab — CowQ has no team model and no seats in the plans.
+
+## Honest labelling
+
+Anything without a backend renders in a dimmed card with a small "Coming soon" pill and disabled controls. Nothing fake claims to save. This keeps the page impressive without over-promising, matching the roadmap section already on the landing page.
+
+## UX
+
+- Inline editing on every editable field: click the value, it becomes an input, blur or Enter saves.
+- Autosave with a subtle "Saved" flash; failed saves toast and revert.
+- Undo toast for the last change (10s window).
+- Confirmation dialogs via the existing `Dialogs.tsx` for destructive actions.
+- Keyboard: `/` focuses search, `⌘K` command palette for jumping tabs, `Esc` cancels an inline edit, arrow keys move through tabs.
+- Loading skeletons per section, fade-and-rise entry (400ms) consistent with the rest of the app.
+- Full keyboard focus rings, ARIA labels on toggles/sliders, live regions for save confirmations.
+
+## Empty states
+
+Line-SVG illustrations, matching the existing `EmptyState` component style, for: no connected shops, no saved model, no team, no activity yet, no invoices.
 
 ## Technical
 
-**Queue store (`src/lib/queue-store.ts`, zustand + `persist` to localStorage)**
-```ts
-type QueueItem = {
-  id: string;                    // local uuid
-  status: 'waiting' | 'running' | 'ready' | 'error';
-  productName: string;
-  price: string;
-  detail: string;
-  photos: CowqPhoto[];           // dataUrls persisted (base64) — needed for background start after nav
-  identified: Identified;
-  cost: number;                  // credits, computed at enqueue
-  jobId?: string;
-  resultId?: string;             // generation id when ready
-  photoProgress?: { done: number; total: number };
-  error?: string;
-};
-```
-Actions: `enqueue`, `remove`, `markRunning`, `updateProgress`, `markReady`, `markError`, `clearFinished`.
+**Database (one migration)**
+- `profiles` — display name, role/title, phone, location, website, timezone, language, date format, currency, country, bio, mission, years in business, team size, social handles, avatar URL. Owner-only RLS, grants for `authenticated` and `service_role`.
+- `notification_prefs` — per-channel booleans, owner-only.
+- `brand_kits` gains AI-preference columns: reply style, emoji usage, conversation length, creativity, temperature.
+- Avatars go in the existing `praan` storage bucket under a `profiles/` prefix.
 
-**Runner (`src/lib/queue-runner.tsx`)**
-- Mounted once inside `__root.tsx` (client-only).
-- `useEffect` watches the queue: if nothing running and there's a `waiting` item, start it — run the same three-phase pipeline currently in `generating.tsx` (`startGenerationJob` → parallel `generateImageForJob` × 4 → `generateCopyAndSave`) with the same 3-minute watchdog and refund logic.
-- Updates the store as it progresses.
-- Because `.persist` keeps items across navigation, generation survives route changes; a hard refresh resumes any `waiting` items (any `running` item at refresh is marked error + refunded via existing `refundGenerationJob`).
+**Server functions** — `src/lib/profile.functions.ts` with `getMyProfile`, `saveMyProfile` (zod-validated, length caps), `uploadAvatar`, `getNotificationPrefs`, `saveNotificationPrefs`, `getSecurityOverview`, `exportMyData`, `deleteMyAccount`. All behind `requireSupabaseAuth`.
 
-**Enqueue path**
-- Confirm screen's "Make my photos" → compute cost via existing pricing helper → check `useAuth`'s credit balance + queued costs → if OK, `enqueue()` and `navigate('/generating')`. Old direct-hand-off through `useCowqStore` is removed for the queue path; `useCowqStore` stays only as the transient buffer between Upload and Confirm.
+**Routes** — `src/routes/_authenticated/profile/route.tsx` (shell: header, profile card, completion ring, tab bar, insights panel, `<Outlet />`) plus `index.tsx` and eight sibling leaves. Auth-gated, so loaders can use protected server functions.
 
-**Generating route rewrite**
-- Reads from `useQueueStore`. Renders active card + waiting list + finished list + Add-another CTA + all-done summary.
-- No longer starts jobs itself — the runner does. This lets the seller leave and come back.
+**Components** — `src/components/profile/` holding roughly twenty small components: `ProfileHeaderCard`, `CompletionRing`, `InlineField`, `SettingCard`, `ToggleRow`, `SliderRow`, `ConnectedAppCard`, `SecurityScore`, `UsageBars`, `ActivityTimeline`, `InsightsPanel`, `ComingSoonCard`, `EmptyIllustration`, plus one per tab.
 
-**Persistent indicator**
-- Small component in `__root.tsx` shell. Reads counts from `useQueueStore`. Hidden when `location.pathname === '/generating'`.
+**Styling** — new `@utility` classes for the glass card, gradient rim and hover glow, added alongside the existing card utilities. No hardcoded colour classes; existing tokens only.
 
-**Combined download**
-- New `src/lib/bulk-download.ts`: fetches each ready generation's images + copy (already in DB), builds one `buildShopifyCsv`-style multi-product CSV, zips with `jszip` (add dep), triggers Blob download.
+**Navigation** — a Profile entry (avatar) added to `AppSidebar` and the mobile nav sheet, plus head metadata with a `noindex` robots tag since it is private.
 
-**Copy strings** — use the exact wording from the brief.
+## Not in scope
 
-## Non-goals
-- No parallel execution.
-- No Pro bulk-upload (noted for later).
-- No server-side queue persistence — queue lives in the browser (matches "per browser" model already used for free tier).
-
-## Files
-
-New:
-- `src/lib/queue-store.ts`
-- `src/lib/queue-runner.tsx`
-- `src/lib/bulk-download.ts`
-- `src/components/QueueIndicator.tsx`
-
-Changed:
-- `src/routes/generating.tsx` — full rewrite as queue screen.
-- `src/routes/confirm.tsx` — enqueue instead of direct navigate; pre-flight credit check with new copy.
-- `src/routes/__root.tsx` — mount `QueueRunner` + `QueueIndicator`.
-- `src/routes/index.tsx` — "Add another product" entry recognises `?add=1` (minor: just wording of a small banner if a queue item is running).
-- `package.json` — add `jszip`.
+- Real 2FA, biometric login, API keys, device/session management, team seats, or the non-Meta integrations. All shown as clearly-marked previews.
+- No changes to Billing, Pricing, Connect or Brand kit pages; Profile links out to them.
