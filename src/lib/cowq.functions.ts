@@ -354,7 +354,7 @@ async function getBrandModelContext(userId?: string | null): Promise<{
   const sb = await admin();
   const { data: kit } = await sb
     .from("brand_kits")
-    .select("model_gender, model_age, model_skin, model_body, model_region, model_cultural_style, model_occasion, model_hair, model_expression, model_pose, brand_model_enabled, brand_model_url, brand_model_source, brand_model_photos")
+    .select("model_gender, model_age, model_skin, model_body, model_region, model_nationality, model_cultural_style, model_occasion, model_hair, model_expression, model_pose, brand_model_enabled, brand_model_url, brand_model_source, brand_model_photos")
     .eq("user_id", userId)
     .maybeSingle();
   if (!kit) return { modelLine, brandModelRefs, brandModelBinding, personSource, occasionScene };
@@ -503,7 +503,7 @@ export const generateImages = createServerFn({ method: "POST" })
         const sb = await admin();
         const { data: kit } = await sb
           .from("brand_kits")
-          .select("model_gender, model_age, model_skin, model_body, model_region, model_cultural_style, model_occasion, model_hair, model_expression, model_pose, brand_model_enabled, brand_model_url, brand_model_source, brand_model_photos")
+          .select("model_gender, model_age, model_skin, model_body, model_region, model_nationality, model_cultural_style, model_occasion, model_hair, model_expression, model_pose, brand_model_enabled, brand_model_url, brand_model_source, brand_model_photos")
           .eq("user_id", data.userId)
           .maybeSingle();
         if (kit) {

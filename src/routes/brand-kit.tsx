@@ -418,6 +418,11 @@ function BrandKitPage() {
  <SelectField label="Body type" options={BODY} value={kit.model_body ?? ""} onChange={(v) => setKit({ ...kit, model_body: v || null })} />
  <SelectField label="Regional look" options={REGION} value={kit.model_region ?? ""} onChange={(v) => setKit({ ...kit, model_region: v || null })} />
  <div className="flex items-center gap-2 pt-1">
+ <span className="text-[14px] font-medium text-ink">Nationality</span>
+ <HelpButton content={<p className="text-muted">Shapes the model's overall appearance for that nationality. Optional.</p>} />
+ </div>
+ <SelectField label="Nationality" options={NATIONALITY} value={kit.model_nationality ?? ""} onChange={(v) => setKit({ ...kit, model_nationality: v || null })} />
+ <div className="flex items-center gap-2 pt-1">
  <span className="text-[14px] font-medium text-ink">Cultural style</span>
  <HelpButton content={<p className="text-muted">Dresses and styles the model to suit your customers. About visible attire and presentation, not a person's faith.</p>} />
  </div>
