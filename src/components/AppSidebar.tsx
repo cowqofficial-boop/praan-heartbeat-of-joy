@@ -8,6 +8,7 @@ import {
   LogOut,
   Plus,
   Receipt,
+  UserRoundCog,
   Settings2,
   Zap,
 } from "lucide-react";
@@ -26,6 +27,7 @@ const ITEMS: Item[] = [
   { to: "/connect", label: "Connect", icon: Link2 },
   { to: "/brand-kit", label: "Brand kit", icon: Settings2 },
   { to: "/billing", label: "Billing", icon: Receipt },
+  { to: "/profile", label: "Profile & settings", icon: UserRoundCog },
 ];
 
 export function AppSidebar() {
