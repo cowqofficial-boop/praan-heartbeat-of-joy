@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Download, Film, Loader2, Trash2 } from "lucide-react";
@@ -13,6 +13,8 @@ import {
 } from "@/lib/video";
 import { useVideoQueue } from "@/lib/video-queue-store";
 import { VideoSetupDialog } from "./VideoSetupDialog";
+import { VideoErrorBoundary } from "./VideoErrorBoundary";
+
 
 const TINTS = ["card-cobalt", "card-magenta", "card-amber"] as const;
 
@@ -26,11 +28,17 @@ export function VideoSection({
   hasAccount: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const queued = useVideoQueue((s) =>
-    s.jobs.filter(
-      (j) => j.generationId === generationId && (j.status === "waiting" || j.status === "running"),
-    ),
+  // Select the raw array — a selector that builds a NEW array on every call
+  // makes zustand v5's useSyncExternalStore snapshot unstable and loops forever.
+  const jobs = useVideoQueue((s) => s.jobs);
+  const queued = useMemo(
+    () =>
+      jobs.filter(
+        (j) => j.generationId === generationId && (j.status === "waiting" || j.status === "running"),
+      ),
+    [jobs, generationId],
   );
+
   const remove = useServerFn(deleteProductVideo);
   const { data: videos = [], refetch } = useQuery({
     queryKey: ["product-videos", generationId],
@@ -135,15 +143,18 @@ export function VideoSection({
       ))}
 
       {open && (
-        <VideoSetupDialog
-          generationId={generationId}
-          productName={productName}
-          onClose={() => {
-            setOpen(false);
-            void refetch();
-          }}
-        />
+        <VideoErrorBoundary onClose={() => setOpen(false)}>
+          <VideoSetupDialog
+            generationId={generationId}
+            productName={productName}
+            onClose={() => {
+              setOpen(false);
+              void refetch();
+            }}
+          />
+        </VideoErrorBoundary>
       )}
+
     </section>
   );
 }
