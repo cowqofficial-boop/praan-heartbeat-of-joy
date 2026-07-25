@@ -198,8 +198,6 @@ function TourOverlay({ onDone }: TourOverlayProps) {
           height="100%"
           fill="rgba(6,7,10,0.72)"
           mask="url(#cowq-tour-mask)"
-          onClick={onDone}
-          style={{ cursor: "pointer" }}
         />
         {highlight && (
           <rect
