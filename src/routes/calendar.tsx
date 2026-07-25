@@ -265,9 +265,47 @@ function CalendarBody({
 }
 
 function CalendarLocked({ planName }: { planName: string }) {
+  const { data: products = [] } = useQuery({
+    queryKey: ["library-products"],
+    queryFn: () => listMyProducts(),
+    staleTime: 60_000,
+  });
+
+  const tiles = products
+    .map((p) => p.generated_images?.[0]?.url ?? p.original_image_url)
+    .filter((u): u is string => !!u)
+    .slice(0, 9);
+
+  const hasProducts = products.length > 0;
+
   return (
     <div className="mt-8">
-      <div className="relative">
+      {hasProducts ? (
+        <>
+          <h2 className="text-center font-display text-[22px] leading-tight text-ink">
+            Your {products.length} product{products.length === 1 ? "" : "s"}, ready to post
+          </h2>
+          <ul className="pointer-events-none mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
+            {tiles.map((url, i) => (
+              <li key={i} className="card-list relative aspect-square overflow-hidden p-0">
+                <img
+                  src={url}
+                  alt=""
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                  style={{ filter: "blur(14px)", transform: "scale(1.15)" }}
+                />
+                <span className="absolute inset-0 grid place-items-center">
+                  <Lock className="h-4 w-4 text-muted" />
+                </span>
+                <span className="absolute left-1 top-1 rounded-md bg-black/50 px-1.5 py-[1px] text-[10px] font-semibold leading-none text-white">
+                  {i + 1}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
         <div className="pointer-events-none grid grid-cols-3 gap-2 opacity-60 blur-[2px]">
           {[0, 1, 2].map((i) => (
             <div key={i} className="card-list aspect-square p-2">
@@ -277,26 +315,35 @@ function CalendarLocked({ planName }: { planName: string }) {
             </div>
           ))}
         </div>
-        <div className="mt-6 flex flex-col items-center text-center">
-          <div className="grid h-16 w-16 place-items-center rounded-full bg-surface">
-            <Lock className="h-7 w-7 text-muted" />
-          </div>
-          <h2 className="mt-4 font-display text-[22px] leading-tight text-ink">Calendar is on Growth &amp; Pro</h2>
-          <p className="mt-1 max-w-xs text-[14px] text-muted">
-            Thirty days of posts, planned for you. You're on {planName}.
-          </p>
-          <Link
-            to="/pricing"
-            className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-[12px] px-5 text-[14px] font-semibold"
-            style={{ background: "#3D5AFE", color: "#F5F7FF" }}
-          >
-            See plans
-          </Link>
+      )}
+
+      <div className="card-feature mt-6 flex flex-col items-center p-6 text-center">
+        <div className="grid h-16 w-16 place-items-center rounded-full bg-surface">
+          <Lock className="h-7 w-7 text-muted" />
         </div>
+        <h3 className="mt-4 font-display text-[22px] leading-tight text-ink">
+          Calendar is on Growth &amp; Pro
+        </h3>
+        <p className="mt-1 max-w-xs text-[14px] text-muted">
+          {hasProducts
+            ? `Thirty days of posts, planned from these. You're on ${planName}.`
+            : "Add products first, then CowQ plans a month from them."}
+        </p>
+        <Link
+          to="/pricing"
+          className="mt-5 inline-flex h-12 w-full max-w-xs items-center justify-center gap-2 rounded-[12px] px-5 text-[15px] font-semibold"
+          style={{ background: "#3D5AFE", color: "#F5F7FF" }}
+        >
+          See plans
+        </Link>
+        <p className="mt-3 max-w-xs text-[12px] text-muted">
+          Plan and download every post yourself now — automatic posting to Instagram &amp; Facebook arrives in September.
+        </p>
       </div>
     </div>
   );
 }
+
 
 function EmptyState({
   onCreate,
