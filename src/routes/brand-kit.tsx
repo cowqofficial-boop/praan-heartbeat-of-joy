@@ -92,15 +92,21 @@ const REGION = [
 ];
 
 const CULTURAL = [
- { value: "", label: "Let CowQ decide" },
- { value: "hindu_traditional", label: "Traditional Hindu" },
- { value: "muslim_hijab", label: "Muslim / Hijab" },
- { value: "sikh_turban", label: "Sikh / Turban" },
- { value: "christian", label: "Christian" },
- { value: "south_indian", label: "South Indian traditional" },
- { value: "north_indian", label: "North Indian traditional" },
- { value: "modern_western", label: "Modern / Western" },
- { value: "none", label: "No preference" },
+  { value: "", label: "Let CowQ decide" },
+  { value: "hindu_traditional", label: "Traditional Hindu" },
+  { value: "north_indian", label: "North Indian traditional" },
+  { value: "south_indian", label: "South Indian traditional" },
+  { value: "bengali_traditional", label: "Bengali traditional" },
+  { value: "maharashtrian", label: "Maharashtrian" },
+  { value: "gujarati_rajasthani", label: "Gujarati / Rajasthani" },
+  { value: "bridal_hindu", label: "Bridal (Hindu)" },
+  { value: "muslim_hijab", label: "Muslim / Hijab" },
+  { value: "sikh_turban", label: "Sikh / Turban" },
+  { value: "christian", label: "Christian" },
+  { value: "buddhist", label: "Buddhist" },
+  { value: "jain", label: "Jain" },
+  { value: "modern_western", label: "Modern / Western" },
+  { value: "none", label: "No preference" },
 ];
 const OCCASION = [
  { value: "", label: "Everyday" },
@@ -165,6 +171,8 @@ const EMPTY_KIT: BrandKit = {
  model_hair: null,
  model_expression: null,
  model_pose: null,
+ model_custom_look: null,
+
  brand_model_enabled: false,
  brand_model_url: null,
  brand_model_source: "ai",
