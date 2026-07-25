@@ -162,16 +162,15 @@ function TourOverlay({ onDone }: TourOverlayProps) {
 
   return createPortal(
     <div
-      data-scroll-lock
-      className="fixed inset-0 z-[100]"
-
+      className="pointer-events-none fixed inset-0 z-[100]"
       role="dialog"
-      aria-modal="true"
+      aria-modal="false"
       aria-label={`Tour step ${i + 1} of ${STEPS.length}`}
     >
-      {/* Dim overlay with a cut-out around the highlight */}
+      {/* Dim overlay with a cut-out around the highlight. Never captures wheel/touch
+          events, so the page underneath stays fully scrollable. */}
       <svg
-        className="absolute inset-0 h-full w-full"
+        className="pointer-events-none absolute inset-0 h-full w-full"
         width={svgW}
         height={svgH}
         aria-hidden
