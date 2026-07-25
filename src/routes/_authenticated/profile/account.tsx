@@ -65,20 +65,20 @@ function AccountTab() {
     onError: (e) => showAlert({ title: "Could not change it", body: (e as Error).message }),
   });
 
-  function changePassword() {
-    showPrompt({
+  async function changePassword() {
+    const value = await showPrompt({
       title: "New password",
       body: "At least 8 characters. Write it down somewhere safe.",
+      label: "New password",
       placeholder: "New password",
       confirmLabel: "Change password",
-      onConfirm: (value: string) => {
-        if (!value || value.length < 8) {
-          showAlert({ title: "Too short", body: "Use at least 8 characters." });
-          return;
-        }
-        passwordMut.mutate(value);
-      },
     });
+    if (value === null) return;
+    if (value.length < 8) {
+      await showAlert({ title: "Too short", body: "Use at least 8 characters." });
+      return;
+    }
+    passwordMut.mutate(value);
   }
 
   if (isLoading || !data) return <div className="grid gap-4"><CardSkeleton rows={4} /><CardSkeleton rows={3} /></div>;
