@@ -53,45 +53,42 @@ export function QueueRunner() {
       jobId = job.jobId;
       update(item.id, { jobId: job.jobId, activeStep: 1 });
 
-      const photoJobs = Array.from({ length: 4 }, (_, styleIndex) =>
-        makePhoto({
-          data: {
-            jobId: job.jobId,
-            browserId,
-            userId,
-            imageUrls: item.imageUrls,
-            productName: item.productName,
-            category: item.identified.category,
-            needsPerson: (item.identified as { needs_person?: boolean }).needs_person ?? false,
-            isKidswear: (item.identified as { is_kidswear?: boolean }).is_kidswear ?? false,
-            isDrapedGarment:
-              (item.identified as { is_draped_garment?: boolean }).is_draped_garment ?? false,
-            styleIndex,
-          },
-        }).then((result) => {
-          const cur = useQueueStore.getState().items.find((i) => i.id === item.id);
-          const done = Math.min((cur?.photoProgress?.done ?? 0) + 1, 4);
-          update(item.id, { photoProgress: { done, total: 4 } });
-          return result;
-        }),
-      );
-
-      const settled = await withTimeout(
-        Promise.allSettled(photoJobs),
-        timeLeft(deadline),
-        TIMEOUT_MESSAGE,
-      );
-      const photoResults = settled.flatMap((r) =>
-        r.status === "fulfilled" ? [r.value] : [],
-      );
+      const photoResults = [] as Awaited<ReturnType<typeof makePhoto>>[];
+      const photoErrors: unknown[] = [];
+      for (let styleIndex = 0; styleIndex < 4; styleIndex += 1) {
+        try {
+          const result = await withTimeout(
+            makePhoto({
+              data: {
+                jobId: job.jobId,
+                browserId,
+                userId,
+                imageUrls: item.imageUrls,
+                productName: item.productName,
+                category: item.identified.category,
+                needsPerson: (item.identified as { needs_person?: boolean }).needs_person ?? false,
+                isKidswear: (item.identified as { is_kidswear?: boolean }).is_kidswear ?? false,
+                isDrapedGarment:
+                  (item.identified as { is_draped_garment?: boolean }).is_draped_garment ?? false,
+                styleIndex,
+              },
+            }),
+            timeLeft(deadline),
+            TIMEOUT_MESSAGE,
+          );
+          photoResults.push(result);
+          update(item.id, { photoProgress: { done: photoResults.length, total: 4 } });
+        } catch (err) {
+          photoErrors.push(err);
+          console.error("[queue-runner] photo step failed:", err);
+        }
+      }
       if (photoResults.length === 0) {
-        const first = settled.find((r) => r.status === "rejected") as
-          | PromiseRejectedResult
-          | undefined;
+        const first = photoErrors[0];
         const msg =
-          first?.reason instanceof Error
-            ? first.reason.message
-            : String(first?.reason ?? "No photos came through. Try again.");
+          first instanceof Error
+            ? first.message
+            : String(first ?? "No photos came through. Try again.");
         throw new Error(msg);
       }
       const images = photoResults.flatMap((r) => r.images);

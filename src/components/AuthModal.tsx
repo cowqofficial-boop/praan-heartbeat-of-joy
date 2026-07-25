@@ -160,7 +160,7 @@ export function AuthModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center px-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center px-4"
       style={{ background: "rgba(6,7,10,0.72)", backdropFilter: "blur(10px)" }}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Check, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckout, getMyCredits } from "@/lib/billing.functions";
 import { creditPacks, estimateProducts, formatInr, subscriptionPairs, type Plan } from "@/lib/plans";
@@ -198,10 +198,12 @@ function PricingPage() {
           const plan = cycle === "yearly" ? yearly : monthly;
           const busy = buying === plan.id;
           const isCurrent = credits?.plan_id === plan.id;
+          const includedFrom = name === "Growth" ? "Starter" : name === "Pro" ? "Growth" : null;
           return (
             <div key={name} className="stagger-item">
               <PlanCard
                 plan={plan}
+                includedFrom={includedFrom}
                 monthlyEquivalent={cycle === "yearly" ? Math.round(yearly.priceInr / 12) : null}
                 busy={busy}
                 current={isCurrent}
@@ -237,6 +239,7 @@ function PricingPage() {
 
 function PlanCard({
   plan,
+  includedFrom,
   monthlyEquivalent,
   busy,
   current,
@@ -244,6 +247,7 @@ function PlanCard({
   highlight,
 }: {
   plan: Plan;
+  includedFrom: "Starter" | "Growth" | null;
   monthlyEquivalent: number | null;
   busy: boolean;
   current: boolean;
@@ -255,24 +259,35 @@ function PlanCard({
   const creditLine = isYearly
     ? `${yearlyCredits.toLocaleString("en-IN")} credits a year · ${plan.credits.toLocaleString("en-IN")} a month`
     : `${plan.credits.toLocaleString("en-IN")} credits a month`;
-  const features: Array<{ label: string; plain: string }> = [
+  const baseFeatures: Array<{ label: string; plain: string }> = [
     { label: creditLine, plain: `About ${estimateProducts(plan.credits)} full products a month.` },
     { label: "Library of all your products", plain: "Every product you make, saved forever." },
     { label: "Stock management", plain: "Track what you have and what it's worth." },
+  ];
+  const plusFeatures: Array<{ label: string; plain: string }> = plan.name === "Starter"
+    ? [
+        { label: "Brand kit memory", plain: "Business name, tone, colours, and model settings saved." },
+        { label: "Manual posting", plain: "One tap to share — you approve every post." },
+        { label: "No watermark", plain: "Photos are clean, ready to sell." },
+      ]
+    : plan.name === "Growth"
+      ? [
     plan.features.calendar
       ? { label: "Full 30-day content calendar", plain: "A month of posts, planned for you." }
       : { label: "Content calendar — Growth or Pro", plain: "Upgrade to unlock the posting calendar." },
     plan.features.auto_post
       ? { label: "Automatic posting — Instagram & Facebook", plain: "More platforms from September." }
       : { label: "Manual posting", plain: "One tap to share — you approve every post." },
-    plan.features.priority
-      ? { label: "Priority generation", plain: "Your photos jump the queue." }
-      : { label: "Standard generation", plain: "Usually ready in under a minute." },
-    { label: "No watermark", plain: "Photos are clean, ready to sell." },
-  ];
+        { label: "More monthly product capacity", plain: "Built for sellers posting several products every week." },
+      ]
+      : [
+        { label: "Priority generation", plain: "Your photos jump the queue." },
+        { label: "Bulk upload", plain: "Make batches faster when you have a catalogue to clear." },
+        { label: "Multiple brand workflows", plain: "Keep different shop lines organised." },
+      ];
   return (
     <div
-      className={`relative rounded-[16px] p-5 ${
+      className={`relative flex h-full min-h-[620px] flex-col rounded-[16px] p-5 ${
         highlight ? "bg-raised sm:scale-[1.02]" : "bg-surface"
       }`}
       style={
@@ -302,21 +317,31 @@ function PlanCard({
         <p className="mt-1 text-[12px] text-muted invisible" aria-hidden>&nbsp;</p>
       )}
       <ul className="mt-4 space-y-3">
-        {features.map((f) => (
-          <li key={f.label} className="flex items-start gap-2 text-[14px]">
-            <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "var(--page-accent)" }} />
-            <div>
-              <p className="text-ink">{f.label}</p>
-              <p className="mt-0.5 text-[12px] text-muted">{f.plain}</p>
-            </div>
-          </li>
+        {baseFeatures.map((f) => (
+          <FeatureLine key={f.label} feature={f} icon="check" />
+        ))}
+      </ul>
+      <div className="my-4 h-px bg-[color:var(--line)]" />
+      {includedFrom ? (
+        <div className="rounded-[12px] bg-primary/10 p-3">
+          <p className="flex items-center gap-2 text-[13px] font-semibold text-ink">
+            <ArrowRight className="h-4 w-4 text-[color:var(--page-accent)]" />
+            Everything in {includedFrom}, plus:
+          </p>
+        </div>
+      ) : (
+        <p className="text-[13px] font-semibold text-muted">Included with Starter:</p>
+      )}
+      <ul className="mt-4 space-y-3">
+        {plusFeatures.map((f) => (
+          <FeatureLine key={f.label} feature={f} icon={includedFrom ? "arrow" : "check"} />
         ))}
       </ul>
       <button
         type="button"
         onClick={onBuy}
         disabled={busy || current}
-        className={`mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-[12px] text-[15px] font-semibold ${
+        className={`mt-auto flex h-12 w-full items-center justify-center gap-2 rounded-[12px] text-[15px] font-semibold ${
           current
             ? "bg-raised text-muted"
             : "btn-accent disabled:opacity-60"
@@ -325,6 +350,25 @@ function PlanCard({
         {current ? "Current plan" : busy ? <><Loader2 className="h-4 w-4 animate-spin" /> Opening…</> : "Choose " + plan.name}
       </button>
     </div>
+  );
+}
+
+function FeatureLine({
+  feature,
+  icon,
+}: {
+  feature: { label: string; plain: string };
+  icon: "check" | "arrow";
+}) {
+  const Icon = icon === "check" ? Check : ArrowRight;
+  return (
+    <li className="flex items-start gap-2 text-[14px]">
+      <Icon className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "var(--page-accent)" }} />
+      <div>
+        <p className="text-ink">{feature.label}</p>
+        <p className="mt-0.5 text-[12px] text-muted">{feature.plain}</p>
+      </div>
+    </li>
   );
 }
 
