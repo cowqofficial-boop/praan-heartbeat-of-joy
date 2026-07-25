@@ -26,7 +26,12 @@ export type Database = {
           logo_url: string | null
           model_age: string | null
           model_body: string | null
+          model_cultural_style: string | null
+          model_expression: string | null
           model_gender: string | null
+          model_hair: string | null
+          model_occasion: string | null
+          model_pose: string | null
           model_region: string | null
           model_skin: string | null
           primary_color: string
@@ -47,7 +52,12 @@ export type Database = {
           logo_url?: string | null
           model_age?: string | null
           model_body?: string | null
+          model_cultural_style?: string | null
+          model_expression?: string | null
           model_gender?: string | null
+          model_hair?: string | null
+          model_occasion?: string | null
+          model_pose?: string | null
           model_region?: string | null
           model_skin?: string | null
           primary_color?: string
@@ -68,7 +78,12 @@ export type Database = {
           logo_url?: string | null
           model_age?: string | null
           model_body?: string | null
+          model_cultural_style?: string | null
+          model_expression?: string | null
           model_gender?: string | null
+          model_hair?: string | null
+          model_occasion?: string | null
+          model_pose?: string | null
           model_region?: string | null
           model_skin?: string | null
           primary_color?: string

@@ -341,26 +341,31 @@ async function getBrandModelContext(userId?: string | null): Promise<{
   brandModelRefs: { b64: string; mime: string }[];
   brandModelBinding: string;
   personSource: "ai" | "user";
+  occasionScene: string;
 }> {
   let modelLine =
     "Choose a clearly adult model (25 to 40 years old) who genuinely fits this product's real buyer — natural-looking Indian adult, warm approachable presence. Never a child, never a teenager.";
   let brandModelRefs: { b64: string; mime: string }[] = [];
   let brandModelBinding = "";
   let personSource: "ai" | "user" = "ai";
-  if (!userId) return { modelLine, brandModelRefs, brandModelBinding, personSource };
+  let occasionScene = "";
+  if (!userId) return { modelLine, brandModelRefs, brandModelBinding, personSource, occasionScene };
 
   const sb = await admin();
   const { data: kit } = await sb
     .from("brand_kits")
-    .select("model_gender, model_age, model_skin, model_body, model_region, brand_model_enabled, brand_model_url, brand_model_source, brand_model_photos")
+    .select("model_gender, model_age, model_skin, model_body, model_region, model_cultural_style, model_occasion, model_hair, model_expression, model_pose, brand_model_enabled, brand_model_url, brand_model_source, brand_model_photos")
     .eq("user_id", userId)
     .maybeSingle();
-  if (!kit) return { modelLine, brandModelRefs, brandModelBinding, personSource };
+  if (!kit) return { modelLine, brandModelRefs, brandModelBinding, personSource, occasionScene };
 
-  const { describeModelPrefs } = await import("./brand-kit.functions");
+  const { describeModelPrefs, describeModelStyling, describeOccasionScene } = await import("./brand-kit.functions");
   const prefs = describeModelPrefs(kit);
   if (prefs) modelLine = `The model is: ${prefs}. Always a clearly adult person, 25 to 40 years old.`;
-  if (!kit.brand_model_enabled) return { modelLine, brandModelRefs, brandModelBinding, personSource };
+  const styling = describeModelStyling(kit);
+  if (styling) modelLine = `${modelLine} ${styling}`;
+  occasionScene = describeOccasionScene(kit);
+  if (!kit.brand_model_enabled) return { modelLine, brandModelRefs, brandModelBinding, personSource, occasionScene };
 
   const source = (kit.brand_model_source as "ai" | "user" | null) ?? "ai";
   const photos = source === "user"
@@ -370,13 +375,13 @@ async function getBrandModelContext(userId?: string | null): Promise<{
   for (const p of photos.slice(0, 5)) {
     try { loaded.push(await fetchAsBase64(p)); } catch { /* skip */ }
   }
-  if (loaded.length === 0) return { modelLine, brandModelRefs, brandModelBinding, personSource };
+  if (loaded.length === 0) return { modelLine, brandModelRefs, brandModelBinding, personSource, occasionScene };
   brandModelRefs = loaded;
   personSource = source;
   brandModelBinding = source === "user"
     ? "Reuse the exact same REAL person shown in the final reference photos — same face, same skin tone, same build, same hair — so this shop's photos all feature one consistent model. Keep their real facial features faithful. The person is clearly an adult."
     : "Reuse the exact same person shown in the final reference portrait — same face, same skin tone, same build — so this shop's photos all feature one consistent brand model. The person is clearly an adult.";
-  return { modelLine, brandModelRefs, brandModelBinding, personSource };
+  return { modelLine, brandModelRefs, brandModelBinding, personSource, occasionScene };
 }
 
 async function generateOneImage(
@@ -493,17 +498,21 @@ export const generateImages = createServerFn({ method: "POST" })
       let brandModelRefs: { b64: string; mime: string }[] = [];
       let brandModelBinding = "";
       let personSource: "ai" | "user" = "ai";
+      let occasionScene = "";
       if (data.userId) {
         const sb = await admin();
         const { data: kit } = await sb
           .from("brand_kits")
-          .select("model_gender, model_age, model_skin, model_body, model_region, brand_model_enabled, brand_model_url, brand_model_source, brand_model_photos")
+          .select("model_gender, model_age, model_skin, model_body, model_region, model_cultural_style, model_occasion, model_hair, model_expression, model_pose, brand_model_enabled, brand_model_url, brand_model_source, brand_model_photos")
           .eq("user_id", data.userId)
           .maybeSingle();
         if (kit) {
-          const { describeModelPrefs } = await import("./brand-kit.functions");
+          const { describeModelPrefs, describeModelStyling, describeOccasionScene } = await import("./brand-kit.functions");
           const prefs = describeModelPrefs(kit);
           if (prefs) modelLine = `The model is: ${prefs}. Always a clearly adult person, 25 to 40 years old.`;
+          const styling = describeModelStyling(kit);
+          if (styling) modelLine = `${modelLine} ${styling}`;
+          occasionScene = describeOccasionScene(kit);
           if (kit.brand_model_enabled) {
             const source = (kit.brand_model_source as "ai" | "user" | null) ?? "ai";
             const photos = source === "user"
@@ -530,7 +539,7 @@ export const generateImages = createServerFn({ method: "POST" })
           ? personStyles(modelLine, brandModelBinding, !!data.isDrapedGarment)
           : PRODUCT_STYLES;
 
-      const contextLine = `Product: ${data.productName}. Category: ${data.category}.`;
+      const contextLine = `Product: ${data.productName}. Category: ${data.category}.${occasionScene ? " " + occasionScene : ""}`;
 
       const tasks: Promise<{ kind: string; url: string }>[] = styles.map((style) => (async () => {
         const refs = style.hasPerson && brandModelRefs.length > 0
@@ -670,7 +679,7 @@ export const generateImageForJob = createServerFn({ method: "POST" })
         : [];
     if (urls.length === 0) throw new Error("No image provided");
 
-    const { modelLine, brandModelRefs, brandModelBinding, personSource } = await getBrandModelContext(data.userId);
+    const { modelLine, brandModelRefs, brandModelBinding, personSource, occasionScene } = await getBrandModelContext(data.userId);
     const styles = getGenerationStyles(data, modelLine, brandModelBinding);
     const style = styles[data.styleIndex];
     if (!style) throw new Error("Photo style was not found. Try again.");
@@ -679,7 +688,7 @@ export const generateImageForJob = createServerFn({ method: "POST" })
     try {
       console.info(`[generation] photo start job=${data.jobId} style=${style.kind} index=${data.styleIndex}`);
       const productRefs = await Promise.all(urls.slice(0, 5).map((u) => fetchAsBase64(u)));
-      const contextLine = `Product: ${data.productName}. Category: ${data.category}.`;
+      const contextLine = `Product: ${data.productName}. Category: ${data.category}.${occasionScene ? " " + occasionScene : ""}`;
       const refs = style.hasPerson && brandModelRefs.length > 0
         ? [...productRefs, ...brandModelRefs]
         : productRefs;

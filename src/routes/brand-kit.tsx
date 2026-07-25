@@ -91,6 +91,47 @@ const REGION = [
  { value: "West Indian", label: "West Indian" },
 ];
 
+const CULTURAL = [
+ { value: "", label: "Let CowQ decide" },
+ { value: "hindu_traditional", label: "Traditional Hindu" },
+ { value: "muslim_hijab", label: "Muslim / Hijab" },
+ { value: "sikh_turban", label: "Sikh / Turban" },
+ { value: "christian", label: "Christian" },
+ { value: "south_indian", label: "South Indian traditional" },
+ { value: "north_indian", label: "North Indian traditional" },
+ { value: "modern_western", label: "Modern / Western" },
+ { value: "none", label: "No preference" },
+];
+const OCCASION = [
+ { value: "", label: "Everyday" },
+ { value: "diwali", label: "Diwali" },
+ { value: "wedding", label: "Wedding" },
+ { value: "navratri", label: "Navratri" },
+ { value: "eid", label: "Eid" },
+ { value: "christmas", label: "Christmas" },
+ { value: "summer", label: "Summer" },
+ { value: "festive", label: "Festive / general" },
+];
+const HAIR = [
+ { value: "", label: "Let CowQ decide" },
+ { value: "short", label: "Short" },
+ { value: "long", label: "Long" },
+ { value: "tied", label: "Tied up" },
+ { value: "covered", label: "Covered" },
+];
+const EXPRESSION = [
+ { value: "", label: "Let CowQ decide" },
+ { value: "smile", label: "Warm smile" },
+ { value: "neutral", label: "Neutral / calm" },
+ { value: "confident", label: "Confident" },
+];
+const POSE = [
+ { value: "", label: "Let CowQ decide" },
+ { value: "standing", label: "Standing" },
+ { value: "closeup", label: "Close-up detail" },
+ { value: "holding", label: "Showing the product in hand" },
+];
+
 const EMPTY_KIT: BrandKit = {
  business_name: "",
  logo_url: null,
@@ -104,6 +145,11 @@ const EMPTY_KIT: BrandKit = {
  model_skin: null,
  model_body: null,
  model_region: null,
+ model_cultural_style: null,
+ model_occasion: null,
+ model_hair: null,
+ model_expression: null,
+ model_pose: null,
  brand_model_enabled: false,
  brand_model_url: null,
  brand_model_source: "ai",
@@ -356,6 +402,19 @@ function BrandKitPage() {
  <SelectField label="Skin tone" options={SKIN} value={kit.model_skin ?? ""} onChange={(v) => setKit({ ...kit, model_skin: v || null })} />
  <SelectField label="Body type" options={BODY} value={kit.model_body ?? ""} onChange={(v) => setKit({ ...kit, model_body: v || null })} />
  <SelectField label="Regional look" options={REGION} value={kit.model_region ?? ""} onChange={(v) => setKit({ ...kit, model_region: v || null })} />
+ <div className="flex items-center gap-2 pt-1">
+ <span className="text-[14px] font-medium text-ink">Cultural style</span>
+ <HelpButton content={<p className="text-muted">Dresses and styles the model to suit your customers. About visible attire and presentation, not a person's faith.</p>} />
+ </div>
+ <SelectField label="Attire" options={CULTURAL} value={kit.model_cultural_style ?? ""} onChange={(v) => setKit({ ...kit, model_cultural_style: v || null })} />
+ <div className="flex items-center gap-2 pt-1">
+ <span className="text-[14px] font-medium text-ink">Occasion</span>
+ <HelpButton content={<p className="text-muted">Styles the shot for a season or festival when it fits the product.</p>} />
+ </div>
+ <SelectField label="Styling" options={OCCASION} value={kit.model_occasion ?? ""} onChange={(v) => setKit({ ...kit, model_occasion: v || null })} />
+ <SelectField label="Hair" options={HAIR} value={kit.model_hair ?? ""} onChange={(v) => setKit({ ...kit, model_hair: v || null })} />
+ <SelectField label="Expression" options={EXPRESSION} value={kit.model_expression ?? ""} onChange={(v) => setKit({ ...kit, model_expression: v || null })} />
+ <SelectField label="Pose" options={POSE} value={kit.model_pose ?? ""} onChange={(v) => setKit({ ...kit, model_pose: v || null })} />
  </div>
 
  <div className="flex flex-col gap-4">

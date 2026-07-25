@@ -17,6 +17,12 @@ export type BrandKit = {
   model_skin: string | null;
   model_body: string | null;
   model_region: string | null;
+  model_cultural_style: string | null;
+  model_occasion: string | null;
+  model_hair: string | null;
+  model_expression: string | null;
+  model_pose: string | null;
+
   brand_model_enabled: boolean;
   brand_model_url: string | null;
   brand_model_source: "ai" | "user";
@@ -53,6 +59,12 @@ export const saveMyBrandKit = createServerFn({ method: "POST" })
       model_skin: data.model_skin ?? null,
       model_body: data.model_body ?? null,
       model_region: data.model_region ?? null,
+      model_cultural_style: data.model_cultural_style ?? null,
+      model_occasion: data.model_occasion ?? null,
+      model_hair: data.model_hair ?? null,
+      model_expression: data.model_expression ?? null,
+      model_pose: data.model_pose ?? null,
+
       brand_model_enabled: data.brand_model_enabled ?? false,
       brand_model_url: data.brand_model_url ?? null,
       brand_model_source: data.brand_model_source ?? "ai",
@@ -104,6 +116,9 @@ export function describeModelPrefs(k: {
   model_skin?: string | null;
   model_body?: string | null;
   model_region?: string | null;
+  model_hair?: string | null;
+  model_expression?: string | null;
+  model_pose?: string | null;
 }): string {
   const parts: string[] = [];
   if (k.model_gender) parts.push(k.model_gender);
@@ -111,12 +126,87 @@ export function describeModelPrefs(k: {
   if (k.model_skin) parts.push(`${k.model_skin} skin`);
   if (k.model_body) parts.push(`${k.model_body} build`);
   if (k.model_region) parts.push(`${k.model_region} regional look`);
+  if (k.model_hair) parts.push(`${HAIR_PROMPT[k.model_hair] ?? k.model_hair} hair`);
+  if (k.model_expression) parts.push(`${EXPRESSION_PROMPT[k.model_expression] ?? k.model_expression} expression`);
   return parts.length > 0 ? parts.join(", ") : "";
+}
+
+const HAIR_PROMPT: Record<string, string> = {
+  short: "short",
+  long: "long",
+  tied: "neatly tied-up",
+  covered: "covered (scarf or dupatta over the hair)",
+};
+
+const EXPRESSION_PROMPT: Record<string, string> = {
+  smile: "a warm, genuine smile",
+  neutral: "a calm, neutral",
+  confident: "a confident, self-assured",
+};
+
+const POSE_PROMPT: Record<string, string> = {
+  standing: "Pose the model standing naturally, full or three-quarter length, product clearly visible.",
+  closeup: "Frame a close-up detail shot that shows the product on the person up close, cropped tight on the product area.",
+  holding: "Pose the model holding and showing the product in hand, product clearly presented to the camera.",
+};
+
+// Attire / styling guidance only — never a statement about a person's faith.
+const CULTURAL_PROMPT: Record<string, string> = {
+  hindu_traditional: "Style the model in traditional Indian attire suited to Hindu customers — for example a saree, salwar kameez or kurta, with modest traditional jewellery and, if it fits, a small bindi.",
+  muslim_hijab: "Style the model in modest attire with a hijab neatly draped over the hair, full sleeves and modest coverage.",
+  sikh_turban: "Style the model in attire with a neatly tied turban, in a look suited to Punjabi Sikh customers.",
+  christian: "Style the model in modest church-going or smart-casual Western attire, simple and understated.",
+  south_indian: "Style the model in South Indian traditional attire — for example a silk saree with a gold border, jasmine flowers in the hair, traditional gold jewellery.",
+  north_indian: "Style the model in North Indian traditional attire — for example a salwar kameez with dupatta, or a kurta pyjama, with simple traditional jewellery.",
+  modern_western: "Style the model in modern Western everyday clothing — clean, contemporary and understated.",
+  none: "",
+};
+
+const OCCASION_SCENE: Record<string, string> = {
+  diwali: "Occasion styling: Diwali. Warm evening lamp light, subtle diyas, marigold and rangoli hints in the setting — kept simple and never covering the product.",
+  wedding: "Occasion styling: an Indian wedding. Richer, more formal setting and warm celebratory light, with restrained floral decor in the background.",
+  navratri: "Occasion styling: Navratri. Bright festive colours, simple mirror-work and garba-season decor hints in the background.",
+  eid: "Occasion styling: Eid. Elegant evening setting, crescent-moon and lantern hints, warm restrained decor.",
+  christmas: "Occasion styling: Christmas. Cool evening light with warm fairy lights, pine and simple ornament hints in the background.",
+  summer: "Occasion styling: summer. Bright natural daylight, light airy surfaces, fresh uncluttered setting.",
+  festive: "Occasion styling: a general Indian festive moment. Warm celebratory light and simple festive props in the background.",
+  everyday: "",
+};
+
+const OCCASION_ATTIRE: Record<string, string> = {
+  diwali: "Dress the model in festive Diwali attire — celebratory but wearable, not costume.",
+  wedding: "Dress the model in formal wedding-guest attire, richer fabrics and jewellery.",
+  navratri: "Dress the model in bright Navratri festive attire.",
+  eid: "Dress the model in elegant Eid attire, modest and well put together.",
+  christmas: "Dress the model in smart festive Christmas attire.",
+  summer: "Dress the model in light summer clothing suited to hot weather.",
+  festive: "Dress the model in festive attire, celebratory but everyday-wearable.",
+  everyday: "",
+};
+
+/** Attire/styling guidance for on-model shots only. */
+export function describeModelStyling(k: {
+  model_cultural_style?: string | null;
+  model_occasion?: string | null;
+  model_pose?: string | null;
+}): string {
+  const parts = [
+    k.model_cultural_style ? CULTURAL_PROMPT[k.model_cultural_style] ?? "" : "",
+    k.model_occasion ? OCCASION_ATTIRE[k.model_occasion] ?? "" : "",
+    k.model_pose ? POSE_PROMPT[k.model_pose] ?? "" : "",
+  ].filter(Boolean);
+  return parts.join(" ");
+}
+
+/** Scene/prop/lighting guidance — applies to every shot, on-model or product-only. */
+export function describeOccasionScene(k: { model_occasion?: string | null }): string {
+  return (k.model_occasion ? OCCASION_SCENE[k.model_occasion] ?? "" : "");
 }
 
 export const generateBrandModelPortrait = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { seedImageUrl?: string | null } = {}) => d)
+
   .handler(async ({ context, data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: kit } = await supabaseAdmin
