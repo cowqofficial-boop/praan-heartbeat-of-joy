@@ -126,7 +126,7 @@ function Body({ children }: { children: ReactNode }) {
 
 function Note({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-4 rounded-[12px] bg-raised px-4 py-3 text-[13px] leading-relaxed text-muted">
+    <p className="card-list mt-4 rounded-[12px] px-4 py-3 text-[13px] leading-relaxed text-muted">
       {children}
     </p>
   );
