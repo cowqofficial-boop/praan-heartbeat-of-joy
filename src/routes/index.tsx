@@ -150,9 +150,13 @@ function Landing() {
       <header className="flex items-center justify-between px-6 pt-6 lg:hidden">
         <span className="font-display text-[22px] leading-none text-ink">CowQ</span>
         <nav className="flex items-center gap-5 text-[14px] text-muted">
+          <Link to="/how-it-works" className="hover:text-ink">
+            How it works
+          </Link>
           <Link to="/pricing" className="hover:text-ink">
             Pricing
           </Link>
+
           {user ? (
             <Link to="/library" className="hover:text-ink">
               Library
