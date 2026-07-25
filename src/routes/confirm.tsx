@@ -37,7 +37,7 @@ export const Route = createFileRoute("/confirm")({
 
 function Confirm() {
   const navigate = useNavigate();
-  const { photos, originalDataUrl, identified, reset: resetUpload } = useCowqStore();
+  const { photos, originalDataUrl, identified } = useCowqStore();
   const items = useQueueStore((s) => s.items);
   const enqueue = useQueueStore((s) => s.enqueue);
   const { user } = useAuth();
@@ -88,9 +88,8 @@ function Confirm() {
       identified,
       cost,
     });
-    resetUpload();
     navigate({ to: "/generating" });
-  }, [photos, name, price, detail, identified, cost, enqueue, resetUpload, navigate]);
+  }, [photos, name, price, detail, identified, cost, enqueue, navigate]);
 
   // After successful auth, resume the pending generation.
   useEffect(() => {

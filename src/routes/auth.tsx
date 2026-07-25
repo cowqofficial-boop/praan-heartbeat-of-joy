@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -35,7 +35,12 @@ function Auth() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   async function afterAuth() {
     try {
@@ -60,7 +65,7 @@ function Auth() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: { emailRedirectTo: mounted ? window.location.origin : undefined },
         });
         if (error) throw error;
         const { data } = await supabase.auth.getSession();
@@ -83,6 +88,7 @@ function Auth() {
   }
 
   async function handleGoogle() {
+    if (!mounted) return;
     setErr(null);
     setBusy(true);
     try {
@@ -123,7 +129,7 @@ function Auth() {
       <button
         type="button"
         onClick={handleGoogle}
-        disabled={busy}
+        disabled={busy || !mounted}
         className="mt-8 flex h-12 w-full items-center justify-center gap-3 rounded-[12px] bg-raised text-[15px] font-semibold text-ink disabled:opacity-60"
       >
         <GoogleIcon />

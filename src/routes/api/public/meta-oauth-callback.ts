@@ -27,7 +27,7 @@ function fail(msg: string) {
 export const Route = createFileRoute("/api/public/meta-oauth-callback")({
   server: {
     handlers: {
-      GET: async ({ request }) => {
+      GET: async ({ request }: { request: Request }) => {
         const url = new URL(request.url);
         const code = url.searchParams.get("code");
         const state = url.searchParams.get("state");

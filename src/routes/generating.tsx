@@ -6,6 +6,7 @@ import { useQueueStore, queueCounts, MAX_QUEUE, type QueueItem } from "@/lib/que
 import { ProgressSteps, type StepState } from "@/components/ProgressSteps";
 import { getGeneration } from "@/lib/cowq.functions";
 import { downloadBulkZip, type BulkProduct } from "@/lib/bulk-download";
+import { getBrowserId } from "@/lib/browser-id";
 
 export const Route = createFileRoute("/generating")({
   head: () => ({
@@ -52,7 +53,7 @@ function QueueScreen() {
       const details = await Promise.all(
         readyItems.map(async (i) => {
           if (!i.resultId) return null;
-          const row = (await getGeneration({ data: { id: i.resultId } })) as {
+          const row = (await getGeneration({ data: { id: i.resultId, browserId: getBrowserId() } })) as {
             product_name: string;
             price: number | null;
             category: string;

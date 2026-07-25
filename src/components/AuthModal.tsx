@@ -58,7 +58,12 @@ export function AuthModal({
   const [confirmTouched, setConfirmTouched] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (open) setMode(initialMode);
@@ -78,8 +83,8 @@ export function AuthModal({
     };
   }, [open, onClose]);
 
-  console.log("[AuthModal] render, open=", open);
-  if (!open || typeof document === "undefined") return null;
+  console.log("[AuthModal] render, open=", open, "mounted=", mounted);
+  if (!open || !mounted) return null;
 
   const strength = scorePassword(password);
   const passwordsMatch = password === confirm;
@@ -155,7 +160,7 @@ export function AuthModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center px-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center px-4"
       style={{ background: "rgba(6,7,10,0.72)", backdropFilter: "blur(10px)" }}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();

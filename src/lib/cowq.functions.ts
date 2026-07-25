@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { buildShopifyCsv, slugify } from "./csv";
 import {
@@ -899,13 +900,33 @@ export const submitFeedback = createServerFn({ method: "POST" })
 // ---------- Read one ----------
 
 export const getGeneration = createServerFn({ method: "GET" })
-  .inputValidator((d: { id: string }) => d)
+  .inputValidator((d: { id: string; browserId?: string }) => d)
   .handler(async ({ data }) => {
     const sb = await admin();
+    const authHeader = getRequestHeader("authorization");
+
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.replace("Bearer ", "").trim();
+      if (!token) throw new Error("Unauthorized");
+      const { data: authData, error: authError } = await sb.auth.getUser(token);
+      if (authError || !authData.user) throw new Error("Unauthorized");
+      const { data: row, error } = await sb
+        .from("generations")
+        .select("*")
+        .eq("id", data.id)
+        .eq("user_id", authData.user.id)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return row;
+    }
+
+    if (!data.browserId) return null;
     const { data: row, error } = await sb
       .from("generations")
       .select("*")
       .eq("id", data.id)
+      .eq("browser_id", data.browserId)
+      .is("user_id", null)
       .maybeSingle();
     if (error) throw new Error(error.message);
     return row;
