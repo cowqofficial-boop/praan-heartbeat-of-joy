@@ -131,7 +131,11 @@ function Results() {
           />
 
           {/* Collapsed listing: one panel, hairline rows, single-open accordion */}
+          {/* Collapsed listing: one panel, hairline rows, single-open accordion */}
           <ListingPanel copy={copy} />
+
+          {/* Videos — only for signed-in sellers, only when the flag is on */}
+          <VideoSection generationId={id} productName={productName} hasAccount={!!user} />
 
           {/* Before/after mobile only */}
           {whiteAfter && (
