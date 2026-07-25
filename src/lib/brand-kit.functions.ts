@@ -17,6 +17,12 @@ export type BrandKit = {
   model_skin: string | null;
   model_body: string | null;
   model_region: string | null;
+  model_cultural_style: string | null;
+  model_occasion: string | null;
+  model_hair: string | null;
+  model_expression: string | null;
+  model_pose: string | null;
+
   brand_model_enabled: boolean;
   brand_model_url: string | null;
   brand_model_source: "ai" | "user";
