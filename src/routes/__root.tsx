@@ -165,6 +165,12 @@ function RootComponent() {
         </div>
         <QueueRunner />
         <QueueIndicator />
+        {VIDEO_ENABLED && (
+          <>
+            <VideoRunner />
+            <VideoQueueIndicator />
+          </>
+        )}
         <Tour />
         <Dialogs />
         <GlobalErrorToast />
