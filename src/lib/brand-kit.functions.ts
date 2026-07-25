@@ -169,23 +169,23 @@ const POSE_PROMPT: Record<string, string> = {
   holding: "Pose the model holding and showing the product in hand, product clearly presented to the camera.",
 };
 
-// Attire / styling guidance only — never a statement about a person's actual faith.
-// These are explicit, required styling markers the user chose; they must appear clearly in the shot.
+// Attire / adornment guidance only — never a statement about a person's faith,
+// and never tied to skin tone or facial features (those are separate seller fields).
 const CULTURAL_PROMPT: Record<string, string> = {
   hindu_traditional:
-    "Style the model in traditional Hindu Indian attire with these details clearly visible: a bindi on the forehead, a mangalsutra necklace, gold bangles on the wrists, small gold earrings, and either a saree with a traditional border or a salwar kameez. Hair worn down or in a traditional style. Make the bindi and mangalsutra clearly visible in the shot.",
+    "Style the model in traditional Indian attire (saree or salwar kameez). Add culturally appropriate adornments, all clearly visible: a bindi on the forehead, a mangalsutra or traditional necklace, bangles on the wrists, and small ear studs or jhumkas. If the drape suits it, a subtle line of sindoor in the hair parting. Keep it tasteful and everyday, not bridal.",
   muslim_hijab:
-    "Style the model in modest attire with a hijab neatly and fully covering the hair and framing the face, full-length sleeves, and modest coverage throughout. The hijab must be clearly visible and correctly worn. Simple, elegant styling.",
+    "Style the model wearing a neatly draped hijab clearly visible and fully covering the hair, with modest full-coverage clothing (long sleeves, modest neckline). Simple, elegant styling — optional subtle earrings or a delicate necklace.",
   sikh_turban:
-    "Style the model in attire suited to Punjabi Sikh customers, with a neatly tied turban (dastar) clearly visible on the head. For a woman, a graceful dupatta draped over the head is also appropriate. Traditional Punjabi styling.",
+    "Style the model in attire suited to Punjabi Sikh presentation. For a woman: a salwar kameez with a dupatta, optionally draped over the head; simple traditional jewellery. For a man: a neatly tied turban and a kara (steel bangle) on the wrist, both clearly visible.",
   christian:
-    "Style the model in modest smart-casual or church-going Western attire — a simple dress or blouse. A small, tasteful cross pendant necklace may be visible. Understated, neat styling.",
+    "Style the model in modest smart-casual or church-going Western attire. Optional simple cross pendant necklace, understated jewellery.",
   south_indian:
-    "Style the model in South Indian traditional attire with these details clearly visible: a silk saree (Kanchipuram style) with a contrasting gold zari border, a bindi, a string of jasmine flowers (gajra) in the hair, gold temple jewellery — jhumka earrings, a gold necklace, and gold bangles.",
+    "Style the model in South Indian traditional attire, all details clearly visible: a silk saree with a contrasting gold border, jasmine flowers (gajra) in the hair, temple-style gold jewellery — jhumkas, a gold necklace, bangles, and a bindi.",
   north_indian:
-    "Style the model in North Indian traditional attire with these details clearly visible: a salwar kameez with a dupatta draped across, or an anarkali; a bindi, jhumka or chandbali earrings, bangles, and a maang tikka or simple necklace. Traditional North Indian styling.",
+    "Style the model in North Indian traditional attire, all details clearly visible: a salwar kameez with dupatta or a kurta with churidar, a bindi, jhumkas or studs, bangles, and a light necklace.",
   modern_western:
-    "Style the model in clean, modern Western everyday clothing — contemporary and understated, no traditional jewellery or markers.",
+    "Style the model in clean, modern Western everyday clothing. Minimal, contemporary jewellery.",
   none: "",
 };
 

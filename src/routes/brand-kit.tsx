@@ -131,6 +131,20 @@ const POSE = [
  { value: "closeup", label: "Close-up detail" },
  { value: "holding", label: "Showing the product in hand" },
 ];
+const NATIONALITY = [
+ { value: "", label: "Let CowQ decide" },
+ { value: "indian", label: "Indian" },
+ { value: "pakistani", label: "Pakistani" },
+ { value: "bangladeshi", label: "Bangladeshi" },
+ { value: "sri_lankan", label: "Sri Lankan" },
+ { value: "nepali", label: "Nepali" },
+ { value: "middle_eastern", label: "Middle Eastern / Arab" },
+ { value: "southeast_asian", label: "Southeast Asian" },
+ { value: "east_asian", label: "East Asian" },
+ { value: "african", label: "African" },
+ { value: "european", label: "European / Western" },
+ { value: "latin_american", label: "Latin American" },
+];
 
 const EMPTY_KIT: BrandKit = {
  business_name: "",
@@ -145,6 +159,7 @@ const EMPTY_KIT: BrandKit = {
  model_skin: null,
  model_body: null,
  model_region: null,
+ model_nationality: null,
  model_cultural_style: null,
  model_occasion: null,
  model_hair: null,
