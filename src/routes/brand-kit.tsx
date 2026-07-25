@@ -92,15 +92,21 @@ const REGION = [
 ];
 
 const CULTURAL = [
- { value: "", label: "Let CowQ decide" },
- { value: "hindu_traditional", label: "Traditional Hindu" },
- { value: "muslim_hijab", label: "Muslim / Hijab" },
- { value: "sikh_turban", label: "Sikh / Turban" },
- { value: "christian", label: "Christian" },
- { value: "south_indian", label: "South Indian traditional" },
- { value: "north_indian", label: "North Indian traditional" },
- { value: "modern_western", label: "Modern / Western" },
- { value: "none", label: "No preference" },
+  { value: "", label: "Let CowQ decide" },
+  { value: "hindu_traditional", label: "Traditional Hindu" },
+  { value: "north_indian", label: "North Indian traditional" },
+  { value: "south_indian", label: "South Indian traditional" },
+  { value: "bengali_traditional", label: "Bengali traditional" },
+  { value: "maharashtrian", label: "Maharashtrian" },
+  { value: "gujarati_rajasthani", label: "Gujarati / Rajasthani" },
+  { value: "bridal_hindu", label: "Bridal (Hindu)" },
+  { value: "muslim_hijab", label: "Muslim / Hijab" },
+  { value: "sikh_turban", label: "Sikh / Turban" },
+  { value: "christian", label: "Christian" },
+  { value: "buddhist", label: "Buddhist" },
+  { value: "jain", label: "Jain" },
+  { value: "modern_western", label: "Modern / Western" },
+  { value: "none", label: "No preference" },
 ];
 const OCCASION = [
  { value: "", label: "Everyday" },
@@ -165,6 +171,8 @@ const EMPTY_KIT: BrandKit = {
  model_hair: null,
  model_expression: null,
  model_pose: null,
+ model_custom_look: null,
+
  brand_model_enabled: false,
  brand_model_url: null,
  brand_model_source: "ai",
@@ -435,6 +443,24 @@ function BrandKitPage() {
  <SelectField label="Hair" options={HAIR} value={kit.model_hair ?? ""} onChange={(v) => setKit({ ...kit, model_hair: v || null })} />
  <SelectField label="Expression" options={EXPRESSION} value={kit.model_expression ?? ""} onChange={(v) => setKit({ ...kit, model_expression: v || null })} />
  <SelectField label="Pose" options={POSE} value={kit.model_pose ?? ""} onChange={(v) => setKit({ ...kit, model_pose: v || null })} />
+ <div className="flex flex-col gap-1.5 pt-1">
+   <div className="flex items-center gap-2">
+     <label htmlFor="custom-look" className="text-[14px] font-medium text-ink">Custom look (optional)</label>
+     <HelpButton content={<p className="text-muted">Anything specific you want on the model — CowQ adds it to every on-model photo.</p>} />
+   </div>
+   <input
+     id="custom-look"
+     type="text"
+     maxLength={200}
+     value={kit.model_custom_look ?? ""}
+     onChange={(e) => setKit({ ...kit, model_custom_look: e.target.value || null })}
+     placeholder="e.g. add a red bindi, gold nose ring, green saree, tulsi mala"
+     className="w-full rounded-xl border border-line bg-raised px-3 py-2.5 text-[14px] text-ink placeholder:text-muted/60 outline-none focus:border-[var(--page-accent,theme(colors.line))]"
+   />
+   <p className="text-[12px] text-muted">
+     Anything specific you want on the model — CowQ adds it to every on-model photo. {(kit.model_custom_look ?? "").length}/200
+   </p>
+ </div>
  </div>
 
  <div className="flex flex-col gap-4">
