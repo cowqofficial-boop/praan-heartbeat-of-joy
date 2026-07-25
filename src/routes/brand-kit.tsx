@@ -3,18 +3,24 @@ import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import {
- generateBrandModelPortrait,
- getMyBrandKit,
- removeRealBrandModel,
- saveMyBrandKit,
- setBrandModelEnabled,
- uploadBrandLogo,
- uploadBrandModelPhotos,
- type BrandKit,
+  deleteBrandModel,
+  generateBrandModelPortrait,
+  getMyBrandKit,
+  listMyBrandModels,
+  removeRealBrandModel,
+  renameBrandModel,
+  saveBrandModel,
+  saveMyBrandKit,
+  setActiveBrandModel,
+  setBrandModelEnabled,
+  uploadBrandLogo,
+  type BrandKit,
+  type SavedModel,
 } from "@/lib/brand-kit.functions";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { PageHeader, HelpButton } from "@/components/PageHeader";
-import { showAlert, showConfirm } from "@/components/Dialogs";
+import { showAlert, showConfirm, showPrompt } from "@/components/Dialogs";
+
 import { MessageCircle, Palette, Store, UserRound } from "lucide-react";
 
 
