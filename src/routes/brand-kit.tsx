@@ -517,280 +517,444 @@ function ColorInput({ label, value, onChange }: { label: string; value: string; 
 }
 
 function BrandModelPanel({
- kit,
- setKit,
- modelBusy,
- setModelBusy,
- onRegenerateAi,
- onRemoveReal,
- onUploadedReal,
+  kit,
+  setKit,
+  modelBusy,
+  setModelBusy,
+  onRegenerateAi,
+  onRemoveReal,
+  onUploadedReal,
 }: {
- kit: BrandKit;
- setKit: React.Dispatch<React.SetStateAction<BrandKit>>;
- modelBusy: boolean;
- setModelBusy: (v: boolean) => void;
- onRegenerateAi: () => Promise<void>;
- onRemoveReal: () => Promise<void>;
- onUploadedReal: (urls: string[]) => void;
+  kit: BrandKit;
+  setKit: React.Dispatch<React.SetStateAction<BrandKit>>;
+  modelBusy: boolean;
+  setModelBusy: (v: boolean) => void;
+  onRegenerateAi: () => Promise<void>;
+  onRemoveReal: () => Promise<void>;
+  onUploadedReal: (urls: string[]) => void;
 }) {
- const source = kit.brand_model_source;
- const realPhotos = kit.brand_model_photos ?? [];
- return (
- <div className="mt-4 flex flex-col gap-4">
- <div className="grid grid-cols-2 gap-2">
- {(["ai", "user"] as const).map((v) => (
- <button
- type="button"
- key={v}
- onClick={() => setKit((k) => ({ ...k, brand_model_source: v }))}
- className={`h-11 rounded-[10px] border text-[13px] font-semibold transition-colors ${
- source === v
- ? "border-primary bg-primary/10 text-ink"
- : "bg-raised text-ink"
- }`}
- >
- {v === "ai" ? "AI model" : "My own model"}
- </button>
- ))}
- </div>
+  const source = kit.brand_model_source;
+  return (
+    <div className="mt-4 flex flex-col gap-4">
+      <div className="grid grid-cols-2 gap-2">
+        {(["ai", "user"] as const).map((v) => (
+          <button
+            type="button"
+            key={v}
+            onClick={() => setKit((k) => ({ ...k, brand_model_source: v }))}
+            className={`h-11 rounded-[10px] border text-[13px] font-semibold transition-colors ${
+              source === v
+                ? "border-primary bg-primary/10 text-ink"
+                : "bg-raised text-ink"
+            }`}
+          >
+            {v === "ai" ? "AI model" : "My own model"}
+          </button>
+        ))}
+      </div>
 
- {source === "ai" ? (
- <div className="card-list flex items-center gap-4 p-3">
- <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-[10px] bg-raised">
- {modelBusy ? (
- <span className="text-[11px] text-muted">Making…</span>
- ) : kit.brand_model_url ? (
- <img src={kit.brand_model_url} alt="Your brand model" className="h-full w-full object-cover" />
- ) : (
- <span className="text-[11px] text-muted">No model yet</span>
- )}
- </div>
- <div className="flex flex-1 flex-col gap-2">
- <button
- type="button"
- onClick={onRegenerateAi}
- disabled={modelBusy}
- className="h-10 rounded-[10px] bg-raised text-[13px] font-semibold text-ink disabled:opacity-60"
- >
- {modelBusy ? "Generating…" : "Change model"}
- </button>
- </div>
- </div>
- ) : realPhotos.length > 0 ? (
- <RealModelSaved
- photos={realPhotos}
- modelBusy={modelBusy}
- setModelBusy={setModelBusy}
- onRemove={onRemoveReal}
- onReplaced={onUploadedReal}
- />
- ) : (
- <RealModelUploader
- modelBusy={modelBusy}
- setModelBusy={setModelBusy}
- onUploaded={onUploadedReal}
- />
- )}
- </div>
- );
+      {source === "ai" ? (
+        <div className="card-list flex items-center gap-4 p-3">
+          <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-[10px] bg-raised">
+            {modelBusy ? (
+              <span className="text-[11px] text-muted">Making…</span>
+            ) : kit.brand_model_url ? (
+              <img src={kit.brand_model_url} alt="Your brand model" className="h-full w-full object-cover" />
+            ) : (
+              <span className="text-[11px] text-muted">No model yet</span>
+            )}
+          </div>
+          <div className="flex flex-1 flex-col gap-2">
+            <button
+              type="button"
+              onClick={onRegenerateAi}
+              disabled={modelBusy}
+              className="h-10 rounded-[10px] bg-raised text-[13px] font-semibold text-ink disabled:opacity-60"
+            >
+              {modelBusy ? "Generating…" : "Change model"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <SavedModelsPanel
+          modelBusy={modelBusy}
+          setModelBusy={setModelBusy}
+          onActivePhotos={onUploadedReal}
+          onNoModels={onRemoveReal}
+        />
+      )}
+    </div>
+  );
 }
 
 async function fileToDataUrl(file: File): Promise<string> {
- return new Promise((res, rej) => {
- const r = new FileReader();
- r.onload = () => res(r.result as string);
- r.onerror = rej;
- r.readAsDataURL(file);
- });
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result as string);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
 }
 
-function RealModelSaved({
- photos,
- modelBusy,
- setModelBusy,
- onRemove,
- onReplaced,
+function SavedModelsPanel({
+  modelBusy,
+  setModelBusy,
+  onActivePhotos,
+  onNoModels,
 }: {
- photos: string[];
- modelBusy: boolean;
- setModelBusy: (v: boolean) => void;
- onRemove: () => Promise<void>;
- onReplaced: (urls: string[]) => void;
+  modelBusy: boolean;
+  setModelBusy: (v: boolean) => void;
+  onActivePhotos: (urls: string[]) => void;
+  onNoModels: () => Promise<void>;
 }) {
- const [changing, setChanging] = useState(false);
- if (changing) {
- return (
- <RealModelUploader
- modelBusy={modelBusy}
- setModelBusy={setModelBusy}
- onUploaded={(urls) => { setChanging(false); onReplaced(urls); }}
- onCancel={() => setChanging(false)}
- />
- );
- }
- return (
- <div className="card-list flex flex-col gap-3 p-3">
- <div className="flex gap-2">
- {photos.map((p, i) => (
- <img
- key={i}
- src={p}
- alt={`Your model ${i + 1}`}
- className="h-20 w-20 rounded-[10px] object-cover"
- />
- ))}
- </div>
- <div className="flex flex-col gap-2">
- <button
- type="button"
- onClick={() => setChanging(true)}
- disabled={modelBusy}
- className="h-10 rounded-[10px] bg-raised text-[13px] font-semibold text-ink disabled:opacity-60"
- >
- Change model
- </button>
- <button
- type="button"
- onClick={onRemove}
- disabled={modelBusy}
- className="h-10 rounded-[10px] text-[13px] font-medium text-muted underline disabled:opacity-60"
- >
- Remove model
- </button>
- </div>
- </div>
- );
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [models, setModels] = useState<SavedModel[]>([]);
+  const [slots, setSlots] = useState(0);
+  const [saveCost, setSaveCost] = useState(30);
+  const [adding, setAdding] = useState(false);
+
+  async function refresh(activate = false) {
+    try {
+      const res = await listMyBrandModels();
+      setModels(res.models);
+      setSlots(res.slots);
+      setSaveCost(res.save_cost);
+      if (activate) {
+        const active = res.models.find((m) => m.is_active);
+        onActivePhotos(active?.photos ?? []);
+      }
+    } catch (e) {
+      await showAlert({ title: "Couldn't load your saved models", body: (e as Error).message });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { void refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
+
+  if (loading) {
+    return <p className="text-[13px] text-muted">Loading your saved models…</p>;
+  }
+
+  if (slots === 0) {
+    return (
+      <div className="card-list flex flex-col gap-3 p-4">
+        <p className="text-[14px] font-semibold text-ink">Saved models are on Growth &amp; Pro</p>
+        <p className="text-[13px] text-muted">
+          Save real people as reusable models — Growth keeps 3, Pro keeps 10 — so the same person appears
+          across every product you shoot.
+        </p>
+        <button
+          type="button"
+          onClick={() => navigate({ to: "/pricing" })}
+          className="h-11 rounded-[10px] bg-primary text-[14px] font-semibold text-white"
+        >
+          See Growth &amp; Pro
+        </button>
+      </div>
+    );
+  }
+
+  async function activate(id: string) {
+    setModelBusy(true);
+    try {
+      await setActiveBrandModel({ data: { id } });
+      await refresh(true);
+    } catch (e) {
+      await showAlert({ title: "Couldn't switch model", body: (e as Error).message });
+    } finally {
+      setModelBusy(false);
+    }
+  }
+
+  async function rename(m: SavedModel) {
+    const name = await showPrompt({
+      title: "Name this model",
+      placeholder: "Priya, Store model…",
+      defaultValue: m.name,
+      confirmLabel: "Save name",
+    });
+    if (!name) return;
+    setModelBusy(true);
+    try {
+      await renameBrandModel({ data: { id: m.id, name } });
+      await refresh();
+    } finally {
+      setModelBusy(false);
+    }
+  }
+
+  async function remove(m: SavedModel) {
+    const ok = await showConfirm({
+      title: `Delete ${m.name}?`,
+      body: "Their photos are deleted permanently from storage. You can add them again any time.",
+      destructive: true,
+      confirmLabel: "Delete",
+    });
+    if (!ok) return;
+    setModelBusy(true);
+    try {
+      await deleteBrandModel({ data: { id: m.id } });
+      const res = await listMyBrandModels();
+      setModels(res.models);
+      const active = res.models.find((x) => x.is_active);
+      if (active) onActivePhotos(active.photos);
+      else await onNoModels();
+    } catch (e) {
+      await showAlert({ title: "Couldn't remove that model", body: (e as Error).message });
+    } finally {
+      setModelBusy(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-[12px] text-muted">
+        {models.length} of {slots} model slots used · {saveCost} credits to save a model
+      </p>
+
+      {models.map((m) => (
+        <div
+          key={m.id}
+          className={`card-list flex flex-col gap-3 p-3 ${m.is_active ? "ring-1 ring-primary" : ""}`}
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex gap-1.5">
+              {m.photos.slice(0, 3).map((p, i) => (
+                <img key={i} src={p} alt={`${m.name} ${i + 1}`} className="h-14 w-14 rounded-[10px] object-cover" />
+              ))}
+            </div>
+            <div className="flex-1">
+              <p className="text-[14px] font-semibold text-ink">{m.name}</p>
+              <p className="text-[12px] text-muted">
+                {m.photos.length} photo{m.photos.length === 1 ? "" : "s"}
+                {m.is_active ? " · in use" : ""}
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {!m.is_active && (
+              <button
+                type="button"
+                onClick={() => activate(m.id)}
+                disabled={modelBusy}
+                className="h-9 rounded-[10px] bg-primary px-3 text-[13px] font-semibold text-white disabled:opacity-60"
+              >
+                Use this model
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => rename(m)}
+              disabled={modelBusy}
+              className="h-9 rounded-[10px] bg-raised px-3 text-[13px] font-semibold text-ink disabled:opacity-60"
+            >
+              Rename
+            </button>
+            <button
+              type="button"
+              onClick={() => remove(m)}
+              disabled={modelBusy}
+              className="h-9 px-1 text-[13px] font-medium text-muted underline disabled:opacity-60"
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+      ))}
+
+      {adding ? (
+        <RealModelUploader
+          modelBusy={modelBusy}
+          setModelBusy={setModelBusy}
+          saveCost={saveCost}
+          onSaved={async () => {
+            setAdding(false);
+            await refresh(true);
+          }}
+          onCancel={() => setAdding(false)}
+        />
+      ) : models.length < slots ? (
+        <button
+          type="button"
+          onClick={() => setAdding(true)}
+          className="h-11 rounded-[10px] bg-raised text-[13px] font-semibold text-ink"
+        >
+          {models.length === 0 ? "Add your own model" : "Add another model"}
+        </button>
+      ) : (
+        <p className="text-[12px] text-muted">
+          All {slots} slots are full. Remove a model to add a different person.
+        </p>
+      )}
+    </div>
+  );
 }
 
 function RealModelUploader({
- modelBusy,
- setModelBusy,
- onUploaded,
- onCancel,
+  modelBusy,
+  setModelBusy,
+  saveCost,
+  onSaved,
+  onCancel,
 }: {
- modelBusy: boolean;
- setModelBusy: (v: boolean) => void;
- onUploaded: (urls: string[]) => void;
- onCancel?: () => void;
+  modelBusy: boolean;
+  setModelBusy: (v: boolean) => void;
+  saveCost: number;
+  onSaved: () => void | Promise<void>;
+  onCancel?: () => void;
 }) {
- const [files, setFiles] = useState<File[]>([]);
- const [previews, setPreviews] = useState<string[]>([]);
- const [c1, setC1] = useState(false);
- const [c2, setC2] = useState(false);
- const [c3, setC3] = useState(false);
- const inputRef = useRef<HTMLInputElement>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [name, setName] = useState("");
+  const [c1, setC1] = useState(false);
+  const [c2, setC2] = useState(false);
+  const [c3, setC3] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
- function addFiles(fl: FileList | null) {
- if (!fl) return;
- const arr = Array.from(fl).slice(0, 3 - files.length);
- Promise.all(arr.map(fileToDataUrl)).then((urls) => {
- setFiles((f) => [...f, ...arr].slice(0, 3));
- setPreviews((p) => [...p, ...urls].slice(0, 3));
- });
- }
+  const consentGiven = c1 && c2 && c3;
 
- const canSubmit = files.length > 0 && c1 && c2 && c3 && !modelBusy;
+  function addFiles(fl: FileList | null) {
+    if (!fl) return;
+    const arr = Array.from(fl).slice(0, 5 - files.length);
+    Promise.all(arr.map(fileToDataUrl)).then((urls) => {
+      setFiles((f) => [...f, ...arr].slice(0, 5));
+      setPreviews((p) => [...p, ...urls].slice(0, 5));
+    });
+  }
 
- async function submit() {
- if (!canSubmit) return;
- setModelBusy(true);
- try {
- const dataUrls = await Promise.all(files.map(fileToDataUrl));
- const { urls } = await uploadBrandModelPhotos({
- data: {
- dataUrls,
- consentAgreed: c1,
- consentAdult: c2,
- consentNotPublicFigure: c3,
- },
- });
- onUploaded(urls);
- } catch (e) {
- await showAlert({ title: "Couldn't save your model photos", body: (e as Error).message });
- } finally {
- setModelBusy(false);
- }
- }
+  const canSubmit = files.length > 0 && consentGiven && !modelBusy;
 
- return (
- <div className="card-list flex flex-col gap-4 p-3">
- <p className="text-[13px] text-muted">
- Upload 1–3 clear photos of your model. One good face shot, and if possible a full-length shot.
- </p>
- <div className="flex flex-wrap gap-2">
- {previews.map((p, i) => (
- <div key={i} className="relative h-20 w-20">
- <img src={p} alt={`Model ${i + 1}`} className="h-20 w-20 rounded-[10px] object-cover" />
- <button
- type="button"
- onClick={() => {
- setFiles((f) => f.filter((_, j) => j !== i));
- setPreviews((pp) => pp.filter((_, j) => j !== i));
- }}
- className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-black/70 text-[11px] font-bold text-white"
- aria-label="Remove"
- >
- ×
- </button>
- </div>
- ))}
- {previews.length < 3 && (
- <button
- type="button"
- onClick={() => inputRef.current?.click()}
- className="grid h-20 w-20 place-items-center rounded-[10px] bg-raised text-[22px] text-muted"
- >
- +
- </button>
- )}
- <input
- ref={inputRef}
- type="file"
- accept="image/*"
- multiple
- className="hidden"
- onChange={(e) => addFiles(e.target.files)}
- />
- </div>
+  async function submit() {
+    if (!canSubmit) return;
+    setModelBusy(true);
+    try {
+      const dataUrls = await Promise.all(files.map(fileToDataUrl));
+      await saveBrandModel({
+        data: {
+          name: name.trim() || "My model",
+          dataUrls,
+          consentAgreed: c1,
+          consentAdult: c2,
+          consentNotPublicFigure: c3,
+        },
+      });
+      await onSaved();
+    } catch (e) {
+      const msg = (e as Error).message;
+      const m = /^NO_CREDITS:(\d+):(\d+)$/.exec(msg);
+      await showAlert({
+        title: m ? "Not enough credits" : "Couldn't save your model photos",
+        body: m
+          ? `Saving a model costs ${m[1]} credits and you have ${m[2]}. Top up in Billing and try again.`
+          : msg,
+      });
+    } finally {
+      setModelBusy(false);
+    }
+  }
 
- <div className="flex flex-col gap-2 rounded-[10px] bg-raised p-3">
- <ConsentRow checked={c1} onChange={setC1}>
- This person has agreed to their photos being used to create product images for my shop.
- </ConsentRow>
- <ConsentRow checked={c2} onChange={setC2}>
- This person is 18 or older.
- </ConsentRow>
- <ConsentRow checked={c3} onChange={setC3}>
- This person is not a celebrity or public figure.
- </ConsentRow>
- </div>
- <p className="text-[12px] text-muted">
- You're responsible for having this person's permission. We delete these photos whenever you ask.
- </p>
+  return (
+    <div className="card-list flex flex-col gap-4 p-3">
+      <p className="text-[13px] text-muted">
+        Add up to 5 clear photos of the person — at least one clear face shot, and a full-length one if you can.
+        More angles means the same person stays consistent across every product.
+      </p>
 
- <div className="flex flex-col gap-2">
- <button
- type="button"
- onClick={submit}
- disabled={!canSubmit}
- className="h-11 rounded-[10px] bg-primary text-[14px] font-semibold text-white disabled:opacity-50"
- >
- {modelBusy ? "Saving…" : "Save my model"}
- </button>
- {onCancel && (
- <button
- type="button"
- onClick={onCancel}
- disabled={modelBusy}
- className="h-10 rounded-[10px] text-[13px] font-medium text-muted underline disabled:opacity-60"
- >
- Cancel
- </button>
- )}
- </div>
- </div>
- );
+      <label className="flex flex-col gap-1.5">
+        <span className="text-[13px] font-medium text-ink">Model name</span>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={40}
+          placeholder="Priya, Store model…"
+          className="h-11 rounded-[10px] bg-raised px-3 text-[14px] text-ink"
+        />
+      </label>
+
+      {/* Consent gate — photo picker stays disabled until all three are ticked */}
+      <div className="flex flex-col gap-2 rounded-[10px] bg-raised p-3">
+        <ConsentRow checked={c1} onChange={setC1}>
+          This person has agreed to their photos being used to create product images for my shop.
+        </ConsentRow>
+        <ConsentRow checked={c2} onChange={setC2}>
+          This person is 18 or older.
+        </ConsentRow>
+        <ConsentRow checked={c3} onChange={setC3}>
+          This person is not a celebrity or public figure.
+        </ConsentRow>
+      </div>
+      <p className="text-[12px] text-muted">
+        You're responsible for having this person's permission. We delete these photos whenever you ask.
+      </p>
+
+      <div className="flex flex-wrap gap-2">
+        {previews.map((p, i) => (
+          <div key={i} className="relative h-20 w-20">
+            <img src={p} alt={`Model ${i + 1}`} className="h-20 w-20 rounded-[10px] object-cover" />
+            <button
+              type="button"
+              onClick={() => {
+                setFiles((f) => f.filter((_, j) => j !== i));
+                setPreviews((pp) => pp.filter((_, j) => j !== i));
+              }}
+              className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-black/70 text-[11px] font-bold text-white"
+              aria-label="Remove"
+            >
+              ×
+            </button>
+          </div>
+        ))}
+        {previews.length < 5 && (
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={!consentGiven}
+            aria-label="Add photos"
+            className="grid h-20 w-20 place-items-center rounded-[10px] bg-raised text-[22px] text-muted disabled:opacity-40"
+          >
+            +
+          </button>
+        )}
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          disabled={!consentGiven}
+          className="hidden"
+          onChange={(e) => addFiles(e.target.files)}
+        />
+      </div>
+      {!consentGiven && (
+        <p className="text-[12px] text-muted">Tick all three boxes above to add photos.</p>
+      )}
+
+      <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={submit}
+          disabled={!canSubmit}
+          className="h-11 rounded-[10px] bg-primary text-[14px] font-semibold text-white disabled:opacity-50"
+        >
+          {modelBusy ? "Saving…" : `Save my model · ${saveCost} credits`}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={modelBusy}
+            className="h-10 rounded-[10px] text-[13px] font-medium text-muted underline disabled:opacity-60"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
+    </div>
+  );
 }
+
 
 function ConsentRow({
  checked,
