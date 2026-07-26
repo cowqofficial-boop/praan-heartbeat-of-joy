@@ -31,6 +31,8 @@ export const Route = createFileRoute("/create")({
 
 function CreatePage() {
   const { user } = useAuth();
+  const [kind, setKind] = useState<ContentKind>("product");
+  const isService = kind === "service";
   return (
     <main className="flex min-h-screen flex-col items-center px-5 pb-28 pt-16 lg:min-h-[calc(100vh-4rem)] lg:justify-center lg:pb-16 lg:pt-16">
       {user && (
@@ -46,29 +48,43 @@ function CreatePage() {
       <div className="w-full max-w-sm lg:max-w-[640px]">
         <div className="flex items-start gap-2">
           <h1 className="font-display text-[40px] leading-[1.02] text-ink sm:text-[56px] lg:text-[72px]">
-            One photo. Everything you need to sell it.
+            {isService
+              ? "One service. Everything you need to sell it."
+              : "One photo. Everything you need to sell it."}
           </h1>
           <div className="mt-3 lg:mt-4">
             <HelpButton
-              label="Photo tips"
+              label={isService ? "Service tips" : "Photo tips"}
               content={
-                <>
-                  <p className="font-semibold text-ink">Photo tips</p>
-                  <p className="mt-1 text-muted">Take a normal photo on a normal table. Add two or three more angles if you can — the back, a close-up, the label. Better input, better output.</p>
-                </>
+                isService ? (
+                  <>
+                    <p className="font-semibold text-ink">Service tips</p>
+                    <p className="mt-1 text-muted">A photo is optional. If you have one of your work, your setup, or your tools, add it — the poster comes out stronger and costs fewer credits. Write what's included in plain words.</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-semibold text-ink">Photo tips</p>
+                    <p className="mt-1 text-muted">Take a normal photo on a normal table. Add two or three more angles if you can — the back, a close-up, the label. Better input, better output.</p>
+                  </>
+                )
               }
             />
           </div>
         </div>
         <p className="mt-4 text-[15px] text-muted lg:text-[17px]">
-          Studio photos, listing, and a catalog file — from your phone.
+          {isService
+            ? "A promotional poster, a listing, captions, and a booking line — from your phone."
+            : "Studio photos, listing, and a catalog file — from your phone."}
         </p>
 
-        <div className="mt-10">
-          <UploadWidget />
+        <div className="mt-6">
+          <TypeToggle value={kind} onChange={setKind} />
         </div>
+
+        <div className="mt-6">{isService ? <ServiceForm /> : <UploadWidget />}</div>
       </div>
     </main>
   );
+
 }
 
