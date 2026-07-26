@@ -17,6 +17,7 @@ import {
 } from "@/lib/calendar.functions";
 import { getMyCredits } from "@/lib/billing.functions";
 import { listMyProducts } from "@/lib/library.functions";
+import { COSTS } from "@/lib/plans";
 
 import { CreditBadge } from "@/components/CreditBadge";
 import { Lock } from "lucide-react";
@@ -175,7 +176,7 @@ function CalendarPage() {
             <p className="mt-1 text-muted">CowQ picks a product for each day and writes a different kind of post — a close-up, an offer, a festival post, a question. Open any day to copy the caption and download the image.</p>
           </>
         }
-        action={!planId ? { label: "Plan my month", onClick: handleCreate, icon: Sparkles, disabled: creating } : undefined}
+        action={!planId ? { label: `Plan my month — ${COSTS.calendar_month} credits`, onClick: handleCreate, icon: Sparkles, disabled: creating } : undefined}
       />
 
 
@@ -363,7 +364,7 @@ function EmptyState({
         illustration={<IllustrationCalendar />}
         title="No month planned yet"
         body="CowQ will fill thirty days with posts made from your products. One tap to start."
-        action={{ label: creating ? "Starting…" : "Plan my month", onClick: onCreate }}
+        action={{ label: creating ? "Starting…" : `Plan my month — ${COSTS.calendar_month} credits`, onClick: onCreate }}
         help={
           <>
             <p className="font-semibold text-ink">How planning works</p>
@@ -583,7 +584,7 @@ function PostSheet({
                   ) : (
                     <RefreshCw className="h-4 w-4" />
                   )}
-                  Regenerate
+                  Regenerate · {COSTS.calendar_post}
                 </button>
                 <button
                   type="button"

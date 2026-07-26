@@ -296,6 +296,12 @@ export const generateBrandModelPortrait = createServerFn({ method: "POST" })
     const who = prefs
       ? `The model is: ${prefs}.`
       : "Choose a natural-looking Indian adult with a warm, pleasant, approachable presence.";
+    // Attire / cultural styling / pose guidance, including the seller's own
+    // "custom look" text — this reference portrait is reused on every on-model
+    // shot, so it has to carry the same visible details.
+    const styling = describeModelStyling(kit ?? {});
+    const custom = sanitizeCustomLook(kit?.model_custom_look ?? null);
+
 
     // Use a seed image if provided (e.g. a product photo to inform styling context).
     // Otherwise generate from a neutral 1x1 white pixel so the model has an image input.
@@ -316,7 +322,10 @@ export const generateBrandModelPortrait = createServerFn({ method: "POST" })
     }
 
     const prompt = `Portrait of one person for a brand model reference. ${who}
+${styling}
+${custom ? `IMPORTANT — clearly include: ${custom}. These details must be plainly visible in the portrait.` : ""}
 Photorealistic, natural pose, natural indoor daylight, plain neutral background, head-and-shoulders framing centered, calm pleasant expression, hands and fingers correct, no props, no text, no logo, no watermark. This is a reference portrait to be reused across a shop's product photography, so the person should look consistent, believable, and ordinary — not a fashion cover, not an editorial shot.`;
+
 
     // Charge for the portrait before generating; refunded if anything fails.
     const credits = await import("./credits.server");

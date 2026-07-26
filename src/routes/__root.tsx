@@ -153,7 +153,7 @@ function RootComponent() {
     ["--page-accent-2" as string]: accent.color2,
   } as CSSProperties;
   const shellClass = user
-    ? "mx-auto min-h-screen w-full max-w-[520px] bg-transparent lg:ml-[240px] lg:max-w-none lg:pl-0"
+    ? "mx-auto min-h-screen w-full max-w-[520px] bg-transparent lg:ml-[240px] lg:w-[calc(100%-240px)] lg:max-w-none lg:pl-0"
     : "mx-auto min-h-screen w-full bg-transparent";
 
   const innerClass = user ? "lg:mx-auto lg:max-w-[1200px] lg:px-12" : "";

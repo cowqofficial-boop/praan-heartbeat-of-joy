@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, Check, Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckout, getMyCredits } from "@/lib/billing.functions";
 import { creditPacks, estimateProducts, formatInr, subscriptionPairs, type Plan } from "@/lib/plans";
 import { PageHeader } from "@/components/PageHeader";
+import { BackButton } from "@/components/BackButton";
+
 
 
 export const Route = createFileRoute("/pricing")({
@@ -121,15 +123,10 @@ function PricingPage() {
 
   return (
     <main className="flex min-h-screen flex-col px-5 pb-16 pt-8 lg:px-0 lg:pt-12">
-      <div className="flex items-center gap-2 lg:hidden">
-        <Link
-          to={signedIn ? "/library" : "/"}
-          className="grid h-10 w-10 -ml-2 place-items-center text-muted hover:text-ink"
-          aria-label="Back"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
+      <div className="flex items-center gap-2">
+        <BackButton fallback="/library" />
       </div>
+
       <PageHeader
         icon={Sparkles}
         title="Plans"

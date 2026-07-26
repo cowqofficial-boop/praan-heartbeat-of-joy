@@ -7,6 +7,7 @@ import { PostThisButton } from "@/components/PostThisButton";
 import JSZip from "jszip";
 import { generateImages, getGeneration, submitFeedback } from "@/lib/cowq.functions";
 import { getBrowserId } from "@/lib/browser-id";
+import { COSTS } from "@/lib/plans";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import { useAuth } from "@/lib/use-auth";
 import { getMyCredits } from "@/lib/billing.functions";
@@ -315,8 +316,8 @@ function PhotosSection({
       {/* MOBILE: full-bleed swipeable carousel with dot indicator */}
       <div className="lg:hidden">
         <div
-          className="relative -mx-6 w-screen"
-          style={{ maxWidth: "100vw" }}
+          className="relative -mx-6 w-[calc(100%+3rem)]"
+          style={{ maxWidth: "calc(100% + 3rem)" }}
           onScroll={(e) => {
             const el = e.currentTarget;
             const w = el.clientWidth;
@@ -758,7 +759,7 @@ function MakeMoreButton({
       }}
       className="mt-1 h-11 w-full rounded-[14px] bg-raised text-[13px] font-medium text-muted hover:text-ink disabled:opacity-60"
     >
-      {busy ? "Making more photos…" : "Make more photos"}
+      {busy ? "Making more photos…" : `Make more photos — ${COSTS.product} credits`}
     </button>
   );
 }

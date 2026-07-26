@@ -3,6 +3,8 @@ import { Camera, Sparkles, Package, Check, Shield, Lock, RefreshCw, ImageIcon, U
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { UploadWidget } from "@/components/UploadWidget";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
+import { Wordmark } from "@/components/Wordmark";
+
 import { useAuth } from "@/lib/use-auth";
 import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/site";
 import { showcasePairs } from "@/data/showcase";
@@ -146,9 +148,11 @@ function Landing() {
   const { user } = useAuth();
   return (
     <main className="w-full">
-      {/* Top bar — mobile only. Sidebar handles desktop chrome. */}
-      <header className="flex items-center justify-between px-6 pt-6 lg:hidden">
-        <span className="font-display text-[22px] leading-none text-ink">CowQ</span>
+      {/* Top bar — logo always visible; nav collapses gracefully on small screens. */}
+      <header className="mx-auto flex w-full max-w-[1200px] items-center justify-between gap-4 px-6 pt-6">
+        {/* Sidebar already shows the wordmark on desktop for signed-in sellers. */}
+        <Wordmark className={user ? "lg:hidden" : ""} />
+
         <nav className="flex items-center gap-5 text-[14px] text-muted">
           <Link to="/how-it-works" className="hover:text-ink">
             How it works
