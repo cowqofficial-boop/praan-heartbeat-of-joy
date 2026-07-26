@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { currentUserId } from "./credits.server";
 import { buildShopifyCsv, slugify } from "./csv";
 import {
   GEMINI_IMAGE_MODEL,
@@ -462,6 +463,7 @@ export const generateImages = createServerFn({ method: "POST" })
     }) => d,
   )
   .handler(async ({ data }) => {
+    const userId = (await currentUserId()) ?? null;
     const { COSTS } = await import("./plans");
     const PRODUCT_COST = COSTS.product;
     let refundInfo: { userId: string; sub: number; pack: number } | null = null;
@@ -595,6 +597,7 @@ export const generateImages = createServerFn({ method: "POST" })
 export const startGenerationJob = createServerFn({ method: "POST" })
   .inputValidator((d: { browserId: string; userId?: string | null }) => d)
   .handler(async ({ data }) => {
+    const userId = (await currentUserId()) ?? null;
     const { COSTS } = await import("./plans");
     const productCost = COSTS.product;
     const sb = await admin();
@@ -671,6 +674,7 @@ export const generateImageForJob = createServerFn({ method: "POST" })
     }) => d,
   )
   .handler(async ({ data }) => {
+    const userId = (await currentUserId()) ?? null;
     await ensureGenerationReserved(data.jobId, data.browserId);
     const urls = data.imageUrls && data.imageUrls.length > 0
       ? data.imageUrls
@@ -757,6 +761,7 @@ export const generateCopyAndSave = createServerFn({ method: "POST" })
     }) => d,
   )
   .handler(async ({ data }) => {
+    const userId = (await currentUserId()) ?? null;
     if (data.jobId) await ensureGenerationReserved(data.jobId, data.browserId);
     // Look up brand kit if signed in.
     let brand: {
