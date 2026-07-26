@@ -743,7 +743,7 @@ function Landing() {
       </section>
 
       <footer className="px-6 py-10 text-center text-[12px] text-muted">
-        CowQ · Complete Operations With Quality ·{" "}
+        CowQ · AI product photos and listings for small sellers ·{" "}
         <Link to="/how-it-works" className="hover:text-ink">
           How it works
         </Link>{" "}
