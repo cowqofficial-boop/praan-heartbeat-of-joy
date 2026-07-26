@@ -836,13 +836,17 @@ function RoadmapCard({
   title,
   body,
   tone = "card-cobalt",
+  live = false,
 }: {
   icon: LucideIcon;
   date: string;
   title: string;
   body: string;
   tone?: string;
+  /** true = shipping now, shown as a live green pill instead of an amber date. */
+  live?: boolean;
 }) {
+
   return (
     <div className={`${tone} p-6`}>
       <span
