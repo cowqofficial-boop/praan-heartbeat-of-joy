@@ -383,7 +383,13 @@ function StockPage() {
                         </td>
                         <td className="px-2 py-3">
                           <button type="button" onClick={() => setEditing(it)} className="text-left font-medium text-ink hover:text-primary">{it.name}</button>
+                          {!it.has_photos && (
+                            <Link to="/create" className="mt-0.5 block text-[12px] font-semibold text-[color:var(--page-accent)]">
+                              Generate photos — {COSTS.product} credits
+                            </Link>
+                          )}
                         </td>
+
                         <td className="px-2 py-3 font-mono text-[13px] tabular-nums text-muted">{it.sku ?? "—"}</td>
                         <td className="px-2 py-3 text-right font-mono text-[15px] font-semibold tabular-nums">{it.quantity}</td>
                         <td className="px-2 py-3"><span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${chip.cls}`}>{chip.label}</span></td>
