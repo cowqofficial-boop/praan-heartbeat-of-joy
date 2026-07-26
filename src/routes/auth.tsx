@@ -113,7 +113,7 @@ function Auth() {
           className="mt-[12px] text-[13px] font-medium text-muted"
           style={{ letterSpacing: "0.04em" }}
         >
-          Complete Operations With Quality
+          AI product photos and listings for small sellers
         </span>
       </div>
       <h1 className="mt-10 font-display text-[32px] leading-tight text-ink">
