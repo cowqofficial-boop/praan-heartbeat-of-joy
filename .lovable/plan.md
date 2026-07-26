@@ -1,82 +1,45 @@
-# Profile & Settings
+## Group E — Billing & invoicing
 
-A new `/profile` area for CowQ, built to the premium dark spec: glass cards, soft gradients, 16–20px corners, large spacing, smooth motion. It reuses the palette and card utilities already in `src/styles.css` (Void Black, Cobalt, Magenta, Amber, Titanium Fog) rather than introducing a second design system.
+**E1. GST details (Billing)**
+Migration adds `gstin`, `invoice_business_name`, `invoice_address`, `invoice_state_code` to `profiles`. New "GST details" card on `/billing` (own tint in the cycle) with the nudge line "Add your GST details to get a GST invoice on every payment." GSTIN is validated loosely (15 alphanumeric chars, uppercased) — a soft magenta hint appears if it doesn't look right, but saving is never blocked. Saved through a new authenticated server fn; Profile → Account reads the same fields.
 
-Language stays in CowQ's current product terms — photos, brand kit, model, credits, shops — with the structure and polish from the brief.
+**E2. Invoices**
+- Migration adds an `invoices` table (user, payment ref, sequential `invoice_no` via a Postgres sequence + `CowQ/2026-27/000123` format, buyer snapshot, taxable value, CGST/SGST/IGST, total) with owner-only RLS and grants.
+- On successful payment (Razorpay webhook path, where credits are already granted) an invoice row is created. Tax at 18% on a reverse-computed taxable value: IGST 18% when the buyer's GSTIN state code differs from the seller state, otherwise CGST 9% + SGST 9%. No GST details on file → the same row is rendered as a plain payment receipt.
+- New printable invoice page `/invoice/$id` (own route, auth-gated read via server fn) styled as a clean white A4-style document with a print/download button (browser print-to-PDF). Seller block is an explicit placeholder: `SELLER_LEGAL_NAME / SELLER_GSTIN / SELLER_ADDRESS` in one constant so the founder edits one file.
+- "Invoice history" list on `/billing` (date, invoice no, plan, amount, Download).
 
-## Shape
+**E3. Inline upgrade + top-ups on Billing**
+Below the current-plan card: compact cards for only the plans above the current one (key difference + price) each with an "Upgrade" button, plus a "Top up credits" section with the four packs (300/₹599, 800/₹1,399, 2,000/₹3,199, 5,000/₹7,499). Both reuse the existing `createCheckout` + Razorpay script flow lifted out of `/pricing` into a shared `useRazorpayCheckout` hook — no navigation to Pricing.
 
-```text
-┌──────────┬───────────────────────────────┬──────────────┐
-│ App      │ Header: Profile · search ·    │ Insights     │
-│ sidebar  │ notifications · help · avatar │ widgets      │
-│ (exists) ├───────────────────────────────┤              │
-│          │ Profile header card           │ Usage        │
-│          │ Completion ring               │ Photos made  │
-│          │ ─ tab bar ─                   │ Credits      │
-│          │ [active tab content]          │ Time saved   │
-└──────────┴───────────────────────────────┴──────────────┘
-```
+**E4. Honest storage tiers**
+`planRetention()` added to `src/lib/plans.ts`: Free 30 days (files removed, product record kept so it can be regenerated), Starter 6 months while subscribed, Growth and Pro kept while subscribed (Pro also priority). Shown as a "Your photos" block on Billing and in Profile → Plan & usage, worded generously ("Your photos stay with you for as long as you're on CowQ") and never using the word "unlimited". The existing `pruneExpiredGeneratedFiles` helper gets wired to plan-based retention and runs on library/results access for free users (cheap, guarded) — no new infrastructure.
 
-Desktop three-column; tablet drops the insights panel to the bottom; mobile stacks everything and the tab bar becomes a horizontal scroller.
+## Group F — Content & visual polish
 
-Always visible above the tabs: profile header card (avatar with online dot, name, role, business, location, contact, member since, plan badge, Edit / Upload photo / Share buttons) and the completion ring with its checklist.
+**F1.** Rename every "Shopify catalog file"/"Shopify" reference in `index.tsx`, `how-it-works.tsx`, `results.$id.tsx`, `library.tsx`, `create.tsx`, `csv.ts`, `bulk-download.ts`, `blog.flat-lay-guide.tsx` to "Website catalog file" with the subline "Works with Shopify, WooCommerce, Amazon, Flipkart and more." The preview becomes a document-style card: `products.csv` filename header bar, CSV badge, monospaced column headers, subtle grid lines, download affordance.
 
-## Tabs
+**F2.** "Built next" reordered: Posting everywhere (September) first, then the newer items. The video card becomes "Product & presenter videos — rolling out"; all "months away" wording removed.
 
-Nine sub-routes under `/profile`, each a route file rendering its own component:
+**F3/F4.** Generate realistic paired imagery: four before/after sets (brass diya, saree, jewellery, packaged good) where the "before" reads as a dim casual phone snap and the "after" as a studio result, plus ~4 additional showcase studio samples across varied products. Uploaded as CDN assets and wired into the before/after slider and studio showcase.
 
-| Tab | Content | Data |
-|---|---|---|
-| Overview | About & business, social links, activity timeline | Real (brand kit + generations) |
-| Account | Name, email, phone, language, timezone, date format, currency, country, password | Real (new profile table) |
-| AI preferences | Personality, brand voice, reply style, emoji usage, creativity & temperature sliders, memory, context | Real — maps onto `brand_kits` tone/voice plus a few new columns |
-| Your model | Active brand model: avatar, name, source, photos count, last saved; Edit / Replace | Real (`brand_models`) |
-| Connected apps | Instagram/Facebook live; Google, WhatsApp, Shopify, Stripe, Zapier and others shown as "Coming soon" cards | Mixed |
-| Security | Password change, sign out everywhere, security score, recent sign-ins | Partly real; 2FA / API keys / devices marked coming soon |
-| Subscription | Plan, credit usage bars, upgrade CTA, payment history | Real (`user_credits`, `payments`, `plans`) |
-| Notifications | Email, WhatsApp, push, reports, alerts toggles | Real (new prefs columns) |
-| Data & privacy | Export data, download AI memory, privacy settings, delete account | Export/download real; delete account with confirmation |
+**F5.** Upload box carousel: when the drop zone is empty, ~10 example product photos cross-fade beside/behind it at low opacity. Pauses on hover/focus, disabled under `prefers-reduced-motion`, images lazy-loaded and unmounted the moment a file is selected, so uploads are never delayed.
 
-Team is included as a locked "Coming soon" panel inside Account rather than a fake tab — CowQ has no team model and no seats in the plans.
+**F6.** `/how-it-works` audit pass: back button uses history with `/` fallback, brass-diya worked example flows through all steps, comparison strip intact, images load, no horizontal overflow at 390px, and a line noting video is rolling out.
 
-## Honest labelling
+**F7.** Chrome-only premium pass in `styles.css` and section shells: deeper ambient gradients on dark sections, larger confident display headers, crisper card shadow/glow tokens, slightly more vertical rhythm, smoother staggered entrance (reduced-motion respected). Layout, palette, tints and product imagery untouched.
 
-Anything without a backend renders in a dimmed card with a small "Coming soon" pill and disabled controls. Nothing fake claims to save. This keeps the page impressive without over-promising, matching the roadmap section already on the landing page.
+## Group G — Guidance
 
-## UX
+**G1.** Move the tour/help trigger on `/profile` into the page header row, matching the "?" placement on every other page; remove the floating/overlapping instance.
 
-- Inline editing on every editable field: click the value, it becomes an input, blur or Enter saves.
-- Autosave with a subtle "Saved" flash; failed saves toast and revert.
-- Undo toast for the last change (10s window).
-- Confirmation dialogs via the existing `Dialogs.tsx` for destructive actions.
-- Keyboard: `/` focuses search, `⌘K` command palette for jumping tabs, `Esc` cancels an inline edit, arrow keys move through tabs.
-- Loading skeletons per section, fade-and-rise entry (400ms) consistent with the rest of the app.
-- Full keyboard focus rings, ARIA labels on toggles/sliders, live regions for save confirmations.
+**G2.** Calendar explainer: a short collapsible intro block (and matching expanded "?" help) with five scannable lines — what it is, how it works, where posts go (download/copy now; auto-posting to Instagram & Facebook in September), when to use it, why it helps. Dismissible and remembered per user.
 
-## Empty states
+## Verification
 
-Line-SVG illustrations, matching the existing `EmptyState` component style, for: no connected shops, no saved model, no team, no activity yet, no invoices.
+Playwright sweep of `/`, `/how-it-works`, `/pricing`, `/library`, `/stock`, `/billing`, `/calendar`, `/brand-kit`, `/profile` at 390/820/1440 with a console-error assertion, plus checks that an invoice renders and downloads, GST fields save and reload, upgrade/top-up buttons appear on Billing, "Website catalog file" appears with no stray "Shopify catalog" text, the calendar explainer renders, and the profile tour button sits in the header. Anonymous free-product flow and credit deduction are re-run to confirm they still work.
 
-## Technical
-
-**Database (one migration)**
-- `profiles` — display name, role/title, phone, location, website, timezone, language, date format, currency, country, bio, mission, years in business, team size, social handles, avatar URL. Owner-only RLS, grants for `authenticated` and `service_role`.
-- `notification_prefs` — per-channel booleans, owner-only.
-- `brand_kits` gains AI-preference columns: reply style, emoji usage, conversation length, creativity, temperature.
-- Avatars go in the existing `praan` storage bucket under a `profiles/` prefix.
-
-**Server functions** — `src/lib/profile.functions.ts` with `getMyProfile`, `saveMyProfile` (zod-validated, length caps), `uploadAvatar`, `getNotificationPrefs`, `saveNotificationPrefs`, `getSecurityOverview`, `exportMyData`, `deleteMyAccount`. All behind `requireSupabaseAuth`.
-
-**Routes** — `src/routes/_authenticated/profile/route.tsx` (shell: header, profile card, completion ring, tab bar, insights panel, `<Outlet />`) plus `index.tsx` and eight sibling leaves. Auth-gated, so loaders can use protected server functions.
-
-**Components** — `src/components/profile/` holding roughly twenty small components: `ProfileHeaderCard`, `CompletionRing`, `InlineField`, `SettingCard`, `ToggleRow`, `SliderRow`, `ConnectedAppCard`, `SecurityScore`, `UsageBars`, `ActivityTimeline`, `InsightsPanel`, `ComingSoonCard`, `EmptyIllustration`, plus one per tab.
-
-**Styling** — new `@utility` classes for the glass card, gradient rim and hover glow, added alongside the existing card utilities. No hardcoded colour classes; existing tokens only.
-
-**Navigation** — a Profile entry (avatar) added to `AppSidebar` and the mobile nav sheet, plus head metadata with a `noindex` robots tag since it is private.
-
-## Not in scope
-
-- Real 2FA, biometric login, API keys, device/session management, team seats, or the non-Meta integrations. All shown as clearly-marked previews.
-- No changes to Billing, Pricing, Connect or Brand kit pages; Profile links out to them.
+### Technical notes
+- One migration: profile GST columns + `invoices` table (sequence, RLS, grants).
+- Invoice numbering is DB-sequential per financial year, so it stays gap-free and audit-friendly.
+- Checkout logic is shared, not duplicated, between `/pricing` and `/billing`.

@@ -1,11 +1,12 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Camera, Plus, X } from "lucide-react";
 import { getBrowserId } from "@/lib/browser-id";
 import { useCowqStore, type CowqPhoto } from "@/lib/cowq-store";
 import { createUploadTicket, identifyProduct, signUploadedOriginal } from "@/lib/cowq.functions";
 import { useAuth } from "@/lib/use-auth";
 import { PrimaryButton } from "@/components/PrimaryButton";
+import { studioSamples } from "@/data/showcase";
 
 const MAX_PHOTOS = 5;
 
@@ -195,19 +196,22 @@ export function UploadWidget({ compact = false }: { compact?: boolean }) {
         <button
           type="button"
           onClick={() => mainInputRef.current?.click()}
-          className={`flex w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[16px] bg-surface text-ink ${
+          className={`relative flex w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[16px] bg-surface text-ink ${
             compact ? "aspect-[4/3]" : "aspect-square lg:aspect-[3/2]"
           }`}
           style={{ boxShadow: "var(--shadow-card)" }}
         >
-          <span className="grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground lg:h-20 lg:w-20">
+          {/* Studio results fading behind the tap target — shows what comes out. */}
+          <SampleCarousel />
+          <span className="relative grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground lg:h-20 lg:w-20">
             <Camera className="h-7 w-7 lg:h-8 lg:w-8" />
           </span>
-          <span className="text-[17px] font-semibold lg:text-[19px]">Add a product photo</span>
-          <span className="text-[13px] text-muted lg:text-[14px]">
+          <span className="relative text-[17px] font-semibold lg:text-[19px]">Add a product photo</span>
+          <span className="relative text-[13px] text-muted lg:text-[14px]">
             Tap to open camera or pick from your phone
           </span>
         </button>
+
       ) : (
         <>
           <div className="overflow-hidden rounded-[16px] bg-surface">
@@ -336,5 +340,41 @@ export function UploadWidget({ compact = false }: { compact?: boolean }) {
         }}
       />
     </div>
+  );
+}
+
+/** Slow cross-fade of real CowQ studio results, sitting behind the tap target. */
+function SampleCarousel() {
+  const [i, setI] = useState(0);
+  const reduced =
+    typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+  useEffect(() => {
+    if (reduced || studioSamples.length < 2) return;
+    const t = setInterval(() => setI((v) => (v + 1) % studioSamples.length), 3800);
+    return () => clearInterval(t);
+  }, [reduced]);
+
+  if (!studioSamples.length) return null;
+
+  return (
+    <span aria-hidden className="pointer-events-none absolute inset-0">
+      {studioSamples.map((s, idx) => (
+        <img
+          key={s.url}
+          src={s.url}
+          alt=""
+          loading="lazy"
+          width={1024}
+          height={1024}
+          className="absolute inset-0 h-full w-full object-cover transition-opacity duration-[1200ms]"
+          style={{ opacity: idx === i ? 0.22 : 0 }}
+        />
+      ))}
+      <span
+        className="absolute inset-0"
+        style={{ background: "linear-gradient(180deg, rgba(6,7,10,0.55), rgba(6,7,10,0.85))" }}
+      />
+    </span>
   );
 }

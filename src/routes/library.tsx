@@ -157,7 +157,7 @@ function LibraryPage() {
             help={
               <>
                 <p className="font-semibold text-ink">How this works</p>
-                <p className="mt-1 text-muted">Take one clear phone photo of your product in daylight. CowQ turns it into 4 studio-style photos, marketplace-ready copy, social posts and a Shopify catalog file — in about a minute.</p>
+                <p className="mt-1 text-muted">Take one clear phone photo of your product in daylight. CowQ turns it into 4 studio-style photos, marketplace-ready copy, social posts and a website catalog file — in about a minute.</p>
               </>
             }
           />

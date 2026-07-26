@@ -11,7 +11,7 @@ export const Route = createFileRoute("/create")({
       {
         name: "description",
         content:
-          "Upload a product photo and CowQ turns it into studio images, a full listing, social posts, and a Shopify catalog file.",
+          "Upload a product photo and CowQ turns it into studio images, a full listing, social posts, and a website catalog file.",
       },
       { property: "og:title", content: "Add a product — CowQ" },
       {

@@ -192,3 +192,100 @@ export const cancelMySubscription = createServerFn({ method: "POST" })
     await rz.cancelRzSubscription(row.razorpay_subscription_id, true);
     return { ok: true };
   });
+
+// ---------- GST details ----------
+
+export type GstDetails = {
+  gstin: string | null;
+  invoice_business_name: string | null;
+  invoice_address: string | null;
+  invoice_state_code: string | null;
+};
+
+export const getMyGstDetails = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<GstDetails> => {
+    const { data } = await context.supabase
+      .from("profiles")
+      .select("gstin, invoice_business_name, invoice_address, invoice_state_code")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    return {
+      gstin: data?.gstin ?? null,
+      invoice_business_name: data?.invoice_business_name ?? null,
+      invoice_address: data?.invoice_address ?? null,
+      invoice_state_code: data?.invoice_state_code ?? null,
+    };
+  });
+
+export const saveMyGstDetails = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { gstin?: string; invoice_business_name?: string; invoice_address?: string }) => d)
+  .handler(async ({ context, data }): Promise<GstDetails> => {
+    const gstin = (data.gstin ?? "").trim().toUpperCase().slice(0, 20) || null;
+    const stateCode = gstin && /^\d{2}/.test(gstin) ? gstin.slice(0, 2) : null;
+    const payload = {
+      user_id: context.userId,
+      gstin,
+      invoice_business_name: (data.invoice_business_name ?? "").trim().slice(0, 200) || null,
+      invoice_address: (data.invoice_address ?? "").trim().slice(0, 600) || null,
+      invoice_state_code: stateCode,
+    };
+    const { data: row, error } = await context.supabase
+      .from("profiles")
+      .upsert(payload, { onConflict: "user_id" })
+      .select("gstin, invoice_business_name, invoice_address, invoice_state_code")
+      .single();
+    if (error) throw new Error(error.message);
+    return row as GstDetails;
+  });
+
+// ---------- Invoices ----------
+
+export type InvoiceRow = {
+  id: string;
+  invoice_no: string;
+  invoice_date: string;
+  plan_id: string;
+  plan_name: string;
+  buyer_name: string | null;
+  buyer_gstin: string | null;
+  buyer_address: string | null;
+  buyer_state_code: string | null;
+  total_paise: number;
+  taxable_paise: number;
+  cgst_paise: number;
+  sgst_paise: number;
+  igst_paise: number;
+  is_gst_invoice: boolean;
+};
+
+const INVOICE_COLS =
+  "id, invoice_no, invoice_date, plan_id, plan_name, buyer_name, buyer_gstin, buyer_address, buyer_state_code, total_paise, taxable_paise, cgst_paise, sgst_paise, igst_paise, is_gst_invoice";
+
+export const getMyInvoices = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<InvoiceRow[]> => {
+    const { data, error } = await context.supabase
+      .from("invoices")
+      .select(INVOICE_COLS)
+      .eq("user_id", context.userId)
+      .order("invoice_date", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as InvoiceRow[];
+  });
+
+export const getMyInvoice = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ context, data }): Promise<InvoiceRow | null> => {
+    const { data: row, error } = await context.supabase
+      .from("invoices")
+      .select(INVOICE_COLS)
+      .eq("id", data.id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return (row as InvoiceRow) ?? null;
+  });

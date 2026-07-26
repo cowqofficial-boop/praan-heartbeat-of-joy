@@ -390,7 +390,7 @@ function HowItWorks() {
           <StepLabel n={5} text="Your catalog file" />
           <H2>One file for your whole store.</H2>
           <Body>
-            Download a catalog file that imports straight into Shopify, Amazon or Flipkart. No
+            Download one website catalog file that works for your own site, Shopify, Amazon or Flipkart. No
             typing product details twice.
           </Body>
         </Reveal>

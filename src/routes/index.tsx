@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Camera, Sparkles, Package, Check, Shield, Lock, RefreshCw, ImageIcon, User, Share2, Video, UserRound, type LucideIcon } from "lucide-react";
+import { Camera, Sparkles, Package, Check, Shield, Lock, RefreshCw, ImageIcon, User, Share2, Video, UserRound, FileSpreadsheet, type LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { UploadWidget } from "@/components/UploadWidget";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
@@ -15,6 +15,19 @@ import who1 from "@/assets/landing/who-1.jpg.asset.json";
 import who2 from "@/assets/landing/who-2.jpg.asset.json";
 import who3 from "@/assets/landing/who-3.jpg.asset.json";
 import who4 from "@/assets/landing/who-4.jpg.asset.json";
+import diyaWhite from "@/assets/how/diya-white.jpg.asset.json";
+import diyaStudio from "@/assets/how/diya-studio.jpg.asset.json";
+import diyaLifestyle from "@/assets/how/diya-lifestyle.jpg.asset.json";
+import diyaFlatlay from "@/assets/how/diya-flatlay.jpg.asset.json";
+
+/** Real CowQ outputs, one per style, shown in the "4 studio photos" card. */
+const STUDIO_SAMPLES: { url: string; label: string }[] = [
+  { url: diyaWhite.url, label: "White background" },
+  { url: diyaStudio.url, label: "Soft studio" },
+  { url: diyaLifestyle.url, label: "Lifestyle scene" },
+  { url: diyaFlatlay.url, label: "Flat-lay" },
+];
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -272,17 +285,28 @@ function Landing() {
             <div className="mt-10 grid gap-4 md:grid-cols-3">
               <Artefact title="4 studio photos" tone="card-cobalt">
                 <div className="grid grid-cols-2 gap-2">
-                  {["White background", "Soft studio", "Lifestyle scene", "Flat-lay"].map((s) => (
-                    <div
-                      key={s}
-                      className="flex aspect-square items-end rounded-[10px] bg-raised p-2 text-[11px] text-muted"
-                    >
-                      {s}
+                  {STUDIO_SAMPLES.map((s) => (
+                    <div key={s.label} className="relative overflow-hidden rounded-[10px] bg-raised">
+                      <img
+                        src={s.url}
+                        alt={`${s.label} product photo made by CowQ`}
+                        loading="lazy"
+                        width={1024}
+                        height={1024}
+                        className="aspect-square w-full object-cover"
+                      />
+                      <span
+                        className="absolute inset-x-0 bottom-0 p-2 text-[11px] text-ink"
+                        style={{ background: "linear-gradient(180deg, transparent, rgba(6,7,10,0.85))" }}
+                      >
+                        {s.label}
+                      </span>
                     </div>
                   ))}
                 </div>
                 <p className="mt-3 text-[12px] text-muted">Square and vertical, both sizes.</p>
               </Artefact>
+
 
               <Artefact title="Marketplace listing" tone="card-magenta">
                 <div className="rounded-[10px] bg-raised p-3 text-left">
@@ -338,9 +362,19 @@ function Landing() {
                 </div>
               </Artefact>
 
-              <Artefact title="Shopify catalog file" wide tone="card-cobalt">
-                <div className="overflow-hidden rounded-[10px] bg-raised">
-                  <div className="grid grid-cols-6 gap-2 bg-background/40 px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-muted">
+              <Artefact title="Website catalog file" wide tone="card-cobalt">
+                {/* Spreadsheet document: filename tab, column letters, row numbers. */}
+                <div className="overflow-hidden rounded-[10px] bg-raised" style={{ border: "1px solid var(--line)" }}>
+                  <div
+                    className="flex items-center gap-2 px-3 py-2"
+                    style={{ borderBottom: "1px solid var(--line)", background: "color-mix(in oklab, var(--card-accent) 8%, transparent)" }}
+                  >
+                    <FileSpreadsheet className="h-4 w-4" style={{ color: "var(--card-accent)" }} strokeWidth={1.75} />
+                    <span className="font-mono text-[11px] text-ink">cowq-catalog.csv</span>
+                    <span className="ml-auto text-[10px] uppercase tracking-wider text-muted">3 rows</span>
+                  </div>
+                  <div className="grid grid-cols-[22px_repeat(6,minmax(0,1fr))] gap-2 px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-muted" style={{ borderBottom: "1px solid var(--line)" }}>
+                    <span />
                     <span>Handle</span>
                     <span className="col-span-2">Title</span>
                     <span>Vendor</span>
@@ -351,11 +385,13 @@ function Landing() {
                     ["stole-01", "Handwoven cotton stole", "Jaipur Loom", "₹1,499", "stole-01.jpg"],
                     ["diya-set", "Brass diya set of 6", "Moradabad", "₹899", "diya-set.jpg"],
                     ["speaker", "Wireless speaker", "Sound&Co", "₹2,999", "speaker.jpg"],
-                  ].map((r) => (
+                  ].map((r, i) => (
                     <div
                       key={r[0]}
-                      className="grid grid-cols-6 gap-2 px-3 py-2 font-mono text-[11px] text-ink"
+                      className="grid grid-cols-[22px_repeat(6,minmax(0,1fr))] gap-2 px-3 py-2 font-mono text-[11px] text-ink"
+                      style={{ borderBottom: i < 2 ? "1px solid color-mix(in oklab, var(--line) 60%, transparent)" : "none" }}
                     >
+                      <span className="text-muted">{i + 1}</span>
                       <span>{r[0]}</span>
                       <span className="col-span-2 truncate">{r[1]}</span>
                       <span className="truncate text-muted">{r[2]}</span>
@@ -365,9 +401,10 @@ function Landing() {
                   ))}
                 </div>
                 <p className="mt-3 text-[12px] text-muted">
-                  Imports straight into Shopify. Same file works for Amazon and Flipkart.
+                  Upload it to your website, Shopify, Amazon or Flipkart — one file, every shop.
                 </p>
               </Artefact>
+
             </div>
           </Reveal>
         </div>
@@ -634,24 +671,25 @@ function Landing() {
               Built next.
             </h2>
             <p className="mt-3 max-w-[620px] text-[15px] text-muted">
-              CowQ ships every month. Here's what's already being worked on.
+              CowQ ships every month. Here's what's rolling out now and what's next.
             </p>
           </Reveal>
           <Reveal delay={80}>
             <div className="mt-10 grid gap-4 md:grid-cols-3">
+              <RoadmapCard
+                icon={Video}
+                tone="card-magenta"
+                date="Rolling out"
+                live
+                title="Product videos"
+                body="Short videos made from the same photos — the product turning, the detail up close, ready for Reels and Shorts. Switching on for sellers now, a few at a time."
+              />
               <RoadmapCard
                 icon={Share2}
                 tone="card-cobalt"
                 date="September 2026"
                 title="Posting everywhere"
                 body="One tap posts to Instagram, Facebook, YouTube, Threads, X, LinkedIn, Pinterest and more. Connect once, then never open another app to publish."
-              />
-              <RoadmapCard
-                icon={Video}
-                tone="card-magenta"
-                date="October 2026"
-                title="Product videos"
-                body="Short videos made from the same photos — the product turning, the detail up close, ready for Reels and Shorts."
               />
               <RoadmapCard
                 icon={UserRound}
@@ -665,6 +703,7 @@ function Landing() {
               Dates are our honest best estimate. We'd rather ship late than promise something that isn't ready.
             </p>
           </Reveal>
+
         </div>
       </section>
 
@@ -836,13 +875,17 @@ function RoadmapCard({
   title,
   body,
   tone = "card-cobalt",
+  live = false,
 }: {
   icon: LucideIcon;
   date: string;
   title: string;
   body: string;
   tone?: string;
+  /** true = shipping now, shown as a live green pill instead of an amber date. */
+  live?: boolean;
 }) {
+
   return (
     <div className={`${tone} p-6`}>
       <span
@@ -855,14 +898,18 @@ function RoadmapCard({
         <Icon className="h-5 w-5" strokeWidth={1.75} />
       </span>
       <span
-        className="mt-5 inline-block rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]"
+        className="mt-5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]"
         style={{
-          background: "color-mix(in oklab, #FF8A1E 14%, transparent)",
-          color: "#FF8A1E",
+          background: `color-mix(in oklab, ${live ? "#00E5A0" : "#FF8A1E"} 14%, transparent)`,
+          color: live ? "#00E5A0" : "#FF8A1E",
         }}
       >
+        {live && (
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: "#00E5A0" }} aria-hidden />
+        )}
         {date}
       </span>
+
       <p className="mt-3 text-[17px] font-semibold text-ink">{title}</p>
       <p className="mt-2 text-[14px] leading-relaxed text-muted">{body}</p>
     </div>
