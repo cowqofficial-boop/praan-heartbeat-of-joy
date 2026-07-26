@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Camera, Sparkles, Package, Check, Shield, Lock, RefreshCw, ImageIcon, User, Share2, Video, UserRound, type LucideIcon } from "lucide-react";
+import { Camera, Sparkles, Package, Check, Shield, Lock, RefreshCw, ImageIcon, User, Share2, Video, UserRound, FileSpreadsheet, type LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { UploadWidget } from "@/components/UploadWidget";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
