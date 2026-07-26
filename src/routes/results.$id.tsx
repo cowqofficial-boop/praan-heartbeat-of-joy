@@ -21,6 +21,7 @@ import { VideoSection } from "@/components/video/VideoSection";
 import { TypeBadge } from "@/components/TypeToggle";
 import { CopyButton } from "@/components/CopyButton";
 import { contactLabel, fallbackCta, type ServiceDetails } from "@/lib/service";
+import { ComponentStack, PhotoActions } from "@/components/modular/ComponentStack";
 
 export const Route = createFileRoute("/results/$id")({
   head: ({ params }) => ({
