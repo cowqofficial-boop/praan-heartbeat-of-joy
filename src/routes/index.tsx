@@ -567,9 +567,25 @@ function Landing() {
                     A note from the founder
                   </p>
                   <p className="mt-2 text-[15px] leading-relaxed text-muted">
-                    [Founder note goes here — first person, one short paragraph, why CowQ exists
-                    and who it&rsquo;s for. Replace this placeholder with the real note before
-                    launch.]
+                    I run a shop with over 1,400 products. Every time I wanted to post one online —
+                    a marketplace listing, a website update, a social caption — I hit the same wall:
+                    writing a good description, finding the right keywords, picking hashtags that
+                    actually worked. I&rsquo;d search Google, paste things into a chatbot, tweak it,
+                    give up halfway.
+                    <br />
+                    <br />
+                    With 1,400 products, that pain multiplies fast. I could never keep up, so I
+                    stayed inconsistent — and inconsistency is what actually kills a small shop.
+                    Customers forget you exist. Sales drift down. Not because the products were bad,
+                    but because nobody knew they existed.
+                    <br />
+                    <br />
+                    I built CowQ to close that gap for good. One photo in — studio-quality images, a
+                    marketplace listing, captions, hashtags, a website-ready catalog file out. No
+                    more switching between five tabs and a chatbot just to post one product.
+                    <br />
+                    <br />
+                    CowQ is the tool I needed as a shop owner, built by a shop owner.
                   </p>
                   <p className="mt-3 text-[13px] text-muted">— Tarak Sundhar, founder</p>
                 </div>
