@@ -231,10 +231,11 @@ export function UploadWidget({ compact = false }: { compact?: boolean }) {
                 >
                   <img src={p.dataUrl} alt="" className="h-full w-full object-cover" />
                   {p.uploading && (
-                    <span className="absolute inset-0 flex items-center justify-center bg-background/50 text-[10px] font-medium text-ink">
-                      …
+                    <span className="absolute inset-0 flex items-center justify-center bg-background/60 text-[10px] font-semibold tabular-nums text-ink">
+                      {p.progress > 0 ? `${p.progress}%` : "…"}
                     </span>
                   )}
+
                 </button>
                 <button
                   type="button"
