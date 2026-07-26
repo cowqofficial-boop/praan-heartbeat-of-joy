@@ -634,24 +634,25 @@ function Landing() {
               Built next.
             </h2>
             <p className="mt-3 max-w-[620px] text-[15px] text-muted">
-              CowQ ships every month. Here's what's already being worked on.
+              CowQ ships every month. Here's what's rolling out now and what's next.
             </p>
           </Reveal>
           <Reveal delay={80}>
             <div className="mt-10 grid gap-4 md:grid-cols-3">
+              <RoadmapCard
+                icon={Video}
+                tone="card-magenta"
+                date="Rolling out"
+                live
+                title="Product videos"
+                body="Short videos made from the same photos — the product turning, the detail up close, ready for Reels and Shorts. Switching on for sellers now, a few at a time."
+              />
               <RoadmapCard
                 icon={Share2}
                 tone="card-cobalt"
                 date="September 2026"
                 title="Posting everywhere"
                 body="One tap posts to Instagram, Facebook, YouTube, Threads, X, LinkedIn, Pinterest and more. Connect once, then never open another app to publish."
-              />
-              <RoadmapCard
-                icon={Video}
-                tone="card-magenta"
-                date="October 2026"
-                title="Product videos"
-                body="Short videos made from the same photos — the product turning, the detail up close, ready for Reels and Shorts."
               />
               <RoadmapCard
                 icon={UserRound}
@@ -665,6 +666,7 @@ function Landing() {
               Dates are our honest best estimate. We'd rather ship late than promise something that isn't ready.
             </p>
           </Reveal>
+
         </div>
       </section>
 
