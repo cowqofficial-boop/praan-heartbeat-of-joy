@@ -600,12 +600,20 @@ export const generateImages = createServerFn({ method: "POST" })
   });
 
 export const startGenerationJob = createServerFn({ method: "POST" })
-  .inputValidator((d: { browserId: string; userId?: string | null }) => d)
+  .inputValidator(
+    (d: {
+      browserId: string;
+      userId?: string | null;
+      action?: "product" | "service_photo" | "service_no_photo";
+    }) => d,
+  )
   .handler(async ({ data }) => {
     const userId = (await import("./credits.server").then((m) => m.currentUserId())) ?? null;
     const { COSTS } = await import("./plans");
-    const productCost = COSTS.product;
+    const action = data.action ?? "product";
+    const productCost = COSTS[action];
     const sb = await admin();
+
     let refundSub = 0;
     let refundPack = 0;
     let reserved = false;

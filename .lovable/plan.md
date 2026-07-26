@@ -1,45 +1,75 @@
-## Group E — Billing & invoicing
+## Goal
 
-**E1. GST details (Billing)**
-Migration adds `gstin`, `invoice_business_name`, `invoice_address`, `invoice_state_code` to `profiles`. New "GST details" card on `/billing` (own tint in the cycle) with the nudge line "Add your GST details to get a GST invoice on every payment." GSTIN is validated loosely (15 alphanumeric chars, uppercased) — a soft magenta hint appears if it doesn't look right, but saving is never blocked. Saved through a new authenticated server fn; Profile → Account reads the same fields.
+Sellers can create a **Service** anywhere they create a **Product** today. Both live in one library, one stock view, one calendar, one credit path.
 
-**E2. Invoices**
-- Migration adds an `invoices` table (user, payment ref, sequential `invoice_no` via a Postgres sequence + `CowQ/2026-27/000123` format, buyer snapshot, taxable value, CGST/SGST/IGST, total) with owner-only RLS and grants.
-- On successful payment (Razorpay webhook path, where credits are already granted) an invoice row is created. Tax at 18% on a reverse-computed taxable value: IGST 18% when the buyer's GSTIN state code differs from the seller state, otherwise CGST 9% + SGST 9%. No GST details on file → the same row is rendered as a plain payment receipt.
-- New printable invoice page `/invoice/$id` (own route, auth-gated read via server fn) styled as a clean white A4-style document with a print/download button (browser print-to-PDF). Seller block is an explicit placeholder: `SELLER_LEGAL_NAME / SELLER_GSTIN / SELLER_ADDRESS` in one constant so the founder edits one file.
-- "Invoice history" list on `/billing` (date, invoice no, plan, amount, Download).
+## 1. Data model (one table, one type column)
 
-**E3. Inline upgrade + top-ups on Billing**
-Below the current-plan card: compact cards for only the plans above the current one (key difference + price) each with an "Upgrade" button, plus a "Top up credits" section with the four packs (300/₹599, 800/₹1,399, 2,000/₹3,199, 5,000/₹7,499). Both reuse the existing `createCheckout` + Razorpay script flow lifted out of `/pricing` into a shared `useRazorpayCheckout` hook — no navigation to Pricing.
+Migration on `generations`:
+- `kind text not null default 'product'` (`'product' | 'service'`)
+- `service_details jsonb` — holds category, description, tiers, contact method
+- index on `(user_id, kind, created_at desc)`
 
-**E4. Honest storage tiers**
-`planRetention()` added to `src/lib/plans.ts`: Free 30 days (files removed, product record kept so it can be regenerated), Starter 6 months while subscribed, Growth and Pro kept while subscribed (Pro also priority). Shown as a "Your photos" block on Billing and in Profile → Plan & usage, worded generously ("Your photos stay with you for as long as you're on CowQ") and never using the word "unlimited". The existing `pruneExpiredGeneratedFiles` helper gets wired to plan-based retention and runs on library/results access for free users (cheap, guarded) — no new infrastructure.
+Migration on `stock_items`:
+- `kind text not null default 'product'`
+- Quantity/low-stock/movement fields stay untouched and are hidden for services; service rows keep `quantity = 0` and never appear in low-stock or restock UI.
 
-## Group F — Content & visual polish
+Service details shape:
 
-**F1.** Rename every "Shopify catalog file"/"Shopify" reference in `index.tsx`, `how-it-works.tsx`, `results.$id.tsx`, `library.tsx`, `create.tsx`, `csv.ts`, `bulk-download.ts`, `blog.flat-lay-guide.tsx` to "Website catalog file" with the subline "Works with Shopify, WooCommerce, Amazon, Flipkart and more." The preview becomes a document-style card: `products.csv` filename header bar, CSV badge, monospaced column headers, subtle grid lines, download affordance.
+```text
+{ category, description, contact: { method: 'phone'|'whatsapp'|'message', value },
+  tiers: [ { name, price, inclusions: [..] } ]   // 1–3, or a single flat price
+}
+```
 
-**F2.** "Built next" reordered: Posting everywhere (September) first, then the newer items. The video card becomes "Product & presenter videos — rolling out"; all "months away" wording removed.
+## 2. The toggle
 
-**F3/F4.** Generate realistic paired imagery: four before/after sets (brass diya, saree, jewellery, packaged good) where the "before" reads as a dim casual phone snap and the "after" as a studio result, plus ~4 additional showcase studio samples across varied products. Uploaded as CDN assets and wired into the before/after slider and studio showcase.
+A shared `TypeToggle` segmented control (Product | Service), placed in:
+- `/create` upload screen — switches between the photo dropzone and the service form
+- `/library` — filter tabs; cards get a small badge + icon per type
+- `/stock` — filters the list; "Add" opens the matching form
+- `/calendar` — source picker when scheduling a post can pick either type
 
-**F5.** Upload box carousel: when the drop zone is empty, ~10 example product photos cross-fade beside/behind it at low opacity. Pauses on hover/focus, disabled under `prefers-reduced-motion`, images lazy-loaded and unmounted the moment a file is selected, so uploads are never delayed.
+Cards and detail views branch on `kind`: services show a single poster instead of the 4-angle carousel, and a pricing/tier card instead of a stock/photo grid.
 
-**F6.** `/how-it-works` audit pass: back button uses history with `/` fallback, brass-diya worked example flows through all steps, comparison strip intact, images load, no horizontal overflow at 390px, and a line noting video is rolling out.
+## 3. Service form (`/create` → Service tab)
 
-**F7.** Chrome-only premium pass in `styles.css` and section shells: deeper ambient gradients on dark sections, larger confident display headers, crisper card shadow/glow tokens, slightly more vertical rhythm, smoother staggered entrance (reduced-motion respected). Layout, palette, tints and product imagery untouched.
+- Service name (required, red asterisk, same validation style as stock)
+- Category — free text input with a suggestion datalist (haircut, tailoring, repair, consulting, home visit, tuition, catering…), not a fixed enum
+- Optional photo — reuses the existing HEIC/resize/compress + direct-to-storage upload pipeline
+- Short description of what's included
+- Price: flat price, or "Add tiers" for 1–3 tiers, each with a name, price and 2–3 bullet inclusions
+- Contact/booking method: phone, WhatsApp, or "message to book" (+ number where relevant)
 
-## Group G — Guidance
+## 4. What gets generated
 
-**G1.** Move the tour/help trigger on `/profile` into the page header row, matching the "?" placement on every other page; remove the floating/overlapping instance.
+Two paths through the existing Gemini server functions:
 
-**G2.** Calendar explainer: a short collapsible intro block (and matching expanded "?" help) with five scannable lines — what it is, how it works, where posts go (download/copy now; auto-posting to Instagram & Facebook in September), when to use it, why it helps. Dismissible and remembered per user.
+- **With photo** → one edited promotional poster from the real photo. Prompt explicitly forbids inventing "after" results, fake customers, fake reviewers, or altering a real person's face.
+- **Without photo** → a typographic/iconographic poster. Prompt forbids photorealistic people or result imagery entirely.
 
-## Verification
+Plus, for both: listing description + concrete bullets (what's included, how long it takes, why this seller), social captions + hashtags, a pricing/tier card rendered from the form, and a booking CTA line built from the chosen contact method. Copy prompts inherit the existing shopkeeper rules and banned-phrase list, adapted to services.
 
-Playwright sweep of `/`, `/how-it-works`, `/pricing`, `/library`, `/stock`, `/billing`, `/calendar`, `/brand-kit`, `/profile` at 390/820/1440 with a console-error assertion, plus checks that an invoice renders and downloads, GST fields save and reload, upgrade/top-up buttons appear on Billing, "Website catalog file" appears with no stray "Shopify catalog" text, the calendar explainer renders, and the profile tour button sits in the header. Anonymous free-product flow and credit deduction are re-run to confirm they still work.
+A **Make a video ad** button renders on the service results page but stays disabled behind `VIDEO_ENABLED` (currently off) — no fal.ai wiring.
 
-### Technical notes
-- One migration: profile GST columns + `invoices` table (sequence, RLS, grants).
-- Invoice numbering is DB-sequential per financial year, so it stays gap-free and audit-friendly.
-- Checkout logic is shared, not duplicated, between `/pricing` and `/billing`.
+## 5. Credits
+
+Add to the existing `COSTS` table:
+- `service_photo: 45`
+- `service_no_photo: 90`
+
+Both go through the same `startGenerationJob` reservation → `spend_credits` RPC → `refund_credits` on failure path used by products. No second deduction path. Every service generate button shows its number before it spends, matching the product rule.
+
+## 6. Guardrails
+
+Carried over unchanged: consent gate whenever an uploaded photo shows a real person, no face-cloning, no fake customer reviews, no fabricated before/after, and the same sanitizer applied to the free-text category and description before they reach the model.
+
+## Out of scope this pass
+
+No working video generation, no booking or availability logic — the CTA is text only.
+
+## Technical notes
+
+- New `src/lib/service.functions.ts` for service-specific server fns; image/copy generation reuses `gemini.server.ts` helpers and the `generation_jobs` reservation flow in `cowq.functions.ts`.
+- `queue-store` gains a `kind` field so services run through the same background queue and status pill.
+- `library.functions.ts` selects and filters on `kind`; `results.$id.tsx` branches its layout on `kind`.
+- CSV export includes a type column so the catalog file stays valid for mixed libraries.

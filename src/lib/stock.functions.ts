@@ -25,6 +25,7 @@ export type StockItem = {
   thumb_url: string | null;
   has_photos: boolean;
   status: StockStatus;
+  kind: "product" | "service";
   updated_at: string;
 };
 
@@ -74,7 +75,7 @@ export const listStock = createServerFn({ method: "GET" })
     const sb = context.supabase;
     const { data, error } = await sb
       .from("stock_items")
-      .select("id, product_id, name, sku, quantity, low_stock_alert, cost_price_paise, selling_price_paise, category, brand, variant, weight, hsn_code, barcode, supplier, reorder_level, notes, updated_at")
+      .select("id, product_id, kind, name, sku, quantity, low_stock_alert, cost_price_paise, selling_price_paise, category, brand, variant, weight, hsn_code, barcode, supplier, reorder_level, notes, updated_at")
       .eq("user_id", context.userId)
       .order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -110,6 +111,7 @@ export const listStock = createServerFn({ method: "GET" })
       thumb_url: thumbFrom(r.product_id ? genById.get(r.product_id) : null),
       has_photos: hasPhotos(r.product_id ? genById.get(r.product_id) : null),
       status: statusOf(r.quantity, r.low_stock_alert),
+      kind: ((r as { kind?: string }).kind === "service" ? "service" : "product") as "product" | "service",
       updated_at: r.updated_at,
     }));
   });
@@ -117,6 +119,7 @@ export const listStock = createServerFn({ method: "GET" })
 const UpsertSchema = z.object({
   id: z.string().optional(),
   product_id: z.string().nullable().optional(),
+  kind: z.enum(["product", "service"]).optional(),
   name: z.string().min(1).max(120),
   sku: z.string().max(60).nullable().optional(),
   quantity: z.number().int().min(0).max(1_000_000),
@@ -143,6 +146,7 @@ export const upsertStockItem = createServerFn({ method: "POST" })
       const { error } = await sb
         .from("stock_items")
         .update({
+          kind: data.kind ?? "product",
           name: data.name,
           sku: data.sku ?? null,
           quantity: data.quantity,
@@ -169,6 +173,7 @@ export const upsertStockItem = createServerFn({ method: "POST" })
       .from("stock_items")
       .insert({
         user_id: context.userId,
+        kind: data.kind ?? "product",
         name: data.name,
         sku: data.sku ?? null,
         quantity: data.quantity,

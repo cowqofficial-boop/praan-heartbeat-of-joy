@@ -19,6 +19,8 @@ import { getMyCredits } from "@/lib/billing.functions";
 import { listMyProducts } from "@/lib/library.functions";
 import { COSTS } from "@/lib/plans";
 
+import { TypeFilter } from "@/components/TypeToggle";
+import type { ContentKind } from "@/lib/service";
 import { CreditBadge } from "@/components/CreditBadge";
 import { Lock } from "lucide-react";
 
@@ -90,16 +92,26 @@ function CalendarPage() {
     },
   });
 
+  const [sourceKind, setSourceKind] = useState<"all" | ContentKind>("all");
+
   async function handleCreate() {
     setCreating(true);
     setCreateError(null);
     try {
-      const res = await getOrCreatePlan({ data: { month } });
+      const res = await getOrCreatePlan({
+        data: { month, kinds: sourceKind === "all" ? undefined : [sourceKind] },
+      });
       setPlanId(res.plan_id);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       if (msg.includes("NO_PRODUCTS")) {
-        setCreateError("Add at least one product first, then plan your month.");
+        setCreateError(
+          sourceKind === "service"
+            ? "Add at least one service first, then plan your month."
+            : sourceKind === "product"
+              ? "Add at least one product first, then plan your month."
+              : "Add at least one product or service first, then plan your month.",
+        );
       } else {
         setCreateError("Couldn't start the plan. Try again in a moment.");
       }
@@ -178,6 +190,13 @@ function CalendarPage() {
         }
         action={!planId ? { label: `Plan my month — ${COSTS.calendar_month} credits`, onClick: handleCreate, icon: Sparkles, disabled: creating } : undefined}
       />
+
+      {!planId && (
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <span className="text-[13px] text-muted">Plan posts from</span>
+          <TypeFilter value={sourceKind} onChange={setSourceKind} />
+        </div>
+      )}
 
       <CalendarExplainer />
 

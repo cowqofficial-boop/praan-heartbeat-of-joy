@@ -27,6 +27,8 @@ import {
 } from "@/lib/stock.functions";
 import { listMyProducts } from "@/lib/library.functions";
 import { COSTS, formatInr } from "@/lib/plans";
+import { TypeToggle, TypeFilter, TypeBadge } from "@/components/TypeToggle";
+import { serviceCost, type ContentKind } from "@/lib/service";
 
 export const Route = createFileRoute("/stock")({
   head: () => ({
@@ -70,6 +72,7 @@ function StockPage() {
   const [authReady, setAuthReady] = useState(false);
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | ContentKind>("all");
   const [editing, setEditing] = useState<StockItem | null>(null);
   const [creating, setCreating] = useState(false);
   const [showLog, setShowLog] = useState(false);
@@ -103,11 +106,12 @@ function StockPage() {
     const rank = (s: StockStatus) => (s === "out" ? 0 : s === "low" ? 1 : 2);
     const q2 = q.trim().toLowerCase();
     return items
-      .filter((i) => (filter === "all" ? true : i.status === filter))
+      .filter((i) => (typeFilter === "all" ? true : (i.kind ?? "product") === typeFilter))
+      .filter((i) => (i.kind === "service" ? true : filter === "all" ? true : i.status === filter))
       .filter((i) => (q2 ? i.name.toLowerCase().includes(q2) || (i.sku ?? "").toLowerCase().includes(q2) : true))
       .slice()
       .sort((a, b) => rank(a.status) - rank(b.status));
-  }, [items, filter, q]);
+  }, [items, filter, typeFilter, q]);
 
   const totals = useMemo(() => {
     let costPaise = 0;
@@ -220,6 +224,17 @@ function StockPage() {
           onChange={(e) => setQ(e.target.value)}
         />
       </label>
+      <div className="mt-3">
+        <TypeFilter
+          value={typeFilter}
+          onChange={setTypeFilter}
+          counts={{
+            all: items.length,
+            product: items.filter((i) => (i.kind ?? "product") === "product").length,
+            service: items.filter((i) => i.kind === "service").length,
+          }}
+        />
+      </div>
       <div className="mt-3 inline-flex rounded-full bg-surface p-1 text-[13px] font-medium">
         {(["all", "low", "out"] as Filter[]).map((k) => (
           <button
@@ -295,7 +310,10 @@ function StockPage() {
                       )}
                       <div className="min-w-0 flex-1">
                         <button type="button" onClick={() => setEditing(it)} className="block w-full text-left">
-                          <p className="truncate text-[15px] font-semibold text-ink">{it.name}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="truncate text-[15px] font-semibold text-ink">{it.name}</p>
+                            <TypeBadge kind={it.kind ?? "product"} />
+                          </div>
                           <p className="mt-0.5 truncate text-[12px] text-muted">
                             {it.sku ? `SKU ${it.sku} · ` : ""}
                             Cost {formatInr(Math.round(it.cost_price_paise / 100))} · Sell {formatInr(Math.round(it.selling_price_paise / 100))}
@@ -307,13 +325,32 @@ function StockPage() {
                             to="/create"
                             className="mt-1 inline-block text-[12px] font-semibold text-[color:var(--page-accent)]"
                           >
-                            Generate photos — {COSTS.product} credits
+                            {it.kind === "service"
+                              ? `Make a service poster — ${serviceCost(false)} credits`
+                              : `Generate photos — ${COSTS.product} credits`}
                           </Link>
                         )}
                       </div>
 
-                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${chip.cls}`}>{chip.label}</span>
+                      {it.kind !== "service" && (
+                        <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${chip.cls}`}>{chip.label}</span>
+                      )}
                     </div>
+                    {it.kind === "service" ? (
+                      <div className="mt-3 flex items-center justify-between">
+                        <p className="text-[13px] text-muted">Services aren't counted in stock.</p>
+                        <div className="flex gap-2">
+                          <button type="button" onClick={() => setEditing(it)} className="h-9 rounded-full bg-surface px-3 text-[13px] font-semibold text-ink">
+                            Edit
+                          </button>
+                          <button type="button" aria-label="Delete item"
+                            onClick={async () => { if (await showConfirm({ title: `Delete "${it.name}"?`, body: "This can't be undone.", destructive: true, confirmLabel: "Delete" })) del.mutate({ data: { id: it.id } }); }}
+                            className="grid h-9 w-9 place-items-center rounded-full text-muted hover:text-primary">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
                     <div className="mt-3 flex items-center justify-between">
                       <div className="flex items-center gap-1">
                         <button type="button" aria-label="Decrease" disabled={it.quantity === 0 || changeQty.isPending}
@@ -347,7 +384,9 @@ function StockPage() {
                         </button>
                       </div>
                     </div>
+                    )}
                   </li>
+
                 );
               })}
             </ul>
@@ -358,7 +397,8 @@ function StockPage() {
                 <thead>
                   <tr className="text-[11px] uppercase tracking-wider text-muted">
                     <th className="px-4 py-3 font-semibold">Photo</th>
-                    <th className="px-2 py-3 font-semibold">Product</th>
+                    <th className="px-2 py-3 font-semibold">Item</th>
+                    <th className="px-2 py-3 font-semibold">Type</th>
                     <th className="px-2 py-3 font-semibold">SKU</th>
                     <th className="px-2 py-3 text-right font-semibold">Qty</th>
                     <th className="px-2 py-3 font-semibold">Status</th>
@@ -385,19 +425,23 @@ function StockPage() {
                           <button type="button" onClick={() => setEditing(it)} className="text-left font-medium text-ink hover:text-primary">{it.name}</button>
                           {!it.has_photos && (
                             <Link to="/create" className="mt-0.5 block text-[12px] font-semibold text-[color:var(--page-accent)]">
-                              Generate photos — {COSTS.product} credits
+                              {it.kind === "service"
+                                ? `Make a service poster — ${serviceCost(false)} credits`
+                                : `Generate photos — ${COSTS.product} credits`}
                             </Link>
                           )}
                         </td>
+                        <td className="px-2 py-3"><TypeBadge kind={it.kind ?? "product"} /></td>
 
                         <td className="px-2 py-3 font-mono text-[13px] tabular-nums text-muted">{it.sku ?? "—"}</td>
-                        <td className="px-2 py-3 text-right font-mono text-[15px] font-semibold tabular-nums">{it.quantity}</td>
-                        <td className="px-2 py-3"><span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${chip.cls}`}>{chip.label}</span></td>
+                        <td className="px-2 py-3 text-right font-mono text-[15px] font-semibold tabular-nums">{it.kind === "service" ? "—" : it.quantity}</td>
+                        <td className="px-2 py-3">{it.kind === "service" ? <span className="text-[12px] text-muted">—</span> : <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${chip.cls}`}>{chip.label}</span>}</td>
                         <td className="px-2 py-3 text-right font-mono tabular-nums text-muted">{formatInr(Math.round(it.cost_price_paise / 100))}</td>
                         <td className="px-2 py-3 text-right font-mono tabular-nums">{formatInr(Math.round(it.selling_price_paise / 100))}</td>
                         <td className="px-2 py-3 text-right font-mono tabular-nums text-green">{profit > 0 ? `+${formatInr(Math.round(profit / 100))}` : "—"}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1">
+                            {it.kind !== "service" && (<>
                             <button type="button" aria-label="Decrease" disabled={it.quantity === 0 || changeQty.isPending}
                               onClick={() => changeQty.mutate({ data: { stock_item_id: it.id, delta: -1, reason: "adjustment" } })}
                               className="grid h-8 w-8 place-items-center rounded-full text-muted hover:bg-raised hover:text-ink disabled:opacity-40">
@@ -418,6 +462,7 @@ function StockPage() {
                               className={`ml-1 h-8 rounded-full bg-primary px-3 text-[12px] font-semibold text-primary-foreground disabled:opacity-40 ${pulseId === it.id ? "pulse-once" : ""}`}>
                               Sold 1
                             </button>
+                            </>)}
                             <button type="button" aria-label="Delete item"
                               onClick={async () => { if (await showConfirm({ title: `Delete "${it.name}" from stock?`, body: "This can't be undone.", destructive: true, confirmLabel: "Delete" })) del.mutate({ data: { id: it.id } }); }}
                               className="grid h-8 w-8 place-items-center rounded-full text-muted hover:text-primary">
@@ -523,6 +568,7 @@ function StockSheet({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const [kind, setKind] = useState<ContentKind>(initial?.kind ?? "product");
   const [name, setName] = useState(initial?.name ?? "");
   const [sku, setSku] = useState(initial?.sku ?? "");
   const [qty, setQty] = useState(initial?.quantity.toString() ?? "0");
@@ -560,7 +606,8 @@ function StockSheet({
     const q = parseInt(qty || "", 10);
     const s = parseFloat(sell || "");
     if (!name.trim()) fe.name = "Name is required.";
-    if (qty.trim() === "" || Number.isNaN(q) || q < 0) fe.qty = "Quantity is required.";
+    if (kind !== "service" && (qty.trim() === "" || Number.isNaN(q) || q < 0))
+      fe.qty = "Quantity is required.";
     if (sell.trim() === "" || Number.isNaN(s) || s <= 0) fe.sell = "Selling price is required.";
     const l = parseInt(low || "0", 10);
     if (Number.isNaN(l) || l < 0) fe.low = "Must be a positive number.";
@@ -574,10 +621,11 @@ function StockSheet({
       data: {
         id: initial?.id,
         product_id: productId,
+        kind,
         name: name.trim(),
         sku: sku.trim() || null,
-        quantity: q,
-        low_stock_alert: l,
+        quantity: kind === "service" ? 0 : q,
+        low_stock_alert: kind === "service" ? 0 : l,
         cost_price_paise: Number.isNaN(c) ? 0 : c,
         selling_price_paise: Math.round(s * 100),
         category: category.trim() || null,
@@ -587,7 +635,7 @@ function StockSheet({
         hsn_code: hsn.trim() || null,
         barcode: barcode.trim() || null,
         supplier: supplier.trim() || null,
-        reorder_level: r,
+        reorder_level: kind === "service" ? null : r,
         notes: notes.trim() || null,
       },
     });
@@ -606,7 +654,7 @@ function StockSheet({
       >
         <div className="sticky -top-5 -mx-5 -mt-5 flex items-center justify-between bg-raised px-5 pb-3 pt-5">
           <h2 className="font-display text-[20px] text-ink">
-            {initial ? "Edit item" : "Add item"}
+            {initial ? "Edit item" : kind === "service" ? "Add service" : "Add item"}
           </h2>
           <button type="button" onClick={onClose} aria-label="Close" className="text-muted">
             <X className="h-5 w-5" />
@@ -615,6 +663,10 @@ function StockSheet({
         <p className="text-[12px] text-muted">
           Fields marked <ReqMark /> are required.
         </p>
+
+        <div className="mt-3">
+          <TypeToggle value={kind} onChange={setKind} size="sm" />
+        </div>
 
         <Section title="Basics">
           {!initial && products.length > 0 && (
@@ -646,7 +698,9 @@ function StockSheet({
               to="/create"
               className="mt-2 inline-flex h-10 items-center rounded-[12px] bg-surface px-3 text-[13px] font-semibold text-ink"
             >
-              Generate photos — {COSTS.product} credits
+              {kind === "service"
+                ? `Make a service poster — ${serviceCost(false)} credits`
+                : `Generate photos — ${COSTS.product} credits`}
             </Link>
           )}
 
@@ -695,6 +749,11 @@ function StockSheet({
           })()}
         </Section>
 
+        {kind === "service" ? (
+          <p className="mt-3 text-[13px] text-muted">
+            Services don't hold stock, so there's no quantity to track here.
+          </p>
+        ) : (
         <Section title="Quantity">
           <div className="grid grid-cols-2 gap-3">
             <Field label="Quantity" required error={fieldErr.qty}>
@@ -714,6 +773,7 @@ function StockSheet({
             />
           </Field>
         </Section>
+        )}
 
         <Section title="Details">
           <div className="grid grid-cols-2 gap-3">

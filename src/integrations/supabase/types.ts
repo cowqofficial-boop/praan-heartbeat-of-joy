@@ -315,9 +315,11 @@ export type Database = {
           gen_metadata: Json
           generated_images: Json
           id: string
+          kind: string
           original_image_url: string | null
           price: number | null
           product_name: string | null
+          service_details: Json | null
           user_id: string | null
         }
         Insert: {
@@ -332,9 +334,11 @@ export type Database = {
           gen_metadata?: Json
           generated_images?: Json
           id?: string
+          kind?: string
           original_image_url?: string | null
           price?: number | null
           product_name?: string | null
+          service_details?: Json | null
           user_id?: string | null
         }
         Update: {
@@ -349,9 +353,11 @@ export type Database = {
           gen_metadata?: Json
           generated_images?: Json
           id?: string
+          kind?: string
           original_image_url?: string | null
           price?: number | null
           product_name?: string | null
+          service_details?: Json | null
           user_id?: string | null
         }
         Relationships: []
@@ -826,6 +832,7 @@ export type Database = {
           created_at: string
           hsn_code: string | null
           id: string
+          kind: string
           low_stock_alert: number
           name: string
           notes: string | null
@@ -848,6 +855,7 @@ export type Database = {
           created_at?: string
           hsn_code?: string | null
           id?: string
+          kind?: string
           low_stock_alert?: number
           name: string
           notes?: string | null
@@ -870,6 +878,7 @@ export type Database = {
           created_at?: string
           hsn_code?: string | null
           id?: string
+          kind?: string
           low_stock_alert?: number
           name?: string
           notes?: string | null

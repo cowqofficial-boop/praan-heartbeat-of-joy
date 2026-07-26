@@ -15,6 +15,9 @@ import { watermarkImageUrl } from "@/lib/watermark";
 import { showAlert } from "@/components/Dialogs";
 import { AuthModal } from "@/components/AuthModal";
 import { VideoSection } from "@/components/video/VideoSection";
+import { TypeBadge } from "@/components/TypeToggle";
+import { CopyButton } from "@/components/CopyButton";
+import { contactLabel, fallbackCta, type ServiceDetails } from "@/lib/service";
 
 export const Route = createFileRoute("/results/$id")({
   head: ({ params }) => ({
@@ -84,6 +87,22 @@ function Results() {
   const whiteAfter = images.find((i) => i.kind === "white" && i.ratio === "1:1")?.url ?? images[0]?.url;
   const personSource = ((data.gen_metadata as { person_source?: "ai" | "user" } | null)?.person_source) ?? "ai";
   const productName = (data.product_name as string) || "cowq";
+
+  if ((data as { kind?: string }).kind === "service") {
+    return (
+      <ServiceResults
+        id={id}
+        name={productName}
+        posterUrl={images[0]?.url ?? original ?? ""}
+        details={(data as { service_details?: unknown }).service_details as ServiceDetails | null}
+        copy={copy}
+        hasAccount={!!user}
+        watermark={watermark}
+      />
+    );
+  }
+
+
 
   return (
     <main className="min-h-screen pb-16 pt-6 lg:pt-10">
@@ -814,5 +833,169 @@ function Feedback({ id }: { id: string }) {
         />
       )}
     </div>
+  );
+}
+
+
+/* ============================================================
+   SERVICE RESULTS — one poster, listing, pricing card, booking CTA
+   ============================================================ */
+
+function ServiceResults({
+  id,
+  name,
+  posterUrl,
+  details,
+  copy,
+  hasAccount,
+  watermark,
+}: {
+  id: string;
+  name: string;
+  posterUrl: string;
+  details: ServiceDetails | null;
+  copy: Copy;
+  hasAccount: boolean;
+  watermark: boolean;
+}) {
+  const cta = details?.ctaLine || (details ? fallbackCta(details.contact, name) : "Message to book.");
+
+  async function downloadPoster() {
+    try {
+      let href = posterUrl;
+      let revoke = false;
+      if (watermark) {
+        const blob = await watermarkImageUrl(posterUrl);
+        href = URL.createObjectURL(blob);
+        revoke = true;
+      }
+      const a = document.createElement("a");
+      a.href = href;
+      a.download = `cowq-service-poster.png`;
+      a.click();
+      if (revoke) URL.revokeObjectURL(href);
+    } catch {
+      window.open(posterUrl, "_blank");
+    }
+  }
+
+  return (
+    <main className="min-h-screen pb-16 pt-6 lg:pt-10">
+      <header className="px-6 lg:px-8">
+        <div className="flex items-center gap-2">
+          <p className="eyebrow">Ready</p>
+          <TypeBadge kind="service" />
+        </div>
+        <h1 className="mt-2 page-headline lg:text-[56px]">Ready to book.</h1>
+        <p className="mt-2 text-[15px] text-muted">{name}</p>
+      </header>
+
+      <div className="mt-8 grid grid-cols-1 gap-8 px-6 lg:mt-10 lg:grid-cols-[3fr_2fr] lg:gap-12 lg:px-8">
+        <div className="lg:sticky lg:top-6 lg:self-start">
+          <p className="eyebrow mb-3">Your poster</p>
+          <div
+            className="relative overflow-hidden rounded-[16px] bg-surface"
+            style={{ aspectRatio: "1 / 1", boxShadow: "var(--shadow-raised)" }}
+          >
+            {posterUrl && (
+              <img src={posterUrl} alt={`${name} poster`} className="h-full w-full object-contain" />
+            )}
+            {watermark && (
+              <span className="pointer-events-none absolute bottom-3 left-3 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white">
+                Made with CowQ
+              </span>
+            )}
+          </div>
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={downloadPoster}
+              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-[12px] bg-raised text-[14px] font-semibold text-ink"
+            >
+              <Download className="h-4 w-4" />
+              Download poster
+            </button>
+            <PostThisButton imageUrl={posterUrl} caption={`${copy.instagram}\n\n${copy.instagramHashtags.join(" ")}`} productName={name} watermark={watermark} />
+          </div>
+          <p className="mt-2 text-[12px] text-muted">
+            This poster is made from what you gave us — no invented results, no pretend customers.
+          </p>
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-8">
+          {/* Pricing / packages */}
+          {details && (details.tiers.length > 0 || details.flatPrice) && (
+            <section>
+              <p className="eyebrow mb-3">Pricing card</p>
+              <div className="card-cobalt p-4">
+                {details.tiers.length > 0 ? (
+                  <ul className="space-y-3">
+                    {details.tiers.map((t, i) => (
+                      <li key={i} className="rounded-[12px] bg-raised p-3">
+                        <div className="flex items-baseline justify-between gap-3">
+                          <p className="text-[15px] font-semibold text-ink">{t.name}</p>
+                          <p className="text-[15px] font-semibold tabular-nums text-ink">₹{t.price}</p>
+                        </div>
+                        {t.inclusions.length > 0 && (
+                          <ul className="mt-2 space-y-1">
+                            {t.inclusions.map((inc, j) => (
+                              <li key={j} className="text-[13px] text-muted">• {inc}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-[20px] font-semibold text-ink">₹{details.flatPrice}</p>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* Booking CTA */}
+          <section>
+            <p className="eyebrow mb-3">Booking line</p>
+            <div className="card-magenta flex items-start justify-between gap-3 p-4">
+              <div className="min-w-0">
+                <p className="text-[15px] text-ink">{cta}</p>
+                {details && (
+                  <p className="mt-1 text-[12px] text-muted">
+                    Booking method: {contactLabel(details.contact.method)}
+                    {details.contact.value ? ` — ${details.contact.value}` : ""}
+                  </p>
+                )}
+              </div>
+              <CopyButton text={cta} />
+            </div>
+          </section>
+
+          <ListingPanel copy={copy} />
+
+          {/* Video ad placeholder — deliberately not wired up yet */}
+          <section>
+            <p className="eyebrow mb-3">Video</p>
+            <button
+              type="button"
+              disabled
+              className="flex w-full items-center justify-center gap-2 rounded-[12px] bg-raised px-4 py-3 text-[14px] font-semibold text-muted opacity-70"
+            >
+              <Lock className="h-4 w-4" />
+              Make a video ad — coming soon
+            </button>
+          </section>
+
+          {!hasAccount && (
+            <SignUpGate
+              title="Sign up to save and download"
+              body="Free forever. Keep this service in your library and download the poster any time."
+              next={`/results/${id}`}
+            />
+          )}
+
+          <Feedback id={id} />
+        </div>
+      </div>
+    </main>
   );
 }

@@ -137,6 +137,7 @@ type Product = {
   name: string;
   category: string | null;
   refUrl: string | null;
+  kind: "product" | "service";
 };
 
 function buildSchedule(products: Product[], startISO: string) {
@@ -159,6 +160,9 @@ function buildSchedule(products: Product[], startISO: string) {
     for (let attempt = 0; attempt < products.length * types.length; attempt++) {
       const p = products[(productCursor + attempt) % products.length];
       const t = types[(typeCursor + Math.floor(attempt / products.length)) % types.length];
+      // A service must never be given a "customer voice" post — that would be
+      // a fabricated review, which we never generate.
+      if (p.kind === "service" && t === "customer_voice") continue;
       const key = `${p.id}|${t}`;
       if (key !== lastKey) {
         picked = { product: p, type: t };
@@ -169,7 +173,10 @@ function buildSchedule(products: Product[], startISO: string) {
       }
     }
     if (!picked) {
-      picked = { product: products[i % products.length], type: types[i % types.length] };
+      const fallbackProduct = products[i % products.length];
+      let fallbackType = types[i % types.length];
+      if (fallbackProduct.kind === "service" && fallbackType === "customer_voice") fallbackType = "hero";
+      picked = { product: fallbackProduct, type: fallbackType };
       lastKey = `${picked.product.id}|${picked.type}`;
     }
     days.push({
@@ -186,7 +193,7 @@ function buildSchedule(products: Product[], startISO: string) {
 
 export const getOrCreatePlan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { month: string }) => d) // first-of-month ISO
+  .inputValidator((d: { month: string; kinds?: Array<"product" | "service"> }) => d) // first-of-month ISO
   .handler(async ({ context, data }) => {
     const sb = context.supabase;
     const monthStart = data.month.slice(0, 7) + "-01";
@@ -203,11 +210,14 @@ export const getOrCreatePlan = createServerFn({ method: "POST" })
     // load products
     const { data: prods, error: pe } = await sb
       .from("generations")
-      .select("id, product_name, category, generated_images, original_image_url")
+      .select("id, product_name, category, generated_images, original_image_url, kind")
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false });
     if (pe) throw new Error(pe.message);
-    const products: Product[] = (prods ?? []).map((p) => {
+    const wanted = data.kinds && data.kinds.length > 0 ? data.kinds : ["product", "service"];
+    const products: Product[] = (prods ?? [])
+      .filter((p) => wanted.includes(((p as { kind?: string }).kind === "service" ? "service" : "product") as "product" | "service"))
+      .map((p) => {
       const imgs = (p.generated_images ?? []) as Array<{ kind: string; ratio: string; url: string }>;
       const ref =
         imgs.find((i) => i.kind === "white" && i.ratio === "1:1")?.url ??
@@ -218,6 +228,7 @@ export const getOrCreatePlan = createServerFn({ method: "POST" })
         name: p.product_name ?? "Product",
         category: p.category,
         refUrl: ref ?? null,
+        kind: ((p as { kind?: string }).kind === "service" ? "service" : "product") as "product" | "service",
       };
     });
     if (products.length === 0) throw new Error("NO_PRODUCTS");
@@ -284,6 +295,7 @@ export const markPosted = createServerFn({ method: "POST" })
 // ---------- Generation of one post ----------
 
 async function generatePostArtifacts(post: {
+  kind: "product" | "service";
   id: string;
   post_type: PostType;
   product_name: string | null;
@@ -308,8 +320,12 @@ async function generatePostArtifacts(post: {
   const context = `Product: ${post.product_name ?? "Product"}.${festHint}`;
   const sizeHint =
     "Render at 1024 by 1024 pixels, square 1:1, photorealistic. Product centred with comfortable margin so nothing important is cropped.";
+  const servicePrompt = `Service: ${post.product_name ?? "Service"}.${festHint} Rework this promotional poster into a fresh version for a social post — same service, same look and wording, only a new arrangement, background and framing. Never invent a result, an 'after', a customer, a review, a rating, or any number or claim that is not already on the poster. ${sizeHint} ${NO_PEOPLE}`;
   const imgOut = await geminiGenerateImage({
-    prompt: `${context} ${stylePrompt} ${sizeHint} ${NO_PEOPLE} Keep product identical to the reference photo in shape, colour, branding and label.`,
+    prompt:
+      post.kind === "service"
+        ? servicePrompt
+        : `${context} ${stylePrompt} ${sizeHint} ${NO_PEOPLE} Keep product identical to the reference photo in shape, colour, branding and label.`,
     reference: { mimeType: refMime, b64: refB64 },
   });
   const imgB64 = imgOut.b64;
@@ -362,7 +378,12 @@ async function generatePostArtifacts(post: {
 
   const sys = `You write Instagram/WhatsApp posts for an Indian small-business seller called ${biz}. Target buyer: ${audience}. Tone: ${brandTone}. Rules: open with the most useful, concrete fact. No filler words like elevate, unleash, embrace, on the go, game-changer, must-have. Use rupees (₹) when talking price. Keep it human — a knowledgeable shopkeeper, not a marketing agency. Reply with a compact JSON object only, no prose, no markdown fences.`;
 
-  const user = `Product: ${post.product_name ?? "our product"}.
+  const serviceRules =
+    post.kind === "service"
+      ? "\nThis is a SERVICE, not a physical product. Never write a customer review, testimonial, rating or quote from a buyer. Never invent results, before/after claims, experience years or numbers. Focus on what is included, what it costs, and how to book."
+      : "";
+
+  const user = `${post.kind === "service" ? "Service" : "Product"}: ${post.product_name ?? "our product"}.${serviceRules}
 Post type: ${POST_TYPE_LABELS[post.post_type]}.
 Brief: ${typeBrief[post.post_type]}
 Return JSON: {"caption": string (2-4 short paragraphs, 400-700 chars, line breaks between paragraphs), "hashtags": string (10-15 relevant Indian-market hashtags space-separated starting with #)}`;
@@ -395,6 +416,7 @@ export const generateOnePost = createServerFn({ method: "POST" })
       product_name: string | null;
       product_ref_url: string | null;
       post_date: string;
+      product_id?: string | null;
     };
     let target: Target | null = null;
 
@@ -404,7 +426,7 @@ export const generateOnePost = createServerFn({ method: "POST" })
         .update({ status: "generating", error: null })
         .eq("id", data.post_id)
         .eq("user_id", context.userId)
-        .select("id, post_type, product_name, product_ref_url, post_date")
+        .select("id, post_type, product_name, product_ref_url, post_date, product_id")
         .single();
       target = (row ?? null) as Target | null;
     } else {
@@ -424,7 +446,7 @@ export const generateOnePost = createServerFn({ method: "POST" })
         .update({ status: "generating" })
         .eq("id", first.id)
         .eq("status", "pending")
-        .select("id, post_type, product_name, product_ref_url, post_date")
+        .select("id, post_type, product_name, product_ref_url, post_date, product_id")
         .maybeSingle();
       if (!claimed) return { done: false as const, skipped: true as const };
       target = claimed as unknown as Target;
@@ -452,8 +474,19 @@ export const generateOnePost = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .maybeSingle();
 
+    let entryKind: "product" | "service" = "product";
+    if (target.product_id) {
+      const { data: gen } = await sb
+        .from("generations")
+        .select("kind")
+        .eq("id", target.product_id)
+        .maybeSingle();
+      if ((gen as { kind?: string } | null)?.kind === "service") entryKind = "service";
+    }
+
     try {
       const out = await generatePostArtifacts({
+        kind: entryKind,
         id: target.id,
         post_type: target.post_type as PostType,
         product_name: target.product_name,
