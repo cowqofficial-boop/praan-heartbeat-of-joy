@@ -663,6 +663,36 @@ function BrandModelPanel({
 }) {
   const source = kit.brand_model_source;
   const modelCost = COSTS.brand_model;
+  const qc = useQueryClient();
+  const [savedVersion, setSavedVersion] = useState(0);
+
+  async function saveAiModel() {
+    const name = await showPrompt({
+      title: "Name this model",
+      body: `Saving keeps this person in your saved models so you can reuse them later. Costs ${modelCost} credits.`,
+      placeholder: "Name this model, e.g. Priya",
+      defaultValue: "My model",
+      confirmLabel: `Save · ${modelCost} credits`,
+    });
+    if (!name) return;
+    setModelBusy(true);
+    try {
+      const res = await saveAiBrandModel({ data: { name } });
+      applyBalance(qc, res.balance);
+      setSavedVersion((v) => v + 1);
+      await showAlert({ title: `${res.model.name} saved`, body: "You can pick this model when you create a product." });
+    } catch (e) {
+      const msg = (e as Error).message;
+      const m = /^NO_CREDITS:(\d+):(\d+)$/.exec(msg);
+      await showAlert({
+        title: m ? "Not enough credits" : "Couldn't save this model",
+        body: m ? `Saving a model costs ${m[1]} credits and you have ${m[2]}.` : msg,
+      });
+    } finally {
+      setModelBusy(false);
+    }
+  }
+
   return (
     <div className="mt-4 flex flex-col gap-4">
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -689,8 +719,8 @@ function BrandModelPanel({
         ))}
       </div>
 
-      {source === "ai" ? (
-        <div className="card-list flex items-center gap-4 p-3">
+      {source === "ai" && (
+        <div className="card-cobalt flex items-center gap-4 rounded-[12px] p-3">
           <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-[10px] bg-raised">
             {modelBusy ? (
               <Loader2 className="h-5 w-5 animate-spin text-muted" />
@@ -718,20 +748,31 @@ function BrandModelPanel({
                 ? "Creating your model…"
                 : `${kit.brand_model_url ? "Change model" : "Create model"} · ${modelCost} credits`}
             </button>
+            {kit.brand_model_url && !modelBusy && (
+              <button
+                type="button"
+                onClick={saveAiModel}
+                className="h-11 rounded-[10px] bg-primary text-[13px] font-semibold text-white"
+              >
+                Save this model · {modelCost} credits
+              </button>
+            )}
           </div>
         </div>
-
-      ) : (
-        <SavedModelsPanel
-          modelBusy={modelBusy}
-          setModelBusy={setModelBusy}
-          onActivePhotos={onUploadedReal}
-          onNoModels={onRemoveReal}
-        />
       )}
+
+      <SavedModelsPanel
+        key={savedVersion}
+        modelBusy={modelBusy}
+        setModelBusy={setModelBusy}
+        onActivePhotos={onUploadedReal}
+        onNoModels={onRemoveReal}
+        showUploader={source === "user"}
+      />
     </div>
   );
 }
+
 
 async function fileToDataUrl(file: File): Promise<string> {
   return new Promise((res, rej) => {
