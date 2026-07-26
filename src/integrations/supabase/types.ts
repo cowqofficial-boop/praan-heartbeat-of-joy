@@ -733,43 +733,70 @@ export type Database = {
       }
       stock_items: {
         Row: {
+          barcode: string | null
+          brand: string | null
+          category: string | null
           cost_price_paise: number
           created_at: string
+          hsn_code: string | null
           id: string
           low_stock_alert: number
           name: string
+          notes: string | null
           product_id: string | null
           quantity: number
+          reorder_level: number | null
           selling_price_paise: number
           sku: string | null
+          supplier: string | null
           updated_at: string
           user_id: string
+          variant: string | null
+          weight: string | null
         }
         Insert: {
+          barcode?: string | null
+          brand?: string | null
+          category?: string | null
           cost_price_paise?: number
           created_at?: string
+          hsn_code?: string | null
           id?: string
           low_stock_alert?: number
           name: string
+          notes?: string | null
           product_id?: string | null
           quantity?: number
+          reorder_level?: number | null
           selling_price_paise?: number
           sku?: string | null
+          supplier?: string | null
           updated_at?: string
           user_id: string
+          variant?: string | null
+          weight?: string | null
         }
         Update: {
+          barcode?: string | null
+          brand?: string | null
+          category?: string | null
           cost_price_paise?: number
           created_at?: string
+          hsn_code?: string | null
           id?: string
           low_stock_alert?: number
           name?: string
+          notes?: string | null
           product_id?: string | null
           quantity?: number
+          reorder_level?: number | null
           selling_price_paise?: number
           sku?: string | null
+          supplier?: string | null
           updated_at?: string
           user_id?: string
+          variant?: string | null
+          weight?: string | null
         }
         Relationships: [
           {
