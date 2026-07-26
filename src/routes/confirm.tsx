@@ -11,6 +11,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { COSTS } from "@/lib/plans";
 import { useAuth, hasUsedFreeGeneration } from "@/lib/use-auth";
 import { getMyCredits } from "@/lib/billing.functions";
+import { listMyBrandModels } from "@/lib/brand-kit.functions";
 
 export const Route = createFileRoute("/confirm")({
   head: () => ({
@@ -48,6 +49,15 @@ function Confirm() {
     staleTime: 15_000,
   });
 
+  const needsPerson = Boolean((identified as { needs_person?: boolean } | null)?.needs_person);
+  const { data: savedModels } = useQuery({
+    queryKey: ["my-brand-models"],
+    queryFn: () => listMyBrandModels(),
+    enabled: !!user && needsPerson,
+    staleTime: 60_000,
+  });
+
+  const [modelId, setModelId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [detail, setDetail] = useState("");
@@ -95,9 +105,10 @@ function Confirm() {
       imageUrls,
       identified,
       cost,
+      modelId,
     });
     navigate({ to: "/generating" });
-  }, [photos, name, price, detail, identified, cost, enqueue, navigate]);
+  }, [photos, name, price, detail, identified, cost, modelId, enqueue, navigate]);
 
   // After successful auth, resume the pending generation.
   useEffect(() => {
@@ -200,6 +211,52 @@ function Confirm() {
           />
         </Field>
       </div>
+
+      {needsPerson && user && (savedModels?.models.length ?? 0) > 0 && (
+        <section className="mt-6">
+          <p className="text-[13px] font-medium text-ink">Who should model this?</p>
+          <p className="mt-0.5 text-[12px] text-muted">
+            Pick a saved model to keep the same person across your shop.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setModelId(null)}
+              className={`flex min-h-[56px] items-center gap-2 rounded-[12px] border px-3 py-2 text-left text-[13px] font-semibold ${
+                modelId === null ? "border-primary bg-primary/10 text-ink" : "border-transparent bg-raised text-ink"
+              }`}
+            >
+              <span className="grid h-10 w-10 place-items-center rounded-[8px] bg-surface text-[16px]">✨</span>
+              <span>
+                Let CowQ decide
+                <span className="block text-[11px] font-normal text-muted">Uses your active model</span>
+              </span>
+            </button>
+            {savedModels?.models.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setModelId(m.id)}
+                className={`flex min-h-[56px] items-center gap-2 rounded-[12px] border px-3 py-2 text-left text-[13px] font-semibold ${
+                  modelId === m.id ? "border-primary bg-primary/10 text-ink" : "border-transparent bg-raised text-ink"
+                }`}
+              >
+                {m.photos[0] ? (
+                  <img src={m.photos[0]} alt={m.name} className="h-10 w-10 rounded-[8px] object-cover" />
+                ) : (
+                  <span className="h-10 w-10 rounded-[8px] bg-surface" />
+                )}
+                <span>
+                  {m.name}
+                  <span className="block text-[11px] font-normal text-muted">
+                    {m.is_active ? "Active model" : "Saved model"}
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       {activeCount > 0 && (
         <p className="mt-4 text-[13px] text-muted">
