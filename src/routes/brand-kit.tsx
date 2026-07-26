@@ -788,11 +788,13 @@ function SavedModelsPanel({
   setModelBusy,
   onActivePhotos,
   onNoModels,
+  showUploader = true,
 }: {
   modelBusy: boolean;
   setModelBusy: (v: boolean) => void;
   onActivePhotos: (urls: string[]) => void;
   onNoModels: () => Promise<void>;
+  showUploader?: boolean;
 }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -826,7 +828,7 @@ function SavedModelsPanel({
 
   if (slots === 0) {
     return (
-      <div className="card-list flex flex-col gap-3 p-4">
+      <div className="card-amber flex flex-col gap-3 rounded-[12px] p-4">
         <p className="text-[14px] font-semibold text-ink">Saved models are on Growth &amp; Pro</p>
         <p className="text-[13px] text-muted">
           Save real people as reusable models — Growth keeps 3, Pro keeps 10 — so the same person appears
@@ -897,9 +899,13 @@ function SavedModelsPanel({
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[12px] text-muted">
-        {models.length} of {slots} model slots used · {saveCost} credits to save a model
-      </p>
+      <div>
+        <p className="text-[14px] font-semibold text-ink">Saved models</p>
+        <p className="text-[12px] text-muted">
+          {models.length} of {slots} used · {saveCost} credits to save a model. Pick one when you create a
+          product.
+        </p>
+      </div>
 
       {models.map((m) => (
         <div
@@ -951,7 +957,7 @@ function SavedModelsPanel({
         </div>
       ))}
 
-      {adding ? (
+      {!showUploader ? null : adding ? (
         <RealModelUploader
           modelBusy={modelBusy}
           setModelBusy={setModelBusy}
