@@ -172,7 +172,7 @@ export function buildVoicePrompt(m: BrandMemory): string {
   const id = [
     line("Sells", m.identity.what_we_sell),
     line("Writes for", m.identity.who_we_serve),
-    line("What makes this shop different", m.identity.what_we_sell ? m.identity.what_makes_us_different : m.identity.what_makes_us_different),
+    line("What makes this shop different", m.identity.what_makes_us_different),
     line("Promise to the buyer", m.identity.promise),
     line("Based in", m.identity.city),
   ].filter(Boolean);
