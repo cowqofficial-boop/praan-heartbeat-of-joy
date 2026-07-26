@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -182,6 +183,7 @@ const EMPTY_KIT: BrandKit = {
 function BrandKitPage() {
  const { onboarding } = Route.useSearch();
  const navigate = useNavigate();
+ const qc = useQueryClient();
  const [ready, setReady] = useState(false);
  const [kit, setKit] = useState<BrandKit>(EMPTY_KIT);
  const [busy, setBusy] = useState(false);
