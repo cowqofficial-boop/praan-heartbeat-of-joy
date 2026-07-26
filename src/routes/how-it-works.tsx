@@ -157,8 +157,13 @@ function Shot({
 function HowItWorks() {
   return (
     <main className="w-full">
+      <header className="flex items-center gap-3 px-6 pt-6">
+        <BackButton fallback="/" />
+        <Wordmark />
+      </header>
       {/* ================ HERO ================ */}
-      <section className="relative px-6 pb-10 pt-12 lg:pt-20">
+      <section className="relative px-6 pb-10 pt-8 lg:pt-14">
+
         <div
           aria-hidden
           className="pointer-events-none absolute left-1/2 top-6 -z-0 h-[440px] w-[820px] max-w-[95vw] -translate-x-1/2 rounded-full opacity-[0.2] blur-[120px]"
