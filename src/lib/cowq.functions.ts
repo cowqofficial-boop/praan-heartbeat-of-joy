@@ -546,7 +546,8 @@ export const generateImages = createServerFn({ method: "POST" })
           ? personStyles(modelLine, brandModelBinding, !!data.isDrapedGarment)
           : PRODUCT_STYLES;
 
-      const contextLine = `Product: ${data.productName}. Category: ${data.category}.${occasionScene ? " " + occasionScene : ""}`;
+      const memoryCtx = await (await import("./brand-memory.server")).loadBrandMemoryContext(userId);
+      const contextLine = `Product: ${data.productName}. Category: ${data.category}.${occasionScene ? " " + occasionScene : ""}${memoryCtx.photo ? " " + memoryCtx.photo : ""}`;
 
       const tasks: Promise<{ kind: string; url: string }>[] = styles.map((style) => (async () => {
         const refs = style.hasPerson && brandModelRefs.length > 0
@@ -706,7 +707,8 @@ export const generateImageForJob = createServerFn({ method: "POST" })
     try {
       console.info(`[generation] photo start job=${data.jobId} style=${style.kind} index=${data.styleIndex}`);
       const productRefs = await Promise.all(urls.slice(0, 5).map((u) => fetchAsBase64(u)));
-      const contextLine = `Product: ${data.productName}. Category: ${data.category}.${occasionScene ? " " + occasionScene : ""}`;
+      const memoryCtx = await (await import("./brand-memory.server")).loadBrandMemoryContext(userId);
+      const contextLine = `Product: ${data.productName}. Category: ${data.category}.${occasionScene ? " " + occasionScene : ""}${memoryCtx.photo ? " " + memoryCtx.photo : ""}`;
       const refs = style.hasPerson && brandModelRefs.length > 0
         ? [...productRefs, ...brandModelRefs]
         : productRefs;
@@ -807,11 +809,15 @@ export const generateCopyAndSave = createServerFn({ method: "POST" })
       ? `Brand: ${brand.business_name || "unnamed"}. Sells: ${brand.sells_what || "n/a"}. Target buyer: ${brand.sells_to || "general Indian shoppers"}.`
       : `Brand: independent Indian seller. Target buyer: general Indian shoppers.`;
 
+    const memoryVoice = (await import("./brand-memory.server")).loadBrandMemoryContext
+      ? (await (await import("./brand-memory.server")).loadBrandMemoryContext(userId)).voice
+      : "";
+
     const sys = `You are a plain-speaking Indian shopkeeper who writes product listings. You explain why THIS specific product is worth buying — with concrete facts, not filler.
 
 ${brandLines}
 ${toneLine}
-
+${memoryVoice ? "\n" + memoryVoice + "\n" : ""}
 Hard rules:
 - Open with the single most useful thing about the product. Never restate what the product obviously is.
 - Every bullet must contain a concrete fact: a material, a size, a use, a benefit someone can picture. Never a bullet that only describes the colour.
