@@ -87,7 +87,7 @@ export const generateServiceAndSave = createServerFn({ method: "POST" })
         browser_id: data.browserId,
         user_id: userId ?? null,
         kind: "service",
-        service_details: details as unknown as Record<string, unknown>,
+        service_details: details as unknown as never,
         original_image_url: data.photoUrl ?? null,
         product_name: name,
         price: Number.isFinite(priceNumber as number) ? priceNumber : null,
