@@ -855,14 +855,18 @@ function RoadmapCard({
         <Icon className="h-5 w-5" strokeWidth={1.75} />
       </span>
       <span
-        className="mt-5 inline-block rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]"
+        className="mt-5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]"
         style={{
-          background: "color-mix(in oklab, #FF8A1E 14%, transparent)",
-          color: "#FF8A1E",
+          background: `color-mix(in oklab, ${live ? "#00E5A0" : "#FF8A1E"} 14%, transparent)`,
+          color: live ? "#00E5A0" : "#FF8A1E",
         }}
       >
+        {live && (
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: "#00E5A0" }} aria-hidden />
+        )}
         {date}
       </span>
+
       <p className="mt-3 text-[17px] font-semibold text-ink">{title}</p>
       <p className="mt-2 text-[14px] leading-relaxed text-muted">{body}</p>
     </div>
