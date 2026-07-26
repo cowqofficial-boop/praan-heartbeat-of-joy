@@ -146,9 +146,10 @@ function Landing() {
   const { user } = useAuth();
   return (
     <main className="w-full">
-      {/* Top bar — mobile only. Sidebar handles desktop chrome. */}
-      <header className="flex items-center justify-between px-6 pt-6 lg:hidden">
-        <span className="font-display text-[22px] leading-none text-ink">CowQ</span>
+      {/* Top bar — logo always visible; nav collapses gracefully on small screens. */}
+      <header className="mx-auto flex w-full max-w-[1200px] items-center justify-between gap-4 px-6 pt-6">
+        <Wordmark />
+
         <nav className="flex items-center gap-5 text-[14px] text-muted">
           <Link to="/how-it-works" className="hover:text-ink">
             How it works
