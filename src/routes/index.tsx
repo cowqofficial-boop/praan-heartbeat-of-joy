@@ -3,6 +3,8 @@ import { Camera, Sparkles, Package, Check, Shield, Lock, RefreshCw, ImageIcon, U
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { UploadWidget } from "@/components/UploadWidget";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
+import { Wordmark } from "@/components/Wordmark";
+
 import { useAuth } from "@/lib/use-auth";
 import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/site";
 import { showcasePairs } from "@/data/showcase";
