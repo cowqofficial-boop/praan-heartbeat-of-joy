@@ -22,7 +22,9 @@ import { PrimaryButton } from "@/components/PrimaryButton";
 import { PageHeader, HelpButton } from "@/components/PageHeader";
 import { showAlert, showConfirm, showPrompt } from "@/components/Dialogs";
 
-import { MessageCircle, Palette, Store, UserRound } from "lucide-react";
+import { Loader2, MessageCircle, Palette, Store, UserRound } from "lucide-react";
+import { COSTS } from "@/lib/plans";
+
 
 
 const searchSchema = z.object({ onboarding: z.boolean().optional() });
