@@ -459,6 +459,46 @@ function StockPage() {
   );
 }
 
+function ReqMark() {
+  return <span className="ml-0.5 text-[color:var(--magenta,#FF2FA3)]" aria-hidden>*</span>;
+}
+
+function Field({
+  label,
+  required,
+  error,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  error?: string | null;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="mt-3">
+      <label className="text-[12px] font-semibold uppercase tracking-wide text-muted">
+        {label}
+        {required && <ReqMark />}
+      </label>
+      <div className="mt-1">{children}</div>
+      {error && (
+        <p className="mt-1 text-[12px] font-medium" style={{ color: "var(--magenta, #FF2FA3)" }}>
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="mt-5 first:mt-4">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-[color:var(--page-accent)]">{title}</p>
+      {children}
+    </section>
+  );
+}
+
 function StockSheet({
   initial,
   onClose,
@@ -475,6 +515,16 @@ function StockSheet({
   const [cost, setCost] = useState((initial ? initial.cost_price_paise / 100 : 0).toString());
   const [sell, setSell] = useState((initial ? initial.selling_price_paise / 100 : 0).toString());
   const [productId, setProductId] = useState<string | null>(initial?.product_id ?? null);
+  const [category, setCategory] = useState(initial?.category ?? "");
+  const [brand, setBrand] = useState(initial?.brand ?? "");
+  const [variant, setVariant] = useState(initial?.variant ?? "");
+  const [weight, setWeight] = useState(initial?.weight ?? "");
+  const [hsn, setHsn] = useState(initial?.hsn_code ?? "");
+  const [barcode, setBarcode] = useState(initial?.barcode ?? "");
+  const [supplier, setSupplier] = useState(initial?.supplier ?? "");
+  const [reorder, setReorder] = useState(initial?.reorder_level?.toString() ?? "");
+  const [notes, setNotes] = useState(initial?.notes ?? "");
+  const [fieldErr, setFieldErr] = useState<Record<string, string>>({});
   const [err, setErr] = useState<string | null>(null);
 
   const { data: products = [] } = useQuery({
@@ -491,13 +541,20 @@ function StockSheet({
 
   function submit() {
     setErr(null);
-    if (!name.trim()) return setErr("Name is needed.");
-    const q = parseInt(qty || "0", 10);
+    const fe: Record<string, string> = {};
+    const q = parseInt(qty || "", 10);
+    const s = parseFloat(sell || "");
+    if (!name.trim()) fe.name = "Name is required.";
+    if (qty.trim() === "" || Number.isNaN(q) || q < 0) fe.qty = "Quantity is required.";
+    if (sell.trim() === "" || Number.isNaN(s) || s <= 0) fe.sell = "Selling price is required.";
     const l = parseInt(low || "0", 10);
+    if (Number.isNaN(l) || l < 0) fe.low = "Must be a positive number.";
+    const r = reorder.trim() === "" ? null : parseInt(reorder, 10);
+    if (r !== null && (Number.isNaN(r) || r < 0)) fe.reorder = "Must be a positive number.";
+    setFieldErr(fe);
+    if (Object.keys(fe).length > 0) return;
+
     const c = Math.round(parseFloat(cost || "0") * 100);
-    const s = Math.round(parseFloat(sell || "0") * 100);
-    if (Number.isNaN(q) || q < 0) return setErr("Quantity must be a positive number.");
-    if (Number.isNaN(l) || l < 0) return setErr("Low-stock alert must be a positive number.");
     save.mutate({
       data: {
         id: initial?.id,
@@ -506,19 +563,33 @@ function StockSheet({
         sku: sku.trim() || null,
         quantity: q,
         low_stock_alert: l,
-        cost_price_paise: c,
-        selling_price_paise: s,
+        cost_price_paise: Number.isNaN(c) ? 0 : c,
+        selling_price_paise: Math.round(s * 100),
+        category: category.trim() || null,
+        brand: brand.trim() || null,
+        variant: variant.trim() || null,
+        weight: weight.trim() || null,
+        hsn_code: hsn.trim() || null,
+        barcode: barcode.trim() || null,
+        supplier: supplier.trim() || null,
+        reorder_level: r,
+        notes: notes.trim() || null,
       },
     });
   }
 
+  const linkedProduct = productId ? products.find((p) => p.id === productId) : null;
+  const linkedHasPhotos = initial
+    ? initial.has_photos
+    : !!(linkedProduct?.generated_images as Array<{ url?: string }> | undefined)?.some((i) => i?.url);
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4" onClick={onClose}>
       <div
-        className="w-full max-w-[480px] rounded-t-[20px] bg-raised p-5 sm:rounded-[20px]"
+        className="max-h-[88vh] w-full max-w-[480px] overflow-y-auto rounded-t-[20px] bg-raised p-5 sm:rounded-[20px]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between">
+        <div className="sticky -top-5 -mx-5 -mt-5 flex items-center justify-between bg-raised px-5 pb-3 pt-5">
           <h2 className="font-display text-[20px] text-ink">
             {initial ? "Edit item" : "Add item"}
           </h2>
@@ -526,75 +597,139 @@ function StockSheet({
             <X className="h-5 w-5" />
           </button>
         </div>
+        <p className="text-[12px] text-muted">
+          Fields marked <ReqMark /> are required.
+        </p>
 
-        {!initial && products.length > 0 && (
-          <div className="mt-4">
-            <label className="text-[12px] font-semibold uppercase tracking-wide text-muted">
-              Link to a product (optional)
-            </label>
-            <select
-              value={productId ?? ""}
-              onChange={(e) => {
-                const id = e.target.value || null;
-                setProductId(id);
-                if (id) {
-                  const p = products.find((x) => x.id === id);
-                  if (p && !name) setName(p.product_name ?? "");
-                }
-              }}
-              className="mt-1 h-11 w-full rounded-[12px] bg-surface px-3 text-[15px] text-ink"
+        <Section title="Basics">
+          {!initial && products.length > 0 && (
+            <Field label="Link to a product (optional)">
+              <select
+                value={productId ?? ""}
+                onChange={(e) => {
+                  const id = e.target.value || null;
+                  setProductId(id);
+                  if (id) {
+                    const p = products.find((x) => x.id === id);
+                    if (p && !name) setName(p.product_name ?? "");
+                  }
+                }}
+                className="h-11 w-full rounded-[12px] bg-surface px-3 text-[15px] text-ink"
+              >
+                <option value="">— No linked product —</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.product_name ?? "Untitled"}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
+
+          {!linkedHasPhotos && (
+            <Link
+              to="/create"
+              className="mt-2 inline-flex h-10 items-center rounded-[12px] bg-surface px-3 text-[13px] font-semibold text-ink"
             >
-              <option value="">— No linked product —</option>
-              {products.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.product_name ?? "Untitled"}
-                </option>
-              ))}
-            </select>
+              Generate photos — {COSTS.product} credits
+            </Link>
+          )}
+
+          <Field label="Name" required error={fieldErr.name}>
+            <input value={name} onChange={(e) => setName(e.target.value)} className="input" />
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Category">
+              <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Sarees" className="input" />
+            </Field>
+            <Field label="Brand">
+              <input value={brand} onChange={(e) => setBrand(e.target.value)} className="input" />
+            </Field>
           </div>
-        )}
+          <Field label="SKU">
+            <input value={sku} onChange={(e) => setSku(e.target.value)} className="input" />
+          </Field>
+        </Section>
 
-        <Field label="Name">
-          <input value={name} onChange={(e) => setName(e.target.value)} className="input" />
-        </Field>
-        <Field label="SKU (optional)">
-          <input value={sku} onChange={(e) => setSku(e.target.value)} className="input" />
-        </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Quantity">
-            <input inputMode="numeric" value={qty} onChange={(e) => setQty(e.target.value.replace(/\D/g, ""))} className="input font-mono" />
-          </Field>
-          <Field label="Low-stock alert at">
-            <input inputMode="numeric" value={low} onChange={(e) => setLow(e.target.value.replace(/\D/g, ""))} className="input font-mono" />
-          </Field>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Cost price ₹">
-            <input inputMode="decimal" value={cost} onChange={(e) => setCost(e.target.value)} className="input font-mono" />
-          </Field>
-          <Field label="Selling price ₹">
-            <input inputMode="decimal" value={sell} onChange={(e) => setSell(e.target.value)} className="input font-mono" />
-          </Field>
-        </div>
+        <Section title="Pricing">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Cost price ₹">
+              <input inputMode="decimal" value={cost} onChange={(e) => setCost(e.target.value)} className="input font-mono" />
+            </Field>
+            <Field label="Selling price ₹" required error={fieldErr.sell}>
+              <input inputMode="decimal" value={sell} onChange={(e) => setSell(e.target.value)} className="input font-mono" />
+            </Field>
+          </div>
+          {(() => {
+            const c = parseFloat(cost || "0");
+            const s = parseFloat(sell || "0");
+            if (s > 0 && c > 0) {
+              const profit = s - c;
+              const margin = ((profit / s) * 100).toFixed(0);
+              return (
+                <p className="mt-2 text-[13px] text-muted">
+                  Profit per unit:{" "}
+                  <span className="font-mono font-semibold text-ink">
+                    {formatInr(Math.round(profit))}
+                  </span>{" "}
+                  ({margin}% margin)
+                </p>
+              );
+            }
+            return null;
+          })()}
+        </Section>
 
-        {(() => {
-          const c = parseFloat(cost || "0");
-          const s = parseFloat(sell || "0");
-          if (s > 0 && c > 0) {
-            const profit = s - c;
-            const margin = ((profit / s) * 100).toFixed(0);
-            return (
-              <p className="mt-2 text-[13px] text-muted">
-                Profit per unit:{" "}
-                <span className="font-mono font-semibold text-ink">
-                  {formatInr(Math.round(profit))}
-                </span>{" "}
-                ({margin}% margin)
-              </p>
-            );
-          }
-          return null;
-        })()}
+        <Section title="Quantity">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Quantity" required error={fieldErr.qty}>
+              <input inputMode="numeric" value={qty} onChange={(e) => setQty(e.target.value.replace(/\D/g, ""))} className="input font-mono" />
+            </Field>
+            <Field label="Low-stock alert at" error={fieldErr.low}>
+              <input inputMode="numeric" value={low} onChange={(e) => setLow(e.target.value.replace(/\D/g, ""))} className="input font-mono" />
+            </Field>
+          </div>
+          <Field label="Reorder level" error={fieldErr.reorder}>
+            <input
+              inputMode="numeric"
+              value={reorder}
+              onChange={(e) => setReorder(e.target.value.replace(/\D/g, ""))}
+              placeholder="Reorder from supplier at this count"
+              className="input font-mono"
+            />
+          </Field>
+        </Section>
+
+        <Section title="Details">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Size / Variant">
+              <input value={variant} onChange={(e) => setVariant(e.target.value)} placeholder="M · 6-inch · Red" className="input" />
+            </Field>
+            <Field label="Weight">
+              <input value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="500g" className="input" />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="HSN code">
+              <input value={hsn} onChange={(e) => setHsn(e.target.value)} className="input font-mono" />
+            </Field>
+            <Field label="Barcode">
+              <input value={barcode} onChange={(e) => setBarcode(e.target.value)} className="input font-mono" />
+            </Field>
+          </div>
+          <Field label="Supplier">
+            <input value={supplier} onChange={(e) => setSupplier(e.target.value)} className="input" />
+          </Field>
+          <Field label="Notes">
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              className="w-full rounded-[12px] bg-raised p-3 text-[15px] text-ink outline-none"
+              style={{ boxShadow: "inset 0 0 0 1px var(--line)" }}
+            />
+          </Field>
+        </Section>
 
         {err && <p className="mt-3 text-[13px] text-primary">{err}</p>}
 
