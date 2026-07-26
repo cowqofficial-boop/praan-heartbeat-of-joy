@@ -322,7 +322,10 @@ export const generateBrandModelPortrait = createServerFn({ method: "POST" })
     }
 
     const prompt = `Portrait of one person for a brand model reference. ${who}
+${styling}
+${custom ? `IMPORTANT — clearly include: ${custom}. These details must be plainly visible in the portrait.` : ""}
 Photorealistic, natural pose, natural indoor daylight, plain neutral background, head-and-shoulders framing centered, calm pleasant expression, hands and fingers correct, no props, no text, no logo, no watermark. This is a reference portrait to be reused across a shop's product photography, so the person should look consistent, believable, and ordinary — not a fashion cover, not an editorial shot.`;
+
 
     // Charge for the portrait before generating; refunded if anything fails.
     const credits = await import("./credits.server");
