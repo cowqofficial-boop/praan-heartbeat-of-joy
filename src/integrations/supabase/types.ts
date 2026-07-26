@@ -356,6 +356,80 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          buyer_address: string | null
+          buyer_gstin: string | null
+          buyer_name: string | null
+          buyer_state_code: string | null
+          cgst_paise: number
+          created_at: string
+          id: string
+          igst_paise: number
+          invoice_date: string
+          invoice_no: string
+          is_gst_invoice: boolean
+          payment_id: string | null
+          plan_id: string
+          plan_name: string
+          sgst_paise: number
+          taxable_paise: number
+          total_paise: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          buyer_address?: string | null
+          buyer_gstin?: string | null
+          buyer_name?: string | null
+          buyer_state_code?: string | null
+          cgst_paise?: number
+          created_at?: string
+          id?: string
+          igst_paise?: number
+          invoice_date?: string
+          invoice_no: string
+          is_gst_invoice?: boolean
+          payment_id?: string | null
+          plan_id: string
+          plan_name: string
+          sgst_paise?: number
+          taxable_paise?: number
+          total_paise?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          buyer_address?: string | null
+          buyer_gstin?: string | null
+          buyer_name?: string | null
+          buyer_state_code?: string | null
+          cgst_paise?: number
+          created_at?: string
+          id?: string
+          igst_paise?: number
+          invoice_date?: string
+          invoice_no?: string
+          is_gst_invoice?: boolean
+          payment_id?: string | null
+          plan_id?: string
+          plan_name?: string
+          sgst_paise?: number
+          taxable_paise?: number
+          total_paise?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_prefs: {
         Row: {
           ai_alerts: boolean
@@ -594,6 +668,10 @@ export type Database = {
           currency: string | null
           date_format: string | null
           display_name: string | null
+          gstin: string | null
+          invoice_address: string | null
+          invoice_business_name: string | null
+          invoice_state_code: string | null
           language: string | null
           location: string | null
           mission: string | null
@@ -618,6 +696,10 @@ export type Database = {
           currency?: string | null
           date_format?: string | null
           display_name?: string | null
+          gstin?: string | null
+          invoice_address?: string | null
+          invoice_business_name?: string | null
+          invoice_state_code?: string | null
           language?: string | null
           location?: string | null
           mission?: string | null
@@ -642,6 +724,10 @@ export type Database = {
           currency?: string | null
           date_format?: string | null
           display_name?: string | null
+          gstin?: string | null
+          invoice_address?: string | null
+          invoice_business_name?: string | null
+          invoice_state_code?: string | null
           language?: string | null
           location?: string | null
           mission?: string | null
