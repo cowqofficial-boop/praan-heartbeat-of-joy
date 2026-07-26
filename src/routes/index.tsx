@@ -338,9 +338,19 @@ function Landing() {
                 </div>
               </Artefact>
 
-              <Artefact title="Shopify catalog file" wide tone="card-cobalt">
-                <div className="overflow-hidden rounded-[10px] bg-raised">
-                  <div className="grid grid-cols-6 gap-2 bg-background/40 px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-muted">
+              <Artefact title="Website catalog file" wide tone="card-cobalt">
+                {/* Spreadsheet document: filename tab, column letters, row numbers. */}
+                <div className="overflow-hidden rounded-[10px] bg-raised" style={{ border: "1px solid var(--line)" }}>
+                  <div
+                    className="flex items-center gap-2 px-3 py-2"
+                    style={{ borderBottom: "1px solid var(--line)", background: "color-mix(in oklab, var(--card-accent) 8%, transparent)" }}
+                  >
+                    <FileSpreadsheet className="h-4 w-4" style={{ color: "var(--card-accent)" }} strokeWidth={1.75} />
+                    <span className="font-mono text-[11px] text-ink">cowq-catalog.csv</span>
+                    <span className="ml-auto text-[10px] uppercase tracking-wider text-muted">3 rows</span>
+                  </div>
+                  <div className="grid grid-cols-[22px_repeat(6,minmax(0,1fr))] gap-2 px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-muted" style={{ borderBottom: "1px solid var(--line)" }}>
+                    <span />
                     <span>Handle</span>
                     <span className="col-span-2">Title</span>
                     <span>Vendor</span>
@@ -351,11 +361,13 @@ function Landing() {
                     ["stole-01", "Handwoven cotton stole", "Jaipur Loom", "₹1,499", "stole-01.jpg"],
                     ["diya-set", "Brass diya set of 6", "Moradabad", "₹899", "diya-set.jpg"],
                     ["speaker", "Wireless speaker", "Sound&Co", "₹2,999", "speaker.jpg"],
-                  ].map((r) => (
+                  ].map((r, i) => (
                     <div
                       key={r[0]}
-                      className="grid grid-cols-6 gap-2 px-3 py-2 font-mono text-[11px] text-ink"
+                      className="grid grid-cols-[22px_repeat(6,minmax(0,1fr))] gap-2 px-3 py-2 font-mono text-[11px] text-ink"
+                      style={{ borderBottom: i < 2 ? "1px solid color-mix(in oklab, var(--line) 60%, transparent)" : "none" }}
                     >
+                      <span className="text-muted">{i + 1}</span>
                       <span>{r[0]}</span>
                       <span className="col-span-2 truncate">{r[1]}</span>
                       <span className="truncate text-muted">{r[2]}</span>
@@ -365,9 +377,10 @@ function Landing() {
                   ))}
                 </div>
                 <p className="mt-3 text-[12px] text-muted">
-                  Imports straight into Shopify. Same file works for Amazon and Flipkart.
+                  Upload it to your website, Shopify, Amazon or Flipkart — one file, every shop.
                 </p>
               </Artefact>
+
             </div>
           </Reveal>
         </div>
