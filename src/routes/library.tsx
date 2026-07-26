@@ -212,10 +212,12 @@ function ProductCard({
   item,
   onRename,
   onDelete,
+  onToggleShop,
 }: {
   item: LibraryItem;
   onRename: (i: LibraryItem) => void;
   onDelete: (i: LibraryItem) => void;
+  onToggleShop: (i: LibraryItem) => void;
 }) {
   const thumb =
     item.generated_images.find((i) => i.kind === "white" && i.ratio === "1:1")?.url ??
@@ -252,11 +254,29 @@ function ProductCard({
           </p>
           <p className="mt-0.5 text-[11px] text-white/70">{date}</p>
         </div>
-        <div className="pointer-events-none absolute left-2 top-2">
+        <div className="pointer-events-none absolute left-2 top-2 flex flex-col items-start gap-1">
           <TypeBadge kind={item.kind ?? "product"} />
+          {item.public_visible && (
+            <span
+              className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
+              style={{ background: "color-mix(in oklab, var(--magenta) 18%, var(--raised))", color: "var(--magenta)" }}
+            >
+              <Store className="h-3 w-3" />
+              On shop
+            </span>
+          )}
         </div>
       </Link>
       <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+        <button
+          type="button"
+          onClick={() => onToggleShop(item)}
+          aria-label={item.public_visible ? "Hide from my public shop" : "Show on my public shop"}
+          title={item.public_visible ? "Hide from my public shop" : "Show on my public shop"}
+          className="grid h-8 w-8 place-items-center rounded-full bg-background/70 text-ink backdrop-blur-sm hover:brightness-110"
+        >
+          {item.public_visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+        </button>
         <button
           type="button"
           onClick={() => onRename(item)}
@@ -277,4 +297,5 @@ function ProductCard({
     </li>
   );
 }
+
 
