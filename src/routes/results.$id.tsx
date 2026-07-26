@@ -368,6 +368,12 @@ function PhotosSection({
       </div>
 
       {hasAccount && (
+        <div className="mt-4">
+          <PhotoActions generationId={id} imageKind={current?.kind} onChanged={onDone} />
+        </div>
+      )}
+
+      {hasAccount && (
         <MakeMoreButton
           id={id}
           productName={productName}
