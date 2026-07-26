@@ -26,7 +26,7 @@ import {
   type StockStatus,
 } from "@/lib/stock.functions";
 import { listMyProducts } from "@/lib/library.functions";
-import { formatInr } from "@/lib/plans";
+import { COSTS, formatInr } from "@/lib/plans";
 
 export const Route = createFileRoute("/stock")({
   head: () => ({
