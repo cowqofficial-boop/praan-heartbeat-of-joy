@@ -638,7 +638,7 @@ function CalendarExplainer() {
             <div
               key={row.q}
               className={`${row.tone} p-4 ${i === EXPLAINER.length - 1 ? "sm:col-span-2" : ""}`}
-              style={{ animation: `rise 400ms ${i * 50}ms both` }}
+              style={{ animation: `cowq-fade-rise 400ms ${i * 50}ms both` }}
             >
               <p className="flex items-center gap-2 text-[14px] font-semibold text-ink">
                 <row.icon className="h-5 w-5" style={{ color: "var(--card-accent)" }} strokeWidth={1.75} />
