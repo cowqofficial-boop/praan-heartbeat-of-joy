@@ -168,19 +168,33 @@ async function handleSubscriptionCharged(
     { onConflict: "user_id" },
   );
 
-  // Record invoice
-  await sb.from("payments").insert({
-    user_id: userId,
-    plan_id: plan.id,
-    razorpay_subscription_id: sub.id,
-    razorpay_payment_id: pay?.id ?? null,
-    razorpay_invoice_id: inv?.id ?? null,
-    invoice_url: inv?.short_url ?? null,
-    amount_inr: pay ? Math.round(pay.amount / 100) : plan.priceInr,
-    credits_granted: plan.credits,
-    status: "paid",
+  // Record payment
+  const amount_inr = pay ? Math.round(pay.amount / 100) : plan.priceInr;
+  const { data: payRow } = await sb
+    .from("payments")
+    .insert({
+      user_id: userId,
+      plan_id: plan.id,
+      razorpay_subscription_id: sub.id,
+      razorpay_payment_id: pay?.id ?? null,
+      razorpay_invoice_id: inv?.id ?? null,
+      invoice_url: inv?.short_url ?? null,
+      amount_inr,
+      credits_granted: plan.credits,
+      status: "paid",
+    })
+    .select("id")
+    .maybeSingle();
+
+  const { createInvoiceForPayment } = await import("@/lib/invoice.server");
+  await createInvoiceForPayment(sb, {
+    userId,
+    paymentId: payRow?.id ?? null,
+    planId: plan.id,
+    amountInr: amount_inr,
   });
 }
+
 
 async function handleSubscriptionCancelled(
   payload: { payload: { subscription?: { entity: RzSubEntity } } },
