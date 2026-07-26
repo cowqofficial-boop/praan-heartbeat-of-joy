@@ -316,8 +316,8 @@ function PhotosSection({
       {/* MOBILE: full-bleed swipeable carousel with dot indicator */}
       <div className="lg:hidden">
         <div
-          className="relative -mx-6 w-screen"
-          style={{ maxWidth: "100vw" }}
+          className="relative -mx-6 w-[calc(100%+3rem)]"
+          style={{ maxWidth: "calc(100% + 3rem)" }}
           onScroll={(e) => {
             const el = e.currentTarget;
             const w = el.clientWidth;
