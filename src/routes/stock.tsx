@@ -568,6 +568,7 @@ function StockSheet({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const [kind, setKind] = useState<ContentKind>(initial?.kind ?? "product");
   const [name, setName] = useState(initial?.name ?? "");
   const [sku, setSku] = useState(initial?.sku ?? "");
   const [qty, setQty] = useState(initial?.quantity.toString() ?? "0");
@@ -605,7 +606,8 @@ function StockSheet({
     const q = parseInt(qty || "", 10);
     const s = parseFloat(sell || "");
     if (!name.trim()) fe.name = "Name is required.";
-    if (qty.trim() === "" || Number.isNaN(q) || q < 0) fe.qty = "Quantity is required.";
+    if (kind !== "service" && (qty.trim() === "" || Number.isNaN(q) || q < 0))
+      fe.qty = "Quantity is required.";
     if (sell.trim() === "" || Number.isNaN(s) || s <= 0) fe.sell = "Selling price is required.";
     const l = parseInt(low || "0", 10);
     if (Number.isNaN(l) || l < 0) fe.low = "Must be a positive number.";
@@ -619,10 +621,11 @@ function StockSheet({
       data: {
         id: initial?.id,
         product_id: productId,
+        kind,
         name: name.trim(),
         sku: sku.trim() || null,
-        quantity: q,
-        low_stock_alert: l,
+        quantity: kind === "service" ? 0 : q,
+        low_stock_alert: kind === "service" ? 0 : l,
         cost_price_paise: Number.isNaN(c) ? 0 : c,
         selling_price_paise: Math.round(s * 100),
         category: category.trim() || null,
@@ -632,7 +635,7 @@ function StockSheet({
         hsn_code: hsn.trim() || null,
         barcode: barcode.trim() || null,
         supplier: supplier.trim() || null,
-        reorder_level: r,
+        reorder_level: kind === "service" ? null : r,
         notes: notes.trim() || null,
       },
     });
@@ -651,7 +654,7 @@ function StockSheet({
       >
         <div className="sticky -top-5 -mx-5 -mt-5 flex items-center justify-between bg-raised px-5 pb-3 pt-5">
           <h2 className="font-display text-[20px] text-ink">
-            {initial ? "Edit item" : "Add item"}
+            {initial ? "Edit item" : kind === "service" ? "Add service" : "Add item"}
           </h2>
           <button type="button" onClick={onClose} aria-label="Close" className="text-muted">
             <X className="h-5 w-5" />
@@ -660,6 +663,10 @@ function StockSheet({
         <p className="text-[12px] text-muted">
           Fields marked <ReqMark /> are required.
         </p>
+
+        <div className="mt-3">
+          <TypeToggle value={kind} onChange={setKind} size="sm" />
+        </div>
 
         <Section title="Basics">
           {!initial && products.length > 0 && (
@@ -691,7 +698,9 @@ function StockSheet({
               to="/create"
               className="mt-2 inline-flex h-10 items-center rounded-[12px] bg-surface px-3 text-[13px] font-semibold text-ink"
             >
-              Generate photos — {COSTS.product} credits
+              {kind === "service"
+                ? `Make a service poster — ${serviceCost(false)} credits`
+                : `Generate photos — ${COSTS.product} credits`}
             </Link>
           )}
 
@@ -740,6 +749,11 @@ function StockSheet({
           })()}
         </Section>
 
+        {kind === "service" ? (
+          <p className="mt-3 text-[13px] text-muted">
+            Services don't hold stock, so there's no quantity to track here.
+          </p>
+        ) : (
         <Section title="Quantity">
           <div className="grid grid-cols-2 gap-3">
             <Field label="Quantity" required error={fieldErr.qty}>
@@ -759,6 +773,7 @@ function StockSheet({
             />
           </Field>
         </Section>
+        )}
 
         <Section title="Details">
           <div className="grid grid-cols-2 gap-3">
