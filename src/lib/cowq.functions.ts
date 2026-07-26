@@ -361,7 +361,7 @@ function getGenerationStyles(data: {
       : PRODUCT_STYLES;
 }
 
-async function getBrandModelContext(userId?: string | null): Promise<{
+async function getBrandModelContext(userId?: string | null, modelId?: string | null): Promise<{
   modelLine: string;
   brandModelRefs: { b64: string; mime: string }[];
   brandModelBinding: string;
@@ -390,12 +390,28 @@ async function getBrandModelContext(userId?: string | null): Promise<{
   const styling = describeModelStyling(kit);
   if (styling) modelLine = `${modelLine} ${styling}`;
   occasionScene = describeOccasionScene(kit);
-  if (!kit.brand_model_enabled) return { modelLine, brandModelRefs, brandModelBinding, personSource, occasionScene };
+  if (!kit.brand_model_enabled && !modelId)
+    return { modelLine, brandModelRefs, brandModelBinding, personSource, occasionScene };
 
-  const source = (kit.brand_model_source as "ai" | "user" | null) ?? "ai";
-  const photos = source === "user"
+  let source = (kit.brand_model_source as "ai" | "user" | null) ?? "ai";
+  let photos = source === "user"
     ? ((kit.brand_model_photos as string[] | null) ?? []).filter(Boolean)
     : (kit.brand_model_url ? [kit.brand_model_url] : []);
+
+  // An explicitly chosen saved model wins over the active brand-kit model.
+  if (modelId) {
+    const { data: chosen } = await sb
+      .from("brand_models")
+      .select("photos")
+      .eq("user_id", userId)
+      .eq("id", modelId)
+      .maybeSingle();
+    const chosenPhotos = ((chosen?.photos as string[] | null) ?? []).filter(Boolean);
+    if (chosenPhotos.length > 0) {
+      photos = chosenPhotos;
+      source = "user";
+    }
+  }
   const loaded: { b64: string; mime: string }[] = [];
   for (const p of photos.slice(0, 5)) {
     try { loaded.push(await fetchAsBase64(p)); } catch { /* skip */ }
@@ -484,6 +500,7 @@ export const generateImages = createServerFn({ method: "POST" })
       needsPerson?: boolean;
       isKidswear?: boolean;
       isDrapedGarment?: boolean;
+      modelId?: string | null;
     }) => d,
   )
   .handler(async ({ data }) => {
@@ -658,6 +675,7 @@ export const generateImageForJob = createServerFn({ method: "POST" })
       needsPerson?: boolean;
       isKidswear?: boolean;
       isDrapedGarment?: boolean;
+      modelId?: string | null;
       styleIndex: number;
     }) => d,
   )
@@ -671,7 +689,7 @@ export const generateImageForJob = createServerFn({ method: "POST" })
         : [];
     if (urls.length === 0) throw new Error("No image provided");
 
-    const { modelLine, brandModelRefs, brandModelBinding, personSource, occasionScene } = await getBrandModelContext(userId);
+    const { modelLine, brandModelRefs, brandModelBinding, personSource, occasionScene } = await getBrandModelContext(userId, data.modelId ?? null);
     const styles = getGenerationStyles(data, modelLine, brandModelBinding);
     const style = styles[data.styleIndex];
     if (!style) throw new Error("Photo style was not found. Try again.");
