@@ -766,14 +766,6 @@ function UndoToast({ name, onUndo, onClose }: { name: string; onUndo: () => void
 }
 
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="mt-3">
-      <label className="text-[12px] font-semibold uppercase tracking-wide text-muted">{label}</label>
-      <div className="mt-1">{children}</div>
-    </div>
-  );
-}
 
 function MovementLog({
   movements,
