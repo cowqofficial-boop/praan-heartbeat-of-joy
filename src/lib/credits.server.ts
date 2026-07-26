@@ -8,7 +8,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { COSTS, type ActionKey } from "./plans";
 
-export type Spend = { sub: number; pack: number };
+export type Spend = { sub: number; pack: number; balance: number };
 
 /** Returns the authenticated user id from the request, or null for anonymous callers. */
 export async function currentUserId(): Promise<string | null> {
@@ -62,8 +62,10 @@ export async function spendOrThrow(userId: string, action: ActionKey, units = 1)
   if (error) throw new Error(`credit check failed: ${error.message}`);
   const row = Array.isArray(data) ? data[0] : data;
   if (!row?.ok) throw new Error(`NO_CREDITS:${amount}:${row?.balance ?? 0}`);
-  console.info(`[credits] spent user=${userId} action=${action} amount=${amount}`);
-  return { sub: row.took_sub ?? 0, pack: row.took_pack ?? 0 };
+  console.info(
+    `[credits] spent user=${userId} action=${action} amount=${amount} balance_after=${row.balance ?? 0}`,
+  );
+  return { sub: row.took_sub ?? 0, pack: row.took_pack ?? 0, balance: row.balance ?? 0 };
 }
 
 /** Put back a previous reservation after a failure. Never throws. */
