@@ -466,10 +466,10 @@ export const generateImages = createServerFn({ method: "POST" })
     const PRODUCT_COST = COSTS.product;
     let refundInfo: { userId: string; sub: number; pack: number } | null = null;
 
-    if (data.userId) {
+    if (userId) {
       const sb = await admin();
       const { data: rows, error } = await sb.rpc("spend_credits", {
-        _user_id: data.userId,
+        _user_id: userId,
         _amount: PRODUCT_COST,
       });
       if (error) throw new Error(`credit check failed: ${error.message}`);
@@ -478,7 +478,7 @@ export const generateImages = createServerFn({ method: "POST" })
         const have = first?.balance ?? 0;
         throw new Error(`NO_CREDITS:${PRODUCT_COST}:${have}`);
       }
-      refundInfo = { userId: data.userId, sub: first.took_sub ?? 0, pack: first.took_pack ?? 0 };
+      refundInfo = { userId: userId, sub: first.took_sub ?? 0, pack: first.took_pack ?? 0 };
     } else {
       await checkAndIncrementLimit(data.browserId);
     }
@@ -499,12 +499,12 @@ export const generateImages = createServerFn({ method: "POST" })
       let brandModelBinding = "";
       let personSource: "ai" | "user" = "ai";
       let occasionScene = "";
-      if (data.userId) {
+      if (userId) {
         const sb = await admin();
         const { data: kit } = await sb
           .from("brand_kits")
           .select("model_gender, model_age, model_skin, model_body, model_region, model_nationality, model_cultural_style, model_occasion, model_hair, model_expression, model_pose, model_custom_look, brand_model_enabled, brand_model_url, brand_model_source, brand_model_photos")
-          .eq("user_id", data.userId)
+          .eq("user_id", userId)
           .maybeSingle();
         if (kit) {
           const { describeModelPrefs, describeModelStyling, describeOccasionScene } = await import("./brand-kit.functions");
@@ -603,9 +603,9 @@ export const startGenerationJob = createServerFn({ method: "POST" })
     let reserved = false;
 
     try {
-      if (data.userId) {
+      if (userId) {
         const { data: rows, error } = await sb.rpc("spend_credits", {
-          _user_id: data.userId,
+          _user_id: userId,
           _amount: productCost,
         });
         if (error) throw new Error(`credit check failed: ${error.message}`);
@@ -625,7 +625,7 @@ export const startGenerationJob = createServerFn({ method: "POST" })
         .from("generation_jobs")
         .insert({
           browser_id: data.browserId,
-          user_id: data.userId ?? null,
+          user_id: userId ?? null,
           refund_sub: refundSub,
           refund_pack: refundPack,
           status: "reserved",
@@ -637,8 +637,8 @@ export const startGenerationJob = createServerFn({ method: "POST" })
       return { jobId: row.id as string, cost: productCost };
     } catch (err) {
       if (reserved) {
-        if (data.userId) {
-          await sb.rpc("refund_credits", { _user_id: data.userId, _sub: refundSub, _pack: refundPack });
+        if (userId) {
+          await sb.rpc("refund_credits", { _user_id: userId, _sub: refundSub, _pack: refundPack });
         } else {
           await decrementLimit(data.browserId);
         }
@@ -679,7 +679,7 @@ export const generateImageForJob = createServerFn({ method: "POST" })
         : [];
     if (urls.length === 0) throw new Error("No image provided");
 
-    const { modelLine, brandModelRefs, brandModelBinding, personSource, occasionScene } = await getBrandModelContext(data.userId);
+    const { modelLine, brandModelRefs, brandModelBinding, personSource, occasionScene } = await getBrandModelContext(userId);
     const styles = getGenerationStyles(data, modelLine, brandModelBinding);
     const style = styles[data.styleIndex];
     if (!style) throw new Error("Photo style was not found. Try again.");
@@ -765,12 +765,12 @@ export const generateCopyAndSave = createServerFn({ method: "POST" })
       sells_to: string;
       tone: string;
     } | null = null;
-    if (data.userId) {
+    if (userId) {
       const sbLookup = await admin();
       const { data: bk } = await sbLookup
         .from("brand_kits")
         .select("business_name, sells_what, sells_to, tone")
-        .eq("user_id", data.userId)
+        .eq("user_id", userId)
         .maybeSingle();
       if (bk) brand = bk;
     }
@@ -862,7 +862,7 @@ Return a JSON object only (no prose, no markdown fences) with these exact keys:
       .from("generations")
       .insert({
         browser_id: data.browserId,
-        user_id: data.userId ?? null,
+        user_id: userId ?? null,
         original_image_url: data.originalImageUrl,
         product_name: data.productName,
         price: Number(data.price) || null,
