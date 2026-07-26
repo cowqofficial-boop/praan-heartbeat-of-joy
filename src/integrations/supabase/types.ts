@@ -335,6 +335,94 @@ export type Database = {
         }
         Relationships: []
       }
+      generation_component_versions: {
+        Row: {
+          component_id: string
+          content: Json
+          created_at: string
+          credits_spent: number
+          id: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          component_id: string
+          content?: Json
+          created_at?: string
+          credits_spent?: number
+          id?: string
+          source?: string
+          user_id: string
+        }
+        Update: {
+          component_id?: string
+          content?: Json
+          created_at?: string
+          credits_spent?: number
+          id?: string
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generation_component_versions_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "generation_components"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      generation_components: {
+        Row: {
+          component_key: string | null
+          component_type: string
+          content: Json
+          created_at: string
+          credits_spent_total: number
+          generation_id: string
+          id: string
+          metadata: Json
+          updated_at: string
+          updated_by: string
+          user_id: string
+        }
+        Insert: {
+          component_key?: string | null
+          component_type: string
+          content?: Json
+          created_at?: string
+          credits_spent_total?: number
+          generation_id: string
+          id?: string
+          metadata?: Json
+          updated_at?: string
+          updated_by?: string
+          user_id: string
+        }
+        Update: {
+          component_key?: string | null
+          component_type?: string
+          content?: Json
+          created_at?: string
+          credits_spent_total?: number
+          generation_id?: string
+          id?: string
+          metadata?: Json
+          updated_at?: string
+          updated_by?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generation_components_generation_id_fkey"
+            columns: ["generation_id"]
+            isOneToOne: false
+            referencedRelation: "generations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       generation_jobs: {
         Row: {
           browser_id: string

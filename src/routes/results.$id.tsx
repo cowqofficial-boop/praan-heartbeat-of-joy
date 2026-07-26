@@ -21,6 +21,7 @@ import { VideoSection } from "@/components/video/VideoSection";
 import { TypeBadge } from "@/components/TypeToggle";
 import { CopyButton } from "@/components/CopyButton";
 import { contactLabel, fallbackCta, type ServiceDetails } from "@/lib/service";
+import { ComponentStack, PhotoActions } from "@/components/modular/ComponentStack";
 
 export const Route = createFileRoute("/results/$id")({
   head: ({ params }) => ({
@@ -156,7 +157,11 @@ function Results() {
 
           {/* Collapsed listing: one panel, hairline rows, single-open accordion */}
           {/* Collapsed listing: one panel, hairline rows, single-open accordion */}
-          <ListingPanel copy={copy} id={id} canEdit={!!user} />
+          {user ? (
+            <ComponentStack generationId={id} onChanged={() => refetch()} />
+          ) : (
+            <ListingPanel copy={copy} id={id} canEdit={false} />
+          )}
 
           {/* Videos — only for signed-in sellers, only when the flag is on */}
           <VideoSection generationId={id} productName={productName} hasAccount={!!user} />
@@ -366,6 +371,12 @@ function PhotosSection({
           </p>
         )}
       </div>
+
+      {hasAccount && (
+        <div className="mt-4">
+          <PhotoActions generationId={id} imageKind={current?.kind} onChanged={onDone} />
+        </div>
+      )}
 
       {hasAccount && (
         <MakeMoreButton
@@ -1097,7 +1108,11 @@ function ServiceResults({
             </div>
           </section>
 
-          <ListingPanel copy={copy} id={id} canEdit={hasAccount} />
+          {hasAccount ? (
+            <ComponentStack generationId={id} />
+          ) : (
+            <ListingPanel copy={copy} id={id} canEdit={false} />
+          )}
 
           {/* Video ad placeholder — deliberately not wired up yet */}
           <section>

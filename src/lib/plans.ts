@@ -97,6 +97,9 @@ export const COSTS = {
   extra_marketplace_photo: 30, // High-res extra photo for marketplaces
   extra_social_photo: 10,      // Standard-res extra photo
   rewrite_copy: 5,             // Copy-only rewrite
+  rewrite_component: 5,        // Rewrite one block of text — title, description, bullets, CTA…
+  regen_hashtags: 5,           // Fresh hashtags only
+  regen_image: 25,             // Redo one photo, leaving the rest untouched
   brand_model: 30,             // Create or change brand model
   calendar_post: 10,           // One calendar post
   calendar_month: 300,         // Full 30-day calendar

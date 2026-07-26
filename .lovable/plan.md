@@ -1,64 +1,62 @@
-## Brand Memory — Stage 1
+## Modular AI Editing & Partial Regeneration
 
-Sellers define their brand once, in plain language, and every future generation uses it automatically. Learning stays off for now, but we start recording the signals so the learning engine can be switched on later without rework.
+Today a generation (`generations` row) is one blob: `copy` JSON + `generated_images` JSON. Any change means a full 90-credit rerun. This turns each output into independently editable, independently regenerable, individually versioned components — without duplicating the parent record.
 
-### 1. Brand Memory data (extends the existing Brand Kit)
+### Scope of this build (Stage 1)
 
-One new structured record per seller, stored alongside the current brand kit — no duplicate storage of logo, colours or model.
+Components covered now: **Title, Description, Bullets/Features, Hashtags, CTA, SEO metadata + alt text, and each individual image (1-4)**, for both Products and Services.
 
-- **Identity**: brand name, category, industry, audience, mission, personality
-- **Voice**: multiple descriptors (warm, premium, bold, traditional…)
-- **Communication style**: sentence length, formality, energy, persuasiveness, emoji usage, storytelling, promo intensity
-- **Caption preferences**: length, opening style, CTA placement, ending, formatting
-- **Hashtags**: count, branded / local / niche / minimal / none
-- **Photography defaults**: white background, lifestyle, studio, flat lay, dark luxury, bright minimal, rustic, outdoor…
-- **Per-surface overrides**: product description, product title, marketplace listing, SEO description, Instagram, Facebook, WhatsApp, email
-- **Housekeeping**: version number, revision history, change log, last confirmed date, and empty slots for learned values + confidence scores (unused in stage 1)
+Deliberately deferred to a later stage (they need their own scoping): pricing/package cards, video audio track, video thumbnail, inpainting/upscale/canvas-expand image ops, translations, and the future-expansion list. The schema is built so they slot in with no structural change.
 
-Strict per-account isolation: the record is owned by the seller, readable and writable only by them, never read across accounts.
+### How it will work for the seller
 
-### 2. Brand voice editor — new Profile tab
+Results page becomes a stack of component cards. Each card shows its content, an inline editable field (manual edits are free and autosave), and its own action row:
 
-New "Brand voice" tab beside Account / My shop, written in plain language, no AI jargon:
+- **Edit** — inline, free, saves on blur with a "Saved" indicator
+- **Improve** — a small menu per component type (Shorten, Expand, Make premium, Make persuasive, Friendly, Fix grammar, Change tone) for text; (Regenerate this photo, Change angle, Change lighting, Change background) for images
+- **History** — previous versions with timestamp and an AI/You badge, one-tap restore
+- Every AI action shows its credit cost on the button, and opens a confirm sheet: what changes, what it costs, what stays untouched. Cancel / Continue.
 
-- "My brand sounds…" (chips, multi-select)
-- "My customers are…"
-- "I prefer captions that are…" (short & punchy / detailed / informative / luxury)
-- "My usual call-to-action is…"
-- "I avoid…" (free text)
-- Emoji usage, hashtag style, photo look
-- Optional "Fine-tune per channel" accordion for the per-surface overrides
+"Regenerate everything" stays, moved to the bottom of the page, visually separated, labelled with the full 90-credit cost.
 
-Mobile-first, keyboard accessible, labelled fields, visible focus states, AA contrast. Live example preview showing a sample caption written in the chosen voice, plus a **Current → New** diff with explicit Save confirmation whenever the memory changes.
+Restoring or regenerating one component never touches the others. Only that card re-renders and refetches.
 
-Existing Brand Kit page keeps logo, colours and model, and links across to Brand voice.
+### Credit costs (new entries in the existing `COSTS` table)
 
-### 3. Injection into generation
+| Action | Credits |
+|---|---|
+| Rewrite one text component (title, description, bullets, benefits, CTA, SEO) | 5 |
+| Regenerate hashtags | 5 |
+| Regenerate one image | 25 |
+| Manual edit | 0 |
+| Full regeneration | 90 (unchanged) |
 
-A single builder converts the structured record into prompt text, used by every generation path: product copy, service copy and posters, calendar captions and hashtags, and image style selection. Model-agnostic — it emits plain instruction text, so swapping the AI provider later changes nothing here.
+All deductions go through the existing `spend_credits` RPC via `spendOrThrow` — no new credit path. If the AI call fails, credits are refunded through the existing `refund_credits` function and the old content is left intact.
 
-Photography defaults bias the style set chosen for each generation, still overridable per product.
+### Technical details
 
-### 4. Guardrails
+**Schema** — one new migration, two tables:
 
-Brand Memory may shape tone, vocabulary, formatting and visual direction only. It is inserted below the safety block and can never relax existing rules: no fake reviews or testimonials, no fabricated claims, no fake urgency or scarcity, no medical or financial advice, no minors, no face-cloning, plus the existing banned-phrase and "concrete fact per bullet" copy rules. Free-text fields are sanitised the same way custom-look already is.
+- `generation_components`: `id`, `generation_id` (FK cascade), `user_id`, `component_type` (text, open-ended so future types need no migration), `component_key` (e.g. `image_2`, null for singletons), `content` (jsonb), `updated_at`, `updated_by` ('ai' | 'seller'), `credits_spent_total`, `metadata` jsonb. Unique on (generation_id, component_type, component_key).
+- `generation_component_versions`: `id`, `component_id` (FK cascade), `content` jsonb, `source` ('ai'|'seller'), `credits_spent`, `created_at`.
 
-### 5. Signal capture (recorded now, learned from later)
+Both get GRANTs for `authenticated` + `service_role`, RLS on, owner-scoped policies via `auth.uid() = user_id` (versions scoped through an EXISTS on the parent component). Version rows are capped at the 10 most recent per component by a trim on insert.
 
-- Generated copy blocks in Results and Calendar become editable and save the seller's version alongside the original
-- Each save records what changed (tone, length, emoji, CTA, hashtags) as an event
-- Lightweight events too: regenerate, copy-to-clipboard, marked posted, deleted
-- Abandoned drafts are not recorded
-- No inference, no suggestions, no automatic changes in this stage — the events simply accumulate
+**Backfill/adapter** — existing rows keep `copy`/`generated_images` as the source of truth. A `getComponents` server fn materialises components lazily on first read of a generation, and every component write mirrors back into `copy`/`generated_images` so the library, shop, CSV, calendar and video pipelines keep working untouched.
 
-### Technical notes
+**Server functions** — new `src/lib/components.functions.ts`:
+- `listComponents({ generationId })`
+- `saveComponent({ componentId, content })` — free, seller source, pushes a version
+- `regenerateComponent({ componentId, instruction })` — authorises owner, runs the same brand-memory + safety/guardrail prompt assembly used by full generation (shared helper extracted from `cowq.functions.ts` / `service.server.ts` so partial and full generation cannot diverge), spends credits, writes a version, refunds on failure
+- `restoreComponentVersion({ versionId })` — free
 
-- New `brand_memory` table keyed to the user with a JSON preferences document, `version`, `history`, and a `brand_memory_events` table for signals. Both RLS-scoped to `auth.uid()` with explicit grants; no anon access.
-- New `src/lib/brand-memory.ts` (types + defaults), `brand-memory.functions.ts` (load/save/diff server fns via `requireSupabaseAuth`), and `brand-memory.server.ts` (prompt builder + sanitiser).
-- Call sites updated: `cowq.functions.ts`, `service.server.ts`, `calendar.functions.ts`.
-- New route `src/routes/_authenticated/profile/brand-voice.tsx`; tab added to the profile layout.
-- Migration runs first and needs your approval before the code lands.
+Text goes through Gemini text; images through the existing `gemini-3-pro-image` path with the original photo + brand memory as reference, so the regenerated image matches the set.
 
-### Not in this stage
+**Safety** — partial regeneration reuses the identical sanitiser and guardrail prompt block as full generation (no people/child/face-clone rules, no fabricated claims or fake reviews, custom-instruction sanitising). Seller-supplied instructions ("change tone to…") are sanitised on the same path as custom-look text.
 
-Confidence scores, "we've noticed you rewrite captions…" suggestions, acceptance-rate and brand-consistency analytics. These build directly on the events captured above.
+**Client** — new `ComponentCard`, `ComponentActions`, `RegenerateConfirmSheet`, `VersionHistorySheet` components. TanStack Query per-generation component list with optimistic updates on manual edits and targeted invalidation of the single component on regenerate. Mobile-first: 56px action row, bottom sheets rather than dialogs, full keyboard focus management and ARIA labels on every control.
+
+**Learning engine** — every manual edit continues to log a `brand_memory_events` "edited" signal, now tagged with the component type, so brand memory gets finer-grained feedback.
+
+### Out of scope
+No layout, palette, or navigation changes. Existing full-generation flow, queue, library, shop and calendar behaviour stay as they are.
