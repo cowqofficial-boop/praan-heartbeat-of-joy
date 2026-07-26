@@ -40,6 +40,7 @@ import { Route as AuthenticatedProfileShopRouteImport } from './routes/_authenti
 import { Route as AuthenticatedProfileSecurityRouteImport } from './routes/_authenticated/profile/security'
 import { Route as AuthenticatedProfilePrivacyRouteImport } from './routes/_authenticated/profile/privacy'
 import { Route as AuthenticatedProfileNotificationsRouteImport } from './routes/_authenticated/profile/notifications'
+import { Route as AuthenticatedProfileBrandVoiceRouteImport } from './routes/_authenticated/profile/brand-voice'
 import { Route as AuthenticatedProfileAppsRouteImport } from './routes/_authenticated/profile/apps'
 import { Route as AuthenticatedProfileAiRouteImport } from './routes/_authenticated/profile/ai'
 import { Route as AuthenticatedProfileAccountRouteImport } from './routes/_authenticated/profile/account'
@@ -209,6 +210,12 @@ const AuthenticatedProfileNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AuthenticatedProfileRouteRoute,
   } as any)
+const AuthenticatedProfileBrandVoiceRoute =
+  AuthenticatedProfileBrandVoiceRouteImport.update({
+    id: '/brand-voice',
+    path: '/brand-voice',
+    getParentRoute: () => AuthenticatedProfileRouteRoute,
+  } as any)
 const AuthenticatedProfileAppsRoute =
   AuthenticatedProfileAppsRouteImport.update({
     id: '/apps',
@@ -258,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/profile/account': typeof AuthenticatedProfileAccountRoute
   '/profile/ai': typeof AuthenticatedProfileAiRoute
   '/profile/apps': typeof AuthenticatedProfileAppsRoute
+  '/profile/brand-voice': typeof AuthenticatedProfileBrandVoiceRoute
   '/profile/notifications': typeof AuthenticatedProfileNotificationsRoute
   '/profile/privacy': typeof AuthenticatedProfilePrivacyRoute
   '/profile/security': typeof AuthenticatedProfileSecurityRoute
@@ -293,6 +301,7 @@ export interface FileRoutesByTo {
   '/profile/account': typeof AuthenticatedProfileAccountRoute
   '/profile/ai': typeof AuthenticatedProfileAiRoute
   '/profile/apps': typeof AuthenticatedProfileAppsRoute
+  '/profile/brand-voice': typeof AuthenticatedProfileBrandVoiceRoute
   '/profile/notifications': typeof AuthenticatedProfileNotificationsRoute
   '/profile/privacy': typeof AuthenticatedProfilePrivacyRoute
   '/profile/security': typeof AuthenticatedProfileSecurityRoute
@@ -331,6 +340,7 @@ export interface FileRoutesById {
   '/_authenticated/profile/account': typeof AuthenticatedProfileAccountRoute
   '/_authenticated/profile/ai': typeof AuthenticatedProfileAiRoute
   '/_authenticated/profile/apps': typeof AuthenticatedProfileAppsRoute
+  '/_authenticated/profile/brand-voice': typeof AuthenticatedProfileBrandVoiceRoute
   '/_authenticated/profile/notifications': typeof AuthenticatedProfileNotificationsRoute
   '/_authenticated/profile/privacy': typeof AuthenticatedProfilePrivacyRoute
   '/_authenticated/profile/security': typeof AuthenticatedProfileSecurityRoute
@@ -369,6 +379,7 @@ export interface FileRouteTypes {
     | '/profile/account'
     | '/profile/ai'
     | '/profile/apps'
+    | '/profile/brand-voice'
     | '/profile/notifications'
     | '/profile/privacy'
     | '/profile/security'
@@ -404,6 +415,7 @@ export interface FileRouteTypes {
     | '/profile/account'
     | '/profile/ai'
     | '/profile/apps'
+    | '/profile/brand-voice'
     | '/profile/notifications'
     | '/profile/privacy'
     | '/profile/security'
@@ -441,6 +453,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile/account'
     | '/_authenticated/profile/ai'
     | '/_authenticated/profile/apps'
+    | '/_authenticated/profile/brand-voice'
     | '/_authenticated/profile/notifications'
     | '/_authenticated/profile/privacy'
     | '/_authenticated/profile/security'
@@ -695,6 +708,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileNotificationsRouteImport
       parentRoute: typeof AuthenticatedProfileRouteRoute
     }
+    '/_authenticated/profile/brand-voice': {
+      id: '/_authenticated/profile/brand-voice'
+      path: '/brand-voice'
+      fullPath: '/profile/brand-voice'
+      preLoaderRoute: typeof AuthenticatedProfileBrandVoiceRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
     '/_authenticated/profile/apps': {
       id: '/_authenticated/profile/apps'
       path: '/apps'
@@ -730,6 +750,7 @@ interface AuthenticatedProfileRouteRouteChildren {
   AuthenticatedProfileAccountRoute: typeof AuthenticatedProfileAccountRoute
   AuthenticatedProfileAiRoute: typeof AuthenticatedProfileAiRoute
   AuthenticatedProfileAppsRoute: typeof AuthenticatedProfileAppsRoute
+  AuthenticatedProfileBrandVoiceRoute: typeof AuthenticatedProfileBrandVoiceRoute
   AuthenticatedProfileNotificationsRoute: typeof AuthenticatedProfileNotificationsRoute
   AuthenticatedProfilePrivacyRoute: typeof AuthenticatedProfilePrivacyRoute
   AuthenticatedProfileSecurityRoute: typeof AuthenticatedProfileSecurityRoute
@@ -744,6 +765,7 @@ const AuthenticatedProfileRouteRouteChildren: AuthenticatedProfileRouteRouteChil
     AuthenticatedProfileAccountRoute: AuthenticatedProfileAccountRoute,
     AuthenticatedProfileAiRoute: AuthenticatedProfileAiRoute,
     AuthenticatedProfileAppsRoute: AuthenticatedProfileAppsRoute,
+    AuthenticatedProfileBrandVoiceRoute: AuthenticatedProfileBrandVoiceRoute,
     AuthenticatedProfileNotificationsRoute:
       AuthenticatedProfileNotificationsRoute,
     AuthenticatedProfilePrivacyRoute: AuthenticatedProfilePrivacyRoute,
