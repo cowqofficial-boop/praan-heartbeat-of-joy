@@ -7,6 +7,7 @@ export type LibraryItem = {
   created_at: string;
   original_image_url: string | null;
   generated_images: Array<{ kind: string; ratio: string; url: string }>;
+  kind: "product" | "service";
 };
 
 export const listMyProducts = createServerFn({ method: "GET" })
@@ -14,11 +15,14 @@ export const listMyProducts = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("generations")
-      .select("id, product_name, created_at, original_image_url, generated_images")
+      .select("id, product_name, created_at, original_image_url, generated_images, kind")
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return (data ?? []) as LibraryItem[];
+    return (data ?? []).map((r) => ({
+      ...r,
+      kind: (r as { kind?: string }).kind === "service" ? "service" : "product",
+    })) as LibraryItem[];
   });
 
 export const renameMyProduct = createServerFn({ method: "POST" })
