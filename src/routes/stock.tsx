@@ -384,7 +384,9 @@ function StockPage() {
                         </button>
                       </div>
                     </div>
+                    )}
                   </li>
+
                 );
               })}
             </ul>
