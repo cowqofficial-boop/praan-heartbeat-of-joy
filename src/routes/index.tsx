@@ -150,7 +150,8 @@ function Landing() {
     <main className="w-full">
       {/* Top bar — logo always visible; nav collapses gracefully on small screens. */}
       <header className="mx-auto flex w-full max-w-[1200px] items-center justify-between gap-4 px-6 pt-6">
-        <Wordmark />
+        {/* Sidebar already shows the wordmark on desktop for signed-in sellers. */}
+        <Wordmark className={user ? "lg:hidden" : ""} />
 
         <nav className="flex items-center gap-5 text-[14px] text-muted">
           <Link to="/how-it-works" className="hover:text-ink">
