@@ -160,6 +160,9 @@ function buildSchedule(products: Product[], startISO: string) {
     for (let attempt = 0; attempt < products.length * types.length; attempt++) {
       const p = products[(productCursor + attempt) % products.length];
       const t = types[(typeCursor + Math.floor(attempt / products.length)) % types.length];
+      // A service must never be given a "customer voice" post — that would be
+      // a fabricated review, which we never generate.
+      if (p.kind === "service" && t === "customer_voice") continue;
       const key = `${p.id}|${t}`;
       if (key !== lastKey) {
         picked = { product: p, type: t };
@@ -170,7 +173,10 @@ function buildSchedule(products: Product[], startISO: string) {
       }
     }
     if (!picked) {
-      picked = { product: products[i % products.length], type: types[i % types.length] };
+      const fallbackProduct = products[i % products.length];
+      let fallbackType = types[i % types.length];
+      if (fallbackProduct.kind === "service" && fallbackType === "customer_voice") fallbackType = "hero";
+      picked = { product: fallbackProduct, type: fallbackType };
       lastKey = `${picked.product.id}|${picked.type}`;
     }
     days.push({
