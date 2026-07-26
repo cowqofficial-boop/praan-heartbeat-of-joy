@@ -2,6 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { SITE_URL } from "@/lib/site";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { updateGenerationCopy } from "@/lib/copy-edit.functions";
+import { recordBrandSignal } from "@/lib/brand-memory.functions";
 import { ChevronDown, Copy, Check, Download, FileText, Image as ImageIcon, Lock, Share2, ThumbsDown, ThumbsUp } from "lucide-react";
 import { PostThisButton } from "@/components/PostThisButton";
 import JSZip from "jszip";
@@ -153,7 +156,7 @@ function Results() {
 
           {/* Collapsed listing: one panel, hairline rows, single-open accordion */}
           {/* Collapsed listing: one panel, hairline rows, single-open accordion */}
-          <ListingPanel copy={copy} />
+          <ListingPanel copy={copy} id={id} canEdit={!!user} />
 
           {/* Videos — only for signed-in sellers, only when the flag is on */}
           <VideoSection generationId={id} productName={productName} hasAccount={!!user} />
@@ -1094,7 +1097,7 @@ function ServiceResults({
             </div>
           </section>
 
-          <ListingPanel copy={copy} />
+          <ListingPanel copy={copy} id={id} canEdit={!!user} />
 
           {/* Video ad placeholder — deliberately not wired up yet */}
           <section>
