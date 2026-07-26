@@ -199,7 +199,7 @@ function LibraryPage() {
         ) : (
           <ul className="grid grid-cols-2 gap-3 stagger sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
             {filtered.map((it) => (
-              <ProductCard key={it.id} item={it} onRename={handleRename} onDelete={handleDelete} />
+              <ProductCard key={it.id} item={it} onRename={handleRename} onDelete={handleDelete} onToggleShop={handleToggleShop} />
             ))}
           </ul>
         )}
