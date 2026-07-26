@@ -1097,7 +1097,7 @@ function ServiceResults({
             </div>
           </section>
 
-          <ListingPanel copy={copy} id={id} canEdit={!!user} />
+          <ListingPanel copy={copy} id={id} canEdit={hasAccount} />
 
           {/* Video ad placeholder — deliberately not wired up yet */}
           <section>
