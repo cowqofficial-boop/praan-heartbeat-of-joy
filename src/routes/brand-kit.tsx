@@ -259,8 +259,8 @@ function BrandKitPage() {
  setModelBusy(true);
  try {
  await saveMyBrandKit({ data: { ...kit, brand_model_source: "ai" } });
- const { url } = await generateBrandModelPortrait({ data: {} });
- qc.invalidateQueries({ queryKey: ["my-credits"] });
+ const { url, balance } = await generateBrandModelPortrait({ data: {} });
+ applyBalance(qc, balance);
  setKit((k) => ({ ...k, brand_model_url: url, brand_model_enabled: true, brand_model_source: "ai" }));
  } catch (e) {
  await showAlert({ title: "Couldn't generate your brand model", body: "Try again.\n\n" + (e as Error).message });
@@ -273,8 +273,8 @@ function BrandKitPage() {
  setModelBusy(true);
  try {
  await saveMyBrandKit({ data: { ...kit, brand_model_source: "ai" } });
- const { url } = await generateBrandModelPortrait({ data: {} });
- qc.invalidateQueries({ queryKey: ["my-credits"] });
+ const { url, balance } = await generateBrandModelPortrait({ data: {} });
+ applyBalance(qc, balance);
  setKit((k) => ({ ...k, brand_model_url: url, brand_model_enabled: true, brand_model_source: "ai", brand_model_photos: [] }));
  } catch (e) {
  await showAlert({ title: "Couldn't generate your brand model", body: "Try again.\n\n" + (e as Error).message });
