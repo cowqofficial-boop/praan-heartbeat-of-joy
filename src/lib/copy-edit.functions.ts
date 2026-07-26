@@ -42,7 +42,7 @@ export const updateGenerationCopy = createServerFn({ method: "POST" })
 
     const { error: upErr } = await context.supabase
       .from("generations")
-      .update({ copy })
+      .update({ copy: copy as never })
       .eq("id", data.id)
       .eq("user_id", context.userId);
     if (upErr) throw new Error(upErr.message);
