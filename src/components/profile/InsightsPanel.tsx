@@ -83,7 +83,8 @@ export function InsightsPanel({
   const total = (credits?.subscription_credits ?? 0) + (credits?.pack_credits ?? 0);
   const creditTint = creditColor(total);
   const hours = Math.round(insights.minutes_saved / 60);
-  const storagePct = Math.min(100, (insights.storage_bytes / (2 * 1024 ** 3)) * 100);
+  const limit = insights.storage_limit_bytes || 2 * 1024 ** 3;
+  const storagePct = Math.min(100, (insights.storage_bytes / limit) * 100);
 
   return (
     <div className="grid gap-3">
@@ -110,14 +111,14 @@ export function InsightsPanel({
         icon={IndianRupee}
         label="Money saved"
         value={`₹${insights.rupees_saved.toLocaleString("en-IN")}`}
-        sub="Versus a studio shoot per product"
+        sub="Estimated vs a studio shoot"
         tint={MAGENTA}
       />
       <Widget
         icon={Clock}
         label="Time saved"
         value={`${hours} hr`}
-        sub="Shooting, editing and writing"
+        sub="Estimated shooting, editing and writing time"
         tint={AMBER}
       />
       <Widget
@@ -137,7 +138,7 @@ export function InsightsPanel({
         icon={HardDrive}
         label="Storage used"
         value={formatBytes(insights.storage_bytes)}
-        sub="Estimated from your photos"
+        sub={`of ${formatBytes(limit)}${insights.retention_days ? ` · photos older than ${insights.retention_days} days are cleared` : " · kept as long as you subscribe"}`}
         tint={COBALT}
         bar={storagePct}
       />
