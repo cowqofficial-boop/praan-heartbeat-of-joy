@@ -9,98 +9,47 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as StockRouteImport } from './routes/stock'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as PricingRouteImport } from './routes/pricing'
-import { Route as LibraryRouteImport } from './routes/library'
-import { Route as HowItWorksRouteImport } from './routes/how-it-works'
-import { Route as GeneratingRouteImport } from './routes/generating'
-import { Route as CreateRouteImport } from './routes/create'
-import { Route as ConnectRouteImport } from './routes/connect'
-import { Route as ConfirmRouteImport } from './routes/confirm'
-import { Route as CalendarRouteImport } from './routes/calendar'
-import { Route as BrandKitRouteImport } from './routes/brand-kit'
-import { Route as BillingRouteImport } from './routes/billing'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ResultsIdRouteImport } from './routes/results.$id'
-import { Route as InvoiceIdRouteImport } from './routes/invoice.$id'
-import { Route as ConnectInstagramRouteImport } from './routes/connect.instagram'
-import { Route as BlogFlatLayGuideRouteImport } from './routes/blog.flat-lay-guide'
-import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BillingRouteImport } from './routes/billing'
+import { Route as BrandKitRouteImport } from './routes/brand-kit'
+import { Route as CalendarRouteImport } from './routes/calendar'
+import { Route as ConfirmRouteImport } from './routes/confirm'
+import { Route as ConnectRouteImport } from './routes/connect'
+import { Route as CreateRouteImport } from './routes/create'
+import { Route as GeneratingRouteImport } from './routes/generating'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as LibraryRouteImport } from './routes/library'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as StockRouteImport } from './routes/stock'
 import { Route as AuthenticatedProfileRouteRouteImport } from './routes/_authenticated/profile/route'
-import { Route as AuthenticatedProfileIndexRouteImport } from './routes/_authenticated/profile/index'
-import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
-import { Route as ApiPublicMetaOauthCallbackRouteImport } from './routes/api/public/meta-oauth-callback'
-import { Route as AuthenticatedProfileTeamRouteImport } from './routes/_authenticated/profile/team'
-import { Route as AuthenticatedProfileSubscriptionRouteImport } from './routes/_authenticated/profile/subscription'
-import { Route as AuthenticatedProfileSecurityRouteImport } from './routes/_authenticated/profile/security'
-import { Route as AuthenticatedProfilePrivacyRouteImport } from './routes/_authenticated/profile/privacy'
-import { Route as AuthenticatedProfileNotificationsRouteImport } from './routes/_authenticated/profile/notifications'
-import { Route as AuthenticatedProfileAppsRouteImport } from './routes/_authenticated/profile/apps'
-import { Route as AuthenticatedProfileAiRouteImport } from './routes/_authenticated/profile/ai'
-import { Route as AuthenticatedProfileAccountRouteImport } from './routes/_authenticated/profile/account'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as BlogFlatLayGuideRouteImport } from './routes/blog.flat-lay-guide'
+import { Route as ConnectInstagramRouteImport } from './routes/connect.instagram'
+import { Route as InvoiceIdRouteImport } from './routes/invoice.$id'
+import { Route as ResultsIdRouteImport } from './routes/results.$id'
 import { Route as AuthenticatedAdminCostsRouteImport } from './routes/_authenticated.admin.costs'
+import { Route as AuthenticatedProfileIndexRouteImport } from './routes/_authenticated/profile/index'
+import { Route as AuthenticatedProfileAccountRouteImport } from './routes/_authenticated/profile/account'
+import { Route as AuthenticatedProfileAiRouteImport } from './routes/_authenticated/profile/ai'
+import { Route as AuthenticatedProfileAppsRouteImport } from './routes/_authenticated/profile/apps'
+import { Route as AuthenticatedProfileNotificationsRouteImport } from './routes/_authenticated/profile/notifications'
+import { Route as AuthenticatedProfilePrivacyRouteImport } from './routes/_authenticated/profile/privacy'
+import { Route as AuthenticatedProfileSecurityRouteImport } from './routes/_authenticated/profile/security'
+import { Route as AuthenticatedProfileSubscriptionRouteImport } from './routes/_authenticated/profile/subscription'
+import { Route as AuthenticatedProfileTeamRouteImport } from './routes/_authenticated/profile/team'
+import { Route as ApiPublicMetaOauthCallbackRouteImport } from './routes/api/public/meta-oauth-callback'
+import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 
-const StockRoute = StockRouteImport.update({
-  id: '/stock',
-  path: '/stock',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LibraryRoute = LibraryRouteImport.update({
-  id: '/library',
-  path: '/library',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HowItWorksRoute = HowItWorksRouteImport.update({
-  id: '/how-it-works',
-  path: '/how-it-works',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GeneratingRoute = GeneratingRouteImport.update({
-  id: '/generating',
-  path: '/generating',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CreateRoute = CreateRouteImport.update({
-  id: '/create',
-  path: '/create',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConnectRoute = ConnectRouteImport.update({
-  id: '/connect',
-  path: '/connect',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConfirmRoute = ConfirmRouteImport.update({
-  id: '/confirm',
-  path: '/confirm',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CalendarRoute = CalendarRouteImport.update({
-  id: '/calendar',
-  path: '/calendar',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BrandKitRoute = BrandKitRouteImport.update({
-  id: '/brand-kit',
-  path: '/brand-kit',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BillingRoute = BillingRouteImport.update({
-  id: '/billing',
-  path: '/billing',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -108,39 +57,65 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const BillingRoute = BillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const BrandKitRoute = BrandKitRouteImport.update({
+  id: '/brand-kit',
+  path: '/brand-kit',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResultsIdRoute = ResultsIdRouteImport.update({
-  id: '/results/$id',
-  path: '/results/$id',
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
   getParentRoute: () => rootRouteImport,
 } as any)
-const InvoiceIdRoute = InvoiceIdRouteImport.update({
-  id: '/invoice/$id',
-  path: '/invoice/$id',
+const ConfirmRoute = ConfirmRouteImport.update({
+  id: '/confirm',
+  path: '/confirm',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ConnectInstagramRoute = ConnectInstagramRouteImport.update({
-  id: '/instagram',
-  path: '/instagram',
-  getParentRoute: () => ConnectRoute,
-} as any)
-const BlogFlatLayGuideRoute = BlogFlatLayGuideRouteImport.update({
-  id: '/blog/flat-lay-guide',
-  path: '/blog/flat-lay-guide',
+const ConnectRoute = ConnectRouteImport.update({
+  id: '/connect',
+  path: '/connect',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthCallbackRoute = AuthCallbackRouteImport.update({
-  id: '/callback',
-  path: '/callback',
-  getParentRoute: () => AuthRoute,
+const CreateRoute = CreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GeneratingRoute = GeneratingRouteImport.update({
+  id: '/generating',
+  path: '/generating',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StockRoute = StockRouteImport.update({
+  id: '/stock',
+  path: '/stock',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedProfileRouteRoute =
   AuthenticatedProfileRouteRouteImport.update({
@@ -148,46 +123,57 @@ const AuthenticatedProfileRouteRoute =
     path: '/profile',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AuthRoute,
+} as any)
+const BlogFlatLayGuideRoute = BlogFlatLayGuideRouteImport.update({
+  id: '/blog/flat-lay-guide',
+  path: '/blog/flat-lay-guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnectInstagramRoute = ConnectInstagramRouteImport.update({
+  id: '/instagram',
+  path: '/instagram',
+  getParentRoute: () => ConnectRoute,
+} as any)
+const InvoiceIdRoute = InvoiceIdRouteImport.update({
+  id: '/invoice/$id',
+  path: '/invoice/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResultsIdRoute = ResultsIdRouteImport.update({
+  id: '/results/$id',
+  path: '/results/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminCostsRoute = AuthenticatedAdminCostsRouteImport.update({
+  id: '/admin/costs',
+  path: '/admin/costs',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProfileIndexRoute =
   AuthenticatedProfileIndexRouteImport.update({
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedProfileRouteRoute,
   } as any)
-const ApiPublicRazorpayWebhookRoute =
-  ApiPublicRazorpayWebhookRouteImport.update({
-    id: '/api/public/razorpay-webhook',
-    path: '/api/public/razorpay-webhook',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicMetaOauthCallbackRoute =
-  ApiPublicMetaOauthCallbackRouteImport.update({
-    id: '/api/public/meta-oauth-callback',
-    path: '/api/public/meta-oauth-callback',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const AuthenticatedProfileTeamRoute =
-  AuthenticatedProfileTeamRouteImport.update({
-    id: '/team',
-    path: '/team',
+const AuthenticatedProfileAccountRoute =
+  AuthenticatedProfileAccountRouteImport.update({
+    id: '/account',
+    path: '/account',
     getParentRoute: () => AuthenticatedProfileRouteRoute,
   } as any)
-const AuthenticatedProfileSubscriptionRoute =
-  AuthenticatedProfileSubscriptionRouteImport.update({
-    id: '/subscription',
-    path: '/subscription',
-    getParentRoute: () => AuthenticatedProfileRouteRoute,
-  } as any)
-const AuthenticatedProfileSecurityRoute =
-  AuthenticatedProfileSecurityRouteImport.update({
-    id: '/security',
-    path: '/security',
-    getParentRoute: () => AuthenticatedProfileRouteRoute,
-  } as any)
-const AuthenticatedProfilePrivacyRoute =
-  AuthenticatedProfilePrivacyRouteImport.update({
-    id: '/privacy',
-    path: '/privacy',
+const AuthenticatedProfileAiRoute = AuthenticatedProfileAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
+  getParentRoute: () => AuthenticatedProfileRouteRoute,
+} as any)
+const AuthenticatedProfileAppsRoute =
+  AuthenticatedProfileAppsRouteImport.update({
+    id: '/apps',
+    path: '/apps',
     getParentRoute: () => AuthenticatedProfileRouteRoute,
   } as any)
 const AuthenticatedProfileNotificationsRoute =
@@ -196,28 +182,42 @@ const AuthenticatedProfileNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AuthenticatedProfileRouteRoute,
   } as any)
-const AuthenticatedProfileAppsRoute =
-  AuthenticatedProfileAppsRouteImport.update({
-    id: '/apps',
-    path: '/apps',
+const AuthenticatedProfilePrivacyRoute =
+  AuthenticatedProfilePrivacyRouteImport.update({
+    id: '/privacy',
+    path: '/privacy',
     getParentRoute: () => AuthenticatedProfileRouteRoute,
   } as any)
-const AuthenticatedProfileAiRoute = AuthenticatedProfileAiRouteImport.update({
-  id: '/ai',
-  path: '/ai',
-  getParentRoute: () => AuthenticatedProfileRouteRoute,
-} as any)
-const AuthenticatedProfileAccountRoute =
-  AuthenticatedProfileAccountRouteImport.update({
-    id: '/account',
-    path: '/account',
+const AuthenticatedProfileSecurityRoute =
+  AuthenticatedProfileSecurityRouteImport.update({
+    id: '/security',
+    path: '/security',
     getParentRoute: () => AuthenticatedProfileRouteRoute,
   } as any)
-const AuthenticatedAdminCostsRoute = AuthenticatedAdminCostsRouteImport.update({
-  id: '/admin/costs',
-  path: '/admin/costs',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
+const AuthenticatedProfileSubscriptionRoute =
+  AuthenticatedProfileSubscriptionRouteImport.update({
+    id: '/subscription',
+    path: '/subscription',
+    getParentRoute: () => AuthenticatedProfileRouteRoute,
+  } as any)
+const AuthenticatedProfileTeamRoute =
+  AuthenticatedProfileTeamRouteImport.update({
+    id: '/team',
+    path: '/team',
+    getParentRoute: () => AuthenticatedProfileRouteRoute,
+  } as any)
+const ApiPublicMetaOauthCallbackRoute =
+  ApiPublicMetaOauthCallbackRouteImport.update({
+    id: '/api/public/meta-oauth-callback',
+    path: '/api/public/meta-oauth-callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicRazorpayWebhookRoute =
+  ApiPublicRazorpayWebhookRouteImport.update({
+    id: '/api/public/razorpay-webhook',
+    path: '/api/public/razorpay-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -452,95 +452,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/stock': {
-      id: '/stock'
-      path: '/stock'
-      fullPath: '/stock'
-      preLoaderRoute: typeof StockRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/library': {
-      id: '/library'
-      path: '/library'
-      fullPath: '/library'
-      preLoaderRoute: typeof LibraryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/how-it-works': {
-      id: '/how-it-works'
-      path: '/how-it-works'
-      fullPath: '/how-it-works'
-      preLoaderRoute: typeof HowItWorksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/generating': {
-      id: '/generating'
-      path: '/generating'
-      fullPath: '/generating'
-      preLoaderRoute: typeof GeneratingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/create': {
-      id: '/create'
-      path: '/create'
-      fullPath: '/create'
-      preLoaderRoute: typeof CreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/connect': {
-      id: '/connect'
-      path: '/connect'
-      fullPath: '/connect'
-      preLoaderRoute: typeof ConnectRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/confirm': {
-      id: '/confirm'
-      path: '/confirm'
-      fullPath: '/confirm'
-      preLoaderRoute: typeof ConfirmRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/calendar': {
-      id: '/calendar'
-      path: '/calendar'
-      fullPath: '/calendar'
-      preLoaderRoute: typeof CalendarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/brand-kit': {
-      id: '/brand-kit'
-      path: '/brand-kit'
-      fullPath: '/brand-kit'
-      preLoaderRoute: typeof BrandKitRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/billing': {
-      id: '/billing'
-      path: '/billing'
-      fullPath: '/billing'
-      preLoaderRoute: typeof BillingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -550,25 +466,116 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/results/$id': {
-      id: '/results/$id'
-      path: '/results/$id'
-      fullPath: '/results/$id'
-      preLoaderRoute: typeof ResultsIdRouteImport
+    '/billing': {
+      id: '/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof BillingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/invoice/$id': {
-      id: '/invoice/$id'
-      path: '/invoice/$id'
-      fullPath: '/invoice/$id'
-      preLoaderRoute: typeof InvoiceIdRouteImport
+    '/brand-kit': {
+      id: '/brand-kit'
+      path: '/brand-kit'
+      fullPath: '/brand-kit'
+      preLoaderRoute: typeof BrandKitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confirm': {
+      id: '/confirm'
+      path: '/confirm'
+      fullPath: '/confirm'
+      preLoaderRoute: typeof ConfirmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connect': {
+      id: '/connect'
+      path: '/connect'
+      fullPath: '/connect'
+      preLoaderRoute: typeof ConnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create': {
+      id: '/create'
+      path: '/create'
+      fullPath: '/create'
+      preLoaderRoute: typeof CreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/generating': {
+      id: '/generating'
+      path: '/generating'
+      fullPath: '/generating'
+      preLoaderRoute: typeof GeneratingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stock': {
+      id: '/stock'
+      path: '/stock'
+      fullPath: '/stock'
+      preLoaderRoute: typeof StockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/blog/flat-lay-guide': {
+      id: '/blog/flat-lay-guide'
+      path: '/blog/flat-lay-guide'
+      fullPath: '/blog/flat-lay-guide'
+      preLoaderRoute: typeof BlogFlatLayGuideRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connect/instagram': {
@@ -578,25 +585,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConnectInstagramRouteImport
       parentRoute: typeof ConnectRoute
     }
-    '/blog/flat-lay-guide': {
-      id: '/blog/flat-lay-guide'
-      path: '/blog/flat-lay-guide'
-      fullPath: '/blog/flat-lay-guide'
-      preLoaderRoute: typeof BlogFlatLayGuideRouteImport
+    '/invoice/$id': {
+      id: '/invoice/$id'
+      path: '/invoice/$id'
+      fullPath: '/invoice/$id'
+      preLoaderRoute: typeof InvoiceIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/callback': {
-      id: '/auth/callback'
-      path: '/callback'
-      fullPath: '/auth/callback'
-      preLoaderRoute: typeof AuthCallbackRouteImport
-      parentRoute: typeof AuthRoute
+    '/results/$id': {
+      id: '/results/$id'
+      path: '/results/$id'
+      fullPath: '/results/$id'
+      preLoaderRoute: typeof ResultsIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/profile': {
-      id: '/_authenticated/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof AuthenticatedProfileRouteRouteImport
+    '/_authenticated/admin/costs': {
+      id: '/_authenticated/admin/costs'
+      path: '/admin/costs'
+      fullPath: '/admin/costs'
+      preLoaderRoute: typeof AuthenticatedAdminCostsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/profile/': {
@@ -606,60 +613,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileIndexRouteImport
       parentRoute: typeof AuthenticatedProfileRouteRoute
     }
-    '/api/public/razorpay-webhook': {
-      id: '/api/public/razorpay-webhook'
-      path: '/api/public/razorpay-webhook'
-      fullPath: '/api/public/razorpay-webhook'
-      preLoaderRoute: typeof ApiPublicRazorpayWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/meta-oauth-callback': {
-      id: '/api/public/meta-oauth-callback'
-      path: '/api/public/meta-oauth-callback'
-      fullPath: '/api/public/meta-oauth-callback'
-      preLoaderRoute: typeof ApiPublicMetaOauthCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/profile/team': {
-      id: '/_authenticated/profile/team'
-      path: '/team'
-      fullPath: '/profile/team'
-      preLoaderRoute: typeof AuthenticatedProfileTeamRouteImport
-      parentRoute: typeof AuthenticatedProfileRouteRoute
-    }
-    '/_authenticated/profile/subscription': {
-      id: '/_authenticated/profile/subscription'
-      path: '/subscription'
-      fullPath: '/profile/subscription'
-      preLoaderRoute: typeof AuthenticatedProfileSubscriptionRouteImport
-      parentRoute: typeof AuthenticatedProfileRouteRoute
-    }
-    '/_authenticated/profile/security': {
-      id: '/_authenticated/profile/security'
-      path: '/security'
-      fullPath: '/profile/security'
-      preLoaderRoute: typeof AuthenticatedProfileSecurityRouteImport
-      parentRoute: typeof AuthenticatedProfileRouteRoute
-    }
-    '/_authenticated/profile/privacy': {
-      id: '/_authenticated/profile/privacy'
-      path: '/privacy'
-      fullPath: '/profile/privacy'
-      preLoaderRoute: typeof AuthenticatedProfilePrivacyRouteImport
-      parentRoute: typeof AuthenticatedProfileRouteRoute
-    }
-    '/_authenticated/profile/notifications': {
-      id: '/_authenticated/profile/notifications'
-      path: '/notifications'
-      fullPath: '/profile/notifications'
-      preLoaderRoute: typeof AuthenticatedProfileNotificationsRouteImport
-      parentRoute: typeof AuthenticatedProfileRouteRoute
-    }
-    '/_authenticated/profile/apps': {
-      id: '/_authenticated/profile/apps'
-      path: '/apps'
-      fullPath: '/profile/apps'
-      preLoaderRoute: typeof AuthenticatedProfileAppsRouteImport
+    '/_authenticated/profile/account': {
+      id: '/_authenticated/profile/account'
+      path: '/account'
+      fullPath: '/profile/account'
+      preLoaderRoute: typeof AuthenticatedProfileAccountRouteImport
       parentRoute: typeof AuthenticatedProfileRouteRoute
     }
     '/_authenticated/profile/ai': {
@@ -669,19 +627,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileAiRouteImport
       parentRoute: typeof AuthenticatedProfileRouteRoute
     }
-    '/_authenticated/profile/account': {
-      id: '/_authenticated/profile/account'
-      path: '/account'
-      fullPath: '/profile/account'
-      preLoaderRoute: typeof AuthenticatedProfileAccountRouteImport
+    '/_authenticated/profile/apps': {
+      id: '/_authenticated/profile/apps'
+      path: '/apps'
+      fullPath: '/profile/apps'
+      preLoaderRoute: typeof AuthenticatedProfileAppsRouteImport
       parentRoute: typeof AuthenticatedProfileRouteRoute
     }
-    '/_authenticated/admin/costs': {
-      id: '/_authenticated/admin/costs'
-      path: '/admin/costs'
-      fullPath: '/admin/costs'
-      preLoaderRoute: typeof AuthenticatedAdminCostsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/_authenticated/profile/notifications': {
+      id: '/_authenticated/profile/notifications'
+      path: '/notifications'
+      fullPath: '/profile/notifications'
+      preLoaderRoute: typeof AuthenticatedProfileNotificationsRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
+    '/_authenticated/profile/privacy': {
+      id: '/_authenticated/profile/privacy'
+      path: '/privacy'
+      fullPath: '/profile/privacy'
+      preLoaderRoute: typeof AuthenticatedProfilePrivacyRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
+    '/_authenticated/profile/security': {
+      id: '/_authenticated/profile/security'
+      path: '/security'
+      fullPath: '/profile/security'
+      preLoaderRoute: typeof AuthenticatedProfileSecurityRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
+    '/_authenticated/profile/subscription': {
+      id: '/_authenticated/profile/subscription'
+      path: '/subscription'
+      fullPath: '/profile/subscription'
+      preLoaderRoute: typeof AuthenticatedProfileSubscriptionRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
+    '/_authenticated/profile/team': {
+      id: '/_authenticated/profile/team'
+      path: '/team'
+      fullPath: '/profile/team'
+      preLoaderRoute: typeof AuthenticatedProfileTeamRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
+    '/api/public/meta-oauth-callback': {
+      id: '/api/public/meta-oauth-callback'
+      path: '/api/public/meta-oauth-callback'
+      fullPath: '/api/public/meta-oauth-callback'
+      preLoaderRoute: typeof ApiPublicMetaOauthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/razorpay-webhook': {
+      id: '/api/public/razorpay-webhook'
+      path: '/api/public/razorpay-webhook'
+      fullPath: '/api/public/razorpay-webhook'
+      preLoaderRoute: typeof ApiPublicRazorpayWebhookRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -777,3 +777,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
