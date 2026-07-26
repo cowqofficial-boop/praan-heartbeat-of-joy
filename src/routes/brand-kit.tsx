@@ -919,7 +919,14 @@ function SavedModelsPanel({
               ))}
             </div>
             <div className="flex-1">
-              <p className="text-[14px] font-semibold text-ink">{m.name}</p>
+              <p className="flex items-center gap-2 text-[14px] font-semibold text-ink">
+                {m.name}
+                {m.is_active && (
+                  <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                    Active
+                  </span>
+                )}
+              </p>
               <p className="text-[12px] text-muted">
                 {m.photos.length} photo{m.photos.length === 1 ? "" : "s"}
                 {m.is_active ? " · in use" : ""}

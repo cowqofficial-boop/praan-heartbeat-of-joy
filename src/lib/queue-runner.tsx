@@ -72,6 +72,7 @@ export function QueueRunner() {
                 isKidswear: (item.identified as { is_kidswear?: boolean }).is_kidswear ?? false,
                 isDrapedGarment:
                   (item.identified as { is_draped_garment?: boolean }).is_draped_garment ?? false,
+                modelId: item.modelId ?? null,
                 styleIndex,
               },
             }),

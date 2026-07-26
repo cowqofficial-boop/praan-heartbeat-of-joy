@@ -16,6 +16,8 @@ export type QueueItem = {
   imageUrls: string[]; // uploaded storage URLs; imageUrls[0] doubles as thumbnail
   identified: Identified;
   cost: number;
+  /** Saved brand model chosen for this product; null = let CowQ decide. */
+  modelId?: string | null;
   // runtime state
   jobId?: string;
   resultId?: string;
