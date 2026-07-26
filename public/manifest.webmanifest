@@ -1,7 +1,7 @@
 {
   "name": "CowQ",
   "short_name": "CowQ",
-  "description": "CowQ — Complete Operations With Quality.",
+  "description": "CowQ — AI product photos and listings for small sellers. Upload one photo and get studio-quality images, a written marketplace listing, social captions, and a ready-to-upload catalog file.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
