@@ -1,8 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { LibraryBig } from "lucide-react";
 import { UploadWidget } from "@/components/UploadWidget";
+import { ServiceForm } from "@/components/ServiceForm";
+import { TypeToggle } from "@/components/TypeToggle";
+import type { ContentKind } from "@/lib/service";
 import { HelpButton } from "@/components/PageHeader";
 import { useAuth } from "@/lib/use-auth";
+
 
 export const Route = createFileRoute("/create")({
   head: () => ({
