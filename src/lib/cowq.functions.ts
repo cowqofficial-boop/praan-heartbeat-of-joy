@@ -54,6 +54,31 @@ function b64ToBytes(b64: string): Uint8Array {
 
 // ---------- Upload ----------
 
+/**
+ * Hands the browser a short-lived signed URL so the photo goes straight to
+ * storage instead of being base64-inflated through this worker.
+ */
+export const createUploadTicket = createServerFn({ method: "POST" })
+  .inputValidator((d: { browserId: string; ext?: string }) => d)
+  .handler(async ({ data }) => {
+    const ext = (data.ext || "jpg").replace(/[^a-z0-9]/gi, "").slice(0, 5) || "jpg";
+    const path = `originals/${data.browserId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const sb = await admin();
+    const { data: ticket, error } = await sb.storage.from(BUCKET).createSignedUploadUrl(path);
+    if (error || !ticket) throw new Error(`upload ticket failed: ${error?.message}`);
+    return { path, token: ticket.token, bucket: BUCKET };
+  });
+
+/** Returns a long-lived signed read URL for a freshly uploaded original. */
+export const signUploadedOriginal = createServerFn({ method: "POST" })
+  .inputValidator((d: { path: string }) => d)
+  .handler(async ({ data }) => {
+    if (!data.path.startsWith("originals/")) throw new Error("Invalid path");
+    return { url: await signedUrl(data.path) };
+  });
+
+
+
 export const uploadOriginal = createServerFn({ method: "POST" })
   .inputValidator((d: { dataUrl: string; browserId: string }) => d)
   .handler(async ({ data }) => {
