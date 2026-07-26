@@ -31,7 +31,9 @@ const TABS: Tab[] = [
   { to: "/profile", label: "Overview", exact: true, keywords: "summary snapshot activity" },
   { to: "/profile/account", label: "Account", keywords: "name email phone password language timezone currency country" },
   { to: "/profile/ai", label: "AI preferences", keywords: "personality tone voice emoji creativity temperature writing" },
+  { to: "/profile/shop", label: "My shop", keywords: "public storefront link slug share visitors listings shop page" },
   { to: "/profile/apps", label: "Connected apps", keywords: "instagram facebook whatsapp integrations channels" },
+
   { to: "/profile/security", label: "Security", keywords: "password sessions two step login devices" },
   { to: "/profile/subscription", label: "Plan & usage", keywords: "billing credits invoices payments upgrade" },
   { to: "/profile/team", label: "Team", keywords: "members roles permissions invite staff" },
