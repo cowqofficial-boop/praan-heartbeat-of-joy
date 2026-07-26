@@ -12,10 +12,16 @@ import {
 import {
   admin,
   b64ToBytes,
+  BUCKET,
   fetchAsBase64,
   generateOneImage,
   getBrandModelContext,
   getGenerationStyles,
+  KIDSWEAR_STYLES,
+  personStyles,
+  PRODUCT_STYLES,
+  signedUrl,
+  type StyleDef,
   uploadBytes,
 } from "./image-gen.server";
 
