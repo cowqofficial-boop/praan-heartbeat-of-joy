@@ -10,6 +10,7 @@ import {
   listMyBrandModels,
   removeRealBrandModel,
   renameBrandModel,
+  saveAiBrandModel,
   saveBrandModel,
   saveMyBrandKit,
   setActiveBrandModel,
@@ -181,6 +182,16 @@ const EMPTY_KIT: BrandKit = {
  brand_model_source: "ai",
  brand_model_photos: [],
 };
+
+/** Reflect a fresh server balance immediately, then refetch to stay in sync. */
+export function applyBalance(qc: ReturnType<typeof useQueryClient>, balance: number) {
+  qc.setQueryData(["my-credits"], (prev: unknown) =>
+    prev && typeof prev === "object"
+      ? { ...(prev as Record<string, unknown>), total: balance }
+      : prev,
+  );
+  void qc.invalidateQueries({ queryKey: ["my-credits"] });
+}
 
 function BrandKitPage() {
  const { onboarding } = Route.useSearch();
