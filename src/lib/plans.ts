@@ -91,6 +91,9 @@ export function planModelSlots(planId: string): number {
 // A single source of truth for what every action costs.
 export const COSTS = {
   product: 90,                 // Complete product — all copy + 4 photos
+  service_photo: 45,           // Service with a real photo — one edited poster + copy
+  service_no_photo: 90,        // Service with no photo — poster built from nothing + copy
+
   extra_marketplace_photo: 30, // High-res extra photo for marketplaces
   extra_social_photo: 10,      // Standard-res extra photo
   rewrite_copy: 5,             // Copy-only rewrite
