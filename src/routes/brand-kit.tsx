@@ -10,6 +10,7 @@ import {
   listMyBrandModels,
   removeRealBrandModel,
   renameBrandModel,
+  saveAiBrandModel,
   saveBrandModel,
   saveMyBrandKit,
   setActiveBrandModel,
@@ -182,6 +183,16 @@ const EMPTY_KIT: BrandKit = {
  brand_model_photos: [],
 };
 
+/** Reflect a fresh server balance immediately, then refetch to stay in sync. */
+export function applyBalance(qc: ReturnType<typeof useQueryClient>, balance: number) {
+  qc.setQueryData(["my-credits"], (prev: unknown) =>
+    prev && typeof prev === "object"
+      ? { ...(prev as Record<string, unknown>), total: balance }
+      : prev,
+  );
+  void qc.invalidateQueries({ queryKey: ["my-credits"] });
+}
+
 function BrandKitPage() {
  const { onboarding } = Route.useSearch();
  const navigate = useNavigate();
@@ -248,8 +259,8 @@ function BrandKitPage() {
  setModelBusy(true);
  try {
  await saveMyBrandKit({ data: { ...kit, brand_model_source: "ai" } });
- const { url } = await generateBrandModelPortrait({ data: {} });
- qc.invalidateQueries({ queryKey: ["my-credits"] });
+ const { url, balance } = await generateBrandModelPortrait({ data: {} });
+ applyBalance(qc, balance);
  setKit((k) => ({ ...k, brand_model_url: url, brand_model_enabled: true, brand_model_source: "ai" }));
  } catch (e) {
  await showAlert({ title: "Couldn't generate your brand model", body: "Try again.\n\n" + (e as Error).message });
@@ -262,8 +273,8 @@ function BrandKitPage() {
  setModelBusy(true);
  try {
  await saveMyBrandKit({ data: { ...kit, brand_model_source: "ai" } });
- const { url } = await generateBrandModelPortrait({ data: {} });
- qc.invalidateQueries({ queryKey: ["my-credits"] });
+ const { url, balance } = await generateBrandModelPortrait({ data: {} });
+ applyBalance(qc, balance);
  setKit((k) => ({ ...k, brand_model_url: url, brand_model_enabled: true, brand_model_source: "ai", brand_model_photos: [] }));
  } catch (e) {
  await showAlert({ title: "Couldn't generate your brand model", body: "Try again.\n\n" + (e as Error).message });
@@ -652,6 +663,36 @@ function BrandModelPanel({
 }) {
   const source = kit.brand_model_source;
   const modelCost = COSTS.brand_model;
+  const qc = useQueryClient();
+  const [savedVersion, setSavedVersion] = useState(0);
+
+  async function saveAiModel() {
+    const name = await showPrompt({
+      title: "Name this model",
+      body: `Saving keeps this person in your saved models so you can reuse them later. Costs ${modelCost} credits.`,
+      placeholder: "Name this model, e.g. Priya",
+      defaultValue: "My model",
+      confirmLabel: `Save · ${modelCost} credits`,
+    });
+    if (!name) return;
+    setModelBusy(true);
+    try {
+      const res = await saveAiBrandModel({ data: { name } });
+      applyBalance(qc, res.balance);
+      setSavedVersion((v) => v + 1);
+      await showAlert({ title: `${res.model.name} saved`, body: "You can pick this model when you create a product." });
+    } catch (e) {
+      const msg = (e as Error).message;
+      const m = /^NO_CREDITS:(\d+):(\d+)$/.exec(msg);
+      await showAlert({
+        title: m ? "Not enough credits" : "Couldn't save this model",
+        body: m ? `Saving a model costs ${m[1]} credits and you have ${m[2]}.` : msg,
+      });
+    } finally {
+      setModelBusy(false);
+    }
+  }
+
   return (
     <div className="mt-4 flex flex-col gap-4">
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -678,8 +719,8 @@ function BrandModelPanel({
         ))}
       </div>
 
-      {source === "ai" ? (
-        <div className="card-list flex items-center gap-4 p-3">
+      {source === "ai" && (
+        <div className="card-cobalt flex items-center gap-4 rounded-[12px] p-3">
           <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-[10px] bg-raised">
             {modelBusy ? (
               <Loader2 className="h-5 w-5 animate-spin text-muted" />
@@ -707,20 +748,31 @@ function BrandModelPanel({
                 ? "Creating your model…"
                 : `${kit.brand_model_url ? "Change model" : "Create model"} · ${modelCost} credits`}
             </button>
+            {kit.brand_model_url && !modelBusy && (
+              <button
+                type="button"
+                onClick={saveAiModel}
+                className="h-11 rounded-[10px] bg-primary text-[13px] font-semibold text-white"
+              >
+                Save this model · {modelCost} credits
+              </button>
+            )}
           </div>
         </div>
-
-      ) : (
-        <SavedModelsPanel
-          modelBusy={modelBusy}
-          setModelBusy={setModelBusy}
-          onActivePhotos={onUploadedReal}
-          onNoModels={onRemoveReal}
-        />
       )}
+
+      <SavedModelsPanel
+        key={savedVersion}
+        modelBusy={modelBusy}
+        setModelBusy={setModelBusy}
+        onActivePhotos={onUploadedReal}
+        onNoModels={onRemoveReal}
+        showUploader={source === "user"}
+      />
     </div>
   );
 }
+
 
 async function fileToDataUrl(file: File): Promise<string> {
   return new Promise((res, rej) => {
@@ -736,11 +788,13 @@ function SavedModelsPanel({
   setModelBusy,
   onActivePhotos,
   onNoModels,
+  showUploader = true,
 }: {
   modelBusy: boolean;
   setModelBusy: (v: boolean) => void;
   onActivePhotos: (urls: string[]) => void;
   onNoModels: () => Promise<void>;
+  showUploader?: boolean;
 }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -774,7 +828,7 @@ function SavedModelsPanel({
 
   if (slots === 0) {
     return (
-      <div className="card-list flex flex-col gap-3 p-4">
+      <div className="card-amber flex flex-col gap-3 rounded-[12px] p-4">
         <p className="text-[14px] font-semibold text-ink">Saved models are on Growth &amp; Pro</p>
         <p className="text-[13px] text-muted">
           Save real people as reusable models — Growth keeps 3, Pro keeps 10 — so the same person appears
@@ -845,9 +899,13 @@ function SavedModelsPanel({
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[12px] text-muted">
-        {models.length} of {slots} model slots used · {saveCost} credits to save a model
-      </p>
+      <div>
+        <p className="text-[14px] font-semibold text-ink">Saved models</p>
+        <p className="text-[12px] text-muted">
+          {models.length} of {slots} used · {saveCost} credits to save a model. Pick one when you create a
+          product.
+        </p>
+      </div>
 
       {models.map((m) => (
         <div
@@ -861,7 +919,14 @@ function SavedModelsPanel({
               ))}
             </div>
             <div className="flex-1">
-              <p className="text-[14px] font-semibold text-ink">{m.name}</p>
+              <p className="flex items-center gap-2 text-[14px] font-semibold text-ink">
+                {m.name}
+                {m.is_active && (
+                  <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                    Active
+                  </span>
+                )}
+              </p>
               <p className="text-[12px] text-muted">
                 {m.photos.length} photo{m.photos.length === 1 ? "" : "s"}
                 {m.is_active ? " · in use" : ""}
@@ -899,7 +964,7 @@ function SavedModelsPanel({
         </div>
       ))}
 
-      {adding ? (
+      {!showUploader ? null : adding ? (
         <RealModelUploader
           modelBusy={modelBusy}
           setModelBusy={setModelBusy}

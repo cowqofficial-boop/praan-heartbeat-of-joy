@@ -361,7 +361,68 @@ Photorealistic, natural pose, natural indoor daylight, plain neutral background,
       .update({ brand_model_url: url, brand_model_enabled: true })
       .eq("user_id", context.userId);
     if (updErr) throw new Error(updErr.message);
-    return { url };
+    // Return the post-charge balance so the UI can show the deduction immediately.
+    return { url, balance: spend.balance };
+  });
+
+/**
+ * Save the AI-generated brand model portrait as a named, reusable saved model.
+ * Same slot limit and cost as saving a real person's photos.
+ */
+export const saveAiBrandModel = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { name: string }) => d)
+  .handler(async ({ context, data }) => {
+    const { supabaseAdmin, slots } = await loadPlanState(context.userId);
+    if (slots === 0) {
+      throw new Error("Saved models are on Growth & Pro. Upgrade your plan to save a model.");
+    }
+    const { data: kit } = await supabaseAdmin
+      .from("brand_kits")
+      .select("brand_model_url")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    const url = kit?.brand_model_url as string | null;
+    if (!url) throw new Error("Create your AI model first, then save it.");
+
+    const { count } = await supabaseAdmin
+      .from("brand_models")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", context.userId);
+    if ((count ?? 0) >= slots) {
+      throw new Error(`Your plan saves ${slots} model${slots === 1 ? "" : "s"}. Remove one first.`);
+    }
+
+    const { data: rows, error: spendErr } = await supabaseAdmin.rpc("spend_credits", {
+      _user_id: context.userId,
+      _amount: SAVE_MODEL_COST,
+    });
+    if (spendErr) throw new Error(spendErr.message);
+    const spend = Array.isArray(rows) ? rows[0] : rows;
+    if (!spend?.ok) throw new Error(`NO_CREDITS:${SAVE_MODEL_COST}:${spend?.balance ?? 0}`);
+
+    try {
+      const name = (data.name || "My model").trim().slice(0, 40) || "My model";
+      const { data: inserted, error: insErr } = await supabaseAdmin
+        .from("brand_models")
+        .insert({ user_id: context.userId, name, photos: [url], is_active: true })
+        .select("id, name, photos, is_active, created_at")
+        .single();
+      if (insErr) throw new Error(insErr.message);
+      await supabaseAdmin
+        .from("brand_models")
+        .update({ is_active: false })
+        .eq("user_id", context.userId)
+        .neq("id", inserted.id);
+      return { model: inserted as SavedModel, balance: spend.balance ?? 0 };
+    } catch (e) {
+      await supabaseAdmin.rpc("refund_credits", {
+        _user_id: context.userId,
+        _sub: spend.took_sub ?? 0,
+        _pack: spend.took_pack ?? 0,
+      });
+      throw e;
+    }
   });
 
 export const setBrandModelEnabled = createServerFn({ method: "POST" })
