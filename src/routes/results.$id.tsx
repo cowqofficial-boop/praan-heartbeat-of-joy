@@ -1108,7 +1108,11 @@ function ServiceResults({
             </div>
           </section>
 
-          <ListingPanel copy={copy} id={id} canEdit={hasAccount} />
+          {hasAccount ? (
+            <ComponentStack generationId={id} />
+          ) : (
+            <ListingPanel copy={copy} id={id} canEdit={false} />
+          )}
 
           {/* Video ad placeholder — deliberately not wired up yet */}
           <section>
