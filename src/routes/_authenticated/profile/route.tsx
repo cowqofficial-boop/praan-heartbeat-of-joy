@@ -4,6 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import {
   Bell,
+  Compass,
+
   HelpCircle,
   Search,
   Sparkles,
