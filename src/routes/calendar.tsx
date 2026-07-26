@@ -179,7 +179,7 @@ function CalendarPage() {
         action={!planId ? { label: `Plan my month — ${COSTS.calendar_month} credits`, onClick: handleCreate, icon: Sparkles, disabled: creating } : undefined}
       />
 
-
+      <CalendarExplainer />
 
 
       <CalendarBody
