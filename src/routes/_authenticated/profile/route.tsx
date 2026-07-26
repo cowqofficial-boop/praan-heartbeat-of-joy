@@ -120,6 +120,16 @@ function ProfileLayout() {
         </div>
 
         <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
+          {/* Tour lives in the header row, next to the other help controls. */}
+          <a
+            href="/library?tour=1"
+            className="flex h-10 items-center gap-1.5 rounded-[12px] px-3 text-[13px] font-medium text-muted hover:text-ink"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--line)" }}
+          >
+            <Compass className="h-[18px] w-[18px]" style={{ color: COBALT }} />
+            Take the tour
+          </a>
+
           <Link
             to="/profile/notifications"
             aria-label="Notifications"
