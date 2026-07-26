@@ -1162,7 +1162,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_shop_published: { Args: { _user_id: string }; Returns: boolean }
       refund_credits: {
         Args: { _pack: number; _sub: number; _user_id: string }
         Returns: undefined
