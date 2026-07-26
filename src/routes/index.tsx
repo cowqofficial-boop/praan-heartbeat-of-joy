@@ -534,7 +534,7 @@ function Landing() {
                     and who it&rsquo;s for. Replace this placeholder with the real note before
                     launch.]
                   </p>
-                  <p className="mt-3 text-[13px] text-muted">— [FOUNDER_NAME], founder</p>
+                  <p className="mt-3 text-[13px] text-muted">— Tarak Sundhar, founder</p>
                 </div>
               </div>
             </div>
