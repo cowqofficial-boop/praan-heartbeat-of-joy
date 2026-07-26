@@ -115,8 +115,8 @@ function Guide() {
           Once you have one clean phone photo, upload it to CowQ. The app
           generates four studio variants (white background, soft studio,
           lifestyle scene, and enhanced flat-lay) in both square (1:1) and
-          vertical (9:16) sizes, plus the full listing text and a Shopify
-          catalog CSV. You do the shooting; CowQ does the polish.
+          vertical (9:16) sizes, plus the full listing text and a website
+          catalog file. You do the shooting; CowQ does the polish.
         </p>
         <Link
           to="/create"
