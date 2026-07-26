@@ -3,20 +3,11 @@ import { useRef, useState } from "react";
 import { Camera, Plus, X } from "lucide-react";
 import { getBrowserId } from "@/lib/browser-id";
 import { useCowqStore, type CowqPhoto } from "@/lib/cowq-store";
-import { identifyProduct, uploadOriginal } from "@/lib/cowq.functions";
+import { createUploadTicket, identifyProduct, signUploadedOriginal } from "@/lib/cowq.functions";
 import { useAuth } from "@/lib/use-auth";
 import { PrimaryButton } from "@/components/PrimaryButton";
 
 const MAX_PHOTOS = 5;
-
-async function fileToDataUrl(file: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result as string);
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
-}
 
 async function convertHeicIfNeeded(file: File): Promise<Blob> {
   const isHeic = /heic|heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name);
@@ -26,34 +17,46 @@ async function convertHeicIfNeeded(file: File): Promise<Blob> {
   return Array.isArray(out) ? out[0] : out;
 }
 
-function shrinkAndCompress(
-  dataUrl: string,
-  maxSide: number,
-  quality: number,
-): Promise<{ dataUrl: string }> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
-      const w = Math.round(img.width * scale);
-      const h = Math.round(img.height * scale);
-      const canvas = document.createElement("canvas");
-      canvas.width = w;
-      canvas.height = h;
-      canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
-      resolve({ dataUrl: canvas.toDataURL("image/jpeg", quality) });
-    };
-    img.onerror = () => reject(new Error("Could not decode image"));
-    img.src = dataUrl;
+/** Decode + resize + compress entirely off the main upload path. */
+async function shrinkToJpeg(blob: Blob, maxSide: number, quality: number): Promise<Blob> {
+  const bitmap = await createImageBitmap(blob);
+  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+  const w = Math.round(bitmap.width * scale);
+  const h = Math.round(bitmap.height * scale);
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, w, h);
+  bitmap.close?.();
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (b) => (b ? resolve(b) : reject(new Error("Could not compress image"))),
+      "image/jpeg",
+      quality,
+    );
   });
 }
 
-async function normalizeImage(file: File): Promise<{ dataUrl: string; sizeBytes: number }> {
-  const blob = await convertHeicIfNeeded(file);
-  const raw = await fileToDataUrl(blob);
-  const { dataUrl } = await shrinkAndCompress(raw, 1600, 0.85);
-  const sizeBytes = Math.round((dataUrl.length - dataUrl.indexOf(",") - 1) * 0.75);
-  return { dataUrl, sizeBytes };
+function blobToObjectUrl(blob: Blob): string {
+  return URL.createObjectURL(blob);
+}
+
+/** PUT straight to storage with real upload progress. */
+function putWithProgress(url: string, blob: Blob, onProgress: (pct: number) => void) {
+  return new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", url);
+    xhr.setRequestHeader("content-type", blob.type || "image/jpeg");
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () =>
+      xhr.status >= 200 && xhr.status < 300
+        ? resolve()
+        : reject(new Error(`upload failed (${xhr.status}): ${xhr.responseText?.slice(0, 200)}`));
+    xhr.onerror = () => reject(new Error("Network error while uploading"));
+    xhr.send(blob);
+  });
 }
 
 type LocalPhoto = {
@@ -61,6 +64,7 @@ type LocalPhoto = {
   dataUrl: string;
   url: string | null;
   uploading: boolean;
+  progress: number;
   error?: string;
 };
 
@@ -78,24 +82,42 @@ export function UploadWidget({ compact = false }: { compact?: boolean }) {
 
   async function ingestFile(file: File): Promise<LocalPhoto | null> {
     try {
-      const { dataUrl, sizeBytes } = await normalizeImage(file);
-      if (sizeBytes > 5 * 1024 * 1024) {
+      const converted = await convertHeicIfNeeded(file);
+      const compressed = await shrinkToJpeg(converted, 1600, 0.85);
+      if (compressed.size > 5 * 1024 * 1024) {
         setError("A photo is over 5MB even after compressing. Try a smaller one.");
         return null;
       }
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-      const photo: LocalPhoto = { id, dataUrl, url: null, uploading: true };
+      const photo: LocalPhoto = {
+        id,
+        dataUrl: blobToObjectUrl(compressed),
+        url: null,
+        uploading: true,
+        progress: 0,
+      };
       const browserId = getBrowserId();
-      uploadOriginal({ data: { dataUrl, browserId } })
-        .then(({ url }) => {
-          setPhotos((cur) => cur.map((p) => (p.id === id ? { ...p, url, uploading: false } : p)));
-        })
-        .catch((e) => {
+
+      void (async () => {
+        try {
+          const ticket = await createUploadTicket({ data: { browserId, ext: "jpg" } });
+          const base = import.meta.env.VITE_SUPABASE_URL as string;
+          const putUrl = `${base}/storage/v1/object/upload/sign/${ticket.bucket}/${ticket.path}?token=${encodeURIComponent(ticket.token)}`;
+          await putWithProgress(putUrl, compressed, (pct) =>
+            setPhotos((cur) => cur.map((p) => (p.id === id ? { ...p, progress: pct } : p))),
+          );
+          const { url } = await signUploadedOriginal({ data: { path: ticket.path } });
+          setPhotos((cur) =>
+            cur.map((p) => (p.id === id ? { ...p, url, uploading: false, progress: 100 } : p)),
+          );
+        } catch (e) {
           const raw = e instanceof Error ? e.message : String(e);
           setPhotos((cur) =>
             cur.map((p) => (p.id === id ? { ...p, uploading: false, error: raw } : p)),
           );
-        });
+        }
+      })();
+
       return photo;
     } catch (e) {
       const raw = e instanceof Error ? e.message : String(e);
@@ -104,6 +126,7 @@ export function UploadWidget({ compact = false }: { compact?: boolean }) {
       return null;
     }
   }
+
 
   async function handleFiles(files: FileList | File[]) {
     setError(null);
@@ -208,10 +231,11 @@ export function UploadWidget({ compact = false }: { compact?: boolean }) {
                 >
                   <img src={p.dataUrl} alt="" className="h-full w-full object-cover" />
                   {p.uploading && (
-                    <span className="absolute inset-0 flex items-center justify-center bg-background/50 text-[10px] font-medium text-ink">
-                      …
+                    <span className="absolute inset-0 flex items-center justify-center bg-background/60 text-[10px] font-semibold tabular-nums text-ink">
+                      {p.progress > 0 ? `${p.progress}%` : "…"}
                     </span>
                   )}
+
                 </button>
                 <button
                   type="button"

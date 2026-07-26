@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { useQueryClient } from "@tanstack/react-query";
 import { useQueueStore, type QueueItem } from "@/lib/queue-store";
 import { getBrowserId } from "@/lib/browser-id";
 import { useAuth, markFreeGenerationUsed } from "@/lib/use-auth";
@@ -26,6 +27,7 @@ export function QueueRunner() {
   const makePhoto = useServerFn(generateImageForJob);
   const writeAndSave = useServerFn(generateCopyAndSave);
   const refundJob = useServerFn(refundGenerationJob);
+  const qc = useQueryClient();
   const runningRef = useRef(false);
 
   useEffect(() => {
@@ -128,6 +130,7 @@ export function QueueRunner() {
       );
 
       jobId = null;
+      void qc.invalidateQueries({ queryKey: ["my-credits"] });
       if (!user) markFreeGenerationUsed();
       update(item.id, {
         status: "ready",

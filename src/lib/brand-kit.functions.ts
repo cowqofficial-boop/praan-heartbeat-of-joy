@@ -318,16 +318,29 @@ export const generateBrandModelPortrait = createServerFn({ method: "POST" })
     const prompt = `Portrait of one person for a brand model reference. ${who}
 Photorealistic, natural pose, natural indoor daylight, plain neutral background, head-and-shoulders framing centered, calm pleasant expression, hands and fingers correct, no props, no text, no logo, no watermark. This is a reference portrait to be reused across a shop's product photography, so the person should look consistent, believable, and ordinary — not a fashion cover, not an editorial shot.`;
 
-    const out = await geminiGenerateImage({
-      prompt,
-      reference: seed,
-    });
+    // Charge for the portrait before generating; refunded if anything fails.
+    const credits = await import("./credits.server");
+    const spend = await credits.spendOrThrow(context.userId, "brand_model");
+
+    let out: { b64: string };
+    try {
+      out = await geminiGenerateImage({
+        prompt,
+        reference: seed,
+      });
+    } catch (e) {
+      await credits.refundSpend(context.userId, spend);
+      throw e;
+    }
 
     const path = `brand-models/${context.userId}/${Date.now()}.png`;
     const { error: upErr } = await supabaseAdmin.storage
       .from("praan")
       .upload(path, b64ToBytes(out.b64), { contentType: "image/png", upsert: true });
-    if (upErr) throw new Error(upErr.message);
+    if (upErr) {
+      await credits.refundSpend(context.userId, spend);
+      throw new Error(upErr.message);
+    }
     const { data: signed, error: sErr } = await supabaseAdmin.storage
       .from("praan")
       .createSignedUrl(path, 60 * 60 * 24 * 365);

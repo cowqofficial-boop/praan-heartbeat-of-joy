@@ -400,14 +400,26 @@ export type ProfileInsights = {
   shops_connected: number;
   saved_models: number;
   storage_bytes: number;
+  storage_limit_bytes: number;
+  retention_days: number | null;
   minutes_saved: number;
   rupees_saved: number;
 };
 
-/** Rough, honest estimates: one product shoot ≈ 90 min and ≈ ₹1,500 at an agency. */
-const MINUTES_PER_PRODUCT = 90;
-const RUPEES_PER_PRODUCT = 1500;
+/** Deliberately conservative estimates — never inflated. */
+const MINUTES_PER_PRODUCT = 20;
+const RUPEES_PER_PRODUCT = 300;
 const BYTES_PER_PHOTO = 850_000;
+
+const GB = 1024 ** 3;
+
+/** Real storage limits, and how long generated files are kept, per plan. */
+export function storagePolicy(planId: string): { limitBytes: number; retentionDays: number | null } {
+  if (planId.startsWith("pro")) return { limitBytes: 200 * GB, retentionDays: null };
+  if (planId.startsWith("growth")) return { limitBytes: 50 * GB, retentionDays: null };
+  if (planId.startsWith("starter")) return { limitBytes: 10 * GB, retentionDays: null };
+  return { limitBytes: 2 * GB, retentionDays: 30 };
+}
 
 export const getMyInsights = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -420,6 +432,20 @@ export const getMyInsights = createServerFn({ method: "GET" })
       context.supabase.from("social_connections").select("id", { count: "exact", head: true }).eq("user_id", uid),
       context.supabase.from("brand_models").select("id", { count: "exact", head: true }).eq("user_id", uid),
     ]);
+
+    const { data: creditRow } = await context.supabase
+      .from("user_credits")
+      .select("plan_id")
+      .eq("user_id", uid)
+      .maybeSingle();
+    const policy = storagePolicy(creditRow?.plan_id ?? "free");
+
+    // Free plans keep generated files for 30 days; clear anything older.
+    if (policy.retentionDays) {
+      void import("./storage-retention.server").then((m) =>
+        m.pruneExpiredGeneratedFiles(uid, policy.retentionDays!),
+      ).catch(() => { /* pruning is best-effort */ });
+    }
 
     const rows = gens.data ?? [];
     const photos = rows.reduce((n, r) => {
@@ -436,6 +462,8 @@ export const getMyInsights = createServerFn({ method: "GET" })
       shops_connected: conns.count ?? 0,
       saved_models: models.count ?? 0,
       storage_bytes: photos * BYTES_PER_PHOTO,
+      storage_limit_bytes: policy.limitBytes,
+      retention_days: policy.retentionDays,
       minutes_saved: products * MINUTES_PER_PRODUCT,
       rupees_saved: products * RUPEES_PER_PRODUCT,
     };

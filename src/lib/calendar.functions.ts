@@ -431,6 +431,20 @@ export const generateOnePost = createServerFn({ method: "POST" })
     }
     if (!target) return { done: true as const };
 
+    // Charge for this post before generating; refunded below if it fails.
+    const credits = await import("./credits.server");
+    let spend: import("./credits.server").Spend | null = null;
+    try {
+      spend = await credits.spendOrThrow(context.userId, "calendar_post");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      await sb
+        .from("content_posts")
+        .update({ status: "error", error: msg.slice(0, 500) })
+        .eq("id", target.id);
+      throw e;
+    }
+
     // fetch brand kit
     const { data: brand } = await sb
       .from("brand_kits")
@@ -478,6 +492,7 @@ export const generateOnePost = createServerFn({ method: "POST" })
       return { done: false as const, post_id: target.id };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
+      await credits.refundSpend(context.userId, spend);
       await sb
         .from("content_posts")
         .update({ status: "error", error: msg.slice(0, 500) })
