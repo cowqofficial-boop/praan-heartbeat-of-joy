@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, Check, Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckout, getMyCredits } from "@/lib/billing.functions";
 import { creditPacks, estimateProducts, formatInr, subscriptionPairs, type Plan } from "@/lib/plans";
 import { PageHeader } from "@/components/PageHeader";
+import { BackButton } from "@/components/BackButton";
+
 
 
 export const Route = createFileRoute("/pricing")({
