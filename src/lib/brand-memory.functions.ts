@@ -76,7 +76,7 @@ export const getMyBrandMemory = createServerFn({ method: "GET" })
       // Seed from the brand kit so the seller doesn't retype what they already told us.
       const { data: kit } = await context.supabase
         .from("brand_kits")
-        .select("sells_what, sells_to, tone, city")
+        .select("sells_what, sells_to, tone")
         .eq("user_id", context.userId)
         .maybeSingle();
       const seeded: BrandMemory = {
@@ -85,7 +85,6 @@ export const getMyBrandMemory = createServerFn({ method: "GET" })
           ...DEFAULT_BRAND_MEMORY.identity,
           what_we_sell: (kit?.sells_what as string) || "",
           who_we_serve: (kit?.sells_to as string) || "",
-          city: ((kit as { city?: string } | null)?.city as string) || "",
         },
         voice: {
           ...DEFAULT_BRAND_MEMORY.voice,
