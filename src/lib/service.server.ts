@@ -52,11 +52,12 @@ const REALISM =
   "Real photography, not a render. Natural light, true-to-life colour, honest texture, no glow, no bloom, no lens flare, no HDR, no magazine gloss.";
 
 /** Poster built from the seller's own photo — the real workspace/work, styled cleanly. */
-function photoPosterPrompt(name: string, category: string, priceLine: string): string {
+function photoPosterPrompt(name: string, category: string, priceLine: string, photoMemory = ""): string {
   return [
     `Turn this photograph into a clean, honest promotional poster for a service called "${name}"${category ? ` (${category})` : ""}.`,
     "Keep the real scene from the photo exactly as it is — same place, same tools, same work, same people if any. Only improve framing, lighting balance and clarity, and add calm empty space for a short title.",
     priceLine,
+    photoMemory,
     REALISM,
     SERVICE_IMAGE_GUARDRAILS,
     "Square 1:1, 2048 by 2048 pixels, generous margin on all four sides.",
@@ -81,6 +82,7 @@ function graphicPosterPrompt(name: string, category: string, priceLine: string):
 
 export async function generateServicePoster(opts: {
   browserId: string;
+  userId?: string | null;
   name: string;
   category: string;
   photoUrl: string | null;
@@ -89,12 +91,15 @@ export async function generateServicePoster(opts: {
   const priceLine = opts.priceLabel
     ? `You may render the price "${opts.priceLabel}" as small clean text. No other claims or numbers.`
     : "Do not render any price or numbers.";
+  const photoMemory = (
+    await (await import("./brand-memory.server")).loadBrandMemoryContext(opts.userId)
+  ).photo;
   const started = Date.now();
   let out: { mimeType: string; b64: string };
   if (opts.photoUrl) {
     const ref = await fetchAsBase64(opts.photoUrl);
     out = await geminiGenerateImage({
-      prompt: photoPosterPrompt(opts.name, opts.category, priceLine),
+      prompt: photoPosterPrompt(opts.name, opts.category, priceLine, photoMemory),
       reference: { mimeType: ref.mime, b64: ref.b64 },
     });
   } else {
