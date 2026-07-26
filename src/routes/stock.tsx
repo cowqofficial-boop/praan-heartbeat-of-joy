@@ -27,6 +27,8 @@ import {
 } from "@/lib/stock.functions";
 import { listMyProducts } from "@/lib/library.functions";
 import { COSTS, formatInr } from "@/lib/plans";
+import { TypeToggle, TypeFilter, TypeBadge } from "@/components/TypeToggle";
+import { serviceCost, type ContentKind } from "@/lib/service";
 
 export const Route = createFileRoute("/stock")({
   head: () => ({
@@ -70,6 +72,7 @@ function StockPage() {
   const [authReady, setAuthReady] = useState(false);
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | ContentKind>("all");
   const [editing, setEditing] = useState<StockItem | null>(null);
   const [creating, setCreating] = useState(false);
   const [showLog, setShowLog] = useState(false);
@@ -103,11 +106,12 @@ function StockPage() {
     const rank = (s: StockStatus) => (s === "out" ? 0 : s === "low" ? 1 : 2);
     const q2 = q.trim().toLowerCase();
     return items
-      .filter((i) => (filter === "all" ? true : i.status === filter))
+      .filter((i) => (typeFilter === "all" ? true : (i.kind ?? "product") === typeFilter))
+      .filter((i) => (i.kind === "service" ? true : filter === "all" ? true : i.status === filter))
       .filter((i) => (q2 ? i.name.toLowerCase().includes(q2) || (i.sku ?? "").toLowerCase().includes(q2) : true))
       .slice()
       .sort((a, b) => rank(a.status) - rank(b.status));
-  }, [items, filter, q]);
+  }, [items, filter, typeFilter, q]);
 
   const totals = useMemo(() => {
     let costPaise = 0;
@@ -220,6 +224,17 @@ function StockPage() {
           onChange={(e) => setQ(e.target.value)}
         />
       </label>
+      <div className="mt-3">
+        <TypeFilter
+          value={typeFilter}
+          onChange={setTypeFilter}
+          counts={{
+            all: items.length,
+            product: items.filter((i) => (i.kind ?? "product") === "product").length,
+            service: items.filter((i) => i.kind === "service").length,
+          }}
+        />
+      </div>
       <div className="mt-3 inline-flex rounded-full bg-surface p-1 text-[13px] font-medium">
         {(["all", "low", "out"] as Filter[]).map((k) => (
           <button
@@ -295,7 +310,10 @@ function StockPage() {
                       )}
                       <div className="min-w-0 flex-1">
                         <button type="button" onClick={() => setEditing(it)} className="block w-full text-left">
-                          <p className="truncate text-[15px] font-semibold text-ink">{it.name}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="truncate text-[15px] font-semibold text-ink">{it.name}</p>
+                            <TypeBadge kind={it.kind ?? "product"} />
+                          </div>
                           <p className="mt-0.5 truncate text-[12px] text-muted">
                             {it.sku ? `SKU ${it.sku} · ` : ""}
                             Cost {formatInr(Math.round(it.cost_price_paise / 100))} · Sell {formatInr(Math.round(it.selling_price_paise / 100))}
@@ -307,13 +325,32 @@ function StockPage() {
                             to="/create"
                             className="mt-1 inline-block text-[12px] font-semibold text-[color:var(--page-accent)]"
                           >
-                            Generate photos — {COSTS.product} credits
+                            {it.kind === "service"
+                              ? `Make a service poster — ${serviceCost(false)} credits`
+                              : `Generate photos — ${COSTS.product} credits`}
                           </Link>
                         )}
                       </div>
 
-                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${chip.cls}`}>{chip.label}</span>
+                      {it.kind !== "service" && (
+                        <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${chip.cls}`}>{chip.label}</span>
+                      )}
                     </div>
+                    {it.kind === "service" ? (
+                      <div className="mt-3 flex items-center justify-between">
+                        <p className="text-[13px] text-muted">Services aren't counted in stock.</p>
+                        <div className="flex gap-2">
+                          <button type="button" onClick={() => setEditing(it)} className="h-9 rounded-full bg-surface px-3 text-[13px] font-semibold text-ink">
+                            Edit
+                          </button>
+                          <button type="button" aria-label="Delete item"
+                            onClick={async () => { if (await showConfirm({ title: `Delete "${it.name}"?`, body: "This can't be undone.", destructive: true, confirmLabel: "Delete" })) del.mutate({ data: { id: it.id } }); }}
+                            className="grid h-9 w-9 place-items-center rounded-full text-muted hover:text-primary">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
                     <div className="mt-3 flex items-center justify-between">
                       <div className="flex items-center gap-1">
                         <button type="button" aria-label="Decrease" disabled={it.quantity === 0 || changeQty.isPending}
