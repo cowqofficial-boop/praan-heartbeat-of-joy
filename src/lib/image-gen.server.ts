@@ -4,7 +4,7 @@
 // never drift apart on safety or house style.
 import { geminiGenerateImage, geminiGenerateText } from "./gemini.server";
 
-const BUCKET = "praan";
+export const BUCKET = "praan";
 
 export async function admin() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
