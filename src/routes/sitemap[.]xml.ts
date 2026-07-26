@@ -22,6 +22,18 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/blog/flat-lay-guide", changefreq: "monthly", priority: "0.6" },
         ];
 
+        // Every published seller shop is indexable.
+        try {
+          const { listPublishedShopSlugs } = await import("@/lib/shop.functions");
+          const slugs = await listPublishedShopSlugs();
+          for (const slug of slugs.slice(0, 5000)) {
+            entries.push({ path: `/shop/${slug}`, changefreq: "weekly", priority: "0.7" });
+          }
+        } catch {
+          // A shop lookup failure must never break the sitemap.
+        }
+
+
         const urls = entries.map((e) =>
           [
             `  <url>`,

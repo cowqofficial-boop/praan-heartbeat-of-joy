@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, MoreHorizontal, Package, Plus, Search, Trash2, Pencil } from "lucide-react";
+import { CalendarDays, Eye, EyeOff, MoreHorizontal, Package, Plus, Search, Store, Trash2, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteMyProduct, listMyProducts, renameMyProduct, type LibraryItem } from "@/lib/library.functions";
+import { setListingVisibility } from "@/lib/shop.functions";
+
 import { CreditBadge } from "@/components/CreditBadge";
 import { LowBalanceBanner } from "@/components/LowBalanceBanner";
 import { ReconnectBanner } from "@/components/ReconnectBanner";
@@ -108,6 +110,14 @@ function LibraryPage() {
     qc.invalidateQueries({ queryKey: ["library"] });
   }
 
+  async function handleToggleShop(item: LibraryItem) {
+    await setListingVisibility({
+      data: { id: item.id, table: "generations", visible: !item.public_visible },
+    });
+    qc.invalidateQueries({ queryKey: ["library"] });
+  }
+
+
   return (
 
     <main className="flex min-h-screen flex-col px-6 pb-16 pt-8 lg:px-0 lg:pt-12">
@@ -189,7 +199,7 @@ function LibraryPage() {
         ) : (
           <ul className="grid grid-cols-2 gap-3 stagger sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
             {filtered.map((it) => (
-              <ProductCard key={it.id} item={it} onRename={handleRename} onDelete={handleDelete} />
+              <ProductCard key={it.id} item={it} onRename={handleRename} onDelete={handleDelete} onToggleShop={handleToggleShop} />
             ))}
           </ul>
         )}
@@ -212,10 +222,12 @@ function ProductCard({
   item,
   onRename,
   onDelete,
+  onToggleShop,
 }: {
   item: LibraryItem;
   onRename: (i: LibraryItem) => void;
   onDelete: (i: LibraryItem) => void;
+  onToggleShop: (i: LibraryItem) => void;
 }) {
   const thumb =
     item.generated_images.find((i) => i.kind === "white" && i.ratio === "1:1")?.url ??
@@ -252,11 +264,29 @@ function ProductCard({
           </p>
           <p className="mt-0.5 text-[11px] text-white/70">{date}</p>
         </div>
-        <div className="pointer-events-none absolute left-2 top-2">
+        <div className="pointer-events-none absolute left-2 top-2 flex flex-col items-start gap-1">
           <TypeBadge kind={item.kind ?? "product"} />
+          {item.public_visible && (
+            <span
+              className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
+              style={{ background: "color-mix(in oklab, var(--magenta) 18%, var(--raised))", color: "var(--magenta)" }}
+            >
+              <Store className="h-3 w-3" />
+              On shop
+            </span>
+          )}
         </div>
       </Link>
       <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+        <button
+          type="button"
+          onClick={() => onToggleShop(item)}
+          aria-label={item.public_visible ? "Hide from my public shop" : "Show on my public shop"}
+          title={item.public_visible ? "Hide from my public shop" : "Show on my public shop"}
+          className="grid h-8 w-8 place-items-center rounded-full bg-background/70 text-ink backdrop-blur-sm hover:brightness-110"
+        >
+          {item.public_visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+        </button>
         <button
           type="button"
           onClick={() => onRename(item)}
@@ -277,4 +307,5 @@ function ProductCard({
     </li>
   );
 }
+
 

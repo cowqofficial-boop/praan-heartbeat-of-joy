@@ -319,6 +319,7 @@ export type Database = {
           original_image_url: string | null
           price: number | null
           product_name: string | null
+          public_visible: boolean
           service_details: Json | null
           user_id: string | null
         }
@@ -338,6 +339,7 @@ export type Database = {
           original_image_url?: string | null
           price?: number | null
           product_name?: string | null
+          public_visible?: boolean
           service_details?: Json | null
           user_id?: string | null
         }
@@ -357,6 +359,7 @@ export type Database = {
           original_image_url?: string | null
           price?: number | null
           product_name?: string | null
+          public_visible?: boolean
           service_details?: Json | null
           user_id?: string | null
         }
@@ -778,6 +781,75 @@ export type Database = {
           },
         ]
       }
+      shop_settings: {
+        Row: {
+          bio: string
+          category: string
+          city: string
+          contact_method: string
+          contact_value: string
+          country: string
+          created_at: string
+          logo_url: string | null
+          published: boolean
+          region: string
+          shop_name: string
+          slug: string
+          social_facebook: string | null
+          social_instagram: string | null
+          social_linkedin: string | null
+          social_website: string | null
+          social_x: string | null
+          social_youtube: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bio?: string
+          category?: string
+          city?: string
+          contact_method?: string
+          contact_value?: string
+          country?: string
+          created_at?: string
+          logo_url?: string | null
+          published?: boolean
+          region?: string
+          shop_name?: string
+          slug: string
+          social_facebook?: string | null
+          social_instagram?: string | null
+          social_linkedin?: string | null
+          social_website?: string | null
+          social_x?: string | null
+          social_youtube?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bio?: string
+          category?: string
+          city?: string
+          contact_method?: string
+          contact_value?: string
+          country?: string
+          created_at?: string
+          logo_url?: string | null
+          published?: boolean
+          region?: string
+          shop_name?: string
+          slug?: string
+          social_facebook?: string | null
+          social_instagram?: string | null
+          social_linkedin?: string | null
+          social_website?: string | null
+          social_x?: string | null
+          social_youtube?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       social_connections: {
         Row: {
           access_token_ciphertext: string
@@ -837,6 +909,7 @@ export type Database = {
           name: string
           notes: string | null
           product_id: string | null
+          public_visible: boolean
           quantity: number
           reorder_level: number | null
           selling_price_paise: number
@@ -860,6 +933,7 @@ export type Database = {
           name: string
           notes?: string | null
           product_id?: string | null
+          public_visible?: boolean
           quantity?: number
           reorder_level?: number | null
           selling_price_paise?: number
@@ -883,6 +957,7 @@ export type Database = {
           name?: string
           notes?: string | null
           product_id?: string | null
+          public_visible?: boolean
           quantity?: number
           reorder_level?: number | null
           selling_price_paise?: number

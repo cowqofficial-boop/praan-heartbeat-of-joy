@@ -1,75 +1,45 @@
-## Goal
+## Public seller shops — Stage 1
 
-Sellers can create a **Service** anywhere they create a **Product** today. Both live in one library, one stock view, one calendar, one credit path.
+Every seller gets a shareable public storefront at `https://cowq.app/shop/<slug>`. Nothing is public until the seller turns it on: the shop starts unpublished and every listing starts hidden.
 
-## 1. Data model (one table, one type column)
+Analytics (views, clicks, charts) is deliberately left for Stage 2 — the tracking hooks will be designed in, but no dashboard this pass.
 
-Migration on `generations`:
-- `kind text not null default 'product'` (`'product' | 'service'`)
-- `service_details jsonb` — holds category, description, tiers, contact method
-- index on `(user_id, kind, created_at desc)`
+### What the seller gets
 
-Migration on `stock_items`:
-- `kind text not null default 'product'`
-- Quantity/low-stock/movement fields stay untouched and are hidden for services; service rows keep `quantity = 0` and never appear in low-stock or restock UI.
+**Shop settings** (new tab in Profile → "My shop")
+- Publish shop switch (off by default)
+- Slug — auto-suggested from the Brand kit business name (`sharma-handloom`), editable, checked for uniqueness and reserved words
+- Shop name, short bio, business category, city/region, country — prefilled from Brand kit / profile but stored separately so nothing private leaks
+- Logo/profile image (reuses the brand-kit logo if present)
+- Public contact: method (WhatsApp / phone / SMS / email) + the value the seller types here. Profile phone/email are never used.
+- Public social links: Instagram, Facebook, LinkedIn, X, YouTube, Website. Empty fields are hidden; URLs validated.
+- Copy shop link, Share (native share sheet), Preview shop. QR code left as a clearly marked later addition.
 
-Service details shape:
+**Per-listing visibility**
+- A "Show on my public shop" toggle on each generation and each stock item, default OFF, in the Library card menu, the results page, and the stock sheet.
+- A listing appears publicly only if the shop is published AND the listing toggle is on AND the listing isn't archived/deleted.
+- Bulk "show/hide" from the Library toolbar for convenience.
 
-```text
-{ category, description, contact: { method: 'phone'|'whatsapp'|'message', value },
-  tiers: [ { name, price, inclusions: [..] } ]   // 1–3, or a single flat price
-}
-```
+### The public page
 
-## 2. The toggle
+Server-rendered, no auth, single 480-ish column on mobile widening to a grid on desktop, in the existing CowQ dark design language.
 
-A shared `TypeToggle` segmented control (Product | Service), placed in:
-- `/create` upload screen — switches between the photo dropzone and the service form
-- `/library` — filter tabs; cards get a small badge + icon per type
-- `/stock` — filters the list; "Add" opens the matching form
-- `/calendar` — source picker when scheduling a post can pick either type
+- Header: logo, shop name, bio, category, city/country, count of public listings, sticky "Contact on WhatsApp" (label follows the chosen method)
+- Grid of public listings: image, title, price in ₹, short description, category, product/service badge, "Contact to buy". Services show their pricing/package card and booking CTA.
+- Social row with real icons, `rel="noopener noreferrer"`
+- Empty state: "This seller hasn't published any products yet." plus the Contact button
+- Accessibility: semantic landmarks, alt text on every image, visible focus rings, 44px targets, AA contrast
+- Performance: lazy-loaded responsive images, skeletons, no client-side data fetching for first paint, 1-hour edge cache
 
-Cards and detail views branch on `kind`: services show a single poster instead of the 4-angle carousel, and a pricing/tier card instead of a stock/photo grid.
+**SEO**: unique title `<Shop name> | CowQ`, unique description, canonical + og:url on `https://cowq.app/shop/<slug>`, og/twitter image from the shop logo or first listing photo, JSON-LD `Store` + `BreadcrumbList` + `Product`/`Service` entries, and every published shop added to `/sitemap.xml`. Unpublished or unknown slugs return a proper 404 with `noindex`.
 
-## 3. Service form (`/create` → Service tab)
+### Technical notes
 
-- Service name (required, red asterisk, same validation style as stock)
-- Category — free text input with a suggestion datalist (haircut, tailoring, repair, consulting, home visit, tuition, catering…), not a fixed enum
-- Optional photo — reuses the existing HEIC/resize/compress + direct-to-storage upload pipeline
-- Short description of what's included
-- Price: flat price, or "Add tiers" for 1–3 tiers, each with a name, price and 2–3 bullet inclusions
-- Contact/booking method: phone, WhatsApp, or "message to book" (+ number where relevant)
+- Migration: new `shop_settings` table (user_id PK, slug unique, published, name, bio, category, city, region, country, logo_url, contact_method, contact_value, six social columns, timestamps) with owner-only write policies and a narrow `TO anon` SELECT policy limited to published shops. `generations` and `stock_items` each gain `public_visible boolean not null default false`, with an anon SELECT policy that only exposes rows whose owner's shop is published and whose flag is true. GRANTs included.
+- Public reads go through a public server function using the publishable key (never the admin client), selecting an explicit safe column list — no credits, wallet, internal IDs, quantities, or owner UUIDs cross the boundary.
+- Route `src/routes/shop.$slug.tsx` with a loader calling that public function; `head()` builds all meta and JSON-LD from loader data. `notFoundComponent` + `errorComponent` included.
+- Shop URLs use the hardcoded `https://cowq.app` base you chose, via a single constant so it can be switched later. Note: those links will 404 until cowq.app is connected as a custom domain — the in-app Preview button uses the current domain so you can still test.
+- Structure is left open for Stage 2: analytics event table, collections, reviews, search/filters slot into the same page shell without rework.
 
-## 4. What gets generated
-
-Two paths through the existing Gemini server functions:
-
-- **With photo** → one edited promotional poster from the real photo. Prompt explicitly forbids inventing "after" results, fake customers, fake reviewers, or altering a real person's face.
-- **Without photo** → a typographic/iconographic poster. Prompt forbids photorealistic people or result imagery entirely.
-
-Plus, for both: listing description + concrete bullets (what's included, how long it takes, why this seller), social captions + hashtags, a pricing/tier card rendered from the form, and a booking CTA line built from the chosen contact method. Copy prompts inherit the existing shopkeeper rules and banned-phrase list, adapted to services.
-
-A **Make a video ad** button renders on the service results page but stays disabled behind `VIDEO_ENABLED` (currently off) — no fal.ai wiring.
-
-## 5. Credits
-
-Add to the existing `COSTS` table:
-- `service_photo: 45`
-- `service_no_photo: 90`
-
-Both go through the same `startGenerationJob` reservation → `spend_credits` RPC → `refund_credits` on failure path used by products. No second deduction path. Every service generate button shows its number before it spends, matching the product rule.
-
-## 6. Guardrails
-
-Carried over unchanged: consent gate whenever an uploaded photo shows a real person, no face-cloning, no fake customer reviews, no fabricated before/after, and the same sanitizer applied to the free-text category and description before they reach the model.
-
-## Out of scope this pass
-
-No working video generation, no booking or availability logic — the CTA is text only.
-
-## Technical notes
-
-- New `src/lib/service.functions.ts` for service-specific server fns; image/copy generation reuses `gemini.server.ts` helpers and the `generation_jobs` reservation flow in `cowq.functions.ts`.
-- `queue-store` gains a `kind` field so services run through the same background queue and status pill.
-- `library.functions.ts` selects and filters on `kind`; `results.$id.tsx` branches its layout on `kind`.
-- CSV export includes a type column so the catalog file stays valid for mixed libraries.
+### Not in this pass
+Analytics dashboard, QR codes, payments/checkout, reviews, custom domains per seller, store themes.

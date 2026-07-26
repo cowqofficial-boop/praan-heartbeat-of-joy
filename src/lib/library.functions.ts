@@ -8,6 +8,7 @@ export type LibraryItem = {
   original_image_url: string | null;
   generated_images: Array<{ kind: string; ratio: string; url: string }>;
   kind: "product" | "service";
+  public_visible: boolean;
 };
 
 export const listMyProducts = createServerFn({ method: "GET" })
@@ -15,15 +16,17 @@ export const listMyProducts = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("generations")
-      .select("id, product_name, created_at, original_image_url, generated_images, kind")
+      .select("id, product_name, created_at, original_image_url, generated_images, kind, public_visible")
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return (data ?? []).map((r) => ({
       ...r,
       kind: (r as { kind?: string }).kind === "service" ? "service" : "product",
+      public_visible: !!(r as { public_visible?: boolean }).public_visible,
     })) as LibraryItem[];
   });
+
 
 export const renameMyProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
