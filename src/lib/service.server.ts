@@ -179,11 +179,15 @@ export async function generateServiceCopy(opts: {
         ? `Customers book on WhatsApp at ${d.contact.value}.`
         : "Customers book by sending a message.";
 
+  const memoryVoice = (
+    await (await import("./brand-memory.server")).loadBrandMemoryContext(opts.userId)
+  ).voice;
+
   const sys = `You are a plain-speaking Indian shopkeeper writing a listing for a SERVICE you provide. You explain why THIS service is worth booking — with concrete facts, not filler.
 
 ${brandLines}
 ${toneLine}
-
+${memoryVoice ? "\n" + memoryVoice + "\n" : ""}
 Hard rules:
 - Open with the single most useful thing about the service. Never restate what the service obviously is.
 - Every bullet must contain a concrete fact: what's included, how long it takes, what's covered, what the customer gets. Never a vague bullet.
