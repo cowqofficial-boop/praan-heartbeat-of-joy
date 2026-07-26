@@ -157,7 +157,11 @@ function Results() {
 
           {/* Collapsed listing: one panel, hairline rows, single-open accordion */}
           {/* Collapsed listing: one panel, hairline rows, single-open accordion */}
-          <ListingPanel copy={copy} id={id} canEdit={!!user} />
+          {user ? (
+            <ComponentStack generationId={id} onChanged={() => refetch()} />
+          ) : (
+            <ListingPanel copy={copy} id={id} canEdit={false} />
+          )}
 
           {/* Videos — only for signed-in sellers, only when the flag is on */}
           <VideoSection generationId={id} productName={productName} hasAccount={!!user} />
