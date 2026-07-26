@@ -302,7 +302,16 @@ function StockPage() {
                             {profit > 0 && (<><span> · </span><span className="text-ink">+{formatInr(Math.round(profit / 100))}</span></>)}
                           </p>
                         </button>
+                        {!it.has_photos && (
+                          <Link
+                            to="/create"
+                            className="mt-1 inline-block text-[12px] font-semibold text-[color:var(--page-accent)]"
+                          >
+                            Generate photos — {COSTS.product} credits
+                          </Link>
+                        )}
                       </div>
+
                       <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${chip.cls}`}>{chip.label}</span>
                     </div>
                     <div className="mt-3 flex items-center justify-between">
