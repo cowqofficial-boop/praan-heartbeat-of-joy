@@ -34,18 +34,13 @@ export async function createInvoiceForPayment(
     const split = splitGst(Math.round(args.amountInr * 100), buyerState);
     const plan = getPlan(args.planId);
 
-    const { data: seqRow } = await sb.rpc("nextval" as never, { "": "" } as never).maybeSingle?.() ?? { data: null };
-    void seqRow;
-
-    // Sequence via a dedicated select (rpc on nextval isn't exposed) — fall back to count.
-    let seq: number;
+    // Sequential number. invoice_no is UNIQUE, so retry on the rare collision.
     const { count } = await sb.from("invoices").select("id", { count: "exact", head: true });
-    seq = (count ?? 0) + 1;
+    const base = (count ?? 0) + 1;
 
-    await sb.from("invoices").insert({
+    const row = {
       user_id: args.userId,
       payment_id: args.paymentId,
-      invoice_no: formatInvoiceNo(seq),
       plan_id: plan.id,
       plan_name: plan.kind === "pack" ? `${plan.name} top-up` : `${plan.name} plan`,
       buyer_name: profile?.invoice_business_name || profile?.display_name || null,
@@ -58,7 +53,14 @@ export async function createInvoiceForPayment(
       sgst_paise: split.sgst_paise,
       igst_paise: split.igst_paise,
       is_gst_invoice: !!gstin,
-    });
+    };
+
+    for (let i = 0; i < 5; i += 1) {
+      const { error } = await sb.from("invoices").insert({ ...row, invoice_no: formatInvoiceNo(base + i) });
+      if (!error) return;
+      if (!/duplicate|unique/i.test(error.message)) throw new Error(error.message);
+    }
+
   } catch (e) {
     console.error("[invoice] create failed", e);
   }
