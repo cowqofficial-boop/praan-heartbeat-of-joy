@@ -96,8 +96,8 @@ function LibraryPage() {
   return (
 
     <main className="flex min-h-screen flex-col px-6 pb-16 pt-8 lg:px-0 lg:pt-12">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+        <div className="min-w-0">
           <PageHeader
             icon={Package}
             title="Your products"
@@ -113,7 +113,7 @@ function LibraryPage() {
             action={{ label: "Add a product", to: "/create", icon: Plus }}
           />
         </div>
-        <div className="flex items-center gap-2 lg:hidden">
+        <div className="flex shrink-0 items-center gap-2 lg:hidden">
           <CreditBadge />
           <button
             type="button"
