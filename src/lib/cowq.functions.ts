@@ -809,9 +809,8 @@ export const generateCopyAndSave = createServerFn({ method: "POST" })
       ? `Brand: ${brand.business_name || "unnamed"}. Sells: ${brand.sells_what || "n/a"}. Target buyer: ${brand.sells_to || "general Indian shoppers"}.`
       : `Brand: independent Indian seller. Target buyer: general Indian shoppers.`;
 
-    const memoryVoice = (await import("./brand-memory.server")).loadBrandMemoryContext
-      ? (await (await import("./brand-memory.server")).loadBrandMemoryContext(userId)).voice
-      : "";
+    const { loadBrandMemoryContext } = await import("./brand-memory.server");
+    const memoryVoice = (await loadBrandMemoryContext(userId)).voice;
 
     const sys = `You are a plain-speaking Indian shopkeeper who writes product listings. You explain why THIS specific product is worth buying — with concrete facts, not filler.
 
