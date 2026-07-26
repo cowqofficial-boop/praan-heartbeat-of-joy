@@ -75,16 +75,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "theme-color", content: "#08090A" },
-      { title: "CowQ — Complete Operations With Quality" },
+      { title: "CowQ — AI product photos and listings for small sellers" },
       {
         name: "description",
         content:
-          "CowQ — Complete Operations With Quality. Upload one product photo. Get studio photos, sales copy, and a catalog file — ready to sell on Amazon, Flipkart, Meesho, Instagram, and WhatsApp.",
+          "CowQ — AI product photos and listings for small sellers. Upload one photo and get studio-quality images, a written marketplace listing, social captions, and a ready-to-upload catalog file.",
       },
-      { property: "og:title", content: "CowQ — Complete Operations With Quality" },
+      { property: "og:title", content: "CowQ — AI product photos and listings for small sellers" },
       {
         property: "og:description",
-        content: "Complete Operations With Quality. Studio photos, listing, and catalog file from one product photo.",
+        content:
+          "Upload one photo and get studio-quality images, a written marketplace listing, social captions, and a ready-to-upload catalog file.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
