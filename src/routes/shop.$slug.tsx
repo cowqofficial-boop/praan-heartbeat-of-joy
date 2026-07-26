@@ -104,7 +104,11 @@ function ShopNotFound() {
 }
 
 function ShopPage() {
-  const { shop, listings } = Route.useLoaderData();
+  const { shop, listings } = Route.useLoaderData() as {
+    shop: PublicShop;
+    listings: PublicListing[];
+  };
+
   const place = [shop.city, shop.region, shop.country].filter(Boolean).join(", ");
   const href = contactHref(shop.contact_method, shop.contact_value, { shopName: shop.shop_name });
   const cta = contactCta(shop.contact_method);

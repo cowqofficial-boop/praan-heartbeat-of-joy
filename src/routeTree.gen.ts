@@ -24,6 +24,7 @@ import { Route as BillingRouteImport } from './routes/billing'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
 import { Route as ResultsIdRouteImport } from './routes/results.$id'
 import { Route as InvoiceIdRouteImport } from './routes/invoice.$id'
 import { Route as ConnectInstagramRouteImport } from './routes/connect.instagram'
@@ -35,6 +36,7 @@ import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicMetaOauthCallbackRouteImport } from './routes/api/public/meta-oauth-callback'
 import { Route as AuthenticatedProfileTeamRouteImport } from './routes/_authenticated/profile/team'
 import { Route as AuthenticatedProfileSubscriptionRouteImport } from './routes/_authenticated/profile/subscription'
+import { Route as AuthenticatedProfileShopRouteImport } from './routes/_authenticated/profile/shop'
 import { Route as AuthenticatedProfileSecurityRouteImport } from './routes/_authenticated/profile/security'
 import { Route as AuthenticatedProfilePrivacyRouteImport } from './routes/_authenticated/profile/privacy'
 import { Route as AuthenticatedProfileNotificationsRouteImport } from './routes/_authenticated/profile/notifications'
@@ -117,6 +119,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShopSlugRoute = ShopSlugRouteImport.update({
+  id: '/shop/$slug',
+  path: '/shop/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResultsIdRoute = ResultsIdRouteImport.update({
   id: '/results/$id',
   path: '/results/$id',
@@ -176,6 +183,12 @@ const AuthenticatedProfileSubscriptionRoute =
   AuthenticatedProfileSubscriptionRouteImport.update({
     id: '/subscription',
     path: '/subscription',
+    getParentRoute: () => AuthenticatedProfileRouteRoute,
+  } as any)
+const AuthenticatedProfileShopRoute =
+  AuthenticatedProfileShopRouteImport.update({
+    id: '/shop',
+    path: '/shop',
     getParentRoute: () => AuthenticatedProfileRouteRoute,
   } as any)
 const AuthenticatedProfileSecurityRoute =
@@ -240,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/connect/instagram': typeof ConnectInstagramRoute
   '/invoice/$id': typeof InvoiceIdRoute
   '/results/$id': typeof ResultsIdRoute
+  '/shop/$slug': typeof ShopSlugRoute
   '/admin/costs': typeof AuthenticatedAdminCostsRoute
   '/profile/account': typeof AuthenticatedProfileAccountRoute
   '/profile/ai': typeof AuthenticatedProfileAiRoute
@@ -247,6 +261,7 @@ export interface FileRoutesByFullPath {
   '/profile/notifications': typeof AuthenticatedProfileNotificationsRoute
   '/profile/privacy': typeof AuthenticatedProfilePrivacyRoute
   '/profile/security': typeof AuthenticatedProfileSecurityRoute
+  '/profile/shop': typeof AuthenticatedProfileShopRoute
   '/profile/subscription': typeof AuthenticatedProfileSubscriptionRoute
   '/profile/team': typeof AuthenticatedProfileTeamRoute
   '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
@@ -273,6 +288,7 @@ export interface FileRoutesByTo {
   '/connect/instagram': typeof ConnectInstagramRoute
   '/invoice/$id': typeof InvoiceIdRoute
   '/results/$id': typeof ResultsIdRoute
+  '/shop/$slug': typeof ShopSlugRoute
   '/admin/costs': typeof AuthenticatedAdminCostsRoute
   '/profile/account': typeof AuthenticatedProfileAccountRoute
   '/profile/ai': typeof AuthenticatedProfileAiRoute
@@ -280,6 +296,7 @@ export interface FileRoutesByTo {
   '/profile/notifications': typeof AuthenticatedProfileNotificationsRoute
   '/profile/privacy': typeof AuthenticatedProfilePrivacyRoute
   '/profile/security': typeof AuthenticatedProfileSecurityRoute
+  '/profile/shop': typeof AuthenticatedProfileShopRoute
   '/profile/subscription': typeof AuthenticatedProfileSubscriptionRoute
   '/profile/team': typeof AuthenticatedProfileTeamRoute
   '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
@@ -309,6 +326,7 @@ export interface FileRoutesById {
   '/connect/instagram': typeof ConnectInstagramRoute
   '/invoice/$id': typeof InvoiceIdRoute
   '/results/$id': typeof ResultsIdRoute
+  '/shop/$slug': typeof ShopSlugRoute
   '/_authenticated/admin/costs': typeof AuthenticatedAdminCostsRoute
   '/_authenticated/profile/account': typeof AuthenticatedProfileAccountRoute
   '/_authenticated/profile/ai': typeof AuthenticatedProfileAiRoute
@@ -316,6 +334,7 @@ export interface FileRoutesById {
   '/_authenticated/profile/notifications': typeof AuthenticatedProfileNotificationsRoute
   '/_authenticated/profile/privacy': typeof AuthenticatedProfilePrivacyRoute
   '/_authenticated/profile/security': typeof AuthenticatedProfileSecurityRoute
+  '/_authenticated/profile/shop': typeof AuthenticatedProfileShopRoute
   '/_authenticated/profile/subscription': typeof AuthenticatedProfileSubscriptionRoute
   '/_authenticated/profile/team': typeof AuthenticatedProfileTeamRoute
   '/api/public/meta-oauth-callback': typeof ApiPublicMetaOauthCallbackRoute
@@ -345,6 +364,7 @@ export interface FileRouteTypes {
     | '/connect/instagram'
     | '/invoice/$id'
     | '/results/$id'
+    | '/shop/$slug'
     | '/admin/costs'
     | '/profile/account'
     | '/profile/ai'
@@ -352,6 +372,7 @@ export interface FileRouteTypes {
     | '/profile/notifications'
     | '/profile/privacy'
     | '/profile/security'
+    | '/profile/shop'
     | '/profile/subscription'
     | '/profile/team'
     | '/api/public/meta-oauth-callback'
@@ -378,6 +399,7 @@ export interface FileRouteTypes {
     | '/connect/instagram'
     | '/invoice/$id'
     | '/results/$id'
+    | '/shop/$slug'
     | '/admin/costs'
     | '/profile/account'
     | '/profile/ai'
@@ -385,6 +407,7 @@ export interface FileRouteTypes {
     | '/profile/notifications'
     | '/profile/privacy'
     | '/profile/security'
+    | '/profile/shop'
     | '/profile/subscription'
     | '/profile/team'
     | '/api/public/meta-oauth-callback'
@@ -413,6 +436,7 @@ export interface FileRouteTypes {
     | '/connect/instagram'
     | '/invoice/$id'
     | '/results/$id'
+    | '/shop/$slug'
     | '/_authenticated/admin/costs'
     | '/_authenticated/profile/account'
     | '/_authenticated/profile/ai'
@@ -420,6 +444,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile/notifications'
     | '/_authenticated/profile/privacy'
     | '/_authenticated/profile/security'
+    | '/_authenticated/profile/shop'
     | '/_authenticated/profile/subscription'
     | '/_authenticated/profile/team'
     | '/api/public/meta-oauth-callback'
@@ -446,6 +471,7 @@ export interface RootRouteChildren {
   BlogFlatLayGuideRoute: typeof BlogFlatLayGuideRoute
   InvoiceIdRoute: typeof InvoiceIdRoute
   ResultsIdRoute: typeof ResultsIdRoute
+  ShopSlugRoute: typeof ShopSlugRoute
   ApiPublicMetaOauthCallbackRoute: typeof ApiPublicMetaOauthCallbackRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
 }
@@ -557,6 +583,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shop/$slug': {
+      id: '/shop/$slug'
+      path: '/shop/$slug'
+      fullPath: '/shop/$slug'
+      preLoaderRoute: typeof ShopSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/results/$id': {
       id: '/results/$id'
       path: '/results/$id'
@@ -634,6 +667,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileSubscriptionRouteImport
       parentRoute: typeof AuthenticatedProfileRouteRoute
     }
+    '/_authenticated/profile/shop': {
+      id: '/_authenticated/profile/shop'
+      path: '/shop'
+      fullPath: '/profile/shop'
+      preLoaderRoute: typeof AuthenticatedProfileShopRouteImport
+      parentRoute: typeof AuthenticatedProfileRouteRoute
+    }
     '/_authenticated/profile/security': {
       id: '/_authenticated/profile/security'
       path: '/security'
@@ -693,6 +733,7 @@ interface AuthenticatedProfileRouteRouteChildren {
   AuthenticatedProfileNotificationsRoute: typeof AuthenticatedProfileNotificationsRoute
   AuthenticatedProfilePrivacyRoute: typeof AuthenticatedProfilePrivacyRoute
   AuthenticatedProfileSecurityRoute: typeof AuthenticatedProfileSecurityRoute
+  AuthenticatedProfileShopRoute: typeof AuthenticatedProfileShopRoute
   AuthenticatedProfileSubscriptionRoute: typeof AuthenticatedProfileSubscriptionRoute
   AuthenticatedProfileTeamRoute: typeof AuthenticatedProfileTeamRoute
   AuthenticatedProfileIndexRoute: typeof AuthenticatedProfileIndexRoute
@@ -707,6 +748,7 @@ const AuthenticatedProfileRouteRouteChildren: AuthenticatedProfileRouteRouteChil
       AuthenticatedProfileNotificationsRoute,
     AuthenticatedProfilePrivacyRoute: AuthenticatedProfilePrivacyRoute,
     AuthenticatedProfileSecurityRoute: AuthenticatedProfileSecurityRoute,
+    AuthenticatedProfileShopRoute: AuthenticatedProfileShopRoute,
     AuthenticatedProfileSubscriptionRoute:
       AuthenticatedProfileSubscriptionRoute,
     AuthenticatedProfileTeamRoute: AuthenticatedProfileTeamRoute,
@@ -771,6 +813,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogFlatLayGuideRoute: BlogFlatLayGuideRoute,
   InvoiceIdRoute: InvoiceIdRoute,
   ResultsIdRoute: ResultsIdRoute,
+  ShopSlugRoute: ShopSlugRoute,
   ApiPublicMetaOauthCallbackRoute: ApiPublicMetaOauthCallbackRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
 }
