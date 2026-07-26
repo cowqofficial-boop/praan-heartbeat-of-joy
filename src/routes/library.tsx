@@ -12,6 +12,8 @@ import { EmptyState, IllustrationShelf } from "@/components/EmptyState";
 import { NudgeCard } from "@/components/NudgeCard";
 import { MobileNavSheet } from "@/components/MobileNavSheet";
 import { showConfirm, showPrompt } from "@/components/Dialogs";
+import { TypeFilter, TypeBadge } from "@/components/TypeToggle";
+import type { ContentKind } from "@/lib/service";
 
 
 
@@ -35,6 +37,7 @@ function LibraryPage() {
   const [authReady, setAuthReady] = useState(false);
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<"all" | ContentKind>("all");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -52,11 +55,23 @@ function LibraryPage() {
     enabled: authReady,
   });
 
+  const counts = useMemo(
+    () => ({
+      all: items.length,
+      product: items.filter((it) => it.kind !== "service").length,
+      service: items.filter((it) => it.kind === "service").length,
+    }),
+    [items],
+  );
+
   const filtered = useMemo(() => {
-    if (!query.trim()) return items;
-    const q = query.toLowerCase();
-    return items.filter((it) => (it.product_name ?? "").toLowerCase().includes(q));
-  }, [items, query]);
+    const q = query.trim().toLowerCase();
+    return items.filter((it) => {
+      if (typeFilter !== "all" && (it.kind ?? "product") !== typeFilter) return false;
+      if (!q) return true;
+      return (it.product_name ?? "").toLowerCase().includes(q);
+    });
+  }, [items, query, typeFilter]);
 
   if (!authReady) {
     return (
@@ -100,8 +115,8 @@ function LibraryPage() {
         <div className="min-w-0">
           <PageHeader
             icon={Package}
-            title="Your products"
-            subtitle="Everything you've made with CowQ lives here. Open any product to download its photos and copy again."
+            title="Your products & services"
+            subtitle="Everything you've made with CowQ lives here — products and services. Open any one to download its photos and copy again."
             help={
               <>
                 <p className="font-semibold text-ink">Your library</p>
@@ -110,7 +125,7 @@ function LibraryPage() {
                 </p>
               </>
             }
-            action={{ label: "Add a product", to: "/create", icon: Plus }}
+            action={{ label: "Add new", to: "/create", icon: Plus }}
           />
         </div>
         <div className="flex shrink-0 items-center gap-2 lg:hidden">
@@ -133,7 +148,13 @@ function LibraryPage() {
       <LowBalanceBanner />
 
       {items.length > 0 && (
-        <label className="mt-6 flex h-11 items-center gap-2 rounded-[12px] bg-raised px-3">
+        <div className="mt-6">
+          <TypeFilter value={typeFilter} onChange={setTypeFilter} counts={counts} />
+        </div>
+      )}
+
+      {items.length > 0 && (
+        <label className="mt-4 flex h-11 items-center gap-2 rounded-[12px] bg-raised px-3">
           <Search className="h-4 w-4 text-muted" />
           <input
             aria-label="Search products"
@@ -162,7 +183,9 @@ function LibraryPage() {
             }
           />
         ) : filtered.length === 0 ? (
-          <p className="text-[15px] text-muted">Nothing matches "{query}".</p>
+          <p className="text-[15px] text-muted">
+            {query.trim() ? `Nothing matches "${query}".` : "Nothing here yet in this tab."}
+          </p>
         ) : (
           <ul className="grid grid-cols-2 gap-3 stagger sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
             {filtered.map((it) => (
@@ -228,6 +251,9 @@ function ProductCard({
             {item.product_name ?? "Untitled"}
           </p>
           <p className="mt-0.5 text-[11px] text-white/70">{date}</p>
+        </div>
+        <div className="pointer-events-none absolute left-2 top-2">
+          <TypeBadge kind={item.kind ?? "product"} />
         </div>
       </Link>
       <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
