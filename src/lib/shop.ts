@@ -67,9 +67,11 @@ export function contactHref(
   const raw = (value || "").trim();
   if (!raw) return null;
   const digits = raw.replace(/[^\d+]/g, "").replace(/^\+?/, "");
+  const shopName = context?.shopName ? ` ${context.shopName}` : "";
   const subject = context?.itemName
-    ? `Hi${context.shopName ? ` ${context.shopName}` : ""}, I'm interested in "${context.itemName}".`
-    : `Hi${context.shopName ? ` ${context.shopName}` : ""}, I found your shop on CowQ.`;
+    ? `Hi${shopName}, I'm interested in "${context.itemName}".`
+    : `Hi${shopName}, I found your shop on CowQ.`;
+
 
   switch (method) {
     case "whatsapp":
