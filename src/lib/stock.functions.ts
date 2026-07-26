@@ -13,7 +13,17 @@ export type StockItem = {
   low_stock_alert: number;
   cost_price_paise: number;
   selling_price_paise: number;
+  category: string | null;
+  brand: string | null;
+  variant: string | null;
+  weight: string | null;
+  hsn_code: string | null;
+  barcode: string | null;
+  supplier: string | null;
+  reorder_level: number | null;
+  notes: string | null;
   thumb_url: string | null;
+  has_photos: boolean;
   status: StockStatus;
   updated_at: string;
 };
@@ -52,13 +62,19 @@ function thumbFrom(row: GenRow | undefined | null): string | null {
   );
 }
 
+function hasPhotos(row: GenRow | undefined | null): boolean {
+  if (!row) return false;
+  const imgs = (row.generated_images ?? []) as Array<{ url?: string }>;
+  return imgs.some((i) => !!i.url);
+}
+
 export const listStock = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<StockItem[]> => {
     const sb = context.supabase;
     const { data, error } = await sb
       .from("stock_items")
-      .select("id, product_id, name, sku, quantity, low_stock_alert, cost_price_paise, selling_price_paise, updated_at")
+      .select("id, product_id, name, sku, quantity, low_stock_alert, cost_price_paise, selling_price_paise, category, brand, variant, weight, hsn_code, barcode, supplier, reorder_level, notes, updated_at")
       .eq("user_id", context.userId)
       .order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -82,7 +98,17 @@ export const listStock = createServerFn({ method: "GET" })
       low_stock_alert: r.low_stock_alert,
       cost_price_paise: r.cost_price_paise,
       selling_price_paise: r.selling_price_paise,
+      category: r.category,
+      brand: r.brand,
+      variant: r.variant,
+      weight: r.weight,
+      hsn_code: r.hsn_code,
+      barcode: r.barcode,
+      supplier: r.supplier,
+      reorder_level: r.reorder_level,
+      notes: r.notes,
       thumb_url: thumbFrom(r.product_id ? genById.get(r.product_id) : null),
+      has_photos: hasPhotos(r.product_id ? genById.get(r.product_id) : null),
       status: statusOf(r.quantity, r.low_stock_alert),
       updated_at: r.updated_at,
     }));
@@ -97,6 +123,15 @@ const UpsertSchema = z.object({
   low_stock_alert: z.number().int().min(0).max(1_000_000),
   cost_price_paise: z.number().int().min(0).max(100_000_000),
   selling_price_paise: z.number().int().min(0).max(100_000_000),
+  category: z.string().max(80).nullable().optional(),
+  brand: z.string().max(80).nullable().optional(),
+  variant: z.string().max(80).nullable().optional(),
+  weight: z.string().max(40).nullable().optional(),
+  hsn_code: z.string().max(20).nullable().optional(),
+  barcode: z.string().max(60).nullable().optional(),
+  supplier: z.string().max(120).nullable().optional(),
+  reorder_level: z.number().int().min(0).max(1_000_000).nullable().optional(),
+  notes: z.string().max(2000).nullable().optional(),
 });
 
 export const upsertStockItem = createServerFn({ method: "POST" })
@@ -115,6 +150,15 @@ export const upsertStockItem = createServerFn({ method: "POST" })
           cost_price_paise: data.cost_price_paise,
           selling_price_paise: data.selling_price_paise,
           product_id: data.product_id ?? null,
+          category: data.category ?? null,
+          brand: data.brand ?? null,
+          variant: data.variant ?? null,
+          weight: data.weight ?? null,
+          hsn_code: data.hsn_code ?? null,
+          barcode: data.barcode ?? null,
+          supplier: data.supplier ?? null,
+          reorder_level: data.reorder_level ?? null,
+          notes: data.notes ?? null,
         })
         .eq("id", data.id)
         .eq("user_id", context.userId);
@@ -132,6 +176,15 @@ export const upsertStockItem = createServerFn({ method: "POST" })
         cost_price_paise: data.cost_price_paise,
         selling_price_paise: data.selling_price_paise,
         product_id: data.product_id ?? null,
+        category: data.category ?? null,
+        brand: data.brand ?? null,
+        variant: data.variant ?? null,
+        weight: data.weight ?? null,
+        hsn_code: data.hsn_code ?? null,
+        barcode: data.barcode ?? null,
+        supplier: data.supplier ?? null,
+        reorder_level: data.reorder_level ?? null,
+        notes: data.notes ?? null,
       })
       .select("id")
       .single();
