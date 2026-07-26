@@ -397,7 +397,8 @@ function StockPage() {
                 <thead>
                   <tr className="text-[11px] uppercase tracking-wider text-muted">
                     <th className="px-4 py-3 font-semibold">Photo</th>
-                    <th className="px-2 py-3 font-semibold">Product</th>
+                    <th className="px-2 py-3 font-semibold">Item</th>
+                    <th className="px-2 py-3 font-semibold">Type</th>
                     <th className="px-2 py-3 font-semibold">SKU</th>
                     <th className="px-2 py-3 text-right font-semibold">Qty</th>
                     <th className="px-2 py-3 font-semibold">Status</th>
@@ -424,19 +425,23 @@ function StockPage() {
                           <button type="button" onClick={() => setEditing(it)} className="text-left font-medium text-ink hover:text-primary">{it.name}</button>
                           {!it.has_photos && (
                             <Link to="/create" className="mt-0.5 block text-[12px] font-semibold text-[color:var(--page-accent)]">
-                              Generate photos — {COSTS.product} credits
+                              {it.kind === "service"
+                                ? `Make a service poster — ${serviceCost(false)} credits`
+                                : `Generate photos — ${COSTS.product} credits`}
                             </Link>
                           )}
                         </td>
+                        <td className="px-2 py-3"><TypeBadge kind={it.kind ?? "product"} /></td>
 
                         <td className="px-2 py-3 font-mono text-[13px] tabular-nums text-muted">{it.sku ?? "—"}</td>
-                        <td className="px-2 py-3 text-right font-mono text-[15px] font-semibold tabular-nums">{it.quantity}</td>
-                        <td className="px-2 py-3"><span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${chip.cls}`}>{chip.label}</span></td>
+                        <td className="px-2 py-3 text-right font-mono text-[15px] font-semibold tabular-nums">{it.kind === "service" ? "—" : it.quantity}</td>
+                        <td className="px-2 py-3">{it.kind === "service" ? <span className="text-[12px] text-muted">—</span> : <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${chip.cls}`}>{chip.label}</span>}</td>
                         <td className="px-2 py-3 text-right font-mono tabular-nums text-muted">{formatInr(Math.round(it.cost_price_paise / 100))}</td>
                         <td className="px-2 py-3 text-right font-mono tabular-nums">{formatInr(Math.round(it.selling_price_paise / 100))}</td>
                         <td className="px-2 py-3 text-right font-mono tabular-nums text-green">{profit > 0 ? `+${formatInr(Math.round(profit / 100))}` : "—"}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1">
+                            {it.kind !== "service" && (<>
                             <button type="button" aria-label="Decrease" disabled={it.quantity === 0 || changeQty.isPending}
                               onClick={() => changeQty.mutate({ data: { stock_item_id: it.id, delta: -1, reason: "adjustment" } })}
                               className="grid h-8 w-8 place-items-center rounded-full text-muted hover:bg-raised hover:text-ink disabled:opacity-40">
@@ -457,6 +462,7 @@ function StockPage() {
                               className={`ml-1 h-8 rounded-full bg-primary px-3 text-[12px] font-semibold text-primary-foreground disabled:opacity-40 ${pulseId === it.id ? "pulse-once" : ""}`}>
                               Sold 1
                             </button>
+                            </>)}
                             <button type="button" aria-label="Delete item"
                               onClick={async () => { if (await showConfirm({ title: `Delete "${it.name}" from stock?`, body: "This can't be undone.", destructive: true, confirmLabel: "Delete" })) del.mutate({ data: { id: it.id } }); }}
                               className="grid h-8 w-8 place-items-center rounded-full text-muted hover:text-primary">
