@@ -195,19 +195,22 @@ export function UploadWidget({ compact = false }: { compact?: boolean }) {
         <button
           type="button"
           onClick={() => mainInputRef.current?.click()}
-          className={`flex w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[16px] bg-surface text-ink ${
+          className={`relative flex w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[16px] bg-surface text-ink ${
             compact ? "aspect-[4/3]" : "aspect-square lg:aspect-[3/2]"
           }`}
           style={{ boxShadow: "var(--shadow-card)" }}
         >
-          <span className="grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground lg:h-20 lg:w-20">
+          {/* Studio results fading behind the tap target — shows what comes out. */}
+          <SampleCarousel />
+          <span className="relative grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground lg:h-20 lg:w-20">
             <Camera className="h-7 w-7 lg:h-8 lg:w-8" />
           </span>
-          <span className="text-[17px] font-semibold lg:text-[19px]">Add a product photo</span>
-          <span className="text-[13px] text-muted lg:text-[14px]">
+          <span className="relative text-[17px] font-semibold lg:text-[19px]">Add a product photo</span>
+          <span className="relative text-[13px] text-muted lg:text-[14px]">
             Tap to open camera or pick from your phone
           </span>
         </button>
+
       ) : (
         <>
           <div className="overflow-hidden rounded-[16px] bg-surface">
