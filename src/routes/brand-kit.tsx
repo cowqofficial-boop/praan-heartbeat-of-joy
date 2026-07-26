@@ -477,7 +477,7 @@ function BrandKitPage() {
  <HelpButton content={<p className="text-muted">Use the same person across every photo so your shop looks like one brand — CowQ can generate a consistent AI model, or you can upload real photos.</p>} />
  </div>
  <p className="mt-1 text-[13px] text-muted">
- Use the same person in every photo, so your shop looks like one brand.
+ Use the same person in every photo, so your shop looks like one brand. Turning this on creates your model — {COSTS.brand_model} credits.
  </p>
  </div>
  <label className="relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center">
