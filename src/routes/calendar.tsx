@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, CalendarDays, Check, Copy, Download, Loader2, RefreshCw, Sparkles, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, Check, Clock, Copy, Download, HelpCircle, Loader2, RefreshCw, Share2, Sparkles, TrendingUp, X, type LucideIcon } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { EmptyState as UiEmptyState, IllustrationCalendar } from "@/components/EmptyState";
 
@@ -604,5 +604,51 @@ function PostSheet({
         </div>
       </div>
     </div>
+  );
+}
+
+/** Scannable five-line explainer: what, how, where, when, why. */
+const EXPLAINER: { q: string; a: string; tone: string; icon: LucideIcon }[] = [
+  { q: "What is this?", a: "A month of ready-to-post content — one post for each day, written and designed from the products already in your library.", tone: "card-cobalt", icon: CalendarDays },
+  { q: "How is it made?", a: "CowQ picks a product per day and rotates ten kinds of post: close-up, offer, festival, question, story, before/after and more. Nothing repeats twice in a week.", tone: "card-magenta", icon: Sparkles },
+  { q: "Where do I post it?", a: "Instagram, Facebook, WhatsApp status — anywhere. Open a day, tap Post this, and your phone hands it to the app you choose.", tone: "card-amber", icon: Share2 },
+  { q: "When should I post?", a: "Each day carries a suggested time. Evenings between 7 and 9 work best for most Indian sellers. You can post early or skip a day — nothing breaks.", tone: "card-cobalt", icon: Clock },
+  { q: "Why bother?", a: "Shops that post most days get found more often. This removes the hardest part — deciding what to say today.", tone: "card-magenta", icon: TrendingUp },
+];
+
+function CalendarExplainer() {
+  const [open, setOpen] = useState(false);
+  return (
+    <section className="mt-4">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between rounded-[12px] px-4 py-3 text-left"
+        style={{ border: "1px solid var(--line)" }}
+      >
+        <span className="flex items-center gap-2 text-[15px] font-semibold text-ink">
+          <HelpCircle className="h-4 w-4" /> What is the posting month?
+        </span>
+        <span className="text-[13px] text-muted">{open ? "Hide" : "Read in 30 seconds"}</span>
+      </button>
+      {open && (
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          {EXPLAINER.map((row, i) => (
+            <div
+              key={row.q}
+              className={`${row.tone} p-4 ${i === EXPLAINER.length - 1 ? "sm:col-span-2" : ""}`}
+              style={{ animation: `rise 400ms ${i * 50}ms both` }}
+            >
+              <p className="flex items-center gap-2 text-[14px] font-semibold text-ink">
+                <row.icon className="h-5 w-5" style={{ color: "var(--card-accent)" }} strokeWidth={1.75} />
+                {row.q}
+              </p>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{row.a}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
