@@ -1,13 +1,22 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Download, ExternalLink, Wallet } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Download, ExternalLink, HardDrive, Plus, ReceiptText, Wallet } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { showAlert, showConfirm } from "@/components/Dialogs";
 
 import { supabase } from "@/integrations/supabase/client";
-import { cancelMySubscription, getMyCredits, getMyPayments } from "@/lib/billing.functions";
-import { formatInr, getPlan } from "@/lib/plans";
+import {
+  cancelMySubscription,
+  getMyCredits,
+  getMyGstDetails,
+  getMyInvoices,
+  getMyPayments,
+  saveMyGstDetails,
+} from "@/lib/billing.functions";
+import { creditPacks, formatInr, getPlan, planRetention, PLANS, type Plan } from "@/lib/plans";
+import { looksLikeGstin, rupees } from "@/lib/invoice";
+import { useRazorpayCheckout } from "@/lib/use-razorpay-checkout";
 
 export const Route = createFileRoute("/billing")({
   head: () => ({
@@ -18,6 +27,14 @@ export const Route = createFileRoute("/billing")({
   }),
   component: BillingPage,
 });
+
+const RANK: Record<string, number> = { Free: 0, Starter: 1, Growth: 2, Pro: 3 };
+
+const PLAN_DIFF: Record<string, string> = {
+  Starter: "800 credits a month, no watermark.",
+  Growth: "2,400 credits, content calendar and auto-posting.",
+  Pro: "5,500 credits, priority runs, bulk upload and 10 saved models.",
+};
 
 function BillingPage() {
   const navigate = useNavigate();
@@ -34,16 +51,11 @@ function BillingPage() {
     });
   }, [navigate]);
 
-  const { data: credits } = useQuery({
-    queryKey: ["my-credits"],
-    queryFn: () => getMyCredits(),
-    enabled: ready,
-  });
-  const { data: payments = [] } = useQuery({
-    queryKey: ["my-payments"],
-    queryFn: () => getMyPayments(),
-    enabled: ready,
-  });
+  const { data: credits } = useQuery({ queryKey: ["my-credits"], queryFn: () => getMyCredits(), enabled: ready });
+  const { data: payments = [] } = useQuery({ queryKey: ["my-payments"], queryFn: () => getMyPayments(), enabled: ready });
+  const { data: invoices = [] } = useQuery({ queryKey: ["my-invoices"], queryFn: () => getMyInvoices(), enabled: ready });
+
+  const { buy, buying, error: buyError } = useRazorpayCheckout({ signedIn: ready, next: "/billing" });
 
   const cancel = useMutation({
     mutationFn: () => cancelMySubscription(),
@@ -53,6 +65,11 @@ function BillingPage() {
     },
     onError: (e) => showAlert({ title: "Couldn't cancel subscription", body: e instanceof Error ? e.message : String(e) }),
   });
+
+  const upgrades = useMemo<Plan[]>(() => {
+    const current = RANK[getPlan(credits?.plan_id ?? "free").name] ?? 0;
+    return PLANS.filter((p) => p.kind === "subscription" && p.interval === "month" && (RANK[p.name] ?? 0) > current);
+  }, [credits?.plan_id]);
 
   if (!ready || !credits) {
     return (
@@ -65,6 +82,8 @@ function BillingPage() {
   const usedThisMonth = payments
     .filter((p) => p.status === "paid" && new Date(p.created_at).getMonth() === new Date().getMonth())
     .reduce((sum, p) => sum + p.credits_granted, 0);
+
+  const retention = planRetention(credits.plan_id);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[720px] flex-col px-5 pb-16 pt-8">
@@ -81,10 +100,6 @@ function BillingPage() {
             <p className="mt-1 text-muted">Credits are spent when CowQ makes something. A full product costs 90. Monthly credits reset on your billing date; credits you buy separately never expire.</p>
           </>
         }
-        action={{
-          label: credits.plan_id === "free" ? "Upgrade" : "Buy credits",
-          to: "/pricing",
-        }}
       />
 
       {/* Current plan */}
@@ -107,26 +122,67 @@ function BillingPage() {
             Includes {credits.pack_credits} pack credit{credits.pack_credits === 1 ? "" : "s"} that never expire.
           </p>
         )}
-        <div className="mt-5 flex gap-2">
-          <Link
-            to="/pricing"
-            className="flex h-11 flex-1 items-center justify-center rounded-[12px] text-[14px] font-semibold"
-            style={{ background: "#3D5AFE", color: "#F5F7FF" }}
-          >
-            {credits.plan_id === "free" ? "Upgrade" : "Change plan / top up"}
-          </Link>
-          {credits.razorpay_subscription_id && (
+        {credits.razorpay_subscription_id && (
+          <div className="mt-5">
             <button
               type="button"
               onClick={async () => { if (await showConfirm({ title: "Cancel your subscription?", body: "It will remain active until the end of the current cycle.", confirmLabel: "Cancel plan", destructive: true })) cancel.mutate(); }}
               disabled={cancel.isPending}
-              className="h-11 rounded-[12px] px-4 text-[14px] font-medium text-ink disabled:opacity-60"
+              className="h-10 rounded-[12px] px-4 text-[14px] font-medium text-ink disabled:opacity-60"
+              style={{ border: "1px solid var(--line)" }}
             >
-              Cancel
+              Cancel plan
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </section>
+
+      {buyError && (
+        <p className="mt-3 text-[13px]" style={{ color: "#FF2FA3" }}>{buyError}</p>
+      )}
+
+      {/* Upgrade inline */}
+      {upgrades.length > 0 && (
+        <section className="mt-4">
+          <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">Move up a plan</p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            {upgrades.map((p, i) => (
+              <div key={p.id} className={["card-magenta", "card-amber", "card-cobalt"][i % 3] + " p-4"}>
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="font-display text-[20px] text-ink">{p.name}</p>
+                  <p className="text-[14px] font-semibold text-ink">{formatInr(p.priceInr)}<span className="text-[12px] text-muted">/mo</span></p>
+                </div>
+                <p className="mt-1 text-[13px] leading-relaxed text-muted">{PLAN_DIFF[p.name]}</p>
+                <button
+                  type="button"
+                  onClick={() => buy(p)}
+                  disabled={buying === p.id}
+                  className="mt-4 flex h-11 w-full items-center justify-center gap-1.5 rounded-[12px] text-[14px] font-semibold disabled:opacity-60"
+                  style={{ background: "#3D5AFE", color: "#F5F7FF" }}
+                >
+                  {buying === p.id ? "Opening…" : <>Upgrade to {p.name} <ArrowUpRight className="h-4 w-4" /></>}
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Top ups */}
+      <TopUps buying={buying} onBuy={buy} />
+
+      {/* Storage */}
+      <section className="card-amber mt-4 p-5">
+        <div className="flex items-center gap-2">
+          <HardDrive className="h-5 w-5 text-[color:var(--card-accent)]" />
+          <p className="text-[12px] font-semibold uppercase tracking-wide text-[color:var(--card-accent)]">Your photos</p>
+        </div>
+        <p className="mt-2 text-[15px] font-medium text-ink">{retention.label}</p>
+        <p className="mt-1 text-[13px] leading-relaxed text-muted">{retention.detail}</p>
+      </section>
+
+      {/* GST details */}
+      <GstBlock ready={ready} />
 
       {/* Usage */}
       <section className="card-magenta mt-4 p-5">
@@ -139,51 +195,58 @@ function BillingPage() {
 
       {/* Invoices */}
       <section className="mt-4">
-        <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">Invoice history</p>
-        {payments.length === 0 ? (
-          <p className="mt-3 text-[14px] text-muted">No invoices yet.</p>
+        <div className="flex items-center gap-2">
+          <ReceiptText className="h-5 w-5 text-muted" />
+          <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">Invoice history</p>
+        </div>
+        {invoices.length === 0 && payments.length === 0 ? (
+          <p className="mt-3 text-[14px] text-muted">No invoices yet. Every payment gets one automatically.</p>
         ) : (
           <ul className="mt-3 space-y-2">
-            {payments.map((p) => (
-              <li
-                key={p.id}
-                className="card-list flex items-center justify-between p-3"
-              >
+            {invoices.map((inv) => (
+              <li key={inv.id} className="card-list flex items-center justify-between p-3">
                 <div>
-                  <p className="text-[14px] font-medium text-ink">{p.plan_name}</p>
-                  <p className="mt-0.5 text-[12px] text-muted">
-                    {new Date(p.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })} ·{" "}
-                    <span className={p.status === "paid" ? "text-green" : p.status === "failed" ? "text-primary" : "text-muted"}>
-                      {p.status}
-                    </span>
+                  <p className="text-[14px] font-medium text-ink">{inv.plan_name}</p>
+                  <p className="mt-0.5 font-mono text-[12px] text-muted">
+                    {inv.invoice_no} ·{" "}
+                    {new Date(inv.invoice_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                    {inv.is_gst_invoice ? " · GST invoice" : " · receipt"}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[14px] font-semibold text-ink">{formatInr(p.amount_inr)}</span>
-                  {p.invoice_url && (
-                    <a
-                      href={p.invoice_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="grid h-8 w-8 place-items-center rounded-full text-muted hover:text-ink"
-                      aria-label="Download invoice"
-                    >
-                      <Download className="h-4 w-4" />
-                    </a>
-                  )}
+                  <span className="text-[14px] font-semibold text-ink">{rupees(inv.total_paise)}</span>
+                  <Link
+                    to="/invoice/$id"
+                    params={{ id: inv.id }}
+                    className="grid h-8 w-8 place-items-center rounded-full text-muted hover:text-ink"
+                    aria-label={`Download invoice ${inv.invoice_no}`}
+                  >
+                    <Download className="h-4 w-4" />
+                  </Link>
                 </div>
               </li>
             ))}
+            {invoices.length === 0 &&
+              payments.map((p) => (
+                <li key={p.id} className="card-list flex items-center justify-between p-3">
+                  <div>
+                    <p className="text-[14px] font-medium text-ink">{p.plan_name}</p>
+                    <p className="mt-0.5 text-[12px] text-muted">
+                      {new Date(p.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })} ·{" "}
+                      <span className={p.status === "paid" ? "text-green" : p.status === "failed" ? "text-primary" : "text-muted"}>{p.status}</span>
+                    </p>
+                  </div>
+                  <span className="text-[14px] font-semibold text-ink">{formatInr(p.amount_inr)}</span>
+                </li>
+              ))}
           </ul>
         )}
       </section>
 
       <p className="mt-8 text-center text-[12px] text-muted">
-        <a href="/library?tour=1" className="underline">
-          Take the tour again
-        </a>
+        <a href="/library?tour=1" className="underline">Take the tour again</a>
         <span className="mx-2">·</span>
-        Need a receipt or GST invoice?{" "}
+        Something wrong with an invoice?{" "}
         <a href="mailto:hello@cowq.app" className="underline">
           Email us <ExternalLink className="inline h-3 w-3" />
         </a>
@@ -192,12 +255,127 @@ function BillingPage() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function TopUps({ buying, onBuy }: { buying: string | null; onBuy: (p: Plan) => void }) {
+  const [open, setOpen] = useState(false);
+  const packs = creditPacks();
   return (
-    <div className="card-list p-3">
-      <p className="text-[11px] uppercase tracking-wide text-muted">{label}</p>
-      <p className="mt-0.5 font-display text-[20px] text-ink">{value}</p>
-    </div>
+    <section className="mt-4">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between rounded-[12px] px-4 py-3 text-left"
+        style={{ border: "1px solid var(--line)" }}
+        aria-expanded={open}
+      >
+        <span className="flex items-center gap-2 text-[15px] font-semibold text-ink">
+          <Plus className="h-4 w-4" /> Top up credits
+        </span>
+        <span className="text-[13px] text-muted">{open ? "Hide" : "Credits that never expire"}</span>
+      </button>
+      {open && (
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          {packs.map((p, i) => (
+            <div key={p.id} className={["card-cobalt", "card-magenta", "card-amber"][i % 3] + " p-4"}>
+              <p className="font-display text-[20px] text-ink">{p.credits.toLocaleString("en-IN")} credits</p>
+              <p className="mt-0.5 text-[13px] text-muted">About {Math.floor(p.credits / 90)} complete products.</p>
+              <button
+                type="button"
+                onClick={() => onBuy(p)}
+                disabled={buying === p.id}
+                className="mt-3 flex h-11 w-full items-center justify-center rounded-[12px] text-[14px] font-semibold disabled:opacity-60"
+                style={{ background: "#3D5AFE", color: "#F5F7FF" }}
+              >
+                {buying === p.id ? "Opening…" : `Buy — ${formatInr(p.priceInr)}`}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function GstBlock({ ready }: { ready: boolean }) {
+  const qc = useQueryClient();
+  const { data } = useQuery({ queryKey: ["my-gst"], queryFn: () => getMyGstDetails(), enabled: ready });
+  const [gstin, setGstin] = useState("");
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [touched, setTouched] = useState(false);
+
+  useEffect(() => {
+    if (!data) return;
+    setGstin(data.gstin ?? "");
+    setName(data.invoice_business_name ?? "");
+    setAddress(data.invoice_address ?? "");
+  }, [data]);
+
+  const save = useMutation({
+    mutationFn: () =>
+      saveMyGstDetails({ data: { gstin, invoice_business_name: name, invoice_address: address } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-gst"] });
+      showAlert({ title: "Saved", body: "Your GST details will appear on future invoices." });
+    },
+    onError: (e) => showAlert({ title: "Couldn't save", body: e instanceof Error ? e.message : String(e) }),
+  });
+
+  const hint = touched && gstin.trim() !== "" && !looksLikeGstin(gstin);
+
+  return (
+    <section className="card-cobalt mt-4 p-5">
+      <p className="text-[12px] font-semibold uppercase tracking-wide text-[color:var(--card-accent)]">GST details</p>
+      <p className="mt-1 text-[13px] leading-relaxed text-muted">
+        Add your GST details to get a GST invoice on every payment.
+      </p>
+
+      <label className="mt-4 block text-[12px] font-semibold uppercase tracking-wide text-muted" htmlFor="gstin">GSTIN</label>
+      <input
+        id="gstin"
+        value={gstin}
+        onChange={(e) => { setGstin(e.target.value.toUpperCase()); setTouched(true); }}
+        placeholder="29ABCDE1234F1Z5"
+        maxLength={20}
+        className="mt-1 h-11 w-full rounded-[12px] px-3 font-mono text-[14px] text-ink"
+        style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
+      />
+      {hint && (
+        <p className="mt-1 text-[12px]" style={{ color: "#FF8A1E" }}>
+          That doesn't look like a valid GSTIN — you can still save it.
+        </p>
+      )}
+
+      <label className="mt-4 block text-[12px] font-semibold uppercase tracking-wide text-muted" htmlFor="inv-name">Business name for invoice</label>
+      <input
+        id="inv-name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Sundhar Traders"
+        className="mt-1 h-11 w-full rounded-[12px] px-3 text-[14px] text-ink"
+        style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
+      />
+
+      <label className="mt-4 block text-[12px] font-semibold uppercase tracking-wide text-muted" htmlFor="inv-addr">Billing address</label>
+      <textarea
+        id="inv-addr"
+        value={address}
+        onChange={(e) => setAddress(e.target.value)}
+        rows={3}
+        placeholder="Shop 4, MG Road, Bengaluru 560001"
+        className="mt-1 w-full rounded-[12px] p-3 text-[14px] text-ink"
+        style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
+      />
+
+      <button
+        type="button"
+        onClick={() => save.mutate()}
+        disabled={save.isPending}
+        className="mt-4 h-11 rounded-[12px] px-5 text-[14px] font-semibold disabled:opacity-60"
+        style={{ background: "#3D5AFE", color: "#F5F7FF" }}
+      >
+        {save.isPending ? "Saving…" : "Save GST details"}
+      </button>
+    </section>
   );
 }
 
