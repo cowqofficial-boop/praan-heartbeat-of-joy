@@ -1,11 +1,12 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Camera, Plus, X } from "lucide-react";
 import { getBrowserId } from "@/lib/browser-id";
 import { useCowqStore, type CowqPhoto } from "@/lib/cowq-store";
 import { createUploadTicket, identifyProduct, signUploadedOriginal } from "@/lib/cowq.functions";
 import { useAuth } from "@/lib/use-auth";
 import { PrimaryButton } from "@/components/PrimaryButton";
+import { studioSamples } from "@/data/showcase";
 
 const MAX_PHOTOS = 5;
 
@@ -339,5 +340,41 @@ export function UploadWidget({ compact = false }: { compact?: boolean }) {
         }}
       />
     </div>
+  );
+}
+
+/** Slow cross-fade of real CowQ studio results, sitting behind the tap target. */
+function SampleCarousel() {
+  const [i, setI] = useState(0);
+  const reduced =
+    typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+  useEffect(() => {
+    if (reduced || studioSamples.length < 2) return;
+    const t = setInterval(() => setI((v) => (v + 1) % studioSamples.length), 3800);
+    return () => clearInterval(t);
+  }, [reduced]);
+
+  if (!studioSamples.length) return null;
+
+  return (
+    <span aria-hidden className="pointer-events-none absolute inset-0">
+      {studioSamples.map((s, idx) => (
+        <img
+          key={s.url}
+          src={s.url}
+          alt=""
+          loading="lazy"
+          width={1024}
+          height={1024}
+          className="absolute inset-0 h-full w-full object-cover transition-opacity duration-[1200ms]"
+          style={{ opacity: idx === i ? 0.22 : 0 }}
+        />
+      ))}
+      <span
+        className="absolute inset-0"
+        style={{ background: "linear-gradient(180deg, rgba(6,7,10,0.55), rgba(6,7,10,0.85))" }}
+      />
+    </span>
   );
 }
