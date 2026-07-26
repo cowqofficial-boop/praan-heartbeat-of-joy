@@ -25,6 +25,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResultsIdRouteImport } from './routes/results.$id'
+import { Route as InvoiceIdRouteImport } from './routes/invoice.$id'
 import { Route as ConnectInstagramRouteImport } from './routes/connect.instagram'
 import { Route as BlogFlatLayGuideRouteImport } from './routes/blog.flat-lay-guide'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
@@ -119,6 +120,11 @@ const IndexRoute = IndexRouteImport.update({
 const ResultsIdRoute = ResultsIdRouteImport.update({
   id: '/results/$id',
   path: '/results/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvoiceIdRoute = InvoiceIdRouteImport.update({
+  id: '/invoice/$id',
+  path: '/invoice/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConnectInstagramRoute = ConnectInstagramRouteImport.update({
@@ -232,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/connect/instagram': typeof ConnectInstagramRoute
+  '/invoice/$id': typeof InvoiceIdRoute
   '/results/$id': typeof ResultsIdRoute
   '/admin/costs': typeof AuthenticatedAdminCostsRoute
   '/profile/account': typeof AuthenticatedProfileAccountRoute
@@ -264,6 +271,7 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/connect/instagram': typeof ConnectInstagramRoute
+  '/invoice/$id': typeof InvoiceIdRoute
   '/results/$id': typeof ResultsIdRoute
   '/admin/costs': typeof AuthenticatedAdminCostsRoute
   '/profile/account': typeof AuthenticatedProfileAccountRoute
@@ -299,6 +307,7 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/flat-lay-guide': typeof BlogFlatLayGuideRoute
   '/connect/instagram': typeof ConnectInstagramRoute
+  '/invoice/$id': typeof InvoiceIdRoute
   '/results/$id': typeof ResultsIdRoute
   '/_authenticated/admin/costs': typeof AuthenticatedAdminCostsRoute
   '/_authenticated/profile/account': typeof AuthenticatedProfileAccountRoute
@@ -334,6 +343,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/connect/instagram'
+    | '/invoice/$id'
     | '/results/$id'
     | '/admin/costs'
     | '/profile/account'
@@ -366,6 +376,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/connect/instagram'
+    | '/invoice/$id'
     | '/results/$id'
     | '/admin/costs'
     | '/profile/account'
@@ -400,6 +411,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/blog/flat-lay-guide'
     | '/connect/instagram'
+    | '/invoice/$id'
     | '/results/$id'
     | '/_authenticated/admin/costs'
     | '/_authenticated/profile/account'
@@ -432,6 +444,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StockRoute: typeof StockRoute
   BlogFlatLayGuideRoute: typeof BlogFlatLayGuideRoute
+  InvoiceIdRoute: typeof InvoiceIdRoute
   ResultsIdRoute: typeof ResultsIdRoute
   ApiPublicMetaOauthCallbackRoute: typeof ApiPublicMetaOauthCallbackRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
@@ -549,6 +562,13 @@ declare module '@tanstack/react-router' {
       path: '/results/$id'
       fullPath: '/results/$id'
       preLoaderRoute: typeof ResultsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invoice/$id': {
+      id: '/invoice/$id'
+      path: '/invoice/$id'
+      fullPath: '/invoice/$id'
+      preLoaderRoute: typeof InvoiceIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connect/instagram': {
@@ -749,6 +769,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StockRoute: StockRoute,
   BlogFlatLayGuideRoute: BlogFlatLayGuideRoute,
+  InvoiceIdRoute: InvoiceIdRoute,
   ResultsIdRoute: ResultsIdRoute,
   ApiPublicMetaOauthCallbackRoute: ApiPublicMetaOauthCallbackRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
