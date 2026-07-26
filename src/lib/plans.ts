@@ -112,3 +112,39 @@ export function costOf(action: ActionKey): number {
 export function estimateProducts(credits: number): number {
   return Math.floor(credits / COSTS.product);
 }
+
+// ---------- Photo storage by plan ----------
+// Honest, generous wording. Never the word "unlimited".
+export type Retention = {
+  /** null = kept for as long as the subscription is active. */
+  days: number | null;
+  label: string;
+  detail: string;
+};
+
+export function planRetention(planId: string): Retention {
+  const name = getPlan(planId).name;
+  if (name === "Pro")
+    return {
+      days: null,
+      label: "Kept while you're on CowQ · priority",
+      detail: "Your photos stay with you for as long as you're on CowQ, on priority storage.",
+    };
+  if (name === "Growth")
+    return {
+      days: null,
+      label: "Kept while you're on CowQ",
+      detail: "Your photos stay with you for as long as you're on CowQ.",
+    };
+  if (name === "Starter")
+    return {
+      days: 183,
+      label: "Kept 6 months while subscribed",
+      detail: "Every photo stays for six months while your plan is active. Upgrade to keep them longer.",
+    };
+  return {
+    days: 30,
+    label: "Kept 30 days on Free",
+    detail: "On the free plan, photo files are cleared after 30 days. The product stays in your library, so you can make the photos again any time.",
+  };
+}
