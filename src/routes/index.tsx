@@ -15,6 +15,19 @@ import who1 from "@/assets/landing/who-1.jpg.asset.json";
 import who2 from "@/assets/landing/who-2.jpg.asset.json";
 import who3 from "@/assets/landing/who-3.jpg.asset.json";
 import who4 from "@/assets/landing/who-4.jpg.asset.json";
+import diyaWhite from "@/assets/how/diya-white.jpg.asset.json";
+import diyaStudio from "@/assets/how/diya-studio.jpg.asset.json";
+import diyaLifestyle from "@/assets/how/diya-lifestyle.jpg.asset.json";
+import diyaFlatlay from "@/assets/how/diya-flatlay.jpg.asset.json";
+
+/** Real CowQ outputs, one per style, shown in the "4 studio photos" card. */
+const STUDIO_SAMPLES: { url: string; label: string }[] = [
+  { url: diyaWhite.url, label: "White background" },
+  { url: diyaStudio.url, label: "Soft studio" },
+  { url: diyaLifestyle.url, label: "Lifestyle scene" },
+  { url: diyaFlatlay.url, label: "Flat-lay" },
+];
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
