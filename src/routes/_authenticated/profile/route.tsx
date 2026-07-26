@@ -30,6 +30,7 @@ type Tab = { to: string; label: string; keywords: string; exact?: boolean };
 const TABS: Tab[] = [
   { to: "/profile", label: "Overview", exact: true, keywords: "summary snapshot activity" },
   { to: "/profile/account", label: "Account", keywords: "name email phone password language timezone currency country" },
+  { to: "/profile/brand-voice", label: "Brand voice", keywords: "brand memory identity voice words banned photo look remembers" },
   { to: "/profile/ai", label: "AI preferences", keywords: "personality tone voice emoji creativity temperature writing" },
   { to: "/profile/shop", label: "My shop", keywords: "public storefront link slug share visitors listings shop page" },
   { to: "/profile/apps", label: "Connected apps", keywords: "instagram facebook whatsapp integrations channels" },

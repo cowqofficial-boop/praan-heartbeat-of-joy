@@ -2,6 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { SITE_URL } from "@/lib/site";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { updateGenerationCopy } from "@/lib/copy-edit.functions";
+import { recordBrandSignal } from "@/lib/brand-memory.functions";
 import { ChevronDown, Copy, Check, Download, FileText, Image as ImageIcon, Lock, Share2, ThumbsDown, ThumbsUp } from "lucide-react";
 import { PostThisButton } from "@/components/PostThisButton";
 import JSZip from "jszip";
@@ -153,7 +156,7 @@ function Results() {
 
           {/* Collapsed listing: one panel, hairline rows, single-open accordion */}
           {/* Collapsed listing: one panel, hairline rows, single-open accordion */}
-          <ListingPanel copy={copy} />
+          <ListingPanel copy={copy} id={id} canEdit={!!user} />
 
           {/* Videos — only for signed-in sellers, only when the flag is on */}
           <VideoSection generationId={id} productName={productName} hasAccount={!!user} />
@@ -601,7 +604,52 @@ async function downloadCsv(url: string, name: string) {
 
 type Row = { key: string; label: string; text: string; multiline?: boolean };
 
-function ListingPanel({ copy }: { copy: Copy }) {
+/** Turns an edited block back into the shape the generation stores. */
+function parseRow(key: string, text: string): { field: string; value: string | string[] }[] {
+  switch (key) {
+    case "title":
+      return [{ field: "seoTitle", value: text.trim() }];
+    case "desc":
+      return [{ field: "description", value: text.trim() }];
+    case "bullets":
+      return [
+        {
+          field: "bullets",
+          value: text
+            .split("\n")
+            .map((l) => l.replace(/^\s*[•\-*]\s*/, "").trim())
+            .filter(Boolean),
+        },
+      ];
+    case "tags":
+      return [{ field: "tags", value: text.split(",").map((t) => t.trim()).filter(Boolean) }];
+    case "insta": {
+      const lines = text.split("\n");
+      const tail: string[] = [];
+      while (lines.length) {
+        const last = (lines[lines.length - 1] ?? "").trim();
+        if (!last) { lines.pop(); continue; }
+        if (last.split(/\s+/).every((w) => w.startsWith("#"))) {
+          tail.unshift(...lines.pop()!.trim().split(/\s+/));
+          continue;
+        }
+        break;
+      }
+      return [
+        { field: "instagram", value: lines.join("\n").trim() },
+        { field: "instagramHashtags", value: tail },
+      ];
+    }
+    case "whatsapp":
+      return [{ field: "whatsapp", value: text.trim() }];
+    case "festival":
+      return [{ field: "festival", value: text.trim() }];
+    default:
+      return [];
+  }
+}
+
+function ListingPanel({ copy, id, canEdit = false }: { copy: Copy; id?: string; canEdit?: boolean }) {
   const rows: Row[] = [
     { key: "title", label: "Title", text: copy.seoTitle },
     { key: "desc", label: "Description", text: copy.description, multiline: true },
@@ -627,6 +675,8 @@ function ListingPanel({ copy }: { copy: Copy }) {
           tone={TONES[i % TONES.length]}
           isOpen={open === r.key}
           onToggle={() => setOpen((cur) => (cur === r.key ? null : r.key))}
+          generationId={id}
+          canEdit={canEdit}
         />
       ))}
     </section>
@@ -638,14 +688,28 @@ function ListingRow({
   tone,
   isOpen,
   onToggle,
+  generationId,
+  canEdit = false,
 }: {
   row: Row;
   tone: string;
   isOpen: boolean;
   onToggle: () => void;
+  generationId?: string;
+  canEdit?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
-  const firstLine = row.text.split("\n")[0];
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(row.text);
+  const [saving, setSaving] = useState(false);
+  const saveCopyFn = useServerFn(updateGenerationCopy);
+  const signalFn = useServerFn(recordBrandSignal);
+  const text = editing ? draft : row.text;
+  const firstLine = text.split("\n")[0];
+
+  useEffect(() => {
+    if (!editing) setDraft(row.text);
+  }, [row.text, editing]);
 
   async function handleCopy(e: React.MouseEvent) {
     e.stopPropagation();
@@ -661,6 +725,33 @@ function ListingRow({
     }
     setCopied(true);
     setTimeout(() => setCopied(false), 1200);
+    if (canEdit && generationId) {
+      // Learning signal only — never block the copy action on it.
+      signalFn({ data: { event_type: "copied", surface: row.key, generation_id: generationId } }).catch(() => {});
+    }
+  }
+
+  async function handleSave() {
+    if (!generationId) return;
+    setSaving(true);
+    try {
+      const patches = parseRow(row.key, draft);
+      for (const p of patches) {
+        await saveCopyFn({
+          data: {
+            id: generationId,
+            field: p.field as "seoTitle",
+            value: p.value,
+            surface: row.key,
+            originalText: row.text,
+            editedText: draft,
+          },
+        });
+      }
+      setEditing(false);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -692,11 +783,47 @@ function ListingRow({
         style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
       >
         <div className="min-h-0 overflow-hidden">
-          <p
-            className={`px-4 pb-4 pt-1 text-[15px] text-ink ${row.multiline ? "whitespace-pre-wrap" : ""}`}
-          >
-            {row.text}
-          </p>
+          {editing ? (
+            <div className="px-4 pb-4 pt-1">
+              <textarea
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                rows={Math.min(12, Math.max(3, draft.split("\n").length + 1))}
+                className="w-full rounded-[12px] border border-[color:var(--line)] bg-white/[0.03] p-3 text-[15px] text-ink outline-none focus:border-[color:var(--card-accent)]"
+              />
+              <div className="mt-2 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="rounded-[10px] bg-[color:var(--card-accent)] px-3 py-1.5 text-[13px] font-semibold text-black disabled:opacity-60"
+                >
+                  {saving ? "Saving…" : "Save"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEditing(false); setDraft(row.text); }}
+                  className="rounded-[10px] px-3 py-1.5 text-[13px] font-medium text-muted hover:text-ink"
+                >
+                  Cancel
+                </button>
+                <span className="text-[12px] text-muted">CowQ learns from your edits.</span>
+              </div>
+            </div>
+          ) : (
+            <div className="px-4 pb-4 pt-1">
+              <p className={`text-[15px] text-ink ${row.multiline ? "whitespace-pre-wrap" : ""}`}>{row.text}</p>
+              {canEdit && generationId && (
+                <button
+                  type="button"
+                  onClick={() => setEditing(true)}
+                  className="mt-2 text-[13px] font-medium text-[color:var(--card-accent)] underline"
+                >
+                  Edit this
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -970,7 +1097,7 @@ function ServiceResults({
             </div>
           </section>
 
-          <ListingPanel copy={copy} />
+          <ListingPanel copy={copy} id={id} canEdit={hasAccount} />
 
           {/* Video ad placeholder — deliberately not wired up yet */}
           <section>

@@ -116,6 +116,75 @@ export type Database = {
         }
         Relationships: []
       }
+      brand_memory: {
+        Row: {
+          created_at: string
+          history: Json
+          last_confirmed_at: string | null
+          learned: Json
+          prefs: Json
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          history?: Json
+          last_confirmed_at?: string | null
+          learned?: Json
+          prefs?: Json
+          updated_at?: string
+          user_id: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          history?: Json
+          last_confirmed_at?: string | null
+          learned?: Json
+          prefs?: Json
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      brand_memory_events: {
+        Row: {
+          created_at: string
+          edited_text: string | null
+          event_type: string
+          generation_id: string | null
+          id: string
+          original_text: string | null
+          signals: Json
+          surface: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          edited_text?: string | null
+          event_type: string
+          generation_id?: string | null
+          id?: string
+          original_text?: string | null
+          signals?: Json
+          surface: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          edited_text?: string | null
+          event_type?: string
+          generation_id?: string | null
+          id?: string
+          original_text?: string | null
+          signals?: Json
+          surface?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       brand_models: {
         Row: {
           created_at: string

@@ -1,45 +1,64 @@
-## Public seller shops — Stage 1
+## Brand Memory — Stage 1
 
-Every seller gets a shareable public storefront at `https://cowq.app/shop/<slug>`. Nothing is public until the seller turns it on: the shop starts unpublished and every listing starts hidden.
+Sellers define their brand once, in plain language, and every future generation uses it automatically. Learning stays off for now, but we start recording the signals so the learning engine can be switched on later without rework.
 
-Analytics (views, clicks, charts) is deliberately left for Stage 2 — the tracking hooks will be designed in, but no dashboard this pass.
+### 1. Brand Memory data (extends the existing Brand Kit)
 
-### What the seller gets
+One new structured record per seller, stored alongside the current brand kit — no duplicate storage of logo, colours or model.
 
-**Shop settings** (new tab in Profile → "My shop")
-- Publish shop switch (off by default)
-- Slug — auto-suggested from the Brand kit business name (`sharma-handloom`), editable, checked for uniqueness and reserved words
-- Shop name, short bio, business category, city/region, country — prefilled from Brand kit / profile but stored separately so nothing private leaks
-- Logo/profile image (reuses the brand-kit logo if present)
-- Public contact: method (WhatsApp / phone / SMS / email) + the value the seller types here. Profile phone/email are never used.
-- Public social links: Instagram, Facebook, LinkedIn, X, YouTube, Website. Empty fields are hidden; URLs validated.
-- Copy shop link, Share (native share sheet), Preview shop. QR code left as a clearly marked later addition.
+- **Identity**: brand name, category, industry, audience, mission, personality
+- **Voice**: multiple descriptors (warm, premium, bold, traditional…)
+- **Communication style**: sentence length, formality, energy, persuasiveness, emoji usage, storytelling, promo intensity
+- **Caption preferences**: length, opening style, CTA placement, ending, formatting
+- **Hashtags**: count, branded / local / niche / minimal / none
+- **Photography defaults**: white background, lifestyle, studio, flat lay, dark luxury, bright minimal, rustic, outdoor…
+- **Per-surface overrides**: product description, product title, marketplace listing, SEO description, Instagram, Facebook, WhatsApp, email
+- **Housekeeping**: version number, revision history, change log, last confirmed date, and empty slots for learned values + confidence scores (unused in stage 1)
 
-**Per-listing visibility**
-- A "Show on my public shop" toggle on each generation and each stock item, default OFF, in the Library card menu, the results page, and the stock sheet.
-- A listing appears publicly only if the shop is published AND the listing toggle is on AND the listing isn't archived/deleted.
-- Bulk "show/hide" from the Library toolbar for convenience.
+Strict per-account isolation: the record is owned by the seller, readable and writable only by them, never read across accounts.
 
-### The public page
+### 2. Brand voice editor — new Profile tab
 
-Server-rendered, no auth, single 480-ish column on mobile widening to a grid on desktop, in the existing CowQ dark design language.
+New "Brand voice" tab beside Account / My shop, written in plain language, no AI jargon:
 
-- Header: logo, shop name, bio, category, city/country, count of public listings, sticky "Contact on WhatsApp" (label follows the chosen method)
-- Grid of public listings: image, title, price in ₹, short description, category, product/service badge, "Contact to buy". Services show their pricing/package card and booking CTA.
-- Social row with real icons, `rel="noopener noreferrer"`
-- Empty state: "This seller hasn't published any products yet." plus the Contact button
-- Accessibility: semantic landmarks, alt text on every image, visible focus rings, 44px targets, AA contrast
-- Performance: lazy-loaded responsive images, skeletons, no client-side data fetching for first paint, 1-hour edge cache
+- "My brand sounds…" (chips, multi-select)
+- "My customers are…"
+- "I prefer captions that are…" (short & punchy / detailed / informative / luxury)
+- "My usual call-to-action is…"
+- "I avoid…" (free text)
+- Emoji usage, hashtag style, photo look
+- Optional "Fine-tune per channel" accordion for the per-surface overrides
 
-**SEO**: unique title `<Shop name> | CowQ`, unique description, canonical + og:url on `https://cowq.app/shop/<slug>`, og/twitter image from the shop logo or first listing photo, JSON-LD `Store` + `BreadcrumbList` + `Product`/`Service` entries, and every published shop added to `/sitemap.xml`. Unpublished or unknown slugs return a proper 404 with `noindex`.
+Mobile-first, keyboard accessible, labelled fields, visible focus states, AA contrast. Live example preview showing a sample caption written in the chosen voice, plus a **Current → New** diff with explicit Save confirmation whenever the memory changes.
+
+Existing Brand Kit page keeps logo, colours and model, and links across to Brand voice.
+
+### 3. Injection into generation
+
+A single builder converts the structured record into prompt text, used by every generation path: product copy, service copy and posters, calendar captions and hashtags, and image style selection. Model-agnostic — it emits plain instruction text, so swapping the AI provider later changes nothing here.
+
+Photography defaults bias the style set chosen for each generation, still overridable per product.
+
+### 4. Guardrails
+
+Brand Memory may shape tone, vocabulary, formatting and visual direction only. It is inserted below the safety block and can never relax existing rules: no fake reviews or testimonials, no fabricated claims, no fake urgency or scarcity, no medical or financial advice, no minors, no face-cloning, plus the existing banned-phrase and "concrete fact per bullet" copy rules. Free-text fields are sanitised the same way custom-look already is.
+
+### 5. Signal capture (recorded now, learned from later)
+
+- Generated copy blocks in Results and Calendar become editable and save the seller's version alongside the original
+- Each save records what changed (tone, length, emoji, CTA, hashtags) as an event
+- Lightweight events too: regenerate, copy-to-clipboard, marked posted, deleted
+- Abandoned drafts are not recorded
+- No inference, no suggestions, no automatic changes in this stage — the events simply accumulate
 
 ### Technical notes
 
-- Migration: new `shop_settings` table (user_id PK, slug unique, published, name, bio, category, city, region, country, logo_url, contact_method, contact_value, six social columns, timestamps) with owner-only write policies and a narrow `TO anon` SELECT policy limited to published shops. `generations` and `stock_items` each gain `public_visible boolean not null default false`, with an anon SELECT policy that only exposes rows whose owner's shop is published and whose flag is true. GRANTs included.
-- Public reads go through a public server function using the publishable key (never the admin client), selecting an explicit safe column list — no credits, wallet, internal IDs, quantities, or owner UUIDs cross the boundary.
-- Route `src/routes/shop.$slug.tsx` with a loader calling that public function; `head()` builds all meta and JSON-LD from loader data. `notFoundComponent` + `errorComponent` included.
-- Shop URLs use the hardcoded `https://cowq.app` base you chose, via a single constant so it can be switched later. Note: those links will 404 until cowq.app is connected as a custom domain — the in-app Preview button uses the current domain so you can still test.
-- Structure is left open for Stage 2: analytics event table, collections, reviews, search/filters slot into the same page shell without rework.
+- New `brand_memory` table keyed to the user with a JSON preferences document, `version`, `history`, and a `brand_memory_events` table for signals. Both RLS-scoped to `auth.uid()` with explicit grants; no anon access.
+- New `src/lib/brand-memory.ts` (types + defaults), `brand-memory.functions.ts` (load/save/diff server fns via `requireSupabaseAuth`), and `brand-memory.server.ts` (prompt builder + sanitiser).
+- Call sites updated: `cowq.functions.ts`, `service.server.ts`, `calendar.functions.ts`.
+- New route `src/routes/_authenticated/profile/brand-voice.tsx`; tab added to the profile layout.
+- Migration runs first and needs your approval before the code lands.
 
-### Not in this pass
-Analytics dashboard, QR codes, payments/checkout, reviews, custom domains per seller, store themes.
+### Not in this stage
+
+Confidence scores, "we've noticed you rewrite captions…" suggestions, acceptance-rate and brand-consistency analytics. These build directly on the events captured above.

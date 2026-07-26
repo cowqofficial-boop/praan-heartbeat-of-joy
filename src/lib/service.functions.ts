@@ -60,6 +60,7 @@ export const generateServiceAndSave = createServerFn({ method: "POST" })
     const [poster, copy] = await Promise.all([
       svc.generateServicePoster({
         browserId: data.browserId,
+        userId,
         name,
         category: details.category,
         photoUrl: data.photoUrl ?? null,

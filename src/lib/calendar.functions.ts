@@ -354,6 +354,9 @@ async function generatePostArtifacts(post: {
           ? "warm, respectful, rooted in Indian tradition"
           : "friendly, conversational, warm";
   const audience = post.brand.sells_to || "everyday Indian shoppers";
+  const memoryVoice = (
+    await (await import("./brand-memory.server")).loadBrandMemoryContext(post.user_id)
+  ).voice;
   const biz = post.brand.business_name || "our shop";
 
   const typeBrief: Record<PostType, string> = {
@@ -376,7 +379,7 @@ async function generatePostArtifacts(post: {
       "Written in a happy buyer's own words as a short review. Start with 'Bought this from ...' or similar; end with a plain-language recommendation. Clearly reads like a review.",
   };
 
-  const sys = `You write Instagram/WhatsApp posts for an Indian small-business seller called ${biz}. Target buyer: ${audience}. Tone: ${brandTone}. Rules: open with the most useful, concrete fact. No filler words like elevate, unleash, embrace, on the go, game-changer, must-have. Use rupees (₹) when talking price. Keep it human — a knowledgeable shopkeeper, not a marketing agency. Reply with a compact JSON object only, no prose, no markdown fences.`;
+  const sys = `You write Instagram/WhatsApp posts for an Indian small-business seller called ${biz}. Target buyer: ${audience}. Tone: ${brandTone}. Rules: open with the most useful, concrete fact. No filler words like elevate, unleash, embrace, on the go, game-changer, must-have. Use rupees (₹) when talking price. Keep it human — a knowledgeable shopkeeper, not a marketing agency. Reply with a compact JSON object only, no prose, no markdown fences.${memoryVoice ? "\n\n" + memoryVoice : ""}`;
 
   const serviceRules =
     post.kind === "service"
