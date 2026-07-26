@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, MoreHorizontal, Package, Plus, Search, Trash2, Pencil } from "lucide-react";
+import { CalendarDays, Eye, EyeOff, MoreHorizontal, Package, Plus, Search, Store, Trash2, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteMyProduct, listMyProducts, renameMyProduct, type LibraryItem } from "@/lib/library.functions";
+import { setListingVisibility } from "@/lib/shop.functions";
+
 import { CreditBadge } from "@/components/CreditBadge";
 import { LowBalanceBanner } from "@/components/LowBalanceBanner";
 import { ReconnectBanner } from "@/components/ReconnectBanner";
@@ -107,6 +109,14 @@ function LibraryPage() {
     await deleteMyProduct({ data: { id: item.id } });
     qc.invalidateQueries({ queryKey: ["library"] });
   }
+
+  async function handleToggleShop(item: LibraryItem) {
+    await setListingVisibility({
+      data: { id: item.id, table: "generations", visible: !item.public_visible },
+    });
+    qc.invalidateQueries({ queryKey: ["library"] });
+  }
+
 
   return (
 
