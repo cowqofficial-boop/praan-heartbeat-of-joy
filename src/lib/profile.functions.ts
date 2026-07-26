@@ -413,13 +413,16 @@ const BYTES_PER_PHOTO = 850_000;
 
 const GB = 1024 ** 3;
 
-/** Real storage limits, and how long generated files are kept, per plan. */
+/** Real storage limits, and how long generated files are kept, per plan.
+ *  Retention days come from planRetention() so Billing and Profile always agree. */
 export function storagePolicy(planId: string): { limitBytes: number; retentionDays: number | null } {
-  if (planId.startsWith("pro")) return { limitBytes: 200 * GB, retentionDays: null };
-  if (planId.startsWith("growth")) return { limitBytes: 50 * GB, retentionDays: null };
-  if (planId.startsWith("starter")) return { limitBytes: 10 * GB, retentionDays: null };
-  return { limitBytes: 2 * GB, retentionDays: 30 };
+  const retentionDays = planRetention(planId).days;
+  if (planId.startsWith("pro")) return { limitBytes: 200 * GB, retentionDays };
+  if (planId.startsWith("growth")) return { limitBytes: 50 * GB, retentionDays };
+  if (planId.startsWith("starter")) return { limitBytes: 10 * GB, retentionDays };
+  return { limitBytes: 2 * GB, retentionDays };
 }
+
 
 export const getMyInsights = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
