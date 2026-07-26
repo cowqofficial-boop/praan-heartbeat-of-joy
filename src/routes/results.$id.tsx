@@ -85,6 +85,22 @@ function Results() {
   const personSource = ((data.gen_metadata as { person_source?: "ai" | "user" } | null)?.person_source) ?? "ai";
   const productName = (data.product_name as string) || "cowq";
 
+  if ((data as { kind?: string }).kind === "service") {
+    return (
+      <ServiceResults
+        id={id}
+        name={productName}
+        posterUrl={images[0]?.url ?? original ?? ""}
+        details={(data as { service_details?: unknown }).service_details as ServiceDetails | null}
+        copy={copy}
+        hasAccount={!!user}
+        watermark={watermark}
+      />
+    );
+  }
+
+
+
   return (
     <main className="min-h-screen pb-16 pt-6 lg:pt-10">
       {/* Header */}
