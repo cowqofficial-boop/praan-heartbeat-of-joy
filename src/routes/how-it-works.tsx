@@ -162,7 +162,7 @@ function HowItWorks() {
     <main className="w-full">
       <header className="flex items-center gap-3 px-6 pt-6">
         <BackButton fallback="/" />
-        <Wordmark />
+        <Wordmark className="lg:hidden" />
       </header>
       {/* ================ HERO ================ */}
       <section className="relative px-6 pb-10 pt-8 lg:pt-14">
