@@ -272,17 +272,28 @@ function Landing() {
             <div className="mt-10 grid gap-4 md:grid-cols-3">
               <Artefact title="4 studio photos" tone="card-cobalt">
                 <div className="grid grid-cols-2 gap-2">
-                  {["White background", "Soft studio", "Lifestyle scene", "Flat-lay"].map((s) => (
-                    <div
-                      key={s}
-                      className="flex aspect-square items-end rounded-[10px] bg-raised p-2 text-[11px] text-muted"
-                    >
-                      {s}
+                  {STUDIO_SAMPLES.map((s) => (
+                    <div key={s.label} className="relative overflow-hidden rounded-[10px] bg-raised">
+                      <img
+                        src={s.url}
+                        alt={`${s.label} product photo made by CowQ`}
+                        loading="lazy"
+                        width={1024}
+                        height={1024}
+                        className="aspect-square w-full object-cover"
+                      />
+                      <span
+                        className="absolute inset-x-0 bottom-0 p-2 text-[11px] text-ink"
+                        style={{ background: "linear-gradient(180deg, transparent, rgba(6,7,10,0.85))" }}
+                      >
+                        {s.label}
+                      </span>
                     </div>
                   ))}
                 </div>
                 <p className="mt-3 text-[12px] text-muted">Square and vertical, both sizes.</p>
               </Artefact>
+
 
               <Artefact title="Marketplace listing" tone="card-magenta">
                 <div className="rounded-[10px] bg-raised p-3 text-left">
