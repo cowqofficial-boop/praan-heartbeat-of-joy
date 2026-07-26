@@ -124,6 +124,7 @@ function CalendarPage() {
           try {
             const r = await generateOnePost({ data: { plan_id: planId } });
             qc.invalidateQueries({ queryKey: ["calendar", planId] });
+            qc.invalidateQueries({ queryKey: ["my-credits"] });
             if ("done" in r && r.done) return;
           } catch {
             // brief pause on error, then continue
@@ -462,7 +463,10 @@ function PostSheet({
 
   const regen = useMutation({
     mutationFn: () => generateOnePost({ data: { plan_id: planId, post_id: post.id } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["calendar", planId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["calendar", planId] });
+      qc.invalidateQueries({ queryKey: ["my-credits"] });
+    },
   });
 
   const toggle = useMutation({
