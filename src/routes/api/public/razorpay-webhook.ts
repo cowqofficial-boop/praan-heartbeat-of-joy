@@ -110,7 +110,7 @@ async function handlePaymentCaptured(
     { onConflict: "user_id" },
   );
 
-  await sb
+  const { data: payRow } = await sb
     .from("payments")
     .update({
       razorpay_payment_id: p.id,
@@ -118,8 +118,19 @@ async function handlePaymentCaptured(
       razorpay_invoice_id: p.invoice_id ?? null,
     })
     .eq("razorpay_order_id", p.order_id ?? "")
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .select("id, amount_inr")
+    .maybeSingle();
+
+  const { createInvoiceForPayment } = await import("@/lib/invoice.server");
+  await createInvoiceForPayment(sb, {
+    userId,
+    paymentId: payRow?.id ?? null,
+    planId: plan.id,
+    amountInr: payRow?.amount_inr ?? Math.round(p.amount / 100),
+  });
 }
+
 
 async function handleSubscriptionCharged(
   payload: {
