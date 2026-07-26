@@ -649,21 +649,29 @@ function BrandModelPanel({
   onUploadedReal: (urls: string[]) => void;
 }) {
   const source = kit.brand_model_source;
+  const modelCost = COSTS.brand_model;
   return (
     <div className="mt-4 flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {(["ai", "user"] as const).map((v) => (
           <button
             type="button"
             key={v}
             onClick={() => setKit((k) => ({ ...k, brand_model_source: v }))}
-            className={`h-11 rounded-[10px] border text-[13px] font-semibold transition-colors ${
+            className={`min-h-[64px] rounded-[10px] border px-3 py-2.5 text-left transition-colors ${
               source === v
                 ? "border-primary bg-primary/10 text-ink"
-                : "bg-raised text-ink"
+                : "border-transparent bg-raised text-ink"
             }`}
           >
-            {v === "ai" ? "AI model" : "My own model"}
+            <span className="block text-[13px] font-semibold">
+              {v === "ai" ? "AI model" : "My own model"}
+            </span>
+            <span className="mt-0.5 block text-[12px] leading-snug text-muted">
+              {v === "ai"
+                ? `CowQ creates one person for you — ${modelCost} credits.`
+                : "Upload photos of a real person you have permission to use."}
+            </span>
           </button>
         ))}
       </div>
@@ -672,24 +680,34 @@ function BrandModelPanel({
         <div className="card-list flex items-center gap-4 p-3">
           <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-[10px] bg-raised">
             {modelBusy ? (
-              <span className="text-[11px] text-muted">Making…</span>
+              <Loader2 className="h-5 w-5 animate-spin text-muted" />
             ) : kit.brand_model_url ? (
               <img src={kit.brand_model_url} alt="Your brand model" className="h-full w-full object-cover" />
             ) : (
               <span className="text-[11px] text-muted">No model yet</span>
             )}
           </div>
-          <div className="flex flex-1 flex-col gap-2">
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <p className="text-[12px] leading-snug text-muted">
+              {modelBusy
+                ? "Creating your model… this takes about 20 seconds."
+                : kit.brand_model_url
+                  ? "Saved. CowQ uses this same person on every product photo that needs one."
+                  : "No model yet — create one and CowQ will reuse the same person everywhere."}
+            </p>
             <button
               type="button"
               onClick={onRegenerateAi}
               disabled={modelBusy}
-              className="h-10 rounded-[10px] bg-raised text-[13px] font-semibold text-ink disabled:opacity-60"
+              className="h-11 rounded-[10px] bg-raised text-[13px] font-semibold text-ink disabled:opacity-60"
             >
-              {modelBusy ? "Generating…" : "Change model"}
+              {modelBusy
+                ? "Creating your model…"
+                : `${kit.brand_model_url ? "Change model" : "Create model"} · ${modelCost} credits`}
             </button>
           </div>
         </div>
+
       ) : (
         <SavedModelsPanel
           modelBusy={modelBusy}
