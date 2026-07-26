@@ -296,6 +296,12 @@ export const generateBrandModelPortrait = createServerFn({ method: "POST" })
     const who = prefs
       ? `The model is: ${prefs}.`
       : "Choose a natural-looking Indian adult with a warm, pleasant, approachable presence.";
+    // Attire / cultural styling / pose guidance, including the seller's own
+    // "custom look" text — this reference portrait is reused on every on-model
+    // shot, so it has to carry the same visible details.
+    const styling = describeModelStyling(kit ?? {});
+    const custom = sanitizeCustomLook(kit?.model_custom_look ?? null);
+
 
     // Use a seed image if provided (e.g. a product photo to inform styling context).
     // Otherwise generate from a neutral 1x1 white pixel so the model has an image input.
