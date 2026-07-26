@@ -16,6 +16,7 @@ import { showAlert } from "@/components/Dialogs";
 import { AuthModal } from "@/components/AuthModal";
 import { VideoSection } from "@/components/video/VideoSection";
 import { TypeBadge } from "@/components/TypeToggle";
+import { CopyButton } from "@/components/CopyButton";
 import { contactLabel, fallbackCta, type ServiceDetails } from "@/lib/service";
 
 export const Route = createFileRoute("/results/$id")({
@@ -914,7 +915,7 @@ function ServiceResults({
               <Download className="h-4 w-4" />
               Download poster
             </button>
-            <PostThisButton imageUrl={posterUrl} caption={`${copy.instagram}\n\n${copy.instagramHashtags.join(" ")}`} />
+            <PostThisButton imageUrl={posterUrl} caption={`${copy.instagram}\n\n${copy.instagramHashtags.join(" ")}`} productName={name} watermark={watermark} />
           </div>
           <p className="mt-2 text-[12px] text-muted">
             This poster is made from what you gave us — no invented results, no pretend customers.
