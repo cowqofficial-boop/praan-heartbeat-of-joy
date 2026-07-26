@@ -12,7 +12,10 @@ import {
 import { UploadWidget } from "@/components/UploadWidget";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import { CopyButton } from "@/components/CopyButton";
+import { BackButton } from "@/components/BackButton";
+import { Wordmark } from "@/components/Wordmark";
 import { SITE_URL } from "@/lib/site";
+
 import heroPhone from "@/assets/how/hero-phone.jpg.asset.json";
 import diyaOriginal from "@/assets/how/diya-original.jpg.asset.json";
 import diyaWhite from "@/assets/how/diya-white.jpg.asset.json";
